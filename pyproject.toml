@@ -19,6 +19,7 @@ maintainers = [
 
 requires-python = ">=3.12,<4.0"
 dependencies = [
+  "click>=8.3.0",
   "pyside6>=6.10.0",
 ]
 
@@ -45,4 +46,4 @@ Source = "https://github.com/CAMBioMed/preprocessor/"
 "Source Archive" = "https://github.com/CAMBioMed/preprocessor/archive/{commit_hash}.zip"
 
 [project.scripts]
-preprocessor = "preprocessor.main:main"
+preprocessor = "preprocessor.main:cli"
