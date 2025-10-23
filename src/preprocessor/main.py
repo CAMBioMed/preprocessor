@@ -1,5 +1,7 @@
+from ._version import __version__
+
 def main():
-    print("Hello from preprocessor!")
+    print(f"Hello from preprocessor {__version__}!")
 
 
 if __name__ == "__main__":

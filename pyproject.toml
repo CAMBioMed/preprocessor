@@ -1,4 +1,6 @@
 [project]
+dynamic = [ "urls" ]
+
 name = "preprocessor"
 version = "0.1.0"
 description = "Benthic image preprocessor"
@@ -33,6 +35,12 @@ version-file = "src/preprocessor/_version.py"
 packages = [
   "src/preprocessor"
 ]
+
+# See: https://packaging.python.org/en/latest/specifications/well-known-project-urls/#well-known-labels
+[tool.hatch.metadata.hooks.vcs.urls]
+Homepage = "https://cambiomed-biodiversa.com/"
+Source = "https://github.com/CAMBioMed/preprocessor/"
+"Source Archive" = "https://github.com/CAMBioMed/preprocessor/archive/{commit_hash}.zip"
 
 [project.scripts]
 preprocessor = "preprocessor.main:main"
