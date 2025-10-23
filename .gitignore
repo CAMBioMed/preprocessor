@@ -14,3 +14,6 @@ _version.py
 
 # Jujutsu
 .jj/
+
+# IntelliJ
+.idea/
