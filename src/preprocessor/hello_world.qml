@@ -19,6 +19,17 @@ Window {
     ColumnLayout {
         anchors.fill:  parent
 
+        Image {
+            id: logo
+            // Relative to this QML file; we'll add the file at images/sample.svg
+            source: "images/sample.svg"
+            fillMode: Image.PreserveAspectFit
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredHeight: 100
+            // Make sure width follows the parent layout width
+            width: parent ? parent.width : 200
+        }
+
         Text {
             id: text
             text: "Hello World"
