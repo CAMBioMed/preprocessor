@@ -9,6 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
+# Hatch VCS version
+_version.py
 
 # Jujutsu
 .jj/

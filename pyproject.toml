@@ -2,8 +2,12 @@
 name = "preprocessor"
 version = "0.1.0"
 description = "Benthic image preprocessor"
+keywords = [ "preprocessor" ]
+
 license = "Apache-2.0"
+license-files = [ "LICENSE.md" ]
 readme = "README.md"
+
 authors = [
   { name = "Daniel A. A. Pelsmaeker", email = "developer@pelsmaeker.net" },
 ]
@@ -15,10 +19,15 @@ requires-python = ">=3.12"
 dependencies = []
 
 [build-system]
-requires = [
-  "hatchling"
-]
+requires = [ "hatchling", "hatch-vcs" ]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+# raw-options.root = ".."
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/preprocessor/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = [
