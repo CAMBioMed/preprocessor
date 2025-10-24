@@ -21,13 +21,15 @@ Window {
 
         Image {
             id: logo
-            // Relative to this QML file; we'll add the file at images/sample.svg
-            source: "images/sample.svg"
+            // Use an image provider (registered as "cvimg" in Python). The provider will supply the image under the id "current".
+            source: "image://cvimg/currents"
             fillMode: Image.PreserveAspectFit
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredHeight: 100
             // Make sure width follows the parent layout width
-            width: parent ? parent.width : 200
+            // width: parent ? parent.width : 200
+            Layout.maximumHeight: 200
+            Layout.maximumWidth: 200
         }
 
         Text {
