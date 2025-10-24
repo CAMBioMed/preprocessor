@@ -1,14 +1,13 @@
 import sys
 import traceback
 from pathlib import Path
-from typing import Tuple
 
 import cv2
-from PySide6 import QtGui
-from PySide6.QtGui import QGuiApplication, QImage, QPixmap
-from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtCore import QUrl, QSize
 from cv2.typing import MatLike
+from PySide6 import QtGui
+from PySide6.QtCore import QSize, QUrl
+from PySide6.QtGui import QGuiApplication, QImage
+from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickImageProvider
 
 
@@ -40,7 +39,7 @@ def show_image(image_path: str) -> MatLike:
 
 # Based on: https://stackoverflow.com/a/35857856/146622
 def as_bgr888_qimage(img: MatLike) -> QImage:
-    height, width, channels = img.shape
+    height, width, _channels = img.shape
     bytes_per_line = 3 * width
     qimage = QImage(img.data, width, height, bytes_per_line, QImage.Format.Format_BGR888)
     return qimage
@@ -62,7 +61,7 @@ class CVImageProvider(QQuickImageProvider):
         super().__init__(image_type)
         self._image_path = str(image_path)
 
-    def requestImage(self, id: str, size: QSize, requestedSize: QSize) -> QImage:
+    def requestImage(self, _id: str, _size: QSize, _requestedSize: QSize) -> QImage:
         # Qt's signature provides a 'size' output parameter (here provided as an instance we can ignore),
         # and a requestedSize indicating the size requested by QML. We ignore both for now and return
         # the full image. The 'id' parameter can be used to select different images.
@@ -74,4 +73,6 @@ class CVImageProvider(QQuickImageProvider):
             print(traceback.format_exc())
             print(f"CVImageProvider: failed to provide image: {exc}", file=sys.stderr)
             return QImage()
+
+
 

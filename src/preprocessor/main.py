@@ -1,7 +1,8 @@
-from preprocessor._version import __version__
 import click
 import PySide6.QtCore
+from preprocessor._version import __version__
 from preprocessor.hello_world import show_ui
+
 
 @click.group()
 def cli():
