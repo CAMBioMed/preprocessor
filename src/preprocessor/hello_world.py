@@ -31,11 +31,13 @@ def show_ui():
     del engine
     sys.exit(exit_code)
 
+
 # Load an image and convert it to grayscale using OpenCV
 def show_image(image_path: str) -> MatLike:
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     return gray
+
 
 # Based on: https://stackoverflow.com/a/35857856/146622
 def as_bgr888_qimage(img: MatLike) -> QImage:
@@ -43,6 +45,7 @@ def as_bgr888_qimage(img: MatLike) -> QImage:
     bytes_per_line = 3 * width
     qimage = QImage(img.data, width, height, bytes_per_line, QImage.Format.Format_BGR888)
     return qimage
+
 
 # Based on: https://stackoverflow.com/a/35857856/146622
 def as_8_qimage(img: MatLike) -> QImage:
@@ -57,7 +60,7 @@ class CVImageProvider(QQuickImageProvider):
 
     def __init__(self, image_path: Path):
         # Use getattr to read the Image enum if present; otherwise fall back to the integer value (1).
-        image_type = getattr(QQuickImageProvider, 'Image', 1)
+        image_type = getattr(QQuickImageProvider, "Image", 1)
         super().__init__(image_type)
         self._image_path = str(image_path)
 
@@ -73,6 +76,3 @@ class CVImageProvider(QQuickImageProvider):
             print(traceback.format_exc())
             print(f"CVImageProvider: failed to provide image: {exc}", file=sys.stderr)
             return QImage()
-
-
-

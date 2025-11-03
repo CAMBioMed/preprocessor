@@ -10,15 +10,18 @@ from preprocessor.main_window import show_ui
 def cli():
     pass
 
+
 @cli.command()
 def version():
     click.echo(f"CAMBioMed Preprocessor {__version__}")
     click.echo(f"  PySide6: {PySide6.__version__}")
     click.echo(f"  PySide6 QtCore: {PySide6.QtCore.__version__}")
 
+
 @cli.command()
 def ui():
     show_ui()
+
 
 if __name__ == "__main__":
     cli()

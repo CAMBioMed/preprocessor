@@ -37,10 +37,12 @@ from PySide6.QtWidgets import (
 class _WorkerSignals(QObject):
     finished = Signal(object, int)  # (result_image_or_None, token)
 
+
 class _ImageWorker(QRunnable):
     """QRunnable that processes an image (read, grayscale, blur, Canny) in a worker thread.
     Emits finished(result, token) when done.
     """
+
     def __init__(self, image_path: str, threshold1: int, threshold2: int, token: int, preview_max_side: int = 800):
         super().__init__()
         self.image_path = image_path
@@ -63,8 +65,9 @@ class _ImageWorker(QRunnable):
                 else:
                     # Downscale image for preview processing to speed up worker
                     try:
-                        if self.preview_max_side and (img.shape[0] > self.preview_max_side
-                                                      or img.shape[1] > self.preview_max_side):
+                        if self.preview_max_side and (
+                            img.shape[0] > self.preview_max_side or img.shape[1] > self.preview_max_side
+                        ):
                             h, w = img.shape[:2]
                             scale = float(self.preview_max_side) / float(max(h, w))
                             new_w = max(1, int(w * scale))
@@ -87,7 +90,9 @@ class _ImageWorker(QRunnable):
         with contextlib.suppress(Exception):
             self.signals.finished.emit(result, self.token)
 
+
 image_file = Path(__file__).resolve().parent / "images" / "Kea5_3a.JPG"
+
 
 def show_ui():
     # Disable allocation limit
@@ -97,6 +102,7 @@ def show_ui():
     window.show()
     exit_code = app.exec_()
     sys.exit(exit_code)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -145,52 +151,52 @@ class MainWindow(QMainWindow):
             layout.addLayout(hbox)
 
         # QLabel
-        self.label = QLabel('Hello PySide6!')
-        add_widget_with_label(main_layout, self.label, 'QLabel:')
+        self.label = QLabel("Hello PySide6!")
+        add_widget_with_label(main_layout, self.label, "QLabel:")
 
         # QPushButton
-        self.button = QPushButton('Click Me')
+        self.button = QPushButton("Click Me")
         self.button.clicked.connect(self.on_button_clicked)
-        add_widget_with_label(main_layout, self.button, 'QPushButton:')
+        add_widget_with_label(main_layout, self.button, "QPushButton:")
 
         # QLineEdit
         self.line_edit = QLineEdit()
-        add_widget_with_label(main_layout, self.line_edit, 'QLineEdit:')
+        add_widget_with_label(main_layout, self.line_edit, "QLineEdit:")
 
         # QComboBox
         self.combo_box = QComboBox()
-        self.combo_box.addItems(['Option 1', 'Option 2', 'Option 3'])
-        add_widget_with_label(main_layout, self.combo_box, 'QComboBox:')
+        self.combo_box.addItems(["Option 1", "Option 2", "Option 3"])
+        add_widget_with_label(main_layout, self.combo_box, "QComboBox:")
 
         # QCheckBox
-        self.check_box = QCheckBox('Check Me')
-        add_widget_with_label(main_layout, self.check_box, 'QCheckBox:')
+        self.check_box = QCheckBox("Check Me")
+        add_widget_with_label(main_layout, self.check_box, "QCheckBox:")
 
         # QRadioButton
-        self.radio_button = QRadioButton('Radio Button')
-        add_widget_with_label(main_layout, self.radio_button, 'QRadioButton:')
+        self.radio_button = QRadioButton("Radio Button")
+        add_widget_with_label(main_layout, self.radio_button, "QRadioButton:")
 
         # QTextEdit
         self.text_edit = QTextEdit()
-        add_widget_with_label(main_layout, self.text_edit, 'QTextEdit:')
+        add_widget_with_label(main_layout, self.text_edit, "QTextEdit:")
 
         # QSlider
         self.slider = QSlider()
-        add_widget_with_label(main_layout, self.slider, 'QSlider:')
+        add_widget_with_label(main_layout, self.slider, "QSlider:")
 
         # QSpinBox
         self.spin_box = QSpinBox()
-        add_widget_with_label(main_layout, self.spin_box, 'QSpinBox:')
+        add_widget_with_label(main_layout, self.spin_box, "QSpinBox:")
 
         # QProgressBar
         self.progress_bar = QProgressBar()
-        add_widget_with_label(main_layout, self.progress_bar, 'QProgressBar:')
+        add_widget_with_label(main_layout, self.progress_bar, "QProgressBar:")
 
         # Image display label
         self.image_label = QLabel()
         self.image_label.setFixedSize(400, 300)
         self.image_label.setScaledContents(True)
-        add_widget_with_label(main_layout, self.image_label, 'Image:')
+        add_widget_with_label(main_layout, self.image_label, "Image:")
 
         # Track the current image path (defaults to module-level image_file)
         self.current_image_path = str(image_file)
@@ -225,7 +231,7 @@ class MainWindow(QMainWindow):
         slider1_h.setContentsMargins(0, 0, 0, 0)
         slider1_h.addWidget(self.slider1)
         slider1_h.addWidget(self.slider1_value_label)
-        add_widget_with_label(main_layout, slider1_container, 'Threshold 1:')
+        add_widget_with_label(main_layout, slider1_container, "Threshold 1:")
 
         self.slider2 = QSlider()
         self.slider2.setOrientation(QtCore.Qt.Orientation.Horizontal)
@@ -241,7 +247,7 @@ class MainWindow(QMainWindow):
         slider2_h.setContentsMargins(0, 0, 0, 0)
         slider2_h.addWidget(self.slider2)
         slider2_h.addWidget(self.slider2_value_label)
-        add_widget_with_label(main_layout, slider2_container, 'Threshold 2:')
+        add_widget_with_label(main_layout, slider2_container, "Threshold 2:")
 
         # Update the image and numeric label whenever a slider value changes
         def _on_slider1_change(v):
@@ -273,7 +279,7 @@ class MainWindow(QMainWindow):
             for j in range(3):
                 item = QTableWidgetItem(f"Cell {i + 1},{j + 1}")
                 self.table_widget.setItem(i, j, item)
-        add_widget_with_label(main_layout, self.table_widget, 'QTableWidget:')
+        add_widget_with_label(main_layout, self.table_widget, "QTableWidget:")
 
         # menu bar
         menubar = self.menuBar()
@@ -339,21 +345,21 @@ class MainWindow(QMainWindow):
 
         # Show the default image at startup (if available)
         try:
-            if hasattr(self, 'current_image_path') and self.current_image_path:
+            if hasattr(self, "current_image_path") and self.current_image_path:
                 # schedule background processing for the default image
                 self.display_image(self.current_image_path)
         except Exception:
             pass
 
     def on_button_clicked(self):
-        self.label.setText('Button Clicked!')
+        self.label.setText("Button Clicked!")
 
     def on_slider_changed(self) -> None:
         """Called when either slider changes; re-run processing on the currently-displayed image.
         This schedules processing on the thread pool; it won't block the UI.
         """
         try:
-            if hasattr(self, 'current_image_path') and self.current_image_path:
+            if hasattr(self, "current_image_path") and self.current_image_path:
                 # schedule a new processing job for the current image
                 self.display_image(self.current_image_path)
         except Exception:
@@ -367,22 +373,23 @@ class MainWindow(QMainWindow):
         # increment token to mark a new request
         self._latest_token += 1
         token = self._latest_token
-        th1 = int(self.slider1.value()) if hasattr(self, 'slider1') else 100
-        th2 = int(self.slider2.value()) if hasattr(self, 'slider2') else 150
+        th1 = int(self.slider1.value()) if hasattr(self, "slider1") else 100
+        th2 = int(self.slider2.value()) if hasattr(self, "slider2") else 150
         # pass preview_max_side so worker can downscale image for faster preview processing
-        worker = _ImageWorker(str(image_path), th1, th2, token, getattr(self, 'preview_max_side', 800))
+        worker = _ImageWorker(str(image_path), th1, th2, token, getattr(self, "preview_max_side", 800))
         worker.signals.finished.connect(self._on_worker_finished)
         # optionally show a processing indicator (simple text) while worker runs
         try:
             # clear pixmap and show small text so users know processing is happening
             self.image_label.setPixmap(QtGui.QPixmap())
-            self.image_label.setText('Processing...')
+            self.image_label.setText("Processing...")
         except Exception:
             pass
         self.thread_pool.start(worker)
 
     def _on_worker_finished(self, result, token: int) -> None:
         """Handle worker completion; apply result only if it matches the latest token."""
+
         # Schedule the UI update on the main thread using a singleShot
         def apply_result():
             try:
@@ -395,6 +402,7 @@ class MainWindow(QMainWindow):
                 self._set_image_from_array(result)
             except Exception:
                 pass
+
         QtCore.QTimer.singleShot(0, apply_result)
 
     def _set_image_from_array(self, img) -> None:
@@ -408,17 +416,17 @@ class MainWindow(QMainWindow):
             bytes_per_line = img.strides[0]
             self._image_ref = img
             # choose a safe QImage format via getattr (avoid static-analysis warnings)
-            qformat = getattr(QtGui.QImage, 'Format_Grayscale8', None)
+            qformat = getattr(QtGui.QImage, "Format_Grayscale8", None)
             if qformat is None:
-                for _name in ('Format_Indexed8', 'Format_RGB888', 'Format_ARGB32', 'Format_ARGB32_Premultiplied'):
+                for _name in ("Format_Indexed8", "Format_RGB888", "Format_ARGB32", "Format_ARGB32_Premultiplied"):
                     qformat = getattr(QtGui.QImage, _name, None)
                     if qformat is not None:
                         break
             if qformat is None:
-                qformat = getattr(QtGui.QImage, 'Format_Invalid', 0)
+                qformat = getattr(QtGui.QImage, "Format_Invalid", 0)
             qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, qformat)
             pix = QtGui.QPixmap.fromImage(qimg)
-            self.image_label.setText('')
+            self.image_label.setText("")
             self.image_label.setPixmap(pix)
         except Exception:
             # on failure, don't crash the UI
