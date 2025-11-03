@@ -4,6 +4,7 @@ from pathlib import Path
 
 import cv2
 from cv2.typing import MatLike
+from typing import Optional, Any, cast
 from PySide6 import QtGui
 from PySide6.QtCore import QSize, QUrl
 from PySide6.QtGui import QGuiApplication, QImage
@@ -11,7 +12,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickImageProvider
 
 
-def show_ui():
+def show_ui() -> None:
     # Disable allocation limit
     QtGui.QImageReader.setAllocationLimit(0)
     app = QGuiApplication(sys.argv)
@@ -33,8 +34,11 @@ def show_ui():
 
 
 # Load an image and convert it to grayscale using OpenCV
-def show_image(image_path: str) -> MatLike:
+def show_image(image_path: str) -> Optional[MatLike]:
+    """Load image via OpenCV and return grayscale image or None if load fails."""
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+    if image is None:
+        return None
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     return gray
 
@@ -58,10 +62,11 @@ def as_8_qimage(img: MatLike) -> QImage:
 class CVImageProvider(QQuickImageProvider):
     """Provides images to QML by loading them with OpenCV and converting to QImage."""
 
-    def __init__(self, image_path: Path):
+    def __init__(self, image_path: Path) -> None:
         # Use getattr to read the Image enum if present; otherwise fall back to the integer value (1).
-        image_type = getattr(QQuickImageProvider, "Image", 1)
-        super().__init__(image_type)
+        image_type: Any = getattr(QQuickImageProvider, "Image", 1)
+        # cast to the provider ImageType so mypy is satisfied
+        super().__init__(cast("QQuickImageProvider.ImageType", image_type))
         self._image_path = str(image_path)
 
     def requestImage(self, _id: str, _size: QSize, _requestedSize: QSize) -> QImage:
@@ -70,6 +75,8 @@ class CVImageProvider(QQuickImageProvider):
         # the full image. The 'id' parameter can be used to select different images.
         try:
             img = show_image(self._image_path)
+            if img is None:
+                return QImage()
             qimg = as_8_qimage(img)
             return qimg
         except Exception as exc:

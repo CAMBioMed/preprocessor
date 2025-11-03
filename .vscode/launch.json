@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug: UI",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "preprocessor",
+      "args": ["ui"],
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "preLaunchTask": "Sync dependencies",
+      "python": "${workspaceFolder}/.venv/bin/python"
+    }
+  ]
+}

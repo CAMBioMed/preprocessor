@@ -1,25 +1,28 @@
 import click
-import PySide6.QtCore
-from preprocessor._version import __version__
+import PySide6
+from ._version import __version__  # type: ignore
 
 # from preprocessor.hello_world import show_ui
-from preprocessor.main_window import show_ui
+from .main_window import show_ui
 
 
 @click.group()
-def cli():
+def cli() -> None:
     pass
 
 
 @cli.command()
-def version():
+def version() -> None:
     click.echo(f"CAMBioMed Preprocessor {__version__}")
-    click.echo(f"  PySide6: {PySide6.__version__}")
-    click.echo(f"  PySide6 QtCore: {PySide6.QtCore.__version__}")
+    # use getattr to avoid mypy errors when stubs don't expose __version__
+    pyside_ver = getattr(PySide6, "__version__", "unknown")
+    qtcore_ver = getattr(getattr(PySide6, "QtCore", None), "__version__", "unknown")
+    click.echo(f"  PySide6: {pyside_ver}")
+    click.echo(f"  PySide6 QtCore: {qtcore_ver}")
 
 
 @cli.command()
-def ui():
+def ui() -> None:
     show_ui()
 
 

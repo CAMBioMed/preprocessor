@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 
 import cv2
+from cv2.typing import MatLike
+from typing import cast
 from PySide6 import QtCore, QtGui
 
 # Add Qt concurrency helpers
@@ -29,7 +31,7 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QToolBar,
     QVBoxLayout,
-    QWidget,
+    QWidget, QBoxLayout,
 )
 
 
@@ -43,7 +45,12 @@ class _ImageWorker(QRunnable):
     Emits finished(result, token) when done.
     """
 
-    def __init__(self, image_path: str, threshold1: int, threshold2: int, token: int, preview_max_side: int = 800):
+    def __init__(self,
+                 image_path: str,
+                 threshold1: int,
+                 threshold2: int,
+                 token: int,
+                 preview_max_side: int = 800) -> None:
         super().__init__()
         self.image_path = image_path
         self.threshold1 = int(threshold1)
@@ -94,7 +101,7 @@ class _ImageWorker(QRunnable):
 image_file = Path(__file__).resolve().parent / "images" / "Kea5_3a.JPG"
 
 
-def show_ui():
+def show_ui() -> None:
     # Disable allocation limit
     QtGui.QImageReader.setAllocationLimit(0)
     app = QApplication(sys.argv)
@@ -105,7 +112,7 @@ def show_ui():
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("CAMBioMed Preprocessor")
         self.setGeometry(100, 100, 800, 600)
@@ -119,7 +126,7 @@ class MainWindow(QMainWindow):
         toolbar = QToolBar("My main toolbar")
         self.addToolBar(toolbar)
 
-        def toolbar_button_clicked(s):
+        def toolbar_button_clicked(s: str) -> None:
             print("click", s)
 
         button_action = QAction(QIcon("src/preprocessor/icons/fugue16/bug.png"), "&Your button", self)
@@ -143,7 +150,7 @@ class MainWindow(QMainWindow):
         # Example widgets
 
         # Function to add widget with label
-        def add_widget_with_label(layout, widget, label_text):
+        def add_widget_with_label(layout: QBoxLayout, widget: QWidget, label_text: str) -> None:
             hbox = QHBoxLayout()
             label = QLabel(label_text)
             hbox.addWidget(label)
@@ -250,7 +257,7 @@ class MainWindow(QMainWindow):
         add_widget_with_label(main_layout, slider2_container, "Threshold 2:")
 
         # Update the image and numeric label whenever a slider value changes
-        def _on_slider1_change(v):
+        def _on_slider1_change(v: int) -> None:
             with contextlib.suppress(Exception):
                 self.slider1_value_label.setText(str(v))
             # restart debounce timer; actual processing will occur when the timer fires
@@ -260,7 +267,7 @@ class MainWindow(QMainWindow):
                 # fallback to immediate processing if timer isn't available for any reason
                 self.on_slider_changed()
 
-        def _on_slider2_change(v):
+        def _on_slider2_change(v: int) -> None:
             with contextlib.suppress(Exception):
                 self.slider2_value_label.setText(str(v))
             # restart debounce timer; actual processing will occur when the timer fires
@@ -286,7 +293,7 @@ class MainWindow(QMainWindow):
         menu_file = menubar.addMenu("&File")
         open_action = QAction("&Open", self)
 
-        def open_file():
+        def open_file() -> None:
             path = QFileDialog.getOpenFileName(self, "Open")[0]
             if path:
                 self.text_edit.setPlainText(str(path))
@@ -304,7 +311,7 @@ class MainWindow(QMainWindow):
 
         save_action = QAction("&Save", self)
 
-        def save():
+        def save() -> None:
             pass
 
         save_action.triggered.connect(save)
@@ -313,7 +320,7 @@ class MainWindow(QMainWindow):
 
         save_as_action = QAction("Save &As...", self)
 
-        def save_as():
+        def save_as() -> None:
             pass
 
         save_as_action.triggered.connect(save_as)
@@ -327,7 +334,7 @@ class MainWindow(QMainWindow):
         about_action = QAction("&About", self)
         menu_help.addAction(about_action)
 
-        def show_about_dialog():
+        def show_about_dialog() -> None:
             text = """
                 <center>
                   <h1>Example</h1>
@@ -351,7 +358,7 @@ class MainWindow(QMainWindow):
         except Exception:
             pass
 
-    def on_button_clicked(self):
+    def on_button_clicked(self) -> None:
         self.label.setText("Button Clicked!")
 
     def on_slider_changed(self) -> None:
@@ -387,11 +394,11 @@ class MainWindow(QMainWindow):
             pass
         self.thread_pool.start(worker)
 
-    def _on_worker_finished(self, result, token: int) -> None:
+    def _on_worker_finished(self, result: MatLike, token: int) -> None:
         """Handle worker completion; apply result only if it matches the latest token."""
 
         # Schedule the UI update on the main thread using a singleShot
-        def apply_result():
+        def apply_result() -> None:
             try:
                 if token != self._latest_token:
                     # stale result, ignore
@@ -405,7 +412,7 @@ class MainWindow(QMainWindow):
 
         QtCore.QTimer.singleShot(0, apply_result)
 
-    def _set_image_from_array(self, img) -> None:
+    def _set_image_from_array(self, img: MatLike) -> None:
         """Convert a grayscale numpy array `img` to QImage/QPixmap and set it on the label.
         Keeps a reference to the NumPy array to avoid GC issues.
         """
@@ -424,7 +431,9 @@ class MainWindow(QMainWindow):
                         break
             if qformat is None:
                 qformat = getattr(QtGui.QImage, "Format_Invalid", 0)
-            qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, qformat)
+            # cast qformat to the QImage.Format type so static type checker accepts it
+            qformat_cast = cast(QtGui.QImage.Format, qformat)
+            qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, qformat_cast)
             pix = QtGui.QPixmap.fromImage(qimg)
             self.image_label.setText("")
             self.image_label.setPixmap(pix)

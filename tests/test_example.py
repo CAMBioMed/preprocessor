@@ -1,4 +1,4 @@
-from preprocessor._version import __version__
+from ._version import __version__  # type: ignore
 
 
 def test_add__two_integers():

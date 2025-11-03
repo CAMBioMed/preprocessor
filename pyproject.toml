@@ -29,6 +29,7 @@ dev = [
   "hatch-vcs>=0.5.0",
   "hatchling>=1.27.0",
   # For PyCharm 'Show as Image'
+  "mypy>=1.18.2",
   "numpy>=2.2.6",
   "pillow>=12.0.0",
   "pyright>=1.1.406",
@@ -91,35 +92,43 @@ line-length = 120
 docstring-code-format = true
 
 [tool.ruff.lint]
-# For more strict linting and code simplifications, replace this with
-# https://github.com/NLeSC/python-template/blob/main/template/pyproject.toml.jinja#L121-L136
 select = [
-  "E", "F", "W", # flake8
+  "YTT",         # flake8-2020
+  "ANN",         # flake8-annotations
   "B",           # flake8-bugbear
-  "I",           # isort
-  "ARG",         # flake8-unused-arguments
   "C4",          # flake8-comprehensions
   "EM",          # flake8-errmsg
-  "ICN",         # flake8-import-conventions
+  "EXE",         # flake8-executable
   "ISC",         # flake8-implicit-str-concat
+  "ICN",         # flake8-import-conventions
   "G",           # flake8-logging-format
-  "PGH",         # pygrep-hooks
   "PIE",         # flake8-pie
-  "PL",          # pylint
   "PT",          # flake8-pytest-style
   "RET",         # flake8-return
-  "RUF",         # Ruff-specific
   "SIM",         # flake8-simplify
+  "ARG",         # flake8-unused-arguments
+  "I",           # isort
+  "E", "W",      # pycodestyle
+  "F",           # Pyflakes
+  "D",           # pydocstyle
+  "PGH",         # pygrep-hooks
+  "PL",          # pylint
   "UP",          # pyupgrade
-  "YTT",         # flake8-2020
-  "EXE",         # flake8-executable
-  # "D",           # pydocstyle, uncomment to have the docstrings linted
-  # "ANN",         # flake8-annotations, uncomment to have type hint annotations linted
+  "RUF",         # Ruff-specific
 ]
 ignore = [
-  "PLR",        # Design related pylint codes
-  "ISC001",     # Conflicts with formatter
-  "RET504",     # Unnecessary assignment to variable before `return` statement
+  "PLR",        # Pylint/Refactor
+  "ISC001",     # flake8-implicit-str-concat - Conflicts with formatter
+  "RET504",     # flake8-return - Unnecessary assignment to variable before `return` statement
+  "D100",       # Allow missing docstrings
+  "D101",       # Allow missing docstrings
+  "D102",       # Allow missing docstrings
+  "D103",       # Allow missing docstrings
+  "D104",       # Allow missing docstrings
+  "D105",       # Allow missing docstrings
+  "D106",       # Allow missing docstrings
+  "D107",       # Allow missing docstrings
+  "D205",       # Conflicts with D202
 ]
 pydocstyle.convention = "google"
 
