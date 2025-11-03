@@ -18,12 +18,13 @@ class _ImageWorker(QRunnable):
     """QRunnable that processes an image (read, grayscale, blur, Canny) in a worker thread.
     Emits finished(result, token) when done.
     """
-    def __init__(self, image_path: str, threshold1: int, threshold2: int, token: int):
+    def __init__(self, image_path: str, threshold1: int, threshold2: int, token: int, preview_max_side: int = 800):
         super().__init__()
         self.image_path = image_path
         self.threshold1 = int(threshold1)
         self.threshold2 = int(threshold2)
         self.token = int(token)
+        self.preview_max_side = int(preview_max_side)
         self.signals = _WorkerSignals()
 
     def run(self) -> None:
@@ -37,8 +38,22 @@ class _ImageWorker(QRunnable):
                 if img is None:
                     result = None
                 else:
+                    # Downscale image for preview processing to speed up worker
+                    try:
+                        if self.preview_max_side and (img.shape[0] > self.preview_max_side or img.shape[1] > self.preview_max_side):
+                            h, w = img.shape[:2]
+                            scale = float(self.preview_max_side) / float(max(h, w))
+                            new_w = max(1, int(w * scale))
+                            new_h = max(1, int(h * scale))
+                            img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+                    except Exception:
+                        # if resizing fails for any reason, continue with original image
+                        pass
                     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+                    # WARNING: This seems to work better on the scaled down preview
+                    # than on the full image. Thus, generating the final image
+                    # full-scale will produce different results!
                     edges = cv2.Canny(blurred, self.threshold1, self.threshold2)
                     result = edges
         except Exception:
@@ -161,6 +176,10 @@ class MainWindow(QMainWindow):
         # Thread pool for background image processing and a token for request ordering
         self.thread_pool = QThreadPool.globalInstance()
         self._latest_token = 0
+
+        # Preview downscale maximum side (pixels) for faster preview processing
+        # Set to None or 0 to disable downscaling and process full-resolution images.
+        self.preview_max_side = 800
 
         # Debounce timer for sliders: avoid scheduling a worker on every tiny move
         self._debounce_interval_ms = 150  # milliseconds; adjust if you want a longer/shorter debounce
@@ -328,7 +347,8 @@ class MainWindow(QMainWindow):
         token = self._latest_token
         th1 = int(self.slider1.value()) if hasattr(self, 'slider1') else 100
         th2 = int(self.slider2.value()) if hasattr(self, 'slider2') else 150
-        worker = _ImageWorker(str(image_path), th1, th2, token)
+        # pass preview_max_side so worker can downscale image for faster preview processing
+        worker = _ImageWorker(str(image_path), th1, th2, token, getattr(self, 'preview_max_side', 800))
         worker.signals.finished.connect(self._on_worker_finished)
         # optionally show a processing indicator (simple text) while worker runs
         try:
@@ -390,17 +410,3 @@ class MainWindow(QMainWindow):
         self.current_image_path = str(image_path)
         # schedule background processing
         self._schedule_processing(self.current_image_path)
-
-    def show_image(self, image_path: str) -> MatLike:
-        # guard: if the path is falsy or the file can't be read, return None
-        if not image_path:
-            return None
-        image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-        if image is None:
-            return None
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        threshold1 = int(self.slider1.value()) if hasattr(self, 'slider1') else 100
-        threshold2 = int(self.slider2.value()) if hasattr(self, 'slider2') else 150
-        edges = cv2.Canny(blurred, threshold1, threshold2)
-        return edges
