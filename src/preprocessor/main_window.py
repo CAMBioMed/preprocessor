@@ -1,14 +1,15 @@
+import contextlib
 import sys
 from pathlib import Path
 
 import cv2
-from PySide6 import QtGui, QtCore
-from PySide6.QtGui import QAction, QKeySequence, QIcon
-from PySide6.QtWidgets import *
-from cv2.typing import MatLike
+from PySide6 import QtCore, QtGui
 
 # Add Qt concurrency helpers
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal
+from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtWidgets import *
+
 
 # Worker signal object to send results back to the main thread
 class _WorkerSignals(QObject):
@@ -60,10 +61,8 @@ class _ImageWorker(QRunnable):
             # avoid allowing worker exceptions to escape
             result = None
         # Emit the result and the token so the main thread can ignore stale results
-        try:
+        with contextlib.suppress(Exception):
             self.signals.finished.emit(result, self.token)
-        except Exception:
-            pass
 
 image_file = Path(__file__).resolve().parent / "images" / "Kea5_3a.JPG"
 
@@ -223,10 +222,8 @@ class MainWindow(QMainWindow):
 
         # Update the image and numeric label whenever a slider value changes
         def _on_slider1_change(v):
-            try:
+            with contextlib.suppress(Exception):
                 self.slider1_value_label.setText(str(v))
-            except Exception:
-                pass
             # restart debounce timer; actual processing will occur when the timer fires
             try:
                 self._debounce_timer.start()
@@ -235,10 +232,8 @@ class MainWindow(QMainWindow):
                 self.on_slider_changed()
 
         def _on_slider2_change(v):
-            try:
+            with contextlib.suppress(Exception):
                 self.slider2_value_label.setText(str(v))
-            except Exception:
-                pass
             # restart debounce timer; actual processing will occur when the timer fires
             try:
                 self._debounce_timer.start()
