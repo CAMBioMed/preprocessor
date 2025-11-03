@@ -162,6 +162,13 @@ class MainWindow(QMainWindow):
         self.thread_pool = QThreadPool.globalInstance()
         self._latest_token = 0
 
+        # Debounce timer for sliders: avoid scheduling a worker on every tiny move
+        self._debounce_interval_ms = 150  # milliseconds; adjust if you want a longer/shorter debounce
+        self._debounce_timer = QtCore.QTimer(self)
+        self._debounce_timer.setSingleShot(True)
+        self._debounce_timer.setInterval(self._debounce_interval_ms)
+        self._debounce_timer.timeout.connect(lambda: self.on_slider_changed())
+
         # Sliders with numeric value labels
         self.slider1 = QSlider()
         self.slider1.setOrientation(QtCore.Qt.Orientation.Horizontal)
@@ -201,14 +208,24 @@ class MainWindow(QMainWindow):
                 self.slider1_value_label.setText(str(v))
             except Exception:
                 pass
-            self.on_slider_changed()
+            # restart debounce timer; actual processing will occur when the timer fires
+            try:
+                self._debounce_timer.start()
+            except Exception:
+                # fallback to immediate processing if timer isn't available for any reason
+                self.on_slider_changed()
 
         def _on_slider2_change(v):
             try:
                 self.slider2_value_label.setText(str(v))
             except Exception:
                 pass
-            self.on_slider_changed()
+            # restart debounce timer; actual processing will occur when the timer fires
+            try:
+                self._debounce_timer.start()
+            except Exception:
+                # fallback to immediate processing if timer isn't available for any reason
+                self.on_slider_changed()
 
         self.slider1.valueChanged.connect(_on_slider1_change)
         self.slider2.valueChanged.connect(_on_slider2_change)
