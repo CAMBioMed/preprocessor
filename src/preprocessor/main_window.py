@@ -115,14 +115,22 @@ class MainWindow(QMainWindow):
         # Track the current image path (defaults to module-level image_file)
         self.current_image_path = str(image_file)
 
-        # Sliders
+        # Sliders with numeric value labels
         self.slider1 = QSlider()
         self.slider1.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.slider1.setMinimum(0)
         self.slider1.setMaximum(500)
         self.slider1.setTickInterval(10)
         self.slider1.setValue(100)
-        add_widget_with_label(main_layout, self.slider1, 'Threshold 1:')
+        # value label for slider1
+        self.slider1_value_label = QLabel(str(self.slider1.value()))
+        # container to hold slider and its numeric label
+        slider1_container = QWidget()
+        slider1_h = QHBoxLayout(slider1_container)
+        slider1_h.setContentsMargins(0, 0, 0, 0)
+        slider1_h.addWidget(self.slider1)
+        slider1_h.addWidget(self.slider1_value_label)
+        add_widget_with_label(main_layout, slider1_container, 'Threshold 1:')
 
         self.slider2 = QSlider()
         self.slider2.setOrientation(QtCore.Qt.Orientation.Horizontal)
@@ -130,11 +138,33 @@ class MainWindow(QMainWindow):
         self.slider2.setMaximum(500)
         self.slider2.setTickInterval(10)
         self.slider2.setValue(150)
-        add_widget_with_label(main_layout, self.slider2, 'Threshold 2:')
+        # value label for slider2
+        self.slider2_value_label = QLabel(str(self.slider2.value()))
+        # container to hold slider and its numeric label
+        slider2_container = QWidget()
+        slider2_h = QHBoxLayout(slider2_container)
+        slider2_h.setContentsMargins(0, 0, 0, 0)
+        slider2_h.addWidget(self.slider2)
+        slider2_h.addWidget(self.slider2_value_label)
+        add_widget_with_label(main_layout, slider2_container, 'Threshold 2:')
 
-        # Update the image whenever a slider value changes
-        self.slider1.valueChanged.connect(lambda _val: self.on_slider_changed())
-        self.slider2.valueChanged.connect(lambda _val: self.on_slider_changed())
+        # Update the image and numeric label whenever a slider value changes
+        def _on_slider1_change(v):
+            try:
+                self.slider1_value_label.setText(str(v))
+            except Exception:
+                pass
+            self.on_slider_changed()
+
+        def _on_slider2_change(v):
+            try:
+                self.slider2_value_label.setText(str(v))
+            except Exception:
+                pass
+            self.on_slider_changed()
+
+        self.slider1.valueChanged.connect(_on_slider1_change)
+        self.slider2.valueChanged.connect(_on_slider2_change)
 
         # QTableWidget
         self.table_widget = QTableWidget(5, 3)
