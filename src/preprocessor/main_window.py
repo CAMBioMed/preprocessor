@@ -1,9 +1,13 @@
 import sys
+from pathlib import Path
 
+import cv2
 from PySide6 import QtGui
 from PySide6.QtGui import QAction, QKeySequence, QIcon
 from PySide6.QtWidgets import *
+from cv2.typing import MatLike
 
+image_file = Path(__file__).resolve().parent / "images" / "Kea5_3a.JPG"
 
 def show_ui():
     # Disable allocation limit
@@ -102,6 +106,12 @@ class MainWindow(QMainWindow):
         self.progress_bar = QProgressBar()
         add_widget_with_label(main_layout, self.progress_bar, 'QProgressBar:')
 
+        # Image display label (new)
+        self.image_label = QLabel()
+        self.image_label.setFixedSize(400, 300)
+        self.image_label.setScaledContents(True)
+        add_widget_with_label(main_layout, self.image_label, 'Image:')
+
         # QTableWidget
         self.table_widget = QTableWidget(5, 3)
         for i in range(5):
@@ -118,7 +128,12 @@ class MainWindow(QMainWindow):
         def open_file():
             path = QFileDialog.getOpenFileName(self, "Open")[0]
             if path:
-                self.text_edit.setPlainText(open(path).read())
+                self.text_edit.setPlainText(str(path))
+                try:
+                    self.display_image(str(path))
+                except Exception:
+                    # avoid crashing the UI if image loading fails
+                    pass
 
         open_action.triggered.connect(open_file)
         open_action.setShortcut(QKeySequence.StandardKey.Open)
@@ -163,3 +178,24 @@ class MainWindow(QMainWindow):
 
     def on_button_clicked(self):
         self.label.setText('Button Clicked!')
+
+    def display_image(self, image_path: str) -> None:
+        """
+        Load the image via show_image, convert to QImage/QPixmap and set on the QLabel.
+        Keeps a reference to the NumPy array in self._image_ref to prevent GC.
+        """
+        img = self.show_image(image_path)
+        if img is None:
+            return
+        h, w = img.shape[:2]
+        bytes_per_line = img.strides[0]
+        # keep a reference so QImage doesn't point to freed memory
+        self._image_ref = img
+        qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, QtGui.QImage.Format_Grayscale8)
+        pix = QtGui.QPixmap.fromImage(qimg)
+        self.image_label.setPixmap(pix)
+
+    def show_image(self, image_path: str) -> MatLike:
+        image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        return gray
