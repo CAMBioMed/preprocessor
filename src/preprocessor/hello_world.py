@@ -4,7 +4,7 @@ from pathlib import Path
 
 import cv2
 from cv2.typing import MatLike
-from typing import Optional, Any, cast
+from typing import Any, cast
 from PySide6 import QtGui
 from PySide6.QtCore import QSize, QUrl
 from PySide6.QtGui import QGuiApplication, QImage
@@ -34,7 +34,7 @@ def show_ui() -> None:
 
 
 # Load an image and convert it to grayscale using OpenCV
-def show_image(image_path: str) -> Optional[MatLike]:
+def show_image(image_path: str) -> MatLike | None:
     """Load image via OpenCV and return grayscale image or None if load fails."""
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
     if image is None:

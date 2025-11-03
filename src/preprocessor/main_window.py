@@ -31,7 +31,8 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QToolBar,
     QVBoxLayout,
-    QWidget, QBoxLayout,
+    QWidget,
+    QBoxLayout,
 )
 
 
@@ -45,12 +46,14 @@ class _ImageWorker(QRunnable):
     Emits finished(result, token) when done.
     """
 
-    def __init__(self,
-                 image_path: str,
-                 threshold1: int,
-                 threshold2: int,
-                 token: int,
-                 preview_max_side: int = 800) -> None:
+    def __init__(
+        self,
+        image_path: str,
+        threshold1: int,
+        threshold2: int,
+        token: int,
+        preview_max_side: int = 800,
+    ) -> None:
         super().__init__()
         self.image_path = image_path
         self.threshold1 = int(threshold1)
@@ -362,7 +365,7 @@ class MainWindow(QMainWindow):
         self.label.setText("Button Clicked!")
 
     def on_slider_changed(self) -> None:
-        """Called when either slider changes; re-run processing on the currently-displayed image.
+        """When either slider changes: re-run processing on the currently-displayed image.
         This schedules processing on the thread pool; it won't block the UI.
         """
         try:
@@ -425,7 +428,12 @@ class MainWindow(QMainWindow):
             # choose a safe QImage format via getattr (avoid static-analysis warnings)
             qformat = getattr(QtGui.QImage, "Format_Grayscale8", None)
             if qformat is None:
-                for _name in ("Format_Indexed8", "Format_RGB888", "Format_ARGB32", "Format_ARGB32_Premultiplied"):
+                for _name in (
+                    "Format_Indexed8",
+                    "Format_RGB888",
+                    "Format_ARGB32",
+                    "Format_ARGB32_Premultiplied",
+                ):
                     qformat = getattr(QtGui.QImage, _name, None)
                     if qformat is not None:
                         break

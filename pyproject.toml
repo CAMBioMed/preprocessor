@@ -83,10 +83,13 @@ port.exclude_lines = [
   'if typing.TYPE_CHECKING:',
 ]
 
-[tool.ruff]
-src = ["app"]
-exclude = []
+
+[tool.black]
 line-length = 120
+
+[tool.ruff]
+line-length = 120
+exclude = []
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -107,30 +110,31 @@ select = [
   "RET",         # flake8-return
   "SIM",         # flake8-simplify
   "ARG",         # flake8-unused-arguments
-  "I",           # isort
   "E", "W",      # pycodestyle
   "F",           # Pyflakes
   "D",           # pydocstyle
-  "PGH",         # pygrep-hooks
   "PL",          # pylint
   "UP",          # pyupgrade
   "RUF",         # Ruff-specific
 ]
 ignore = [
+  # Stylistic choices
   "PLR",        # Pylint/Refactor
-  "ISC001",     # flake8-implicit-str-concat - Conflicts with formatter
-  "RET504",     # flake8-return - Unnecessary assignment to variable before `return` statement
-  "D100",       # Allow missing docstrings
-  "D101",       # Allow missing docstrings
-  "D102",       # Allow missing docstrings
-  "D103",       # Allow missing docstrings
-  "D104",       # Allow missing docstrings
-  "D105",       # Allow missing docstrings
-  "D106",       # Allow missing docstrings
-  "D107",       # Allow missing docstrings
-  "D205",       # Conflicts with D202
+  "RET504",     # unnecessary-assign
+  # Ensure formatter compatibility
+  "E203",       # whitespace-before-punctuation
+  # Allow gradual documentation
+  "D100",       # undocumented-public-module
+  "D101",       # undocumented-public-class
+  "D102",       # undocumented-public-method
+  "D103",       # undocumented-public-nested-class
+  "D104",       # undocumented-public-package
+  "D105",       # undocumented-magic-method
+  "D106",       # undocumented-public-nested-class
+  "D107",       # undocumented-public-init
+  "D205",       # missing-blank-line-after-summary
 ]
-pydocstyle.convention = "google"
+pydocstyle.convention = "pep257"
 
 [tool.ruff.lint.per-file-ignores]
 # Tests can ignore a few extra rules
