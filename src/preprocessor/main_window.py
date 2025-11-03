@@ -7,6 +7,49 @@ from PySide6.QtGui import QAction, QKeySequence, QIcon
 from PySide6.QtWidgets import *
 from cv2.typing import MatLike
 
+# Add Qt concurrency helpers
+from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal
+
+# Worker signal object to send results back to the main thread
+class _WorkerSignals(QObject):
+    finished = Signal(object, int)  # (result_image_or_None, token)
+
+class _ImageWorker(QRunnable):
+    """QRunnable that processes an image (read, grayscale, blur, Canny) in a worker thread.
+    Emits finished(result, token) when done.
+    """
+    def __init__(self, image_path: str, threshold1: int, threshold2: int, token: int):
+        super().__init__()
+        self.image_path = image_path
+        self.threshold1 = int(threshold1)
+        self.threshold2 = int(threshold2)
+        self.token = int(token)
+        self.signals = _WorkerSignals()
+
+    def run(self) -> None:
+        # Do the image processing here (same algorithm as before) and emit the result
+        result = None
+        try:
+            if not self.image_path:
+                result = None
+            else:
+                img = cv2.imread(self.image_path, cv2.IMREAD_COLOR)
+                if img is None:
+                    result = None
+                else:
+                    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+                    edges = cv2.Canny(blurred, self.threshold1, self.threshold2)
+                    result = edges
+        except Exception:
+            # avoid allowing worker exceptions to escape
+            result = None
+        # Emit the result and the token so the main thread can ignore stale results
+        try:
+            self.signals.finished.emit(result, self.token)
+        except Exception:
+            pass
+
 image_file = Path(__file__).resolve().parent / "images" / "Kea5_3a.JPG"
 
 def show_ui():
@@ -114,6 +157,10 @@ class MainWindow(QMainWindow):
 
         # Track the current image path (defaults to module-level image_file)
         self.current_image_path = str(image_file)
+
+        # Thread pool for background image processing and a token for request ordering
+        self.thread_pool = QThreadPool.globalInstance()
+        self._latest_token = 0
 
         # Sliders with numeric value labels
         self.slider1 = QSlider()
@@ -235,6 +282,7 @@ class MainWindow(QMainWindow):
         # Show the default image at startup (if available)
         try:
             if hasattr(self, 'current_image_path') and self.current_image_path:
+                # schedule background processing for the default image
                 self.display_image(self.current_image_path)
         except Exception:
             pass
@@ -243,29 +291,88 @@ class MainWindow(QMainWindow):
         self.label.setText('Button Clicked!')
 
     def on_slider_changed(self) -> None:
-        """Called when either slider changes; re-run show_image on the currently-displayed image."""
+        """Called when either slider changes; re-run processing on the currently-displayed image.
+        This schedules processing on the thread pool; it won't block the UI.
+        """
         try:
             if hasattr(self, 'current_image_path') and self.current_image_path:
+                # schedule a new processing job for the current image
                 self.display_image(self.current_image_path)
         except Exception:
             # don't allow slider updates to crash the UI
             pass
 
-    def display_image(self, image_path: str) -> None:
+    def _schedule_processing(self, image_path: str) -> None:
+        """Create and schedule a worker to process `image_path` with current slider values.
+        Uses a token to identify the latest request so stale results are ignored.
         """
-        Load the image via show_image, convert to QImage/QPixmap and set on the QLabel.
-        Keeps a reference to the NumPy array in self._image_ref to prevent GC.
+        # increment token to mark a new request
+        self._latest_token += 1
+        token = self._latest_token
+        th1 = int(self.slider1.value()) if hasattr(self, 'slider1') else 100
+        th2 = int(self.slider2.value()) if hasattr(self, 'slider2') else 150
+        worker = _ImageWorker(str(image_path), th1, th2, token)
+        worker.signals.finished.connect(self._on_worker_finished)
+        # optionally show a processing indicator (simple text) while worker runs
+        try:
+            # clear pixmap and show small text so users know processing is happening
+            self.image_label.setPixmap(QtGui.QPixmap())
+            self.image_label.setText('Processing...')
+        except Exception:
+            pass
+        self.thread_pool.start(worker)
+
+    def _on_worker_finished(self, result, token: int) -> None:
+        """Handle worker completion; apply result only if it matches the latest token."""
+        # Schedule the UI update on the main thread using a singleShot
+        def apply_result():
+            try:
+                if token != self._latest_token:
+                    # stale result, ignore
+                    return
+                if result is None:
+                    # nothing to show
+                    return
+                self._set_image_from_array(result)
+            except Exception:
+                pass
+        QtCore.QTimer.singleShot(0, apply_result)
+
+    def _set_image_from_array(self, img) -> None:
+        """Convert a grayscale numpy array `img` to QImage/QPixmap and set it on the label.
+        Keeps a reference to the NumPy array to avoid GC issues.
         """
-        img = self.show_image(image_path)
         if img is None:
             return
-        h, w = img.shape[:2]
-        bytes_per_line = img.strides[0]
-        # keep a reference so QImage doesn't point to freed memory
-        self._image_ref = img
-        qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, QtGui.QImage.Format_Grayscale8)
-        pix = QtGui.QPixmap.fromImage(qimg)
-        self.image_label.setPixmap(pix)
+        try:
+            h, w = img.shape[:2]
+            bytes_per_line = img.strides[0]
+            self._image_ref = img
+            # choose a safe QImage format via getattr (avoid static-analysis warnings)
+            qformat = getattr(QtGui.QImage, 'Format_Grayscale8', None)
+            if qformat is None:
+                for _name in ('Format_Indexed8', 'Format_RGB888', 'Format_ARGB32', 'Format_ARGB32_Premultiplied'):
+                    qformat = getattr(QtGui.QImage, _name, None)
+                    if qformat is not None:
+                        break
+            if qformat is None:
+                qformat = getattr(QtGui.QImage, 'Format_Invalid', 0)
+            qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, qformat)
+            pix = QtGui.QPixmap.fromImage(qimg)
+            self.image_label.setText('')
+            self.image_label.setPixmap(pix)
+        except Exception:
+            # on failure, don't crash the UI
+            pass
+
+    def display_image(self, image_path: str) -> None:
+        """Public API: schedule background processing of `image_path` and show result when ready.
+        This replaces the previous synchronous behavior.
+        """
+        # remember which image is currently displayed so slider changes can re-run processing
+        self.current_image_path = str(image_path)
+        # schedule background processing
+        self._schedule_processing(self.current_image_path)
 
     def show_image(self, image_path: str) -> MatLike:
         # guard: if the path is falsy or the file can't be read, return None
