@@ -8,7 +8,29 @@ from PySide6 import QtCore, QtGui
 # Add Qt concurrency helpers
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
-from PySide6.QtWidgets import *
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QRadioButton,
+    QSlider,
+    QSpinBox,
+    QStatusBar,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QToolBar,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 # Worker signal object to send results back to the main thread
@@ -41,7 +63,8 @@ class _ImageWorker(QRunnable):
                 else:
                     # Downscale image for preview processing to speed up worker
                     try:
-                        if self.preview_max_side and (img.shape[0] > self.preview_max_side or img.shape[1] > self.preview_max_side):
+                        if self.preview_max_side and (img.shape[0] > self.preview_max_side
+                                                      or img.shape[1] > self.preview_max_side):
                             h, w = img.shape[:2]
                             scale = float(self.preview_max_side) / float(max(h, w))
                             new_w = max(1, int(w * scale))
@@ -299,13 +322,17 @@ class MainWindow(QMainWindow):
         menu_help.addAction(about_action)
 
         def show_about_dialog():
-            text = "<center>" \
-                   "<h1>Example</h1>" \
-                   "&#8291;" \
-                   "<img src=icon.svg>" \
-                   "</center>" \
-                   "<p>Version 31.4.159.265358<br/>" \
-                   "Copyright &copy; Company Inc.</p>"
+            text = """
+                <center>
+                  <h1>Example</h1>
+                  &#8291;
+                  <img src=icon.svg>
+                </center>
+                <p>
+                  Version 31.4.159.265358<br/>
+                  Copyright &copy; Company Inc.
+                </p>
+                """
             QMessageBox.about(self, "About Example", text)
 
         about_action.triggered.connect(show_about_dialog)
