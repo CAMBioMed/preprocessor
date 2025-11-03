@@ -112,6 +112,9 @@ class MainWindow(QMainWindow):
         self.image_label.setScaledContents(True)
         add_widget_with_label(main_layout, self.image_label, 'Image:')
 
+        # Track the current image path (defaults to module-level image_file)
+        self.current_image_path = str(image_file)
+
         # Sliders
         self.slider1 = QSlider()
         self.slider1.setOrientation(QtCore.Qt.Orientation.Horizontal)
@@ -128,6 +131,10 @@ class MainWindow(QMainWindow):
         self.slider2.setTickInterval(10)
         self.slider2.setValue(150)
         add_widget_with_label(main_layout, self.slider2, 'Threshold 2:')
+
+        # Update the image whenever a slider value changes
+        self.slider1.valueChanged.connect(lambda _val: self.on_slider_changed())
+        self.slider2.valueChanged.connect(lambda _val: self.on_slider_changed())
 
         # QTableWidget
         self.table_widget = QTableWidget(5, 3)
@@ -147,6 +154,8 @@ class MainWindow(QMainWindow):
             if path:
                 self.text_edit.setPlainText(str(path))
                 try:
+                    # remember which image is currently displayed so slider changes can re-run processing
+                    self.current_image_path = path
                     self.display_image(str(path))
                 except Exception:
                     # avoid crashing the UI if image loading fails
@@ -193,8 +202,24 @@ class MainWindow(QMainWindow):
 
         about_action.triggered.connect(show_about_dialog)
 
+        # Show the default image at startup (if available)
+        try:
+            if hasattr(self, 'current_image_path') and self.current_image_path:
+                self.display_image(self.current_image_path)
+        except Exception:
+            pass
+
     def on_button_clicked(self):
         self.label.setText('Button Clicked!')
+
+    def on_slider_changed(self) -> None:
+        """Called when either slider changes; re-run show_image on the currently-displayed image."""
+        try:
+            if hasattr(self, 'current_image_path') and self.current_image_path:
+                self.display_image(self.current_image_path)
+        except Exception:
+            # don't allow slider updates to crash the UI
+            pass
 
     def display_image(self, image_path: str) -> None:
         """
@@ -213,10 +238,15 @@ class MainWindow(QMainWindow):
         self.image_label.setPixmap(pix)
 
     def show_image(self, image_path: str) -> MatLike:
+        # guard: if the path is falsy or the file can't be read, return None
+        if not image_path:
+            return None
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        if image is None:
+            return None
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        threshold1 = self.slider1.value()
-        threshold2 = self.slider2.value()
+        threshold1 = int(self.slider1.value()) if hasattr(self, 'slider1') else 100
+        threshold2 = int(self.slider2.value()) if hasattr(self, 'slider2') else 150
         edges = cv2.Canny(blurred, threshold1, threshold2)
         return edges
