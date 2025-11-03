@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 import cv2
-from PySide6 import QtGui
+from PySide6 import QtGui, QtCore
 from PySide6.QtGui import QAction, QKeySequence, QIcon
 from PySide6.QtWidgets import *
 from cv2.typing import MatLike
@@ -106,11 +106,28 @@ class MainWindow(QMainWindow):
         self.progress_bar = QProgressBar()
         add_widget_with_label(main_layout, self.progress_bar, 'QProgressBar:')
 
-        # Image display label (new)
+        # Image display label
         self.image_label = QLabel()
         self.image_label.setFixedSize(400, 300)
         self.image_label.setScaledContents(True)
         add_widget_with_label(main_layout, self.image_label, 'Image:')
+
+        # Sliders
+        self.slider1 = QSlider()
+        self.slider1.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.slider1.setMinimum(0)
+        self.slider1.setMaximum(500)
+        self.slider1.setTickInterval(10)
+        self.slider1.setValue(100)
+        add_widget_with_label(main_layout, self.slider1, 'Threshold 1:')
+
+        self.slider2 = QSlider()
+        self.slider2.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.slider2.setMinimum(0)
+        self.slider2.setMaximum(500)
+        self.slider2.setTickInterval(10)
+        self.slider2.setValue(150)
+        add_widget_with_label(main_layout, self.slider2, 'Threshold 2:')
 
         # QTableWidget
         self.table_widget = QTableWidget(5, 3)
@@ -198,4 +215,8 @@ class MainWindow(QMainWindow):
     def show_image(self, image_path: str) -> MatLike:
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        return gray
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        threshold1 = self.slider1.value()
+        threshold2 = self.slider2.value()
+        edges = cv2.Canny(blurred, threshold1, threshold2)
+        return edges
