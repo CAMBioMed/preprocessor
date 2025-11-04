@@ -2,15 +2,15 @@
 
 
 ## Everyday tasks
-- Install dependencies: `uv sync`
-- Run CLI: `uv run preprocessor`
-- Run UI: `uv run preprocessor ui`
-- Run tests: `uv run pytest -q`
-- Run tests with coverage: `uv run pytest -q --cov`
-- Determine version: `uv run hatch version`
-- Lint code: `uv run ruff check .`
-- Format code: `uv run ruff format .`
-- Build package: `uv build`
-- Mypy type checking: `uv run mypy src tests`
+- Sync dependencies: `uv sync` (`make sync`)
+- Run CLI: `uv run preprocessor` (`make run`)
+- Run GUI: `uv run preprocessor ui` (`make run-gui`)
+- Run tests: `uv run pytest -q` (`make test`)
+- Run tests with coverage: `uv run pytest -q --cov` (`make test-coverage`)
+- Determine version: `uv run hatch version` (`make version`)
+- Lint code: `uv run ruff check .` (`make lint`)
+- Format code: `uv run ruff format .` (`make format`)
+- Build package: `uv build` (`make build`)
+- Mypy type checking: `uv run mypy src tests` (`make typecheck`)
 
 
