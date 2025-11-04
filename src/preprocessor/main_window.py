@@ -12,27 +12,18 @@ from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
-    QCheckBox,
-    QComboBox,
     QFileDialog,
     QHBoxLayout,
     QLabel,
-    QLineEdit,
     QMainWindow,
     QMessageBox,
-    QProgressBar,
-    QPushButton,
-    QRadioButton,
     QSlider,
-    QSpinBox,
     QStatusBar,
-    QTableWidget,
-    QTableWidgetItem,
-    QTextEdit,
     QToolBar,
     QVBoxLayout,
     QWidget,
-    QBoxLayout, QGridLayout,
+    QBoxLayout,
+    QGridLayout,
 )
 
 
@@ -251,7 +242,6 @@ class MainWindow(QMainWindow):
         def open_file() -> None:
             path = QFileDialog.getOpenFileName(self, "Open")[0]
             if path:
-                self.text_edit.setPlainText(str(path))
                 try:
                     # remember which image is currently displayed so slider changes can re-run processing
                     self.current_image_path = path
@@ -314,7 +304,7 @@ class MainWindow(QMainWindow):
             pass
 
     def on_button_clicked(self) -> None:
-        self.label.setText("Button Clicked!")
+        pass
 
     def on_slider_changed(self) -> None:
         """When either slider changes: re-run processing on the currently-displayed image.

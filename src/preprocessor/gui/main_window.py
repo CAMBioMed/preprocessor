@@ -1,11 +1,10 @@
-# This Python file uses the following encoding: utf-8
 import sys
 from typing import cast
 
 from PySide6 import QtGui
 from PySide6.QtCore import Qt, QSettings, QByteArray
-from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QDockWidget
+from PySide6.QtGui import QAction, QIcon, QCloseEvent
+from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QDockWidget, QWidget
 from PySide6.QtUiTools import QUiLoader
 
 from preprocessor.gui.ui import UILoader
@@ -19,10 +18,11 @@ from preprocessor.gui.ui import UILoader
 
 loader = QUiLoader()
 
+
 class MainWindow(QMainWindow):
     """Main application window."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("CAMBioMed Preprocessor")
         self.resize(400, 200)
@@ -67,21 +67,21 @@ class MainWindow(QMainWindow):
 
     def create_dock(self) -> None:
         """Create a dock widget."""
-        dock: QDockWidget = UILoader.load("dock1")
+        dock = cast(QDockWidget, UILoader.load("dock1"))
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
         super().closeEvent(event)
         event.accept()
 
-    def write_settings(self):
+    def write_settings(self) -> None:
         """Write window settings to persistent storage."""
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
 
-    def read_settings(self):
+    def read_settings(self) -> None:
         """Read window settings from persistent storage."""
         self.restoreGeometry(cast(QByteArray, self.settings.value("geometry", QByteArray())))
         self.restoreState(cast(QByteArray, self.settings.value("windowState", QByteArray())))
