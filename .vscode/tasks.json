@@ -15,9 +15,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Run: UI",
+      "label": "Run: GUI",
       "type": "shell",
-      "command": "uv run preprocessor ui",
+      "command": "uv run preprocessor gui",
       "problemMatcher": []
     },
     {

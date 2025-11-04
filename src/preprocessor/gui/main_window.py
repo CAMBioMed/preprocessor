@@ -7,7 +7,9 @@ from PySide6.QtGui import QAction, QIcon, QCloseEvent
 from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QDockWidget, QWidget
 from PySide6.QtUiTools import QUiLoader
 
-from preprocessor.gui.ui import UILoader
+from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.ui_loader import UILoader
+from preprocessor._version import __version__
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
@@ -28,19 +30,29 @@ class MainWindow(QMainWindow):
         self.resize(400, 200)
         self.settings = QSettings("CAMBioMed", "Preprocessor")
 
+        self.create_menu()
         self.create_toolbar()
-        self.create_dock()
+        self.create_central_widget()
+        self.create_properties_dock()
+        self.create_statusbar()
+
         self.read_settings()
-        #
-        # self.ui = Ui_MyWindow()
-        # self.ui.setupUi(self)
-        #
-        # docked = Ui_MyDockWidget("Mydock", self)
-        # docked.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
-        # self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, docked)
-        # widget = QWidget()
-        # widget.setLayout(grid_layout)
-        # self.setCentralWidget(widget)
+
+    def create_menu(self) -> None:
+        """Create the main window menu."""
+        menu = self.menuBar()
+
+        file_menu = menu.addMenu("&File")
+        exit_action = QAction("&Exit", self)
+        exit_action.setStatusTip("Exit the application")
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+
+        help_menu = menu.addMenu("&Help")
+        about_action = QAction("&About", self)
+        about_action.setStatusTip("Show the About dialog")
+        about_action.triggered.connect(lambda: show_about_dialog(self))
+        help_menu.addAction(about_action)
 
     def create_toolbar(self) -> None:
         """Create the main window toolbar."""
@@ -65,9 +77,19 @@ class MainWindow(QMainWindow):
         button_action2.setCheckable(False)
         toolbar.addAction(button_action2)
 
-    def create_dock(self) -> None:
+    def create_statusbar(self) -> None:
+        """Create the main window status bar."""
+        self.statusBar().showMessage(f"Preprocessor {QtGui.QGuiApplication.applicationVersion()} ready")
+
+    def create_central_widget(self) -> None:
+        """Create the central widget."""
+        central_widget = QWidget() # placeholder
+        central_widget.setStyleSheet("background-color: purple;")
+        self.setCentralWidget(central_widget)
+
+    def create_properties_dock(self) -> None:
         """Create a dock widget."""
-        dock = cast(QDockWidget, UILoader.load("dock1"))
+        dock = cast(QDockWidget, UILoader.load("properties_dock"))
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
 
@@ -87,11 +109,13 @@ class MainWindow(QMainWindow):
         self.restoreState(cast(QByteArray, self.settings.value("windowState", QByteArray())))
 
 
-def show_ui() -> None:
+def show_application() -> None:
     """Show the main application window."""
     # Disable allocation limit
     QtGui.QImageReader.setAllocationLimit(0)
+
     app = QApplication(sys.argv)
+    app.setApplicationVersion(__version__)
     window = MainWindow()
     window.show()
     exit_code = app.exec_()

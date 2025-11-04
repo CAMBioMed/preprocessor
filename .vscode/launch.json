@@ -2,14 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug: UI",
+      "name": "Debug: GUI",
       "type": "debugpy",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "preprocessor.main",
-      "args": [
-        "ui"
-      ],
+      "args": [ "gui" ],
       "justMyCode": true,
       "console": "integratedTerminal",
       "preLaunchTask": "Sync dependencies",

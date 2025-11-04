@@ -2,9 +2,7 @@ import click
 import PySide6
 from ._version import __version__  # type: ignore
 
-# from preprocessor.hello_world import show_ui
-from .gui.main_window import show_ui
-# from .main_window import show_ui
+from preprocessor.gui.main_window import show_application
 
 
 @click.group()
@@ -23,8 +21,8 @@ def version() -> None:
 
 
 @cli.command()
-def ui() -> None:
-    show_ui()
+def gui() -> None:
+    show_application()
 
 
 if __name__ == "__main__":

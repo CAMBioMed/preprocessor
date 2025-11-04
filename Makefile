@@ -46,7 +46,7 @@ run:                                ## Run the CLI interface
 
 .PHONY: run-gui
 run-gui:                            ## Run the GUI interface
-	uv run preprocessor -- ui
+	uv run preprocessor -- gui
 
 ### =============================================================================
 ##@ Development

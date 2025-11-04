@@ -1,7 +1,7 @@
 # No Qt platform plugin could be initialized
 
 ```shell
-uv run preprocessor ui
+uv run preprocessor gui
 ```
 
 If you get this error:
@@ -23,7 +23,7 @@ sudo apt install -y libxcb-cursor-dev
 # Cannot create platform OpenGL context, neither GLX nor EGL are enabled
 
 ```shell
-uv run preprocessor ui
+uv run preprocessor gui
 ```
 
 If you get this error:
@@ -42,7 +42,7 @@ Ensure you don't have an existing Conda environment activated that may interfere
 
 ```shell
 conda deactivate
-uv run preprocessor ui
+uv run preprocessor gui
 ```
 
 If it's the `base` environment, which activates by default, you can disable auto-activation:

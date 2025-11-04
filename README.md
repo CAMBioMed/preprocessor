@@ -4,7 +4,7 @@
 ## Everyday tasks
 - Sync dependencies: `uv sync` (`make sync`)
 - Run CLI: `uv run preprocessor` (`make run`)
-- Run GUI: `uv run preprocessor ui` (`make run-gui`)
+- Run GUI: `uv run preprocessor gui` (`make run-gui`)
 - Run tests: `uv run pytest -q` (`make test`)
 - Run tests with coverage: `uv run pytest -q --cov` (`make test-coverage`)
 - Determine version: `uv run hatch version` (`make version`)
