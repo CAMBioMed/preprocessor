@@ -32,7 +32,7 @@ from PySide6.QtWidgets import (
     QToolBar,
     QVBoxLayout,
     QWidget,
-    QBoxLayout,
+    QBoxLayout, QGridLayout,
 )
 
 
@@ -160,53 +160,13 @@ class MainWindow(QMainWindow):
             hbox.addWidget(widget)
             layout.addLayout(hbox)
 
-        # QLabel
-        self.label = QLabel("Hello PySide6!")
-        add_widget_with_label(main_layout, self.label, "QLabel:")
-
-        # QPushButton
-        self.button = QPushButton("Click Me")
-        self.button.clicked.connect(self.on_button_clicked)
-        add_widget_with_label(main_layout, self.button, "QPushButton:")
-
-        # QLineEdit
-        self.line_edit = QLineEdit()
-        add_widget_with_label(main_layout, self.line_edit, "QLineEdit:")
-
-        # QComboBox
-        self.combo_box = QComboBox()
-        self.combo_box.addItems(["Option 1", "Option 2", "Option 3"])
-        add_widget_with_label(main_layout, self.combo_box, "QComboBox:")
-
-        # QCheckBox
-        self.check_box = QCheckBox("Check Me")
-        add_widget_with_label(main_layout, self.check_box, "QCheckBox:")
-
-        # QRadioButton
-        self.radio_button = QRadioButton("Radio Button")
-        add_widget_with_label(main_layout, self.radio_button, "QRadioButton:")
-
-        # QTextEdit
-        self.text_edit = QTextEdit()
-        add_widget_with_label(main_layout, self.text_edit, "QTextEdit:")
-
-        # QSlider
-        self.slider = QSlider()
-        add_widget_with_label(main_layout, self.slider, "QSlider:")
-
-        # QSpinBox
-        self.spin_box = QSpinBox()
-        add_widget_with_label(main_layout, self.spin_box, "QSpinBox:")
-
-        # QProgressBar
-        self.progress_bar = QProgressBar()
-        add_widget_with_label(main_layout, self.progress_bar, "QProgressBar:")
-
         # Image display label
         self.image_label = QLabel()
         self.image_label.setFixedSize(400, 300)
         self.image_label.setScaledContents(True)
-        add_widget_with_label(main_layout, self.image_label, "Image:")
+        image_grid = QGridLayout()
+        image_grid.addWidget(self.image_label)
+        main_layout.addLayout(image_grid)
 
         # Track the current image path (defaults to module-level image_file)
         self.current_image_path = str(image_file)
@@ -282,14 +242,6 @@ class MainWindow(QMainWindow):
 
         self.slider1.valueChanged.connect(_on_slider1_change)
         self.slider2.valueChanged.connect(_on_slider2_change)
-
-        # QTableWidget
-        self.table_widget = QTableWidget(5, 3)
-        for i in range(5):
-            for j in range(3):
-                item = QTableWidgetItem(f"Cell {i + 1},{j + 1}")
-                self.table_widget.setItem(i, j, item)
-        add_widget_with_label(main_layout, self.table_widget, "QTableWidget:")
 
         # menu bar
         menubar = self.menuBar()

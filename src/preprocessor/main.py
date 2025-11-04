@@ -3,7 +3,8 @@ import PySide6
 from ._version import __version__  # type: ignore
 
 # from preprocessor.hello_world import show_ui
-from .main_window import show_ui
+from .gui.main_window import show_ui
+# from .main_window import show_ui
 
 
 @click.group()
