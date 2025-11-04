@@ -21,10 +21,20 @@
       "problemMatcher": []
     },
     {
+      "label": "Build",
+      "type": "shell",
+      "command": "uv build",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
       "label": "Test",
       "type": "shell",
       "command": "uv run pytest -q",
-      "group": "test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
       "problemMatcher": []
     },
     {
@@ -58,10 +68,14 @@
         "Sync dependencies",
         "Lint",
         "Type check",
-        "Test"
+        "Test",
+        "Build"
       ],
-      "problemMatcher": [],
-      "group": "build"
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
     }
   ]
 }
