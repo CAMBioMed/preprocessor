@@ -1,0 +1,23 @@
+// Extensions to install:
+//  - Python (Microsoft)
+//  - Ruff (Astral Software)
+{
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+    },
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "files.exclude": {
+        "**/*.egg-info": true,
+        "**/htmlcov": true,
+        "**/~$*": true,
+        "**/.coverage.*": true,
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/.mypy_cache": true,
+        "**/.pytest_cache": true,
+    }
+}

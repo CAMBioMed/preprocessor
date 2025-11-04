@@ -5,8 +5,11 @@
       "name": "Debug: UI",
       "type": "debugpy",
       "request": "launch",
-      "module": "preprocessor",
-      "args": ["ui"],
+      "cwd": "${workspaceFolder}",
+      "module": "preprocessor.main",
+      "args": [
+        "ui"
+      ],
       "justMyCode": true,
       "console": "integratedTerminal",
       "preLaunchTask": "Sync dependencies",

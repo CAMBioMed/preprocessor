@@ -83,9 +83,9 @@ port.exclude_lines = [
   'if typing.TYPE_CHECKING:',
 ]
 
-
-[tool.black]
-line-length = 120
+[tool.mypy]
+warn_return_any = true
+disallow_untyped_defs = true
 
 [tool.ruff]
 line-length = 120
