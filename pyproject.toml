@@ -152,3 +152,9 @@ sequence_style = "keep_style"
 explicit_start = false
 whitelines = 1
 section_whitelines = 1
+
+[tool.pyside6-project]
+# List all UI files here, use Qt Creator to edit them
+files = [
+    "src/preprocessor/gui/properties_dock.ui"
+]

@@ -2,7 +2,7 @@
 UI files, produced by Qt Creator, can be converted to Python files using the `pyside6-uic` tool.
 
 ```shell
-pyside6-uic src/preprocessor/mywindow.ui -o src/preprocessor/mywindow.py
+uv run pyside6-uic src/preprocessor/gui/properties_dock.ui -o src/preprocessor/gui/properties_dock.py
 ```
 
 They can also be loaded directly, for example:
