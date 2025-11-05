@@ -1,3 +1,4 @@
+import logging
 import sys
 import traceback
 from types import TracebackType
@@ -6,6 +7,8 @@ from typing import Callable, Any
 from PySide6.QtCore import Slot, QRunnable, Signal, QObject
 
 from PySide6.QtCore import QThreadPool
+
+logger = logging.getLogger(__name__)
 
 # Based on: https://www.pythonguis.com/tutorials/multithreading-pyside6-applications-qthreadpool/
 
@@ -18,7 +21,10 @@ class WorkerManager:
 
     def start(self, worker: QRunnable):
         """Start a worker in the thread pool."""
+        # By default, the threadpool will take ownership of the worker
+        # and (as autoDelete is enabled) clean it up when done.
         self.threadpool.start(worker)
+
 
 class WorkerSignals(QObject):
     """Defines the signals available from a running worker thread."""
@@ -29,8 +35,9 @@ class WorkerSignals(QObject):
     """Signals when the worker has finished."""
     result = Signal(object)
     """Signals when the worker has a result to return."""
-    error = Signal(tuple[TracebackType, Exception, str])
+    error = Signal(tuple)
     """Signals when an error occurred. Emits a tuple of (exctype, value, traceback)."""
+
 
 class Worker(QRunnable):
     """
@@ -51,6 +58,7 @@ class Worker(QRunnable):
 
         worker_manager.start(worker)
     """
+
     fn: Callable
     args: tuple[Any, ...]
     kwargs: dict[str, Any]
@@ -73,12 +81,17 @@ class Worker(QRunnable):
     @Slot()
     def run(self):
         try:
+            logger.debug("Starting worker task.")
             result = self.fn(*self.args, **self.kwargs)
+            logger.debug("Worker task completed.")
         except Exception as e:
+            logger.error("Error in worker task: %s", e)
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
         else:
+            logger.debug("Emitting result from worker task.")
             self.signals.result.emit(result)
         finally:
+            logger.debug("Emitting finished signal from worker task.")
             self.signals.finished.emit()

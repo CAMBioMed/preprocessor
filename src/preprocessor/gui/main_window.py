@@ -1,18 +1,31 @@
+import logging
 import sys
 from typing import cast, Callable
 
 import cv2
 from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Signal
+from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Signal, Slot
 from PySide6.QtGui import QAction, QIcon, QCloseEvent, QKeySequence
-from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QDockWidget, QWidget, QFileDialog, QLabel, \
-    QGridLayout
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QToolBar,
+    QDockWidget,
+    QWidget,
+    QFileDialog,
+    QLabel,
+    QGridLayout,
+)
 from cv2.typing import MatLike
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.ui_loader import UILoader
 from preprocessor._version import __version__
 from preprocessor.gui.worker import Worker, WorkerManager
+
+from qimage2ndarray import array2qimage
+
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -56,7 +69,7 @@ class MainWindow(QMainWindow):
 
         open_action = QAction("&Open", self)
         open_action.setStatusTip("Open an image")
-        open_action.triggered.connect(self.on_open_file)
+        open_action.triggered.connect(self.on_file_open)
         open_action.setShortcut(QKeySequence.StandardKey.Open)
         file_menu.addAction(open_action)
 
@@ -69,21 +82,22 @@ class MainWindow(QMainWindow):
 
         about_action = QAction("&About", self)
         about_action.setStatusTip("Show the About dialog")
-        about_action.triggered.connect(lambda: show_about_dialog(self))
+        about_action.triggered.connect(self.on_help_about)
         help_menu.addAction(about_action)
 
     def create_toolbar(self) -> None:
         """Create the main window toolbar."""
         toolbar = QToolBar("Main Toolbar")
+        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.addToolBar(toolbar)
         # toolbar.setMovable(False)
 
         def toolbar_button_clicked(s: str) -> None:
             print("click", s)
 
-        button_action = QAction(QIcon("src/preprocessor/icons/fugue16/bug.png"), "&Your button", self)
-        button_action.setStatusTip("This is your button")
-        button_action.triggered.connect(toolbar_button_clicked)
+        button_action = QAction(QIcon("src/preprocessor/icons/fugue16/folder-open-image.png"), "&Open", self)
+        button_action.setStatusTip("Open an image")
+        button_action.triggered.connect(self.on_file_open)
         button_action.setCheckable(False)
         toolbar.addAction(button_action)
 
@@ -111,7 +125,9 @@ class MainWindow(QMainWindow):
     def create_properties_dock(self) -> None:
         """Create a dock widget."""
         self.properties_dock = cast(QDockWidget, UILoader.load("properties_dock"))
-        self.properties_dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+        self.properties_dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
+        )
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.properties_dock)
 
         # Update the image and numeric label whenever a slider value changes
@@ -145,10 +161,13 @@ class MainWindow(QMainWindow):
         self.restoreGeometry(cast(QByteArray, self.settings.value("geometry", QByteArray())))
         self.restoreState(cast(QByteArray, self.settings.value("windowState", QByteArray())))
 
-
-    def on_open_file(self) -> None:
+    def on_file_open(self) -> None:
         path = QFileDialog.getOpenFileName(self, "Open")[0]
-        if path: self._display_image(str(path))
+        if path:
+            self._display_image(str(path))
+
+    def on_help_about(self) -> None:
+        show_about_dialog(self)
 
     _current_image_path: str | None = None
     """Path to the currently displayed image, or None."""
@@ -175,27 +194,60 @@ class MainWindow(QMainWindow):
         # Downscale the image for faster preview processing
         preview_max_side = 800
 
-        worker = Worker(lambda progress_callback: self._process_image(image_path, th1, th2, preview_max_side, progress_callback))
-        worker.signals.result.connect(lambda result: self._on_process_image_finished(result, token))
-        worker.signals.progress.connect(lambda p: self.central_widget.setText(f"Processing... {int(p * 100)}% ({self._worker_manager.threadpool.maxThreadCount()})"))
+        @Slot(object)
+        def on_result(result: MatLike) -> None:
+            self._on_process_image_finished(result, token)
+
+        @Slot(float)
+        def on_progress(p: float) -> None:
+            self.central_widget.setText(
+                f"Processing... {int(p * 100)}% ({self._worker_manager.threadpool.maxThreadCount()})"
+            )
+
+        @Slot()
+        def act(progress_callback: Signal) -> MatLike | None:
+            return self._process_image(image_path, th1, th2, preview_max_side, progress_callback)
+
+        logger.debug(f"Refcount on_result pre: {sys.getrefcount(on_result)}")
+        logger.debug(f"Refcount on_progress pre: {sys.getrefcount(on_progress)}")
+        logger.debug(f"Refcount act pre: {sys.getrefcount(act)}")
+
+        worker = Worker(act)
+        # self.worker = worker # prevent garbage collection
+        worker.signals.result.connect(on_result)
+        worker.signals.progress.connect(on_progress)
+
+        logger.debug(f"Refcount on_result post: {sys.getrefcount(on_result)}")
+        logger.debug(f"Refcount on_progress post: {sys.getrefcount(on_progress)}")
+        logger.debug(f"Refcount act post: {sys.getrefcount(act)}")
+
         try:
             # Clear pixmap and show small text so users know processing is happening
             self.central_widget.setPixmap(QtGui.QPixmap())
             self.central_widget.setText("Processing...")
         except Exception:
             pass
+        logger.debug(f"Refcount worker pre: {sys.getrefcount(worker)}")
         self._worker_manager.start(worker)
+        logger.debug(f"Refcount worker post: {sys.getrefcount(worker)}")
 
-    def _process_image(self, image_path: str, threshold1: int, threshold2: int, preview_max_side: int, progress_callback: Signal) -> MatLike | None:
+    def _process_image(
+        self, image_path: str, threshold1: int, threshold2: int, preview_max_side: int, progress_callback: Signal
+    ) -> MatLike | None:
         """Process the image and return it."""
         import faulthandler
 
-        faulthandler.enable()
+        faulthandler.enable(all_threads=True)
 
-        progress_callback.emit(0.1)
-        if not image_path: return None
+        if not image_path:
+            return None
+
+        logger.debug(f"Reading image {image_path}...")
         img = cv2.imread(image_path, cv2.IMREAD_COLOR)
-        if img is None: return None
+        progress_callback.emit(0.1)
+        logger.debug(f"Read image {image_path}")
+        if img is None:
+            return None
 
         h, w = img.shape[:2]
 
@@ -205,45 +257,69 @@ class MainWindow(QMainWindow):
                 scale = float(preview_max_side) / float(max(h, w))
                 new_w = max(1, int(w * scale))
                 new_h = max(1, int(h * scale))
+                logger.debug(f"Downscaling image to {new_w}x{new_h} pixels...")
                 img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+                progress_callback.emit(0.4)
+                logger.debug(f"Downscaled image to {new_w}x{new_h} pixels")
         except Exception:
             # if resizing fails for any reason, continue with original image
             pass
-        progress_callback.emit(0.4)
 
+        logger.debug("Graying image...")
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         progress_callback.emit(0.6)
+        logger.debug("Grayed image.")
+
+        logger.debug("Blurring image...")
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         progress_callback.emit(0.8)
+        logger.debug("Blurred image")
+
         # WARNING: This seems to work better on the scaled down preview
         # than on the full image. Thus, generating the final image
         # full-scale will produce different results!
+        logger.debug(f"Cannying image to {threshold1}, {threshold2}...")
         edges = cv2.Canny(blurred, threshold1, threshold2)
         progress_callback.emit(1.0)
+        logger.debug("Cannied image.")
         return edges
 
     def _on_process_image_finished(self, result: MatLike | None, token: int) -> None:
         """Handle worker finished processing the image."""
+        logger.debug("Finishing processing...")
         # Only update the display if this is the latest request
-        if token != self._latest_token: return
+        if token != self._latest_token:
+            logger.debug("Skipped: not latest")
+            return
         # Only update the display if there is a result
-        if result is None: return
+        if result is None:
+            logger.debug("Skipped: no result")
+            return
 
         def apply() -> None:
             try:
-                h, w = result.shape[:2]
-                bytes_per_line = result.strides[0]
-                self._image_ref = result
-                qformat = QtGui.QImage.Format.Format_Grayscale8
-                qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, qformat)
+                logger.debug("Converting image...")
+                qimg = array2qimage(result)
+                # h, w = result.shape[:2]
+                # bytes_per_line = result.strides[0]
+                # self._image_ref = result
+                # qformat = QtGui.QImage.Format.Format_Grayscale8
+                # qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, qformat)
+                logger.debug("Converted image")
+
+                logger.debug("Displaying image...")
                 qpixmap = QtGui.QPixmap.fromImage(qimg)
                 self.central_widget.setPixmap(qpixmap)
                 self.central_widget.setText("")
+                logger.debug("Displayed image.")
             except Exception as e:
                 self.central_widget.setText(f"Error: {e}")
 
         # Schedule the UI update on the main thread using a single-shot timer
+        logger.debug("Scheduling display on UI...")
         QtCore.QTimer.singleShot(0, apply)
+        logger.debug("Scheduled display on UI")
+
 
 def show_application() -> None:
     """Show the main application window."""
@@ -256,4 +332,3 @@ def show_application() -> None:
     window.show()
     exit_code = app.exec_()
     sys.exit(exit_code)
-

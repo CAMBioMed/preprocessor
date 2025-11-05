@@ -22,6 +22,7 @@ dependencies = [
   "opencv-contrib-python>=4.12.0.88",
   "pillow>=12.0.0",
   "pyside6>=6.10.0",
+  "qimage2ndarray>=1.10.0",
 ]
 [dependency-groups]
 dev = [
@@ -61,7 +62,7 @@ Source = "https://github.com/CAMBioMed/preprocessor/"
 "Source Archive" = "https://github.com/CAMBioMed/preprocessor/archive/{commit_hash}.zip"
 
 [project.scripts]
-preprocessor = "preprocessor.main:cli"
+preprocessor = "preprocessor.main:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

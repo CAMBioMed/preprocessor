@@ -706,6 +706,7 @@ dependencies = [
     { name = "opencv-contrib-python" },
     { name = "pillow" },
     { name = "pyside6" },
+    { name = "qimage2ndarray" },
 ]
 
 [package.dev-dependencies]
@@ -729,6 +730,7 @@ requires-dist = [
     { name = "opencv-contrib-python", specifier = ">=4.12.0.88" },
     { name = "pillow", specifier = ">=12.0.0" },
     { name = "pyside6", specifier = ">=6.10.0" },
+    { name = "qimage2ndarray", specifier = ">=1.10.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -953,6 +955,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/85/9f/01a1a99704853cb63f253eea009390c88e7131c67e66a0a02099a8c917cb/pywin32-ctypes-0.2.3.tar.gz", hash = "sha256:d162dc04946d704503b2edc4d55f3dba5c1d539ead017afa00142c38b9885755", size = 29471, upload-time = "2024-08-14T10:15:34.626Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/de/3d/8161f7711c017e01ac9f008dfddd9410dff3674334c233bde66e7ba65bbf/pywin32_ctypes-0.2.3-py3-none-any.whl", hash = "sha256:8a1513379d709975552d202d942d9837758905c8d01eb82b8bcc30918929e7b8", size = 30756, upload-time = "2024-08-14T10:15:33.187Z" },
+]
+
+[[package]]
+name = "qimage2ndarray"
+version = "1.10.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c5/c5/9c5630bcda3e2dd8445dd5c663e938451967c84d7f8707816ca9f00824db/qimage2ndarray-1.10.0.tar.gz", hash = "sha256:3725102446dc8a696b2ec775b1d2af43b13af6a7f9ebee8a37115bb9543a2c58", size = 200439, upload-time = "2023-01-28T16:16:59.369Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9d/79/d3ce0ec91c3c761e04d0210d5544073ba3d38a4d6538e2ba58b45e33275c/qimage2ndarray-1.10.0-py3-none-any.whl", hash = "sha256:4c1c2a4ef2f72a7943392ee76305da87831274b9a10f00ccf624a54cb335ec6d", size = 12590, upload-time = "2023-01-28T16:16:54.996Z" },
 ]
 
 [[package]]

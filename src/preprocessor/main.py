@@ -25,5 +25,18 @@ def gui() -> None:
     show_application()
 
 
-if __name__ == "__main__":
+def setup_logging() -> None:
+    import logging
+
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger("preprocessor")
+    logger.info("Logging is set up.")
+
+
+def main() -> None:
+    setup_logging()
     cli()
+
+
+if __name__ == "__main__":
+    main()

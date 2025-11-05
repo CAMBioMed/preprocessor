@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QWidget, QMessageBox
 
 from preprocessor._version import __version__  # type: ignore
 
+
 def show_about_dialog(parent: QWidget | None = None) -> None:
     """Show the About dialog."""
     text = f"""
