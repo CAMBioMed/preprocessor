@@ -1,7 +1,6 @@
 import logging
 import sys
 import traceback
-from types import TracebackType
 from typing import Callable, Any
 
 from PySide6.QtCore import Slot, QRunnable, Signal, QObject
@@ -16,13 +15,18 @@ class WorkerManager:
     """Manages a pool of worker threads to run tasks in the background."""
 
     def __init__(self):
-        # self.threadpool = QThreadPool()
+        # Note sure what the trade-off is between using QThreadPool.globalInstance() vs creating a new QThreadPool().
         self.threadpool = QThreadPool.globalInstance()
 
     def start(self, worker: QRunnable):
         """Start a worker in the thread pool."""
         # By default, the threadpool will take ownership of the worker
         # and (as autoDelete is enabled) clean it up when done.
+        # However, signals seem to not be emitted when autoDelete is True.
+        # This comment https://github.com/git-cola/git-cola/blob/1b9279dd937c9f4db0273c5ffee955231b668e8d/cola/qtutils.py#L1156-L1159
+        # indicates that this is due to Python performing double-free,
+        # so we disable Qt auto-deletion here and let Python clean the worker up.
+        worker.setAutoDelete(False)
         self.threadpool.start(worker)
 
 

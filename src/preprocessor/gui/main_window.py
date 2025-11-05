@@ -213,7 +213,6 @@ class MainWindow(QMainWindow):
         logger.debug(f"Refcount act pre: {sys.getrefcount(act)}")
 
         worker = Worker(act)
-        # self.worker = worker # prevent garbage collection
         worker.signals.result.connect(on_result)
         worker.signals.progress.connect(on_progress)
 
