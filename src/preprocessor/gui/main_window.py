@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from cv2.typing import MatLike
 
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.quadrat_detection import QuadratDetectionParams
 from preprocessor.gui.ui_loader import UILoader
 from preprocessor._version import __version__
@@ -36,7 +37,7 @@ class MainWindow(QMainWindow):
 
     properties_dock: QDockWidget
     """The dock widget showing properties."""
-    central_widget: QLabel
+    central_widget: QImageEditor
     """The central widget showing the image."""
     _debounce_timer: QTimer
     """Timer for debouncing image processing parameter changes."""
@@ -118,11 +119,9 @@ class MainWindow(QMainWindow):
 
     def create_central_widget(self) -> None:
         """Create the central widget."""
-        self.central_widget = QLabel()
-        self.central_widget.setScaledContents(True)
+        self.central_widget = QImageEditor()
+        # self.central_widget.setScaledContents(True)
         self.central_widget.setStyleSheet("background-color: purple;")
-        # central_widget_grid = QGridLayout()
-        # central_widget_grid.addWidget(self.central_widget)
         self.setCentralWidget(self.central_widget)
 
     def create_properties_dock(self) -> None:
@@ -219,9 +218,7 @@ class MainWindow(QMainWindow):
 
         @Slot(float)
         def on_progress(p: float) -> None:
-            self.central_widget.setText(
-                f"Processing... {int(p * 100)}% ({self._worker_manager.threadpool.maxThreadCount()})"
-            )
+            self.central_widget.message = f"Processing... {int(p * 100)}% ({self._worker_manager.threadpool.maxThreadCount()})"
 
         @Slot()
         def act(progress_callback: Signal) -> MatLike | None:
@@ -241,8 +238,8 @@ class MainWindow(QMainWindow):
 
         try:
             # Clear pixmap and show small text so users know processing is happening
-            self.central_widget.setPixmap(QtGui.QPixmap())
-            self.central_widget.setText("Processing...")
+            self.central_widget.pixmap = None
+            self.central_widget.message = "Processing..."
         except Exception:
             pass
         logger.debug(f"Refcount worker pre: {sys.getrefcount(worker)}")
@@ -333,11 +330,11 @@ class MainWindow(QMainWindow):
 
                 logger.debug("Displaying image...")
                 qpixmap = QtGui.QPixmap.fromImage(qimg)
-                self.central_widget.setPixmap(qpixmap)
-                self.central_widget.setText("")
+                self.central_widget.pixmap = qpixmap
+                self.central_widget.message = ""
                 logger.debug("Displayed image.")
             except Exception as e:
-                self.central_widget.setText(f"Error: {e}")
+                self.central_widget.message = f"Error: {e}"
 
         # Schedule the UI update on the main thread using a single-shot timer
         logger.debug("Scheduling display on UI...")
