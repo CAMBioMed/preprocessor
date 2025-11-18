@@ -154,6 +154,8 @@ class MainWindow(QMainWindow):
         self.properties_dock.spinboxDownscaleMaxSize.valueChanged.connect(_on_parameter_change)
         self.properties_dock.checkboxBlurEnabled.stateChanged.connect(_on_parameter_change)
         self.properties_dock.spinboxBlurKernelSize.valueChanged.connect(_on_parameter_change)
+        # TODO: Add new thresholding handlers
+        # TODO: Change value in spinbox when slider changes and vice versa
         self.properties_dock.checkboxCannyEnabled.stateChanged.connect(_on_parameter_change)
         self.properties_dock.sliderCannyThreshold1.valueChanged.connect(_on_sliderCannyThreshold1_change)
         self.properties_dock.sliderCannyThreshold2.valueChanged.connect(_on_sliderCannyThreshold2_change)
@@ -206,6 +208,7 @@ class MainWindow(QMainWindow):
             downscale_max_size = int(self.properties_dock.spinboxDownscaleMaxSize.value()),
             blur_enabled = bool(self.properties_dock.checkboxBlurEnabled.isChecked()),
             blur_kernel_size = int(self.properties_dock.spinboxBlurKernelSize.value()),
+            # TODO: Add new thresholding parameters
             canny_enabled = bool(self.properties_dock.checkboxCannyEnabled.isChecked()),
             canny_threshold1 = int(self.properties_dock.sliderCannyThreshold1.value()),
             canny_threshold2 = int(self.properties_dock.sliderCannyThreshold2.value()),
