@@ -1,6 +1,7 @@
 import logging
 import signal
 import sys
+from dataclasses import dataclass
 from typing import cast, Callable
 
 import cv2
@@ -20,6 +21,7 @@ from PySide6.QtWidgets import (
 from cv2.typing import MatLike
 
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.quadrat_detection import QuadratDetectionParams
 from preprocessor.gui.ui_loader import UILoader
 from preprocessor._version import __version__
 from preprocessor.gui.worker import Worker, WorkerManager
@@ -132,20 +134,31 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.properties_dock)
 
         # Update the image and numeric label whenever a slider value changes
-        def _on_slider1_change(v: int) -> None:
-            self.properties_dock.label.setText(str(v))
+        def _on_sliderCannyThreshold1_change(v: int) -> None:
+            self.properties_dock.spinboxCannyThreshold1.setValue(v)
             # Start the timer to debounce rapid slider changes
             # If the timer is already running, it will be restarted
             self._debounce_timer.start()
 
-        def _on_slider2_change(v: int) -> None:
-            self.properties_dock.label_2.setText(str(v))
+        def _on_sliderCannyThreshold2_change(v: int) -> None:
+            self.properties_dock.spinboxCannyThreshold2.setValue(v)
             # Start the timer to debounce rapid slider changes
             # If the timer is already running, it will be restarted
             self._debounce_timer.start()
 
-        self.properties_dock.horizontalSlider.valueChanged.connect(_on_slider1_change)
-        self.properties_dock.horizontalSlider_2.valueChanged.connect(_on_slider2_change)
+        def _on_parameter_change() -> None:
+            # Start the timer to debounce rapid parameter changes
+            # If the timer is already running, it will be restarted
+            self._debounce_timer.start()
+
+        self.properties_dock.checkboxDownscaleEnabled.stateChanged.connect(_on_parameter_change)
+        self.properties_dock.spinboxDownscaleMaxSize.valueChanged.connect(_on_parameter_change)
+        self.properties_dock.checkboxBlurEnabled.stateChanged.connect(_on_parameter_change)
+        self.properties_dock.spinboxBlurKernelSize.valueChanged.connect(_on_parameter_change)
+        self.properties_dock.checkboxCannyEnabled.stateChanged.connect(_on_parameter_change)
+        self.properties_dock.sliderCannyThreshold1.valueChanged.connect(_on_sliderCannyThreshold1_change)
+        self.properties_dock.sliderCannyThreshold2.valueChanged.connect(_on_sliderCannyThreshold2_change)
+        self.properties_dock.spinboxCannyApertureSize.valueChanged.connect(_on_parameter_change)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
@@ -188,12 +201,17 @@ class MainWindow(QMainWindow):
         self._latest_token += 1
         token = self._latest_token
 
-        # Obtain current threshold values from sliders
-        th1 = int(self.properties_dock.horizontalSlider.value())
-        th2 = int(self.properties_dock.horizontalSlider_2.value())
-
-        # Downscale the image for faster preview processing
-        preview_max_side = 800
+        # Obtain current parameters
+        params = QuadratDetectionParams(
+            downscale_enabled = bool(self.properties_dock.checkboxDownscaleEnabled.isChecked()),
+            downscale_max_size = int(self.properties_dock.spinboxDownscaleMaxSize.value()),
+            blur_enabled = bool(self.properties_dock.checkboxBlurEnabled.isChecked()),
+            blur_kernel_size = int(self.properties_dock.spinboxBlurKernelSize.value()),
+            canny_enabled = bool(self.properties_dock.checkboxCannyEnabled.isChecked()),
+            canny_threshold1 = int(self.properties_dock.sliderCannyThreshold1.value()),
+            canny_threshold2 = int(self.properties_dock.sliderCannyThreshold2.value()),
+            canny_aperture_size = int(self.properties_dock.spinboxCannyApertureSize.value()),
+        )
 
         @Slot(object)
         def on_result(result: MatLike) -> None:
@@ -207,7 +225,7 @@ class MainWindow(QMainWindow):
 
         @Slot()
         def act(progress_callback: Signal) -> MatLike | None:
-            return self._process_image(image_path, th1, th2, preview_max_side, progress_callback)
+            return self._process_image(image_path, params, progress_callback)
 
         logger.debug(f"Refcount on_result pre: {sys.getrefcount(on_result)}")
         logger.debug(f"Refcount on_progress pre: {sys.getrefcount(on_progress)}")
@@ -232,7 +250,7 @@ class MainWindow(QMainWindow):
         logger.debug(f"Refcount worker post: {sys.getrefcount(worker)}")
 
     def _process_image(
-        self, image_path: str, threshold1: int, threshold2: int, preview_max_side: int, progress_callback: Signal
+        self, image_path: str, params: QuadratDetectionParams, progress_callback: Signal
     ) -> MatLike | None:
         """Process the image and return it."""
         import faulthandler
@@ -253,8 +271,8 @@ class MainWindow(QMainWindow):
 
         # Downscale image for preview processing to speed up worker
         try:
-            if preview_max_side and (h > preview_max_side or w > preview_max_side):
-                scale = float(preview_max_side) / float(max(h, w))
+            if params.downscale_enabled and params.downscale_max_size and (h > params.downscale_max_size or w > params.downscale_max_size):
+                scale = float(params.downscale_max_size) / float(max(h, w))
                 new_w = max(1, int(w * scale))
                 new_h = max(1, int(h * scale))
                 logger.debug(f"Downscaling image to {new_w}x{new_h} pixels...")
@@ -266,23 +284,29 @@ class MainWindow(QMainWindow):
             pass
 
         logger.debug("Graying image...")
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         progress_callback.emit(0.6)
         logger.debug("Grayed image.")
 
-        logger.debug("Blurring image...")
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        progress_callback.emit(0.8)
-        logger.debug("Blurred image")
+        if (params.blur_enabled):
+            logger.debug("Blurring image...")
+            img = cv2.GaussianBlur(img, (params.blur_kernel_size, params.blur_kernel_size), 0)
+            progress_callback.emit(0.8)
+            logger.debug("Blurred image")
 
-        # WARNING: This seems to work better on the scaled down preview
-        # than on the full image. Thus, generating the final image
-        # full-scale will produce different results!
-        logger.debug(f"Cannying image to {threshold1}, {threshold2}...")
-        edges = cv2.Canny(blurred, threshold1, threshold2)
-        progress_callback.emit(1.0)
-        logger.debug("Cannied image.")
-        return edges
+        if (params.canny_enabled):
+            threshold1 = params.canny_threshold1
+            threshold2 = params.canny_threshold2
+
+            # WARNING: This seems to work better on the scaled down preview
+            # than on the full image. Thus, generating the final image
+            # full-scale will produce different results!
+            logger.debug(f"Cannying image to {threshold1}, {threshold2}...")
+            img = cv2.Canny(img, threshold1, threshold2, apertureSize=params.canny_aperture_size)
+            progress_callback.emit(1.0)
+            logger.debug("Cannied image.")
+
+        return img
 
     def _on_process_image_finished(self, result: MatLike | None, token: int) -> None:
         """Handle worker finished processing the image."""

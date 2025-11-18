@@ -6,100 +6,300 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>362</height>
+    <width>494</width>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Properties</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QGridLayout" name="layoutPropertiesDock">
     <item row="0" column="0">
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
+     <widget class="QScrollArea" name="scrollareaPropertiesDock">
+      <property name="widgetResizable">
+       <bool>true</bool>
       </property>
       <widget class="QWidget" name="scrollAreaWidgetContents">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>366</width>
-         <height>240</height>
+         <width>460</width>
+         <height>434</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QGroupBox" name="groupBox">
-          <property name="title">
-           <string>GroupBox</string>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QGridLayout" name="layoutScrollAreaPropertiesDock">
+        <item row="3" column="0">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
-          <layout class="QFormLayout" name="formLayout">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>TextLabel</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_2">
-          <property name="title">
-           <string>GroupBox</string>
+          <property name="sizeType">
+           <enum>QSizePolicy::Policy::Expanding</enum>
           </property>
-          <layout class="QFormLayout" name="formLayout_2">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>TextLabel</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_3">
-          <property name="title">
-           <string>GroupBox</string>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
           </property>
-          <layout class="QFormLayout" name="formLayout_3">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>TextLabel</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
+         </spacer>
         </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_4">
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="group0Downscale">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="title">
-           <string>GroupBox</string>
+           <string>Downscale</string>
           </property>
-          <layout class="QFormLayout" name="formLayout_4">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_4">
+          <layout class="QFormLayout" name="layoutDownscale">
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelDownscaleMaxSize">
              <property name="text">
-              <string>TextLabel</string>
+              <string>Max Size</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="spinboxDownscaleMaxSize">
+             <property name="suffix">
+              <string> px</string>
+             </property>
+             <property name="maximum">
+              <number>3000</number>
+             </property>
+             <property name="value">
+              <number>800</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelDownscaleEnabled">
+             <property name="text">
+              <string>Enabled</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="checkboxDownscaleEnabled">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QGroupBox" name="group1Blur">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Gaussian Blur</string>
+          </property>
+          <layout class="QFormLayout" name="layoutBlur">
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelBlurEnabled">
+             <property name="text">
+              <string>Enabled</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelBlurKernelSize">
+             <property name="text">
+              <string>Kernel size</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="spinboxBlurKernelSize">
+             <property name="suffix">
+              <string> px</string>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="singleStep">
+              <number>2</number>
+             </property>
+             <property name="value">
+              <number>5</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="checkboxBlurEnabled">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QGroupBox" name="group2Canny">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Canny</string>
+          </property>
+          <layout class="QFormLayout" name="layoutCanny">
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelCannyEnabled">
+             <property name="text">
+              <string>Enabled</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="checkboxCannyEnabled">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelCannyThreshold1">
+             <property name="text">
+              <string>Threshold 1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="labelCannyThreshold2">
+             <property name="text">
+              <string>Threshold 2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="labelCannyApertureSize">
+             <property name="text">
+              <string>Aperture size</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <layout class="QHBoxLayout" name="layoutCannyThreshold1">
+             <item>
+              <widget class="QSlider" name="sliderCannyThreshold1">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>4</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>255</number>
+               </property>
+               <property name="value">
+                <number>50</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spinboxCannyThreshold1">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>255</number>
+               </property>
+               <property name="value">
+                <number>50</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="layoutCannyThreshold2">
+             <item>
+              <widget class="QSlider" name="sliderCannyThreshold2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>4</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>255</number>
+               </property>
+               <property name="value">
+                <number>150</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spinboxCannyThreshold2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>255</number>
+               </property>
+               <property name="value">
+                <number>150</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="1">
+            <widget class="QSpinBox" name="spinboxCannyApertureSize">
+             <property name="suffix">
+              <string> px</string>
+             </property>
+             <property name="minimum">
+              <number>3</number>
+             </property>
+             <property name="maximum">
+              <number>7</number>
+             </property>
+             <property name="singleStep">
+              <number>2</number>
              </property>
             </widget>
            </item>
