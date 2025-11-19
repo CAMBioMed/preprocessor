@@ -61,8 +61,13 @@ Homepage = "https://cambiomed-biodiversa.com/"
 Source = "https://github.com/CAMBioMed/preprocessor/"
 "Source Archive" = "https://github.com/CAMBioMed/preprocessor/archive/{commit_hash}.zip"
 
+# CLI launcher
 [project.scripts]
 preprocessor = "preprocessor.main:main"
+
+# For Windows GUI launcher (no console)
+[project.gui-scripts]
+preprocessor-gui = "preprocessor.main:main_gui"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -153,8 +158,13 @@ explicit_start = false
 whitelines = 1
 section_whitelines = 1
 
+#[tool.hatch.build.hooks.pyside]
+##[tool.hatch.build.targets.wheel.hooks.pyside]
+#folders = ["."]
+
 [tool.pyside6-project]
-# List all UI files here, use Qt Creator to edit them
 files = [
-    "src/preprocessor/gui/properties_dock.ui"
+    "src/preprocessor/main.py",   # Required. Otherwise, error: "Python file with main function not found."
+    # List all UI files here, use Qt Creator to edit them
+    "src/preprocessor/gui/properties_dock.ui",
 ]

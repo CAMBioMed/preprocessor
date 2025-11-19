@@ -1,21 +1,22 @@
 from PySide6.QtWidgets import QDockWidget
 
-from preprocessor.gui.properties_dock import Ui_PropertiesDock
+from preprocessor.gui.ui_properties_dock import Ui_PropertiesDock
 from preprocessor.gui.properties_dock_model import PropertiesDockModel
 from preprocessor.gui.quadrat_detection import ThresholdingMethod
+from preprocessor.gui.ui_loader import UILoader
 
 
-class Ui_PropertiesDockWithModel(QDockWidget, Ui_PropertiesDock):
+class PropertiesDockWidget(QDockWidget):
 
+    # ui: Ui_PropertiesDock
     model: PropertiesDockModel
 
     def __init__(self, parent=None):
         QDockWidget.__init__(self, parent)
-        Ui_PropertiesDock.__init__(self)
-        self.setupUi(self)
-
-    def setupUi(self, PropertiesDock):
-        super().setupUi(PropertiesDock)
+        self.ui = Ui_PropertiesDock()
+        # NOTE: This approach doesn't work with UILoader:
+        # self.ui = UILoader.load("properties_dock", self)
+        self.ui.setupUi(self)
 
         self.model = PropertiesDockModel()
         self._connect_signals()
@@ -25,66 +26,66 @@ class Ui_PropertiesDockWithModel(QDockWidget, Ui_PropertiesDock):
         # NOTE: Surely there is a way to avoid all this boilerplate...
 
         # Downscale
-        self.checkboxDownscaleEnabled.stateChanged.connect(
+        self.ui.checkboxDownscaleEnabled.stateChanged.connect(
             lambda value: setattr(self.model, 'downscale_enabled', value)
         )
         self.model.on_downscale_enabled_changed.connect(
-            self.checkboxDownscaleEnabled.setChecked
+            self.ui.checkboxDownscaleEnabled.setChecked
         )
 
-        self.spinboxDownscaleMaxSize.valueChanged.connect(
+        self.ui.spinboxDownscaleMaxSize.valueChanged.connect(
             lambda value: setattr(self.model, 'downscale_max_size', value)
         )
         self.model.on_downscale_max_size_changed.connect(
-            self.spinboxDownscaleMaxSize.setValue
+            self.ui.spinboxDownscaleMaxSize.setValue
         )
 
         # Blur
-        self.checkboxBlurEnabled.stateChanged.connect(
+        self.ui.checkboxBlurEnabled.stateChanged.connect(
             lambda value: setattr(self.model, 'blur_enabled', value)
         )
         self.model.on_blur_enabled_changed.connect(
-            self.checkboxBlurEnabled.setChecked
+            self.ui.checkboxBlurEnabled.setChecked
         )
 
-        self.spinboxBlurKernelSize.valueChanged.connect(
+        self.ui.spinboxBlurKernelSize.valueChanged.connect(
             lambda value: setattr(self.model, 'blur_kernel_size', value)
         )
         self.model.on_blur_kernel_size_changed.connect(
-            self.spinboxBlurKernelSize.setValue
+            self.ui.spinboxBlurKernelSize.setValue
         )
 
         # Thresholding
         def on_comboboxThresholdingMethod_changed(i: int):
-            method_str = self.comboboxThresholdingMethod.itemText(i)
+            method_str = self.ui.comboboxThresholdingMethod.itemText(i)
             method = ThresholdingMethod.from_string(method_str)
             setattr(self.model, 'thresholding_method', method)
 
-        self.comboboxThresholdingMethod.currentIndexChanged.connect(on_comboboxThresholdingMethod_changed)
+        self.ui.comboboxThresholdingMethod.currentIndexChanged.connect(on_comboboxThresholdingMethod_changed)
 
         def on_thresholding_method_changed(method: ThresholdingMethod):
-            self.comboboxThresholdingMethod.setCurrentText(method.value)
-            self.sliderThresholdingThreshold.setEnabled(
+            self.ui.comboboxThresholdingMethod.setCurrentText(method.value)
+            self.ui.sliderThresholdingThreshold.setEnabled(
                 method != ThresholdingMethod.NONE
             )
-            self.spinboxThresholdingThreshold.setEnabled(
+            self.ui.spinboxThresholdingThreshold.setEnabled(
                 method != ThresholdingMethod.NONE
             )
-            self.sliderThresholdingMaximum.setEnabled(
+            self.ui.sliderThresholdingMaximum.setEnabled(
                 method != ThresholdingMethod.NONE
             )
-            self.spinboxThresholdingMaximum.setEnabled(
+            self.ui.spinboxThresholdingMaximum.setEnabled(
                 method != ThresholdingMethod.NONE
             )
-            self.sliderThresholdingBlockSize.setEnabled(
+            self.ui.sliderThresholdingBlockSize.setEnabled(
                 method == ThresholdingMethod.MEAN or
                 method == ThresholdingMethod.GAUSSIAN
             )
-            self.spinboxThresholdingC.setEnabled(
+            self.ui.spinboxThresholdingC.setEnabled(
                 method == ThresholdingMethod.MEAN or
                 method == ThresholdingMethod.GAUSSIAN
             )
-            self.checkboxThresholdingOtsu.setEnabled(
+            self.ui.checkboxThresholdingOtsu.setEnabled(
                 method != ThresholdingMethod.NONE and
                 method != ThresholdingMethod.MEAN and
                 method != ThresholdingMethod.GAUSSIAN
@@ -93,93 +94,93 @@ class Ui_PropertiesDockWithModel(QDockWidget, Ui_PropertiesDock):
         self.model.on_thresholding_method_changed.connect(on_thresholding_method_changed)
 
 
-        self.sliderThresholdingThreshold.valueChanged.connect(
+        self.ui.sliderThresholdingThreshold.valueChanged.connect(
             lambda value: setattr(self.model, 'thresholding_threshold', value)
         )
         self.model.on_thresholding_threshold_changed.connect(
-            self.sliderThresholdingThreshold.setValue
+            self.ui.sliderThresholdingThreshold.setValue
         )
-        self.spinboxThresholdingThreshold.valueChanged.connect(
+        self.ui.spinboxThresholdingThreshold.valueChanged.connect(
             lambda value: setattr(self.model, 'thresholding_threshold', value)
         )
         self.model.on_thresholding_threshold_changed.connect(
-            self.spinboxThresholdingThreshold.setValue
+            self.ui.spinboxThresholdingThreshold.setValue
         )
 
-        self.sliderThresholdingMaximum.valueChanged.connect(
+        self.ui.sliderThresholdingMaximum.valueChanged.connect(
             lambda value: setattr(self.model, 'thresholding_maximum', value)
         )
         self.model.on_thresholding_maximum_changed.connect(
-            self.sliderThresholdingMaximum.setValue
+            self.ui.sliderThresholdingMaximum.setValue
         )
-        self.spinboxThresholdingMaximum.valueChanged.connect(
+        self.ui.spinboxThresholdingMaximum.valueChanged.connect(
             lambda value: setattr(self.model, 'thresholding_maximum', value)
         )
         self.model.on_thresholding_maximum_changed.connect(
-            self.spinboxThresholdingMaximum.setValue
+            self.ui.spinboxThresholdingMaximum.setValue
         )
 
-        self.sliderThresholdingBlockSize.valueChanged.connect(
+        self.ui.sliderThresholdingBlockSize.valueChanged.connect(
             lambda value: setattr(self.model, 'thresholding_block_size', value)
         )
         self.model.on_thresholding_block_size_changed.connect(
-            self.sliderThresholdingBlockSize.setValue
+            self.ui.sliderThresholdingBlockSize.setValue
         )
 
-        self.spinboxThresholdingC.valueChanged.connect(
+        self.ui.spinboxThresholdingC.valueChanged.connect(
             lambda value: setattr(self.model, 'thresholding_C', value)
         )
         self.model.on_thresholding_C_changed.connect(
-            self.spinboxThresholdingC.setValue
+            self.ui.spinboxThresholdingC.setValue
         )
 
-        self.checkboxThresholdingOtsu.stateChanged.connect(
+        self.ui.checkboxThresholdingOtsu.stateChanged.connect(
             lambda value: setattr(self.model, 'thresholding_otsu_enabled', value)
         )
         self.model.on_thresholding_otsu_enabled_changed.connect(
-            self.checkboxThresholdingOtsu.setChecked
+            self.ui.checkboxThresholdingOtsu.setChecked
         )
 
         # Canny
 
-        self.checkboxCannyEnabled.stateChanged.connect(
+        self.ui.checkboxCannyEnabled.stateChanged.connect(
             lambda value: setattr(self.model, 'canny_enabled', value)
         )
         self.model.on_canny_enabled_changed.connect(
-            self.checkboxCannyEnabled.setChecked
+            self.ui.checkboxCannyEnabled.setChecked
         )
 
-        self.sliderCannyThreshold1.valueChanged.connect(
+        self.ui.sliderCannyThreshold1.valueChanged.connect(
             lambda value: setattr(self.model, 'canny_threshold1', value)
         )
         self.model.on_canny_threshold1_changed.connect(
-            self.sliderCannyThreshold1.setValue
+            self.ui.sliderCannyThreshold1.setValue
         )
-        self.spinboxCannyThreshold1.valueChanged.connect(
+        self.ui.spinboxCannyThreshold1.valueChanged.connect(
             lambda value: setattr(self.model, 'canny_threshold1', value)
         )
         self.model.on_canny_threshold1_changed.connect(
-            self.spinboxCannyThreshold1.setValue
+            self.ui.spinboxCannyThreshold1.setValue
         )
 
-        self.sliderCannyThreshold2.valueChanged.connect(
+        self.ui.sliderCannyThreshold2.valueChanged.connect(
             lambda value: setattr(self.model, 'canny_threshold2', value)
         )
         self.model.on_canny_threshold2_changed.connect(
-            self.sliderCannyThreshold2.setValue
+            self.ui.sliderCannyThreshold2.setValue
         )
-        self.spinboxCannyThreshold2.valueChanged.connect(
+        self.ui.spinboxCannyThreshold2.valueChanged.connect(
             lambda value: setattr(self.model, 'canny_threshold2', value)
         )
         self.model.on_canny_threshold2_changed.connect(
-            self.spinboxCannyThreshold2.setValue
+            self.ui.spinboxCannyThreshold2.setValue
         )
 
-        self.spinboxCannyApertureSize.valueChanged.connect(
+        self.ui.spinboxCannyApertureSize.valueChanged.connect(
             lambda value: setattr(self.model, 'canny_aperture_size', value)
         )
         self.model.on_canny_aperture_size_changed.connect(
-            self.spinboxCannyApertureSize.setValue
+            self.ui.spinboxCannyApertureSize.setValue
         )
 
     def _trigger_initial_updates(self):

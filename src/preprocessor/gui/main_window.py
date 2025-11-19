@@ -22,8 +22,7 @@ from cv2.typing import MatLike
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.image_editor import QImageEditor
-from preprocessor.gui.properties_dock import Ui_PropertiesDock
-from preprocessor.gui.properties_dock_with_model import Ui_PropertiesDockWithModel
+from preprocessor.gui.properties_dock_with_model import PropertiesDockWidget
 from preprocessor.gui.quadrat_detection import QuadratDetectionParams, ThresholdingMethod
 from preprocessor.gui.ui_loader import UILoader
 from preprocessor._version import __version__
@@ -37,7 +36,7 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     """Main application window."""
 
-    properties_dock: Ui_PropertiesDockWithModel
+    properties_dock: PropertiesDockWidget
     """The dock widget showing properties."""
     central_widget: QImageEditor
     """The central widget showing the image."""
@@ -129,7 +128,7 @@ class MainWindow(QMainWindow):
     def create_properties_dock(self) -> None:
         """Create a dock widget."""
         # self.properties_dock = cast(QDockWidget, UILoader.load("properties_dock"))
-        self.properties_dock = Ui_PropertiesDockWithModel()
+        self.properties_dock = PropertiesDockWidget()
         self.properties_dock.setAllowedAreas(
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
         )
