@@ -6,7 +6,7 @@ from typing import cast, Callable
 
 import cv2
 from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Signal, Slot
+from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Signal, Slot, QAbstractListModel, QAbstractTableModel
 from PySide6.QtGui import QAction, QIcon, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
@@ -22,7 +22,9 @@ from cv2.typing import MatLike
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.image_editor import QImageEditor
-from preprocessor.gui.quadrat_detection import QuadratDetectionParams
+from preprocessor.gui.properties_dock import Ui_PropertiesDock
+from preprocessor.gui.properties_dock_with_model import Ui_PropertiesDockWithModel
+from preprocessor.gui.quadrat_detection import QuadratDetectionParams, ThresholdingMethod
 from preprocessor.gui.ui_loader import UILoader
 from preprocessor._version import __version__
 from preprocessor.gui.worker import Worker, WorkerManager
@@ -35,7 +37,7 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     """Main application window."""
 
-    properties_dock: QDockWidget
+    properties_dock: Ui_PropertiesDockWithModel
     """The dock widget showing properties."""
     central_widget: QImageEditor
     """The central widget showing the image."""
@@ -126,40 +128,19 @@ class MainWindow(QMainWindow):
 
     def create_properties_dock(self) -> None:
         """Create a dock widget."""
-        self.properties_dock = cast(QDockWidget, UILoader.load("properties_dock"))
+        # self.properties_dock = cast(QDockWidget, UILoader.load("properties_dock"))
+        self.properties_dock = Ui_PropertiesDockWithModel()
         self.properties_dock.setAllowedAreas(
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
         )
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.properties_dock)
-
-        # Update the image and numeric label whenever a slider value changes
-        def _on_sliderCannyThreshold1_change(v: int) -> None:
-            self.properties_dock.spinboxCannyThreshold1.setValue(v)
-            # Start the timer to debounce rapid slider changes
-            # If the timer is already running, it will be restarted
-            self._debounce_timer.start()
-
-        def _on_sliderCannyThreshold2_change(v: int) -> None:
-            self.properties_dock.spinboxCannyThreshold2.setValue(v)
-            # Start the timer to debounce rapid slider changes
-            # If the timer is already running, it will be restarted
-            self._debounce_timer.start()
 
         def _on_parameter_change() -> None:
             # Start the timer to debounce rapid parameter changes
             # If the timer is already running, it will be restarted
             self._debounce_timer.start()
 
-        self.properties_dock.checkboxDownscaleEnabled.stateChanged.connect(_on_parameter_change)
-        self.properties_dock.spinboxDownscaleMaxSize.valueChanged.connect(_on_parameter_change)
-        self.properties_dock.checkboxBlurEnabled.stateChanged.connect(_on_parameter_change)
-        self.properties_dock.spinboxBlurKernelSize.valueChanged.connect(_on_parameter_change)
-        # TODO: Add new thresholding handlers
-        # TODO: Change value in spinbox when slider changes and vice versa
-        self.properties_dock.checkboxCannyEnabled.stateChanged.connect(_on_parameter_change)
-        self.properties_dock.sliderCannyThreshold1.valueChanged.connect(_on_sliderCannyThreshold1_change)
-        self.properties_dock.sliderCannyThreshold2.valueChanged.connect(_on_sliderCannyThreshold2_change)
-        self.properties_dock.spinboxCannyApertureSize.valueChanged.connect(_on_parameter_change)
+        self.properties_dock.model.on_changed.connect(_on_parameter_change)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
@@ -204,11 +185,20 @@ class MainWindow(QMainWindow):
 
         # Obtain current parameters
         params = QuadratDetectionParams(
+            # Downscale
             downscale_enabled = bool(self.properties_dock.checkboxDownscaleEnabled.isChecked()),
             downscale_max_size = int(self.properties_dock.spinboxDownscaleMaxSize.value()),
+            # Blur
             blur_enabled = bool(self.properties_dock.checkboxBlurEnabled.isChecked()),
             blur_kernel_size = int(self.properties_dock.spinboxBlurKernelSize.value()),
-            # TODO: Add new thresholding parameters
+            # Thresholding
+            thresholding_method = ThresholdingMethod.from_string(self.properties_dock.comboboxThresholdingMethod.currentText()),
+            thresholding_threshold = int(self.properties_dock.sliderThresholdingThreshold.value()),
+            thresholding_maximum = int(self.properties_dock.sliderThresholdingMaximum.value()),
+            thresholding_block_size = int(self.properties_dock.sliderThresholdingBlockSize.value()),
+            thresholding_C = float(self.properties_dock.spinboxThresholdingC.value()),
+            thresholding_otsu_enabled = bool(self.properties_dock.checkboxThresholdingOtsu.isChecked()),
+            # Canny
             canny_enabled = bool(self.properties_dock.checkboxCannyEnabled.isChecked()),
             canny_threshold1 = int(self.properties_dock.sliderCannyThreshold1.value()),
             canny_threshold2 = int(self.properties_dock.sliderCannyThreshold2.value()),

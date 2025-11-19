@@ -24,7 +24,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
+         <y>-196</y>
          <width>460</width>
          <height>662</height>
         </rect>
@@ -333,22 +333,22 @@
              </item>
              <item>
               <property name="text">
-               <string>BinaryINV</string>
+               <string>Binary Inverse</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Trunc</string>
+               <string>Truncate</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>ToZero</string>
+               <string>To Zero</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>ToZeroINV</string>
+               <string>To Zero Inverse</string>
               </property>
              </item>
              <item>
