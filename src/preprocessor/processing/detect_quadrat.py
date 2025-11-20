@@ -2,6 +2,7 @@ import logging
 import math
 
 import cv2
+import numpy as np
 from cv2.typing import MatLike
 
 from preprocessor.processing.params import (
@@ -12,7 +13,8 @@ from preprocessor.processing.params import (
     ThresholdingParams,
     ThresholdingMethod,
     FindContourParams,
-    ContourApproximationMethod, HoughParams,
+    ContourApproximationMethod,
+    HoughParams,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,6 +37,9 @@ def process_image(
 
     img = _grayscale_image(img)
 
+    # Create transparent empty image
+    debug_img = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint8)
+
     if params.blur.enabled:
         img = _blur_image(img, params.blur)
 
@@ -45,11 +50,15 @@ def process_image(
         img = _canny_image(img, params.canny)
 
     if params.hough.enabled:
-        img = _hough(img, params.hough)
+        debug_img = _hough(img, debug_img, params.hough)
 
     if params.findContour.enabled:
-        img = _find_contours(img, params.findContour)
+        debug_img = _find_contours(img, debug_img, params.findContour)
 
+    # Draw debug image on top of original
+    bgr_img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2BGRA)
+    img = cv2.addWeighted(bgr_img, 0.7, debug_img, 0.3, 0)  # semi-transparent
     return img
 
 
@@ -152,7 +161,7 @@ def _canny_image(img: MatLike, params: CannyParams) -> MatLike:
     return img
 
 
-def _hough(img: MatLike, params: HoughParams) -> MatLike:
+def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> MatLike:
     """Apply Hough Transform to detect lines in the image."""
     logger.debug("Applying Hough Transform...")
     if params.probabilistic:
@@ -166,9 +175,11 @@ def _hough(img: MatLike, params: HoughParams) -> MatLike:
         )
         if lines is not None:
             logger.debug(f"Found {len(lines)} lines.")
-            for line in lines:
-                x1, y1, x2, y2 = line[0]
-                cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            for i in range(len(lines)):
+                x1, y1, x2, y2 = lines[i][0]
+                pt1 = (x1, y1)
+                pt2 = (x2, y2)
+                cv2.line(debug_img, pt1, pt2, (0, 255, 0), 1, cv2.LINE_AA)
         else:
             logger.debug("No lines found.")
     else:
@@ -184,22 +195,22 @@ def _hough(img: MatLike, params: HoughParams) -> MatLike:
         )
         if lines is not None:
             logger.debug(f"Found {len(lines)} lines.")
-            for i in range(0, len(lines)):
+            for i in range(len(lines)):
                 rho = lines[i][0][0]
                 theta = lines[i][0][1]
                 a = math.cos(theta)
                 b = math.sin(theta)
                 x0 = a * rho
                 y0 = b * rho
-                pt1 = (int(x0 + 1000 * (-b)), int(y0 + 1000 * (a)))
-                pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * (a)))
-                cv2.line(img, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
+                pt1 = (int(x0 + 1000 * (-b)), int(y0 + 1000 * a))
+                pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * a))
+                cv2.line(debug_img, pt1, pt2, (0, 0, 255), 1, cv2.LINE_AA)
         else:
             logger.debug("No lines found.")
-    return img
+    return debug_img
 
 
-def _find_contours(img: MatLike, params: FindContourParams) -> MatLike:
+def _find_contours(img: MatLike, debug_img: MatLike, params: FindContourParams) -> MatLike:
     """Find contours in the image."""
     logger.debug("Finding contours...")
     method: int
@@ -218,5 +229,5 @@ def _find_contours(img: MatLike, params: FindContourParams) -> MatLike:
 
     contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, method)
     logger.debug(f"Found {len(contours)} contours.")
-    img = cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
-    return img
+    debug_img = cv2.drawContours(debug_img, contours, -1, (0, 255, 0), 2)
+    return debug_img

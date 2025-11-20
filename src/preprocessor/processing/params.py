@@ -71,13 +71,13 @@ class HoughParams:
     probabilistic: bool
     rho: int  # px
     theta: float  # degrees
-    threshold: int # votes
+    threshold: int  # votes
     srn: float
     stn: float
-    min_theta: float # degrees
-    max_theta: float # degrees
-    min_line_length: int # px
-    max_line_gap: int # px
+    min_theta: float  # degrees
+    max_theta: float  # degrees
+    min_line_length: int  # px
+    max_line_gap: int  # px
 
 
 @dataclass
@@ -124,7 +124,7 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
         enabled=False,
         probabilistic=False,
         rho=1,
-        theta=2, # degrees
+        theta=2,  # degrees
         threshold=50,
         srn=0.0,
         stn=0.0,

@@ -138,13 +138,11 @@ class PropertiesDockWidget(QDockWidget):
         self.model.on_canny_aperture_size_changed.connect(self.ui.spinboxCannyApertureSize.setValue)
 
         # Hough
-        self.ui.checkboxHoughEnabled.stateChanged.connect(
-            lambda value: setattr(self.model, "hough_enabled", value)
-        )
+        self.ui.checkboxHoughEnabled.stateChanged.connect(lambda value: setattr(self.model, "hough_enabled", value))
         self.model.on_hough_enabled_changed.connect(self.ui.checkboxHoughEnabled.setChecked)
 
         def on_checkboxHoughProbabilistic_changed(value: bool) -> None:
-            setattr(self.model, "hough_probabilistic", value)
+            self.model.hough_probabilistic = value
 
             self.ui.spinboxHoughSrn.setEnabled(not value)
             self.ui.spinboxHoughStn.setEnabled(not value)

@@ -8,7 +8,8 @@ from preprocessor.processing.params import (
     ThresholdingParams,
     CannyParams,
     ContourApproximationMethod,
-    FindContourParams, HoughParams,
+    FindContourParams,
+    HoughParams,
 )
 
 
@@ -399,7 +400,6 @@ class PropertiesDockModel(QObject):
             self.on_hough_max_line_gap_changed.emit(value)
             self.on_changed.emit()
             self._hough_max_line_gap = value
-
 
     #################
     # Find Contours #
