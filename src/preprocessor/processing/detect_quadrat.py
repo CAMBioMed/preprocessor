@@ -118,34 +118,32 @@ def _threshold_image(img: MatLike, params: ThresholdingParams) -> MatLike:
     logger.debug(f"Thresholding image with method {method}...")
     if method == ThresholdingMethod.NONE:
         return img
+
+    threshold_type: int | None = None
     if method == ThresholdingMethod.BINARY:
-        if params.inverse:
-            _, img = cv2.threshold(img, threshold, maximum, cv2.THRESH_BINARY_INV)
-        else:
-            _, img = cv2.threshold(img, threshold, maximum, cv2.THRESH_BINARY)
+        threshold_type = cv2.THRESH_BINARY_INV if params.inverse else cv2.THRESH_BINARY
     elif method == ThresholdingMethod.TRUNC:
-        _, img = cv2.threshold(img, threshold, 0, cv2.THRESH_TRUNC)
+        threshold_type = cv2.THRESH_TRUNC
     elif method == ThresholdingMethod.TO_ZERO:
-        if params.inverse:
-            _, img = cv2.threshold(img, threshold, 0, cv2.THRESH_TOZERO_INV)
-        else:
-            _, img = cv2.threshold(img, threshold, 0, cv2.THRESH_TOZERO)
-    elif method == ThresholdingMethod.MEAN:
-        if params.inverse:
-            img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, block_size, C)
-        else:
-            img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, block_size, C)
-    elif method == ThresholdingMethod.GAUSSIAN:
-        if params.inverse:
-            img = cv2.adaptiveThreshold(
-                img, maximum, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, block_size, C
-            )
-        else:
-            img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, block_size, C)
+        threshold_type = cv2.THRESH_TOZERO_INV if params.inverse else cv2.THRESH_TOZERO
+
+    if threshold_type is not None:
+        if params.otsu_enabled:
+            # Thresholding with Otsu's method ignores the given threshold value
+            threshold_type |= cv2.THRESH_OTSU
+        # Thresholding with anything other than BINARY or BINARY_INV ignores the maximum value
+        _, img = cv2.threshold(img, threshold, maximum, threshold_type)
     else:
-        msg = f"Unknown thresholding method: {method}"
-        logger.error(msg)
-        raise NotImplementedError(msg)
+        threshold_type = cv2.THRESH_BINARY_INV if params.inverse else cv2.THRESH_BINARY
+
+        if method == ThresholdingMethod.MEAN:
+            img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_MEAN_C, threshold_type, block_size, C)
+        elif method == ThresholdingMethod.GAUSSIAN:
+            img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, threshold_type, block_size, C)
+        else:
+            msg = f"Unknown thresholding method: {method}"
+            logger.error(msg)
+            raise NotImplementedError(msg)
 
     logger.debug("Thresholded image.")
     return img
