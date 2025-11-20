@@ -3,7 +3,6 @@ import signal
 import sys
 from typing import cast, Any
 
-import cv2
 from PySide6 import QtGui, QtCore
 from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Slot, Signal
 from PySide6.QtGui import QAction, QIcon, QCloseEvent, QKeySequence
@@ -19,6 +18,7 @@ from cv2.typing import MatLike
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.properties_dock_with_model import PropertiesDockWidget
+from preprocessor.processing.detect_quadrat import process_image
 from preprocessor.processing.params import QuadratDetectionParams
 from preprocessor._version import __version__
 from preprocessor.gui.worker import Worker, WorkerManager
@@ -215,58 +215,13 @@ class MainWindow(QMainWindow):
         logger.debug(f"Refcount worker post: {sys.getrefcount(worker)}")
 
     def _process_image(
-        self, image_path: str | None, params: QuadratDetectionParams, progress_callback: Signal
+        self, image_path: str | None, params: QuadratDetectionParams, _progress_callback: Signal
     ) -> MatLike | None:
         """Process the image and return it."""
         if not image_path:
             return None
 
-        logger.debug(f"Reading image {image_path}...")
-        img = cv2.imread(image_path, cv2.IMREAD_COLOR)
-        progress_callback.emit(0.1)
-        logger.debug(f"Read image {image_path}")
-        if img is None:
-            return None
-
-        h, w = img.shape[:2]
-
-        # Downscale image for preview processing to speed up worker
-        try:
-            if params.downscale_enabled and (h > params.downscale_max_size or w > params.downscale_max_size):
-                scale = float(params.downscale_max_size) / float(max(h, w))
-                new_w = max(1, int(w * scale))
-                new_h = max(1, int(h * scale))
-                logger.debug(f"Downscaling image to {new_w}x{new_h} pixels...")
-                img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
-                progress_callback.emit(0.4)
-                logger.debug(f"Downscaled image to {new_w}x{new_h} pixels")
-        except Exception:
-            # if resizing fails for any reason, continue with original image
-            pass
-
-        logger.debug("Graying image...")
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        progress_callback.emit(0.6)
-        logger.debug("Grayed image.")
-
-        if params.blur_enabled:
-            logger.debug("Blurring image...")
-            img = cv2.GaussianBlur(img, (params.blur_kernel_size, params.blur_kernel_size), 0)
-            progress_callback.emit(0.8)
-            logger.debug("Blurred image")
-
-        if params.canny_enabled:
-            threshold1 = params.canny_threshold1
-            threshold2 = params.canny_threshold2
-
-            # WARNING: This seems to work better on the scaled down preview
-            # than on the full image. Thus, generating the final image
-            # full-scale will produce different results!
-            logger.debug(f"Cannying image to {threshold1}, {threshold2}...")
-            img = cv2.Canny(img, threshold1, threshold2, apertureSize=params.canny_aperture_size)
-            progress_callback.emit(1.0)
-            logger.debug("Cannied image.")
-
+        img = process_image(image_path, params)
         return img
 
     def _on_process_image_finished(self, result: MatLike | None, token: int) -> None:
