@@ -115,7 +115,6 @@ class PropertiesDockWidget(QDockWidget):
         self.model.on_thresholding_otsu_enabled_changed.connect(self.ui.checkboxThresholdingOtsu.setChecked)
 
         # Canny
-
         self.ui.checkboxCannyEnabled.stateChanged.connect(lambda value: setattr(self.model, "canny_enabled", value))
         self.model.on_canny_enabled_changed.connect(self.ui.checkboxCannyEnabled.setChecked)
 
@@ -137,6 +136,78 @@ class PropertiesDockWidget(QDockWidget):
             lambda value: setattr(self.model, "canny_aperture_size", value)
         )
         self.model.on_canny_aperture_size_changed.connect(self.ui.spinboxCannyApertureSize.setValue)
+
+        # Hough
+        self.ui.checkboxHoughEnabled.stateChanged.connect(
+            lambda value: setattr(self.model, "hough_enabled", value)
+        )
+        self.model.on_hough_enabled_changed.connect(self.ui.checkboxHoughEnabled.setChecked)
+
+        def on_checkboxHoughProbabilistic_changed(value: bool) -> None:
+            setattr(self.model, "hough_probabilistic", value)
+
+            self.ui.spinboxHoughSrn.setEnabled(not value)
+            self.ui.spinboxHoughStn.setEnabled(not value)
+            self.ui.dialHoughMinTheta.setEnabled(not value)
+            self.ui.spinboxHoughMinTheta.setEnabled(not value)
+            self.ui.dialHoughMaxTheta.setEnabled(not value)
+            self.ui.spinboxHoughMaxTheta.setEnabled(not value)
+            self.ui.spinboxHoughMinLineLength.setEnabled(value)
+            self.ui.sliderHoughMinLineLength.setEnabled(value)
+            self.ui.spinboxHoughMaxLineGap.setEnabled(value)
+            self.ui.sliderHoughMaxLineGap.setEnabled(value)
+
+        self.ui.checkboxHoughProbabilistic.stateChanged.connect(on_checkboxHoughProbabilistic_changed)
+        self.model.on_hough_probabilistic_changed.connect(self.ui.checkboxHoughProbabilistic.setChecked)
+
+        self.ui.sliderHoughRho.valueChanged.connect(lambda value: setattr(self.model, "hough_rho", value))
+        self.model.on_hough_rho_changed.connect(self.ui.sliderHoughRho.setValue)
+        self.ui.spinboxHoughRho.valueChanged.connect(lambda value: setattr(self.model, "hough_rho", value))
+        self.model.on_hough_rho_changed.connect(self.ui.spinboxHoughRho.setValue)
+
+        self.ui.dialHoughTheta.valueChanged.connect(lambda value: setattr(self.model, "hough_theta", value))
+        self.model.on_hough_theta_changed.connect(self.ui.dialHoughTheta.setValue)
+        self.ui.spinboxHoughTheta.valueChanged.connect(lambda value: setattr(self.model, "hough_theta", value))
+        self.model.on_hough_theta_changed.connect(self.ui.spinboxHoughTheta.setValue)
+
+        self.ui.sliderHoughThreshold.valueChanged.connect(lambda value: setattr(self.model, "hough_threshold", value))
+        self.model.on_hough_threshold_changed.connect(self.ui.sliderHoughThreshold.setValue)
+        self.ui.spinboxHoughThreshold.valueChanged.connect(lambda value: setattr(self.model, "hough_threshold", value))
+        self.model.on_hough_threshold_changed.connect(self.ui.spinboxHoughThreshold.setValue)
+
+        self.ui.spinboxHoughSrn.valueChanged.connect(lambda value: setattr(self.model, "hough_srn", value))
+        self.model.on_hough_srn_changed.connect(self.ui.spinboxHoughSrn.setValue)
+
+        self.ui.spinboxHoughStn.valueChanged.connect(lambda value: setattr(self.model, "hough_stn", value))
+        self.model.on_hough_stn_changed.connect(self.ui.spinboxHoughStn.setValue)
+
+        self.ui.dialHoughMinTheta.valueChanged.connect(lambda value: setattr(self.model, "hough_min_theta", value))
+        self.model.on_hough_min_theta_changed.connect(self.ui.dialHoughMinTheta.setValue)
+        self.ui.spinboxHoughMinTheta.valueChanged.connect(lambda value: setattr(self.model, "hough_min_theta", value))
+        self.model.on_hough_min_theta_changed.connect(self.ui.spinboxHoughMinTheta.setValue)
+
+        self.ui.dialHoughMaxTheta.valueChanged.connect(lambda value: setattr(self.model, "hough_max_theta", value))
+        self.model.on_hough_max_theta_changed.connect(self.ui.dialHoughMaxTheta.setValue)
+        self.ui.spinboxHoughMaxTheta.valueChanged.connect(lambda value: setattr(self.model, "hough_max_theta", value))
+        self.model.on_hough_max_theta_changed.connect(self.ui.spinboxHoughMaxTheta.setValue)
+
+        self.ui.sliderHoughMinLineLength.valueChanged.connect(
+            lambda value: setattr(self.model, "hough_min_line_length", value)
+        )
+        self.model.on_hough_min_line_length_changed.connect(self.ui.sliderHoughMinLineLength.setValue)
+        self.ui.spinboxHoughMinLineLength.valueChanged.connect(
+            lambda value: setattr(self.model, "hough_min_line_length", value)
+        )
+        self.model.on_hough_min_line_length_changed.connect(self.ui.spinboxHoughMinLineLength.setValue)
+
+        self.ui.sliderHoughMaxLineGap.valueChanged.connect(
+            lambda value: setattr(self.model, "hough_max_line_gap", value)
+        )
+        self.model.on_hough_max_line_gap_changed.connect(self.ui.sliderHoughMaxLineGap.setValue)
+        self.ui.spinboxHoughMaxLineGap.valueChanged.connect(
+            lambda value: setattr(self.model, "hough_max_line_gap", value)
+        )
+        self.model.on_hough_max_line_gap_changed.connect(self.ui.spinboxHoughMaxLineGap.setValue)
 
         # Find Contours
         self.ui.checkboxFindContourEnabled.stateChanged.connect(
@@ -177,6 +248,23 @@ class PropertiesDockWidget(QDockWidget):
         self.model.on_canny_threshold1_changed.emit(self.model.canny_threshold1)
         self.model.on_canny_threshold2_changed.emit(self.model.canny_threshold2)
         self.model.on_canny_aperture_size_changed.emit(self.model.canny_aperture_size)
+
+        # Hough
+        self.model.on_hough_enabled_changed.emit(self.model.hough_enabled)
+        self.model.on_hough_probabilistic_changed.emit(self.model.hough_probabilistic)
+        self.model.on_hough_rho_changed.emit(self.model.hough_rho)
+        self.model.on_hough_theta_changed.emit(self.model.hough_theta)
+        self.model.on_hough_threshold_changed.emit(self.model.hough_threshold)
+        self.model.on_hough_srn_changed.emit(self.model.hough_srn)
+        self.model.on_hough_stn_changed.emit(self.model.hough_stn)
+        self.model.on_hough_min_theta_changed.emit(self.model.hough_min_theta)
+        self.model.on_hough_max_theta_changed.emit(self.model.hough_max_theta)
+        self.model.on_hough_min_line_length_changed.emit(self.model.hough_min_line_length)
+        self.model.on_hough_max_line_gap_changed.emit(self.model.hough_max_line_gap)
+
+        # Find Contours
+        self.model.on_find_contour_enabled_changed.emit(self.model.find_contour_enabled)
+        self.model.on_find_contour_method_changed.emit(self.model.find_contour_method)
 
         # Overall
         self.model.on_changed.emit()

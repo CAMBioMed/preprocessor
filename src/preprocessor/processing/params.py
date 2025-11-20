@@ -66,6 +66,21 @@ class CannyParams:
 
 
 @dataclass
+class HoughParams:
+    enabled: bool
+    probabilistic: bool
+    rho: int  # px
+    theta: float  # degrees
+    threshold: int # votes
+    srn: float
+    stn: float
+    min_theta: float # degrees
+    max_theta: float # degrees
+    min_line_length: int # px
+    max_line_gap: int # px
+
+
+@dataclass
 class FindContourParams:
     enabled: bool
     method: ContourApproximationMethod
@@ -77,6 +92,7 @@ class QuadratDetectionParams:
     blur: BlurParams
     thresholding: ThresholdingParams
     canny: CannyParams
+    hough: HoughParams
     findContour: FindContourParams
 
 
@@ -103,6 +119,19 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
         threshold1=50,
         threshold2=150,
         aperture_size=5,
+    ),
+    hough=HoughParams(
+        enabled=False,
+        probabilistic=False,
+        rho=1,
+        theta=2, # degrees
+        threshold=50,
+        srn=0.0,
+        stn=0.0,
+        min_theta=0.0,
+        max_theta=180.0,
+        min_line_length=50,
+        max_line_gap=10,
     ),
     findContour=FindContourParams(
         enabled=False,

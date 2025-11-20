@@ -8,7 +8,7 @@ from preprocessor.processing.params import (
     ThresholdingParams,
     CannyParams,
     ContourApproximationMethod,
-    FindContourParams,
+    FindContourParams, HoughParams,
 )
 
 
@@ -242,7 +242,169 @@ class PropertiesDockModel(QObject):
             self.on_changed.emit()
             self._canny_aperture_size = value
 
-    _find_contour_enabled: bool = True
+    #########
+    # Hough #
+    #########
+
+    _hough_enabled: bool = False
+    on_hough_enabled_changed: Signal = Signal(bool)
+
+    @property
+    def hough_enabled(self) -> bool:
+        return self._hough_enabled
+
+    @hough_enabled.setter
+    def hough_enabled(self, value: bool) -> None:
+        if self._hough_enabled != value:
+            self.on_hough_enabled_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_enabled = value
+
+    _hough_probabilistic: bool = False
+    on_hough_probabilistic_changed: Signal = Signal(bool)
+
+    @property
+    def hough_probabilistic(self) -> bool:
+        return self._hough_probabilistic
+
+    @hough_probabilistic.setter
+    def hough_probabilistic(self, value: bool) -> None:
+        if self._hough_probabilistic != value:
+            self.on_hough_probabilistic_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_probabilistic = value
+
+    _hough_rho: int = 1
+    on_hough_rho_changed: Signal = Signal(int)
+
+    @property
+    def hough_rho(self) -> int:
+        return self._hough_rho
+
+    @hough_rho.setter
+    def hough_rho(self, value: int) -> None:
+        if self._hough_rho != value:
+            self.on_hough_rho_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_rho = value
+
+    _hough_theta: float = 1.0
+    on_hough_theta_changed: Signal = Signal(float)
+
+    @property
+    def hough_theta(self) -> float:
+        return self._hough_theta
+
+    @hough_theta.setter
+    def hough_theta(self, value: float) -> None:
+        if self._hough_theta != value:
+            self.on_hough_theta_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_theta = value
+
+    _hough_threshold: int = 100
+    on_hough_threshold_changed: Signal = Signal(int)
+
+    @property
+    def hough_threshold(self) -> int:
+        return self._hough_threshold
+
+    @hough_threshold.setter
+    def hough_threshold(self, value: int) -> None:
+        if self._hough_threshold != value:
+            self.on_hough_threshold_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_threshold = value
+
+    _hough_srn: float = 0.0
+    on_hough_srn_changed: Signal = Signal(float)
+
+    @property
+    def hough_srn(self) -> float:
+        return self._hough_srn
+
+    @hough_srn.setter
+    def hough_srn(self, value: float) -> None:
+        if self._hough_srn != value:
+            self.on_hough_srn_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_srn = value
+
+    _hough_stn: float = 0.0
+    on_hough_stn_changed: Signal = Signal(float)
+
+    @property
+    def hough_stn(self) -> float:
+        return self._hough_stn
+
+    @hough_stn.setter
+    def hough_stn(self, value: float) -> None:
+        if self._hough_stn != value:
+            self.on_hough_stn_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_stn = value
+
+    _hough_min_theta: float = 0.0
+    on_hough_min_theta_changed: Signal = Signal(float)
+
+    @property
+    def hough_min_theta(self) -> float:
+        return self._hough_min_theta
+
+    @hough_min_theta.setter
+    def hough_min_theta(self, value: float) -> None:
+        if self._hough_min_theta != value:
+            self.on_hough_min_theta_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_min_theta = value
+
+    _hough_max_theta: float = 180.0
+    on_hough_max_theta_changed: Signal = Signal(float)
+
+    @property
+    def hough_max_theta(self) -> float:
+        return self._hough_max_theta
+
+    @hough_max_theta.setter
+    def hough_max_theta(self, value: float) -> None:
+        if self._hough_max_theta != value:
+            self.on_hough_max_theta_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_max_theta = value
+
+    _hough_min_line_length: int = 0
+    on_hough_min_line_length_changed: Signal = Signal(int)
+
+    @property
+    def hough_min_line_length(self) -> int:
+        return self._hough_min_line_length
+
+    @hough_min_line_length.setter
+    def hough_min_line_length(self, value: int) -> None:
+        if self._hough_min_line_length != value:
+            self.on_hough_min_line_length_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_min_line_length = value
+
+    _hough_max_line_gap: int = 0
+    on_hough_max_line_gap_changed: Signal = Signal(int)
+
+    @property
+    def hough_max_line_gap(self) -> int:
+        return self._hough_max_line_gap
+
+    @hough_max_line_gap.setter
+    def hough_max_line_gap(self, value: int) -> None:
+        if self._hough_max_line_gap != value:
+            self.on_hough_max_line_gap_changed.emit(value)
+            self.on_changed.emit()
+            self._hough_max_line_gap = value
+
+
+    #################
+    # Find Contours #
+    #################
+    _find_contour_enabled: bool = False
     on_find_contour_enabled_changed: Signal = Signal(bool)
 
     @property
@@ -296,6 +458,19 @@ class PropertiesDockModel(QObject):
                 threshold2=self.canny_threshold2,
                 aperture_size=self.canny_aperture_size,
             ),
+            hough=HoughParams(
+                enabled=self.hough_enabled,
+                probabilistic=self.hough_probabilistic,
+                rho=self.hough_rho,
+                theta=self.hough_theta,
+                threshold=self.hough_threshold,
+                srn=self.hough_srn,
+                stn=self.hough_stn,
+                min_theta=self.hough_min_theta,
+                max_theta=self.hough_max_theta,
+                min_line_length=self.hough_min_line_length,
+                max_line_gap=self.hough_max_line_gap,
+            ),
             findContour=FindContourParams(
                 enabled=self.find_contour_enabled,
                 method=self.find_contour_method,
@@ -322,3 +497,18 @@ class PropertiesDockModel(QObject):
         self.canny_threshold1 = value.canny.threshold1
         self.canny_threshold2 = value.canny.threshold2
         self.canny_aperture_size = value.canny.aperture_size
+
+        self.hough_enabled = value.hough.enabled
+        self.hough_probabilistic = value.hough.probabilistic
+        self.hough_rho = value.hough.rho
+        self.hough_theta = value.hough.theta
+        self.hough_threshold = value.hough.threshold
+        self.hough_srn = value.hough.srn
+        self.hough_stn = value.hough.stn
+        self.hough_min_theta = value.hough.min_theta
+        self.hough_max_theta = value.hough.max_theta
+        self.hough_min_line_length = value.hough.min_line_length
+        self.hough_max_line_gap = value.hough.max_line_gap
+
+        self.find_contour_enabled = value.findContour.enabled
+        self.find_contour_method = value.findContour.method
