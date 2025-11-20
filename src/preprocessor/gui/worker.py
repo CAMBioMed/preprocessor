@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Based on: https://www.pythonguis.com/tutorials/multithreading-pyside6-applications-qthreadpool/
 
+
 class WorkerManager:
     """Manages a pool of worker threads to run tasks in the background."""
 

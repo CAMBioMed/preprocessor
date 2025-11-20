@@ -36,9 +36,11 @@ def main() -> None:
     setup_logging()
     cli()
 
+
 def main_gui() -> None:
     setup_logging()
     gui()
+
 
 if __name__ == "__main__":
     main()

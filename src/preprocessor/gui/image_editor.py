@@ -4,7 +4,6 @@ from PySide6.QtWidgets import QWidget
 
 
 class QImageEditor(QWidget):
-
     position: QPoint | None
     _pixmap: QPixmap | None
 
@@ -51,6 +50,6 @@ class QImageEditor(QWidget):
             painter.setPen(QPen(Qt.GlobalColor.red, 15, Qt.PenStyle.SolidLine))
             painter.drawEllipse(self.position, 15, 15)
 
-    def mouseMoveEvent(self, event : QMouseEvent) -> None:
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self.position = event.pos()
         self.update()

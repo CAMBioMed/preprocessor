@@ -249,13 +249,13 @@ class MainWindow(QMainWindow):
         progress_callback.emit(0.6)
         logger.debug("Grayed image.")
 
-        if (params.blur_enabled):
+        if params.blur_enabled:
             logger.debug("Blurring image...")
             img = cv2.GaussianBlur(img, (params.blur_kernel_size, params.blur_kernel_size), 0)
             progress_callback.emit(0.8)
             logger.debug("Blurred image")
 
-        if (params.canny_enabled):
+        if params.canny_enabled:
             threshold1 = params.canny_threshold1
             threshold2 = params.canny_threshold2
 
@@ -305,12 +305,15 @@ class MainWindow(QMainWindow):
         QtCore.QTimer.singleShot(0, apply)
         logger.debug("Scheduled display on UI")
 
+
 def sigint_handler(*_args: Any) -> None:
     """Handle the SIGINT signal."""
-    sys.stderr.write('\r')
+    sys.stderr.write("\r")
     QApplication.quit()
 
+
 signal_timer: QTimer
+
 
 def setup_sigint_handler(interval: int = 200) -> None:
     """Process any pending SIGINT signals."""
@@ -324,6 +327,7 @@ def setup_sigint_handler(interval: int = 200) -> None:
     signal_timer = QTimer()
     signal_timer.start(interval)
     signal_timer.timeout.connect(lambda: None)  # Let the interpreter run each time.
+
 
 def show_application() -> None:
     """Show the main application window."""

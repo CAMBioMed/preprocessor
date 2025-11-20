@@ -5,8 +5,8 @@ from preprocessor.processing.params import ThresholdingMethod, QuadratDetectionP
 
 # NOTE: There must be a way in Python to avoid most of this boilerplate...
 
-class PropertiesDockModel(QObject):
 
+class PropertiesDockModel(QObject):
     on_changed: Signal = Signal()
 
     #############
@@ -223,23 +223,23 @@ class PropertiesDockModel(QObject):
     def params(self) -> QuadratDetectionParams:
         return QuadratDetectionParams(
             # Downscale
-            downscale_enabled = self._downscale_enabled,
-            downscale_max_size = self._downscale_max_size,
+            downscale_enabled=self._downscale_enabled,
+            downscale_max_size=self._downscale_max_size,
             # Blur
-            blur_enabled = self._blur_enabled,
-            blur_kernel_size = self._blur_kernel_size,
+            blur_enabled=self._blur_enabled,
+            blur_kernel_size=self._blur_kernel_size,
             # Thresholding
-            thresholding_method = self._thresholding_method,
-            thresholding_threshold = self._thresholding_threshold,
-            thresholding_maximum = self._thresholding_maximum,
-            thresholding_block_size = self._thresholding_block_size,
-            thresholding_C = self._thresholding_C,
-            thresholding_otsu_enabled = self._thresholding_otsu_enabled,
+            thresholding_method=self._thresholding_method,
+            thresholding_threshold=self._thresholding_threshold,
+            thresholding_maximum=self._thresholding_maximum,
+            thresholding_block_size=self._thresholding_block_size,
+            thresholding_C=self._thresholding_C,
+            thresholding_otsu_enabled=self._thresholding_otsu_enabled,
             # Canny
-            canny_enabled = self._canny_enabled,
-            canny_threshold1 = self._canny_threshold1,
-            canny_threshold2 = self._canny_threshold2,
-            canny_aperture_size = self._canny_aperture_size,
+            canny_enabled=self._canny_enabled,
+            canny_threshold1=self._canny_threshold1,
+            canny_threshold2=self._canny_threshold2,
+            canny_aperture_size=self._canny_aperture_size,
         )
 
     @params.setter
