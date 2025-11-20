@@ -230,26 +230,26 @@ class PropertiesDockModel(QObject):
     def params(self) -> QuadratDetectionParams:
         return QuadratDetectionParams(
             downscale=DownscaleParams(
-                enabled=self._downscale_enabled,
-                max_size=self._downscale_max_size,
+                enabled=self.downscale_enabled,
+                max_size=self.downscale_max_size,
             ),
             blur=BlurParams(
-                enabled=self._blur_enabled,
-                kernel_size=self._blur_kernel_size,
+                enabled=self.blur_enabled,
+                kernel_size=self.blur_kernel_size,
             ),
             thresholding=ThresholdingParams(
-                method=self._thresholding_method,
-                threshold=self._thresholding_threshold,
-                maximum=self._thresholding_maximum,
-                block_size=self._thresholding_block_size,
-                C=self._thresholding_C,
-                otsu_enabled=self._thresholding_otsu_enabled,
+                method=self.thresholding_method,
+                threshold=self.thresholding_threshold,
+                maximum=self.thresholding_maximum,
+                block_size=self.thresholding_block_size,
+                C=self.thresholding_C,
+                otsu_enabled=self.thresholding_otsu_enabled,
             ),
             canny=CannyParams(
-                enabled=self._canny_enabled,
-                threshold1=self._canny_threshold1,
-                threshold2=self._canny_threshold2,
-                aperture_size=self._canny_aperture_size,
+                enabled=self.canny_enabled,
+                threshold1=self.canny_threshold1,
+                threshold2=self.canny_threshold2,
+                aperture_size=self.canny_aperture_size,
             ),
         )
 

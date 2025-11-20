@@ -51,8 +51,14 @@ class PropertiesDockWidget(QDockWidget):
             self.ui.comboboxThresholdingMethod.setCurrentText(method.value)
             self.ui.sliderThresholdingThreshold.setEnabled(method != ThresholdingMethod.NONE)
             self.ui.spinboxThresholdingThreshold.setEnabled(method != ThresholdingMethod.NONE)
-            self.ui.sliderThresholdingMaximum.setEnabled(method != ThresholdingMethod.NONE)
-            self.ui.spinboxThresholdingMaximum.setEnabled(method != ThresholdingMethod.NONE)
+            self.ui.sliderThresholdingMaximum.setEnabled(
+                method == ThresholdingMethod.BINARY or
+                method == ThresholdingMethod.BINARY_INV
+            )
+            self.ui.spinboxThresholdingMaximum.setEnabled(
+                method == ThresholdingMethod.BINARY or
+                method == ThresholdingMethod.BINARY_INV
+            )
             self.ui.sliderThresholdingBlockSize.setEnabled(
                 method == ThresholdingMethod.MEAN or method == ThresholdingMethod.GAUSSIAN
             )
