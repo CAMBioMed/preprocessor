@@ -1,9 +1,8 @@
-from PySide6.QtWidgets import QDockWidget
+from PySide6.QtWidgets import QDockWidget, QWidget
 
 from preprocessor.gui.ui_properties_dock import Ui_PropertiesDock
 from preprocessor.gui.properties_dock_model import PropertiesDockModel
-from preprocessor.gui.quadrat_detection import ThresholdingMethod
-from preprocessor.gui.ui_loader import UILoader
+from preprocessor.processing.params import ThresholdingMethod
 
 
 class PropertiesDockWidget(QDockWidget):
@@ -11,18 +10,16 @@ class PropertiesDockWidget(QDockWidget):
     # ui: Ui_PropertiesDock
     model: PropertiesDockModel
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         QDockWidget.__init__(self, parent)
         self.ui = Ui_PropertiesDock()
-        # NOTE: This approach doesn't work with UILoader:
-        # self.ui = UILoader.load("properties_dock", self)
         self.ui.setupUi(self)
 
         self.model = PropertiesDockModel()
         self._connect_signals()
         self._trigger_initial_updates()
 
-    def _connect_signals(self):
+    def _connect_signals(self) -> None:
         # NOTE: Surely there is a way to avoid all this boilerplate...
 
         # Downscale
@@ -56,14 +53,14 @@ class PropertiesDockWidget(QDockWidget):
         )
 
         # Thresholding
-        def on_comboboxThresholdingMethod_changed(i: int):
+        def on_comboboxThresholdingMethod_changed(i: int) -> None:
             method_str = self.ui.comboboxThresholdingMethod.itemText(i)
             method = ThresholdingMethod.from_string(method_str)
-            setattr(self.model, 'thresholding_method', method)
+            self.model.thresholding_method = method
 
         self.ui.comboboxThresholdingMethod.currentIndexChanged.connect(on_comboboxThresholdingMethod_changed)
 
-        def on_thresholding_method_changed(method: ThresholdingMethod):
+        def on_thresholding_method_changed(method: ThresholdingMethod) -> None:
             self.ui.comboboxThresholdingMethod.setCurrentText(method.value)
             self.ui.sliderThresholdingThreshold.setEnabled(
                 method != ThresholdingMethod.NONE
@@ -183,7 +180,7 @@ class PropertiesDockWidget(QDockWidget):
             self.ui.spinboxCannyApertureSize.setValue
         )
 
-    def _trigger_initial_updates(self):
+    def _trigger_initial_updates(self) -> None:
         # Downscale
         self.model.on_downscale_enabled_changed.emit(
             self.model.downscale_enabled

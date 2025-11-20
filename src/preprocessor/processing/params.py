@@ -12,11 +12,12 @@ class ThresholdingMethod(Enum):
     GAUSSIAN = 'Gaussian'
 
     @staticmethod
-    def from_string(method_name: str):
+    def from_string(method_name: str) -> 'ThresholdingMethod':
         for method in ThresholdingMethod:
             if method.value == method_name:
                 return method
-        raise NotImplementedError(f"Unknown thresholding method: {method_name}")
+        msg = f"Unknown ThresholdingMethod: {method_name}"
+        raise NotImplementedError(msg)
 
 @dataclass
 class QuadratDetectionParams:
@@ -38,3 +39,29 @@ class QuadratDetectionParams:
     canny_threshold1: int
     canny_threshold2: int
     canny_aperture_size: int
+
+@dataclass
+class DownscaleParams:
+    enabled: bool
+    max_size: int
+
+@dataclass
+class BlurParams:
+    enabled: bool
+    kernel_size: int
+
+@dataclass
+class ThresholdingParams:
+    method: ThresholdingMethod
+    threshold: int
+    maximum: int
+    block_size: int
+    C: float
+    otsu_enabled: bool
+
+@dataclass
+class CannyParams:
+    enabled: bool
+    threshold1: int
+    threshold2: int
+    aperture_size: int

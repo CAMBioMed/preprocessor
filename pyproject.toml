@@ -95,7 +95,9 @@ disallow_untyped_defs = true
 
 [tool.ruff]
 line-length = 120
-exclude = []
+exclude = [
+    "ui_*.py",
+]
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -139,6 +141,8 @@ ignore = [
   "D106",       # undocumented-public-nested-class
   "D107",       # undocumented-public-init
   "D205",       # missing-blank-line-after-summary
+  # For now:
+  "G004",       # logging-f-string
 ]
 pydocstyle.convention = "pep257"
 
@@ -150,6 +154,9 @@ pydocstyle.convention = "pep257"
     "S101",   # Use of assert is detected
     "INP001", # Missing __init__.py file
 ]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
 
 [tool.yamlfix]
 line_length = 120

@@ -1,30 +1,25 @@
 import logging
 import signal
 import sys
-from dataclasses import dataclass
-from typing import cast, Callable
+from typing import cast, Any
 
 import cv2
 from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Signal, Slot, QAbstractListModel, QAbstractTableModel
+from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Slot, Signal
 from PySide6.QtGui import QAction, QIcon, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QToolBar,
-    QDockWidget,
     QWidget,
     QFileDialog,
-    QLabel,
-    QGridLayout,
 )
 from cv2.typing import MatLike
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.properties_dock_with_model import PropertiesDockWidget
-from preprocessor.gui.quadrat_detection import QuadratDetectionParams, ThresholdingMethod
-from preprocessor.gui.ui_loader import UILoader
+from preprocessor.processing.params import QuadratDetectionParams
 from preprocessor._version import __version__
 from preprocessor.gui.worker import Worker, WorkerManager
 
@@ -176,33 +171,14 @@ class MainWindow(QMainWindow):
         # schedule background processing
         self._schedule_processing(self._current_image_path)
 
-    def _schedule_processing(self, image_path: str) -> None:
+    def _schedule_processing(self, image_path: str | None) -> None:
         """Schedule a worker to process the image."""
         # Increment token to mark a new request
         self._latest_token += 1
         token = self._latest_token
 
         # Obtain current parameters
-        params = QuadratDetectionParams(
-            # Downscale
-            downscale_enabled = bool(self.properties_dock.checkboxDownscaleEnabled.isChecked()),
-            downscale_max_size = int(self.properties_dock.spinboxDownscaleMaxSize.value()),
-            # Blur
-            blur_enabled = bool(self.properties_dock.checkboxBlurEnabled.isChecked()),
-            blur_kernel_size = int(self.properties_dock.spinboxBlurKernelSize.value()),
-            # Thresholding
-            thresholding_method = ThresholdingMethod.from_string(self.properties_dock.comboboxThresholdingMethod.currentText()),
-            thresholding_threshold = int(self.properties_dock.sliderThresholdingThreshold.value()),
-            thresholding_maximum = int(self.properties_dock.sliderThresholdingMaximum.value()),
-            thresholding_block_size = int(self.properties_dock.sliderThresholdingBlockSize.value()),
-            thresholding_C = float(self.properties_dock.spinboxThresholdingC.value()),
-            thresholding_otsu_enabled = bool(self.properties_dock.checkboxThresholdingOtsu.isChecked()),
-            # Canny
-            canny_enabled = bool(self.properties_dock.checkboxCannyEnabled.isChecked()),
-            canny_threshold1 = int(self.properties_dock.sliderCannyThreshold1.value()),
-            canny_threshold2 = int(self.properties_dock.sliderCannyThreshold2.value()),
-            canny_aperture_size = int(self.properties_dock.spinboxCannyApertureSize.value()),
-        )
+        params = self.properties_dock.model.params
 
         @Slot(object)
         def on_result(result: MatLike) -> None:
@@ -210,7 +186,7 @@ class MainWindow(QMainWindow):
 
         @Slot(float)
         def on_progress(p: float) -> None:
-            self.central_widget.message = f"Processing... {int(p * 100)}% ({self._worker_manager.threadpool.maxThreadCount()})"
+            self.central_widget.message = f"Processing... {int(p * 100)}%"
 
         @Slot()
         def act(progress_callback: Signal) -> MatLike | None:
@@ -239,13 +215,9 @@ class MainWindow(QMainWindow):
         logger.debug(f"Refcount worker post: {sys.getrefcount(worker)}")
 
     def _process_image(
-        self, image_path: str, params: QuadratDetectionParams, progress_callback: Signal
+        self, image_path: str | None, params: QuadratDetectionParams, progress_callback: Signal
     ) -> MatLike | None:
         """Process the image and return it."""
-        import faulthandler
-
-        faulthandler.enable(all_threads=True)
-
         if not image_path:
             return None
 
@@ -260,7 +232,7 @@ class MainWindow(QMainWindow):
 
         # Downscale image for preview processing to speed up worker
         try:
-            if params.downscale_enabled and params.downscale_max_size and (h > params.downscale_max_size or w > params.downscale_max_size):
+            if params.downscale_enabled and (h > params.downscale_max_size or w > params.downscale_max_size):
                 scale = float(params.downscale_max_size) / float(max(h, w))
                 new_w = max(1, int(w * scale))
                 new_h = max(1, int(h * scale))
@@ -333,8 +305,8 @@ class MainWindow(QMainWindow):
         QtCore.QTimer.singleShot(0, apply)
         logger.debug("Scheduled display on UI")
 
-def sigint_handler(*args):
-    """Handler for the SIGINT signal."""
+def sigint_handler(*_args: Any) -> None:
+    """Handle the SIGINT signal."""
     sys.stderr.write('\r')
     QApplication.quit()
 
@@ -342,12 +314,11 @@ signal_timer: QTimer
 
 def setup_sigint_handler(interval: int = 200) -> None:
     """Process any pending SIGINT signals."""
-
     # Based on: https://stackoverflow.com/a/4939113/146622
     # The Qt application main event loop doesn't run on the Python interpreter, so it doesn't process signals.
     # Setup timer to periodically run the Python interpreter to check for (SIGINT) signals from outside.
 
-    global signal_timer  # Prevent garbage collection
+    global signal_timer  # Prevent garbage collection # noqa: PLW0603
 
     signal.signal(signal.SIGINT, sigint_handler)
     signal_timer = QTimer()

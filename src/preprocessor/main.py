@@ -3,6 +3,7 @@ import PySide6
 from ._version import __version__  # type: ignore
 
 from preprocessor.gui.main_window import show_application
+import logging
 
 
 @click.group()
@@ -26,8 +27,6 @@ def gui() -> None:
 
 
 def setup_logging() -> None:
-    import logging
-
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger("preprocessor")
     logger.info("Logging is set up.")
