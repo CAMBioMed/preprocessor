@@ -6,7 +6,7 @@ from preprocessor.processing.params import ThresholdingMethod, defaultParams, Co
 
 
 class PropertiesDockWidget(QDockWidget):
-    # ui: Ui_PropertiesDock
+    ui: Ui_PropertiesDock
     model: PropertiesDockModel
 
     def __init__(self, parent: QWidget | None = None) -> None:

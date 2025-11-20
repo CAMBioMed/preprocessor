@@ -33,9 +33,9 @@ class PropertiesDockModel(QObject):
     @downscale_enabled.setter
     def downscale_enabled(self, value: bool) -> None:
         if self._downscale_enabled != value:
+            self._downscale_enabled = value
             self.on_downscale_enabled_changed.emit(value)
             self.on_changed.emit()
-            self._downscale_enabled = value
 
     _downscale_max_size: int = 800
     on_downscale_max_size_changed: Signal = Signal(int)
@@ -47,9 +47,9 @@ class PropertiesDockModel(QObject):
     @downscale_max_size.setter
     def downscale_max_size(self, value: int) -> None:
         if self._downscale_max_size != value:
+            self._downscale_max_size = value
             self.on_downscale_max_size_changed.emit(value)
             self.on_changed.emit()
-            self._downscale_max_size = value
 
     ########
     # Blur #
@@ -65,9 +65,9 @@ class PropertiesDockModel(QObject):
     @blur_enabled.setter
     def blur_enabled(self, value: bool) -> None:
         if self._blur_enabled != value:
+            self._blur_enabled = value
             self.on_blur_enabled_changed.emit(value)
             self.on_changed.emit()
-            self._blur_enabled = value
 
     _blur_kernel_size: int = 5
     on_blur_kernel_size_changed: Signal = Signal(int)
@@ -79,9 +79,9 @@ class PropertiesDockModel(QObject):
     @blur_kernel_size.setter
     def blur_kernel_size(self, value: int) -> None:
         if self._blur_kernel_size != value:
+            self._blur_kernel_size = value
             self.on_blur_kernel_size_changed.emit(value)
             self.on_changed.emit()
-            self._blur_kernel_size = value
 
     ################
     # Thresholding #
@@ -96,9 +96,9 @@ class PropertiesDockModel(QObject):
     @thresholding_method.setter
     def thresholding_method(self, value: ThresholdingMethod) -> None:
         if self._thresholding_method != value:
+            self._thresholding_method = value
             self.on_thresholding_method_changed.emit(value)
             self.on_changed.emit()
-            self._thresholding_method = value
 
     _thresholding_inverse: bool = False
     on_thresholding_inverse_changed: Signal = Signal(bool)
@@ -110,9 +110,9 @@ class PropertiesDockModel(QObject):
     @thresholding_inverse.setter
     def thresholding_inverse(self, value: bool) -> None:
         if self._thresholding_inverse != value:
+            self._thresholding_inverse = value
             self.on_thresholding_inverse_changed.emit(value)
             self.on_changed.emit()
-            self._thresholding_inverse = value
 
     _thresholding_threshold: int = 127
     on_thresholding_threshold_changed: Signal = Signal(int)
@@ -124,9 +124,9 @@ class PropertiesDockModel(QObject):
     @thresholding_threshold.setter
     def thresholding_threshold(self, value: int) -> None:
         if self._thresholding_threshold != value:
+            self._thresholding_threshold = value
             self.on_thresholding_threshold_changed.emit(value)
             self.on_changed.emit()
-            self._thresholding_threshold = value
 
     _thresholding_maximum: int = 255
     on_thresholding_maximum_changed: Signal = Signal(int)
@@ -138,9 +138,9 @@ class PropertiesDockModel(QObject):
     @thresholding_maximum.setter
     def thresholding_maximum(self, value: int) -> None:
         if self._thresholding_maximum != value:
+            self._thresholding_maximum = value
             self.on_thresholding_maximum_changed.emit(value)
             self.on_changed.emit()
-            self._thresholding_maximum = value
 
     _thresholding_block_size: int = 3
     on_thresholding_block_size_changed: Signal = Signal(int)
@@ -152,9 +152,9 @@ class PropertiesDockModel(QObject):
     @thresholding_block_size.setter
     def thresholding_block_size(self, value: int) -> None:
         if self._thresholding_block_size != value:
+            self._thresholding_block_size = value
             self.on_thresholding_block_size_changed.emit(value)
             self.on_changed.emit()
-            self._thresholding_block_size = value
 
     _thresholding_C: float = 5.0
     on_thresholding_C_changed: Signal = Signal(float)
@@ -166,9 +166,9 @@ class PropertiesDockModel(QObject):
     @thresholding_C.setter
     def thresholding_C(self, value: float) -> None:
         if self._thresholding_C != value:
+            self._thresholding_C = value
             self.on_thresholding_C_changed.emit(value)
             self.on_changed.emit()
-            self._thresholding_C = value
 
     _thresholding_otsu_enabled: bool = False
     on_thresholding_otsu_enabled_changed: Signal = Signal(bool)
@@ -180,9 +180,9 @@ class PropertiesDockModel(QObject):
     @thresholding_otsu_enabled.setter
     def thresholding_otsu_enabled(self, value: bool) -> None:
         if self._thresholding_otsu_enabled != value:
+            self._thresholding_otsu_enabled = value
             self.on_thresholding_otsu_enabled_changed.emit(value)
             self.on_changed.emit()
-            self._thresholding_otsu_enabled = value
 
     #########
     # Canny #
@@ -197,9 +197,9 @@ class PropertiesDockModel(QObject):
     @canny_enabled.setter
     def canny_enabled(self, value: bool) -> None:
         if self._canny_enabled != value:
+            self._canny_enabled = value
             self.on_canny_enabled_changed.emit(value)
             self.on_changed.emit()
-            self._canny_enabled = value
 
     _canny_threshold1: int = 50
     on_canny_threshold1_changed: Signal = Signal(int)
@@ -211,9 +211,9 @@ class PropertiesDockModel(QObject):
     @canny_threshold1.setter
     def canny_threshold1(self, value: int) -> None:
         if self._canny_threshold1 != value:
+            self._canny_threshold1 = value
             self.on_canny_threshold1_changed.emit(value)
             self.on_changed.emit()
-            self._canny_threshold1 = value
 
     _canny_threshold2: int = 150
     on_canny_threshold2_changed: Signal = Signal(int)
@@ -225,9 +225,9 @@ class PropertiesDockModel(QObject):
     @canny_threshold2.setter
     def canny_threshold2(self, value: int) -> None:
         if self._canny_threshold2 != value:
+            self._canny_threshold2 = value
             self.on_canny_threshold2_changed.emit(value)
             self.on_changed.emit()
-            self._canny_threshold2 = value
 
     _canny_aperture_size: int = 3
     on_canny_aperture_size_changed: Signal = Signal(int)
@@ -239,9 +239,9 @@ class PropertiesDockModel(QObject):
     @canny_aperture_size.setter
     def canny_aperture_size(self, value: int) -> None:
         if self._canny_aperture_size != value:
+            self._canny_aperture_size = value
             self.on_canny_aperture_size_changed.emit(value)
             self.on_changed.emit()
-            self._canny_aperture_size = value
 
     #########
     # Hough #
@@ -257,9 +257,9 @@ class PropertiesDockModel(QObject):
     @hough_enabled.setter
     def hough_enabled(self, value: bool) -> None:
         if self._hough_enabled != value:
+            self._hough_enabled = value
             self.on_hough_enabled_changed.emit(value)
             self.on_changed.emit()
-            self._hough_enabled = value
 
     _hough_probabilistic: bool = False
     on_hough_probabilistic_changed: Signal = Signal(bool)
@@ -271,9 +271,9 @@ class PropertiesDockModel(QObject):
     @hough_probabilistic.setter
     def hough_probabilistic(self, value: bool) -> None:
         if self._hough_probabilistic != value:
+            self._hough_probabilistic = value
             self.on_hough_probabilistic_changed.emit(value)
             self.on_changed.emit()
-            self._hough_probabilistic = value
 
     _hough_rho: int = 1
     on_hough_rho_changed: Signal = Signal(int)
@@ -285,9 +285,9 @@ class PropertiesDockModel(QObject):
     @hough_rho.setter
     def hough_rho(self, value: int) -> None:
         if self._hough_rho != value:
+            self._hough_rho = value
             self.on_hough_rho_changed.emit(value)
             self.on_changed.emit()
-            self._hough_rho = value
 
     _hough_theta: float = 1.0
     on_hough_theta_changed: Signal = Signal(float)
@@ -299,9 +299,9 @@ class PropertiesDockModel(QObject):
     @hough_theta.setter
     def hough_theta(self, value: float) -> None:
         if self._hough_theta != value:
+            self._hough_theta = value
             self.on_hough_theta_changed.emit(value)
             self.on_changed.emit()
-            self._hough_theta = value
 
     _hough_threshold: int = 100
     on_hough_threshold_changed: Signal = Signal(int)
@@ -313,9 +313,9 @@ class PropertiesDockModel(QObject):
     @hough_threshold.setter
     def hough_threshold(self, value: int) -> None:
         if self._hough_threshold != value:
+            self._hough_threshold = value
             self.on_hough_threshold_changed.emit(value)
             self.on_changed.emit()
-            self._hough_threshold = value
 
     _hough_srn: float = 0.0
     on_hough_srn_changed: Signal = Signal(float)
@@ -327,9 +327,9 @@ class PropertiesDockModel(QObject):
     @hough_srn.setter
     def hough_srn(self, value: float) -> None:
         if self._hough_srn != value:
+            self._hough_srn = value
             self.on_hough_srn_changed.emit(value)
             self.on_changed.emit()
-            self._hough_srn = value
 
     _hough_stn: float = 0.0
     on_hough_stn_changed: Signal = Signal(float)
@@ -341,9 +341,9 @@ class PropertiesDockModel(QObject):
     @hough_stn.setter
     def hough_stn(self, value: float) -> None:
         if self._hough_stn != value:
+            self._hough_stn = value
             self.on_hough_stn_changed.emit(value)
             self.on_changed.emit()
-            self._hough_stn = value
 
     _hough_min_theta: float = 0.0
     on_hough_min_theta_changed: Signal = Signal(float)
@@ -355,9 +355,9 @@ class PropertiesDockModel(QObject):
     @hough_min_theta.setter
     def hough_min_theta(self, value: float) -> None:
         if self._hough_min_theta != value:
+            self._hough_min_theta = value
             self.on_hough_min_theta_changed.emit(value)
             self.on_changed.emit()
-            self._hough_min_theta = value
 
     _hough_max_theta: float = 180.0
     on_hough_max_theta_changed: Signal = Signal(float)
@@ -369,9 +369,9 @@ class PropertiesDockModel(QObject):
     @hough_max_theta.setter
     def hough_max_theta(self, value: float) -> None:
         if self._hough_max_theta != value:
+            self._hough_max_theta = value
             self.on_hough_max_theta_changed.emit(value)
             self.on_changed.emit()
-            self._hough_max_theta = value
 
     _hough_min_line_length: int = 0
     on_hough_min_line_length_changed: Signal = Signal(int)
@@ -383,9 +383,9 @@ class PropertiesDockModel(QObject):
     @hough_min_line_length.setter
     def hough_min_line_length(self, value: int) -> None:
         if self._hough_min_line_length != value:
+            self._hough_min_line_length = value
             self.on_hough_min_line_length_changed.emit(value)
             self.on_changed.emit()
-            self._hough_min_line_length = value
 
     _hough_max_line_gap: int = 0
     on_hough_max_line_gap_changed: Signal = Signal(int)
@@ -397,9 +397,9 @@ class PropertiesDockModel(QObject):
     @hough_max_line_gap.setter
     def hough_max_line_gap(self, value: int) -> None:
         if self._hough_max_line_gap != value:
+            self._hough_max_line_gap = value
             self.on_hough_max_line_gap_changed.emit(value)
             self.on_changed.emit()
-            self._hough_max_line_gap = value
 
     #################
     # Find Contours #
@@ -414,9 +414,9 @@ class PropertiesDockModel(QObject):
     @find_contour_enabled.setter
     def find_contour_enabled(self, value: bool) -> None:
         if self._find_contour_enabled != value:
+            self._find_contour_enabled = value
             self.on_find_contour_enabled_changed.emit(value)
             self.on_changed.emit()
-            self._find_contour_enabled = value
 
     _find_contour_method: ContourApproximationMethod = ContourApproximationMethod.SIMPLE
     on_find_contour_method_changed: Signal = Signal(ContourApproximationMethod)
@@ -428,9 +428,9 @@ class PropertiesDockModel(QObject):
     @find_contour_method.setter
     def find_contour_method(self, value: ContourApproximationMethod) -> None:
         if self._find_contour_method != value:
+            self._find_contour_method = value
             self.on_find_contour_method_changed.emit(value)
             self.on_changed.emit()
-            self._find_contour_method = value
 
     @property
     def params(self) -> QuadratDetectionParams:

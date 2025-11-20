@@ -1,5 +1,6 @@
 import logging
 import math
+from dataclasses import dataclass
 
 import cv2
 import numpy as np
@@ -20,22 +21,29 @@ from preprocessor.processing.params import (
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class QuadratDetectionResult:
+    original: MatLike | None
+    processed: MatLike | None
+    debug: MatLike | None
+
+
 def process_image(
     image_path: str | None,
     params: QuadratDetectionParams,
-) -> MatLike | None:
+) -> QuadratDetectionResult:
     """Process the image and return it."""
     if not image_path:
-        return None
+        return QuadratDetectionResult(None, None, None)
 
-    img = _read_image(image_path)
-    if img is None:
-        return None
+    original_img = _read_image(image_path)
+    if original_img is None:
+        return QuadratDetectionResult(None, None, None)
 
     if params.downscale.enabled:
-        img = _downscale_image(img, params.downscale)
+        original_img = _downscale_image(original_img, params.downscale)
 
-    img = _grayscale_image(img)
+    img = _grayscale_image(original_img)
 
     # Create transparent empty image
     debug_img = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint8)
@@ -55,17 +63,13 @@ def process_image(
     if params.findContour.enabled:
         debug_img = _find_contours(img, debug_img, params.findContour)
 
-    # Draw debug image on top of original
-    bgr_img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2BGRA)
-    img = cv2.addWeighted(bgr_img, 0.7, debug_img, 0.3, 0)  # semi-transparent
-    return img
+    return QuadratDetectionResult(original_img, img, debug_img)
 
 
 def _read_image(image_path: str) -> MatLike | None:
     """Read the image from the given path."""
     logger.debug(f"Reading image {image_path}...")
-    img = cv2.imread(image_path, cv2.IMREAD_COLOR)
+    img = cv2.imread(image_path, cv2.IMREAD_COLOR_BGR)
     logger.debug(f"Read image {image_path}")
     return img  # can be None
 
