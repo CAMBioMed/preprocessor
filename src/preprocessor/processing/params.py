@@ -5,10 +5,8 @@ from enum import Enum
 class ThresholdingMethod(Enum):
     NONE = "None"
     BINARY = "Binary"
-    BINARY_INV = "Binary Inverse"
     TRUNC = "Truncate"
-    TOZERO = "To Zero"
-    TOZERO_INV = "To Zero Inverse"
+    TO_ZERO = "To Zero"
     MEAN = "Mean"
     GAUSSIAN = "Gaussian"
 
@@ -36,6 +34,7 @@ class BlurParams:
 @dataclass
 class ThresholdingParams:
     method: ThresholdingMethod
+    inverse: bool
     threshold: int
     maximum: int
     block_size: int
@@ -57,3 +56,30 @@ class QuadratDetectionParams:
     blur: BlurParams
     thresholding: ThresholdingParams
     canny: CannyParams
+
+
+defaultParams: QuadratDetectionParams = QuadratDetectionParams(
+    downscale=DownscaleParams(
+        enabled=True,
+        max_size=400,
+    ),
+    blur=BlurParams(
+        enabled=True,
+        kernel_size=5,
+    ),
+    thresholding=ThresholdingParams(
+        method=ThresholdingMethod.BINARY,
+        inverse=False,
+        threshold=225,
+        maximum=255,
+        block_size=3,
+        C=1.0,
+        otsu_enabled=False,
+    ),
+    canny=CannyParams(
+        enabled=True,
+        threshold1=50,
+        threshold2=250,
+        aperture_size=5,
+    ),
+)

@@ -97,6 +97,20 @@ class PropertiesDockModel(QObject):
             self.on_changed.emit()
             self._thresholding_method = value
 
+    _thresholding_inverse: bool = False
+    on_thresholding_inverse_changed: Signal = Signal(bool)
+
+    @property
+    def thresholding_inverse(self) -> bool:
+        return self._thresholding_inverse
+
+    @thresholding_inverse.setter
+    def thresholding_inverse(self, value: bool) -> None:
+        if self._thresholding_inverse != value:
+            self.on_thresholding_inverse_changed.emit(value)
+            self.on_changed.emit()
+            self._thresholding_inverse = value
+
     _thresholding_threshold: int = 127
     on_thresholding_threshold_changed: Signal = Signal(int)
 
@@ -239,6 +253,7 @@ class PropertiesDockModel(QObject):
             ),
             thresholding=ThresholdingParams(
                 method=self.thresholding_method,
+                inverse=self.thresholding_inverse,
                 threshold=self.thresholding_threshold,
                 maximum=self.thresholding_maximum,
                 block_size=self.thresholding_block_size,
@@ -262,6 +277,7 @@ class PropertiesDockModel(QObject):
         self.blur_kernel_size = value.blur.kernel_size
 
         self.thresholding_method = value.thresholding.method
+        self.thresholding_inverse = value.thresholding.inverse
         self.thresholding_threshold = value.thresholding.threshold
         self.thresholding_maximum = value.thresholding.maximum
         self.thresholding_block_size = value.thresholding.block_size

@@ -3,8 +3,14 @@ import logging
 import cv2
 from cv2.typing import MatLike
 
-from preprocessor.processing.params import QuadratDetectionParams, DownscaleParams, BlurParams, CannyParams, \
-    ThresholdingParams, ThresholdingMethod
+from preprocessor.processing.params import (
+    QuadratDetectionParams,
+    DownscaleParams,
+    BlurParams,
+    CannyParams,
+    ThresholdingParams,
+    ThresholdingMethod,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -90,22 +96,30 @@ def _threshold_image(img: MatLike, params: ThresholdingParams) -> MatLike:
     logger.debug(f"Thresholding image with method {method}...")
     if method == ThresholdingMethod.NONE:
         return img
-    elif method == ThresholdingMethod.BINARY:
-        _, img = cv2.threshold(img, threshold, maximum, cv2.THRESH_BINARY)
-    elif method == ThresholdingMethod.BINARY_INV:
-        _, img = cv2.threshold(img, threshold, maximum, cv2.THRESH_BINARY_INV)
+    if method == ThresholdingMethod.BINARY:
+        if params.inverse:
+            _, img = cv2.threshold(img, threshold, maximum, cv2.THRESH_BINARY_INV)
+        else:
+            _, img = cv2.threshold(img, threshold, maximum, cv2.THRESH_BINARY)
     elif method == ThresholdingMethod.TRUNC:
         _, img = cv2.threshold(img, threshold, 0, cv2.THRESH_TRUNC)
-    elif method == ThresholdingMethod.TOZERO:
-        _, img = cv2.threshold(img, threshold, 0, cv2.THRESH_TOZERO)
-    elif method == ThresholdingMethod.TOZERO_INV:
-        _, img = cv2.threshold(img, threshold, 0, cv2.THRESH_TOZERO_INV)
+    elif method == ThresholdingMethod.TO_ZERO:
+        if params.inverse:
+            _, img = cv2.threshold(img, threshold, 0, cv2.THRESH_TOZERO_INV)
+        else:
+            _, img = cv2.threshold(img, threshold, 0, cv2.THRESH_TOZERO)
     elif method == ThresholdingMethod.MEAN:
-        img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_MEAN_C,
-                                    cv2.THRESH_BINARY, block_size, C)
+        if params.inverse:
+            img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, block_size, C)
+        else:
+            img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, block_size, C)
     elif method == ThresholdingMethod.GAUSSIAN:
-        img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                    cv2.THRESH_BINARY, block_size, C)
+        if params.inverse:
+            img = cv2.adaptiveThreshold(
+                img, maximum, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, block_size, C
+            )
+        else:
+            img = cv2.adaptiveThreshold(img, maximum, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, block_size, C)
     else:
         msg = f"Unknown thresholding method: {method}"
         logger.error(msg)
@@ -113,6 +127,7 @@ def _threshold_image(img: MatLike, params: ThresholdingParams) -> MatLike:
 
     logger.debug("Thresholded image.")
     return img
+
 
 def _canny_image(img: MatLike, params: CannyParams) -> MatLike:
     """Apply Canny edge detection to the image."""

@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QDockWidget, QWidget
 
 from preprocessor.gui.ui_properties_dock import Ui_PropertiesDock
 from preprocessor.gui.properties_dock_model import PropertiesDockModel
-from preprocessor.processing.params import ThresholdingMethod
+from preprocessor.processing.params import ThresholdingMethod, defaultParams
 
 
 class PropertiesDockWidget(QDockWidget):
@@ -16,7 +16,7 @@ class PropertiesDockWidget(QDockWidget):
 
         self.model = PropertiesDockModel()
         self._connect_signals()
-        self._trigger_initial_updates()
+        self.model.params = defaultParams
 
     def _connect_signals(self) -> None:
         # NOTE: Surely there is a way to avoid all this boilerplate...
@@ -49,15 +49,20 @@ class PropertiesDockWidget(QDockWidget):
 
         def on_thresholding_method_changed(method: ThresholdingMethod) -> None:
             self.ui.comboboxThresholdingMethod.setCurrentText(method.value)
+            self.ui.checkboxThresholdingInverse.setEnabled(
+                method != ThresholdingMethod.NONE and method != ThresholdingMethod.TRUNC
+            )
             self.ui.sliderThresholdingThreshold.setEnabled(method != ThresholdingMethod.NONE)
             self.ui.spinboxThresholdingThreshold.setEnabled(method != ThresholdingMethod.NONE)
             self.ui.sliderThresholdingMaximum.setEnabled(
-                method == ThresholdingMethod.BINARY or
-                method == ThresholdingMethod.BINARY_INV
+                method == ThresholdingMethod.BINARY
+                or method == ThresholdingMethod.MEAN
+                or method == ThresholdingMethod.GAUSSIAN
             )
             self.ui.spinboxThresholdingMaximum.setEnabled(
-                method == ThresholdingMethod.BINARY or
-                method == ThresholdingMethod.BINARY_INV
+                method == ThresholdingMethod.BINARY
+                or method == ThresholdingMethod.MEAN
+                or method == ThresholdingMethod.GAUSSIAN
             )
             self.ui.sliderThresholdingBlockSize.setEnabled(
                 method == ThresholdingMethod.MEAN or method == ThresholdingMethod.GAUSSIAN
@@ -72,6 +77,11 @@ class PropertiesDockWidget(QDockWidget):
             )
 
         self.model.on_thresholding_method_changed.connect(on_thresholding_method_changed)
+
+        self.ui.checkboxThresholdingInverse.stateChanged.connect(
+            lambda value: setattr(self.model, "thresholding_inverse", value)
+        )
+        self.model.on_thresholding_inverse_changed.connect(self.ui.checkboxThresholdingInverse.setChecked)
 
         self.ui.sliderThresholdingThreshold.valueChanged.connect(
             lambda value: setattr(self.model, "thresholding_threshold", value)
@@ -139,6 +149,7 @@ class PropertiesDockWidget(QDockWidget):
 
         # Thresholding
         self.model.on_thresholding_method_changed.emit(self.model.thresholding_method)
+        self.model.on_thresholding_inverse_changed.emit(self.model.thresholding_inverse)
         self.model.on_thresholding_threshold_changed.emit(self.model.thresholding_threshold)
         self.model.on_thresholding_maximum_changed.emit(self.model.thresholding_maximum)
         self.model.on_thresholding_block_size_changed.emit(self.model.thresholding_block_size)

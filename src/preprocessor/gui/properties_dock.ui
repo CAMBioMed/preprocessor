@@ -333,22 +333,12 @@
              </item>
              <item>
               <property name="text">
-               <string>Binary Inverse</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
                <string>Truncate</string>
               </property>
              </item>
              <item>
               <property name="text">
                <string>To Zero</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>To Zero Inverse</string>
               </property>
              </item>
              <item>
