@@ -34,7 +34,7 @@ class Ui_PropertiesDock(object):
         self.scrollareaPropertiesDock.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, -196, 460, 686))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, -289, 460, 787))
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -42,175 +42,6 @@ class Ui_PropertiesDock(object):
         self.scrollAreaWidgetContents.setSizePolicy(sizePolicy)
         self.layoutScrollAreaPropertiesDock = QGridLayout(self.scrollAreaWidgetContents)
         self.layoutScrollAreaPropertiesDock.setObjectName(u"layoutScrollAreaPropertiesDock")
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.layoutScrollAreaPropertiesDock.addItem(self.verticalSpacer, 4, 0, 1, 1)
-
-        self.group0Downscale = QGroupBox(self.scrollAreaWidgetContents)
-        self.group0Downscale.setObjectName(u"group0Downscale")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.group0Downscale.sizePolicy().hasHeightForWidth())
-        self.group0Downscale.setSizePolicy(sizePolicy1)
-        self.layoutDownscale = QFormLayout(self.group0Downscale)
-        self.layoutDownscale.setObjectName(u"layoutDownscale")
-        self.labelDownscaleMaxSize = QLabel(self.group0Downscale)
-        self.labelDownscaleMaxSize.setObjectName(u"labelDownscaleMaxSize")
-
-        self.layoutDownscale.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelDownscaleMaxSize)
-
-        self.spinboxDownscaleMaxSize = QSpinBox(self.group0Downscale)
-        self.spinboxDownscaleMaxSize.setObjectName(u"spinboxDownscaleMaxSize")
-        self.spinboxDownscaleMaxSize.setMaximum(3000)
-        self.spinboxDownscaleMaxSize.setValue(800)
-
-        self.layoutDownscale.setWidget(1, QFormLayout.ItemRole.FieldRole, self.spinboxDownscaleMaxSize)
-
-        self.labelDownscaleEnabled = QLabel(self.group0Downscale)
-        self.labelDownscaleEnabled.setObjectName(u"labelDownscaleEnabled")
-
-        self.layoutDownscale.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelDownscaleEnabled)
-
-        self.checkboxDownscaleEnabled = QCheckBox(self.group0Downscale)
-        self.checkboxDownscaleEnabled.setObjectName(u"checkboxDownscaleEnabled")
-        self.checkboxDownscaleEnabled.setChecked(True)
-
-        self.layoutDownscale.setWidget(0, QFormLayout.ItemRole.FieldRole, self.checkboxDownscaleEnabled)
-
-
-        self.layoutScrollAreaPropertiesDock.addWidget(self.group0Downscale, 0, 0, 1, 1)
-
-        self.group1Blur = QGroupBox(self.scrollAreaWidgetContents)
-        self.group1Blur.setObjectName(u"group1Blur")
-        sizePolicy1.setHeightForWidth(self.group1Blur.sizePolicy().hasHeightForWidth())
-        self.group1Blur.setSizePolicy(sizePolicy1)
-        self.layoutBlur = QFormLayout(self.group1Blur)
-        self.layoutBlur.setObjectName(u"layoutBlur")
-        self.labelBlurEnabled = QLabel(self.group1Blur)
-        self.labelBlurEnabled.setObjectName(u"labelBlurEnabled")
-
-        self.layoutBlur.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelBlurEnabled)
-
-        self.labelBlurKernelSize = QLabel(self.group1Blur)
-        self.labelBlurKernelSize.setObjectName(u"labelBlurKernelSize")
-
-        self.layoutBlur.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelBlurKernelSize)
-
-        self.spinboxBlurKernelSize = QSpinBox(self.group1Blur)
-        self.spinboxBlurKernelSize.setObjectName(u"spinboxBlurKernelSize")
-        self.spinboxBlurKernelSize.setMinimum(1)
-        self.spinboxBlurKernelSize.setSingleStep(2)
-        self.spinboxBlurKernelSize.setValue(5)
-
-        self.layoutBlur.setWidget(1, QFormLayout.ItemRole.FieldRole, self.spinboxBlurKernelSize)
-
-        self.checkboxBlurEnabled = QCheckBox(self.group1Blur)
-        self.checkboxBlurEnabled.setObjectName(u"checkboxBlurEnabled")
-        self.checkboxBlurEnabled.setChecked(True)
-
-        self.layoutBlur.setWidget(0, QFormLayout.ItemRole.FieldRole, self.checkboxBlurEnabled)
-
-
-        self.layoutScrollAreaPropertiesDock.addWidget(self.group1Blur, 1, 0, 1, 1)
-
-        self.group3Canny = QGroupBox(self.scrollAreaWidgetContents)
-        self.group3Canny.setObjectName(u"group3Canny")
-        sizePolicy1.setHeightForWidth(self.group3Canny.sizePolicy().hasHeightForWidth())
-        self.group3Canny.setSizePolicy(sizePolicy1)
-        self.layoutCanny = QFormLayout(self.group3Canny)
-        self.layoutCanny.setObjectName(u"layoutCanny")
-        self.labelCannyEnabled = QLabel(self.group3Canny)
-        self.labelCannyEnabled.setObjectName(u"labelCannyEnabled")
-
-        self.layoutCanny.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelCannyEnabled)
-
-        self.checkboxCannyEnabled = QCheckBox(self.group3Canny)
-        self.checkboxCannyEnabled.setObjectName(u"checkboxCannyEnabled")
-        self.checkboxCannyEnabled.setChecked(True)
-
-        self.layoutCanny.setWidget(0, QFormLayout.ItemRole.FieldRole, self.checkboxCannyEnabled)
-
-        self.labelCannyThreshold1 = QLabel(self.group3Canny)
-        self.labelCannyThreshold1.setObjectName(u"labelCannyThreshold1")
-
-        self.layoutCanny.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelCannyThreshold1)
-
-        self.labelCannyThreshold2 = QLabel(self.group3Canny)
-        self.labelCannyThreshold2.setObjectName(u"labelCannyThreshold2")
-
-        self.layoutCanny.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelCannyThreshold2)
-
-        self.labelCannyApertureSize = QLabel(self.group3Canny)
-        self.labelCannyApertureSize.setObjectName(u"labelCannyApertureSize")
-
-        self.layoutCanny.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelCannyApertureSize)
-
-        self.layoutCannyThreshold1 = QHBoxLayout()
-        self.layoutCannyThreshold1.setObjectName(u"layoutCannyThreshold1")
-        self.sliderCannyThreshold1 = QSlider(self.group3Canny)
-        self.sliderCannyThreshold1.setObjectName(u"sliderCannyThreshold1")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy2.setHorizontalStretch(4)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.sliderCannyThreshold1.sizePolicy().hasHeightForWidth())
-        self.sliderCannyThreshold1.setSizePolicy(sizePolicy2)
-        self.sliderCannyThreshold1.setMaximum(255)
-        self.sliderCannyThreshold1.setValue(50)
-        self.sliderCannyThreshold1.setOrientation(Qt.Orientation.Horizontal)
-
-        self.layoutCannyThreshold1.addWidget(self.sliderCannyThreshold1)
-
-        self.spinboxCannyThreshold1 = QSpinBox(self.group3Canny)
-        self.spinboxCannyThreshold1.setObjectName(u"spinboxCannyThreshold1")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        sizePolicy3.setHorizontalStretch(1)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.spinboxCannyThreshold1.sizePolicy().hasHeightForWidth())
-        self.spinboxCannyThreshold1.setSizePolicy(sizePolicy3)
-        self.spinboxCannyThreshold1.setMaximum(255)
-        self.spinboxCannyThreshold1.setValue(50)
-
-        self.layoutCannyThreshold1.addWidget(self.spinboxCannyThreshold1)
-
-
-        self.layoutCanny.setLayout(1, QFormLayout.ItemRole.FieldRole, self.layoutCannyThreshold1)
-
-        self.layoutCannyThreshold2 = QHBoxLayout()
-        self.layoutCannyThreshold2.setObjectName(u"layoutCannyThreshold2")
-        self.sliderCannyThreshold2 = QSlider(self.group3Canny)
-        self.sliderCannyThreshold2.setObjectName(u"sliderCannyThreshold2")
-        sizePolicy2.setHeightForWidth(self.sliderCannyThreshold2.sizePolicy().hasHeightForWidth())
-        self.sliderCannyThreshold2.setSizePolicy(sizePolicy2)
-        self.sliderCannyThreshold2.setMaximum(255)
-        self.sliderCannyThreshold2.setValue(150)
-        self.sliderCannyThreshold2.setOrientation(Qt.Orientation.Horizontal)
-
-        self.layoutCannyThreshold2.addWidget(self.sliderCannyThreshold2)
-
-        self.spinboxCannyThreshold2 = QSpinBox(self.group3Canny)
-        self.spinboxCannyThreshold2.setObjectName(u"spinboxCannyThreshold2")
-        sizePolicy3.setHeightForWidth(self.spinboxCannyThreshold2.sizePolicy().hasHeightForWidth())
-        self.spinboxCannyThreshold2.setSizePolicy(sizePolicy3)
-        self.spinboxCannyThreshold2.setMaximum(255)
-        self.spinboxCannyThreshold2.setValue(150)
-
-        self.layoutCannyThreshold2.addWidget(self.spinboxCannyThreshold2)
-
-
-        self.layoutCanny.setLayout(2, QFormLayout.ItemRole.FieldRole, self.layoutCannyThreshold2)
-
-        self.spinboxCannyApertureSize = QSpinBox(self.group3Canny)
-        self.spinboxCannyApertureSize.setObjectName(u"spinboxCannyApertureSize")
-        self.spinboxCannyApertureSize.setMinimum(3)
-        self.spinboxCannyApertureSize.setMaximum(7)
-        self.spinboxCannyApertureSize.setSingleStep(2)
-
-        self.layoutCanny.setWidget(3, QFormLayout.ItemRole.FieldRole, self.spinboxCannyApertureSize)
-
-
-        self.layoutScrollAreaPropertiesDock.addWidget(self.group3Canny, 3, 0, 1, 1)
-
         self.group2Threshold = QGroupBox(self.scrollAreaWidgetContents)
         self.group2Threshold.setObjectName(u"group2Threshold")
         self.formLayout = QFormLayout(self.group2Threshold)
@@ -265,8 +96,11 @@ class Ui_PropertiesDock(object):
         self.layoutThresholdingThreshold.setObjectName(u"layoutThresholdingThreshold")
         self.sliderThresholdingThreshold = QSlider(self.group2Threshold)
         self.sliderThresholdingThreshold.setObjectName(u"sliderThresholdingThreshold")
-        sizePolicy2.setHeightForWidth(self.sliderThresholdingThreshold.sizePolicy().hasHeightForWidth())
-        self.sliderThresholdingThreshold.setSizePolicy(sizePolicy2)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(4)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.sliderThresholdingThreshold.sizePolicy().hasHeightForWidth())
+        self.sliderThresholdingThreshold.setSizePolicy(sizePolicy1)
         self.sliderThresholdingThreshold.setMaximum(255)
         self.sliderThresholdingThreshold.setValue(127)
         self.sliderThresholdingThreshold.setOrientation(Qt.Orientation.Horizontal)
@@ -275,8 +109,11 @@ class Ui_PropertiesDock(object):
 
         self.spinboxThresholdingThreshold = QSpinBox(self.group2Threshold)
         self.spinboxThresholdingThreshold.setObjectName(u"spinboxThresholdingThreshold")
-        sizePolicy3.setHeightForWidth(self.spinboxThresholdingThreshold.sizePolicy().hasHeightForWidth())
-        self.spinboxThresholdingThreshold.setSizePolicy(sizePolicy3)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(1)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.spinboxThresholdingThreshold.sizePolicy().hasHeightForWidth())
+        self.spinboxThresholdingThreshold.setSizePolicy(sizePolicy2)
         self.spinboxThresholdingThreshold.setMaximum(255)
         self.spinboxThresholdingThreshold.setValue(127)
 
@@ -289,8 +126,8 @@ class Ui_PropertiesDock(object):
         self.layoutThresholdingMaximum.setObjectName(u"layoutThresholdingMaximum")
         self.sliderThresholdingMaximum = QSlider(self.group2Threshold)
         self.sliderThresholdingMaximum.setObjectName(u"sliderThresholdingMaximum")
-        sizePolicy2.setHeightForWidth(self.sliderThresholdingMaximum.sizePolicy().hasHeightForWidth())
-        self.sliderThresholdingMaximum.setSizePolicy(sizePolicy2)
+        sizePolicy1.setHeightForWidth(self.sliderThresholdingMaximum.sizePolicy().hasHeightForWidth())
+        self.sliderThresholdingMaximum.setSizePolicy(sizePolicy1)
         self.sliderThresholdingMaximum.setMaximum(255)
         self.sliderThresholdingMaximum.setValue(255)
         self.sliderThresholdingMaximum.setOrientation(Qt.Orientation.Horizontal)
@@ -299,8 +136,8 @@ class Ui_PropertiesDock(object):
 
         self.spinboxThresholdingMaximum = QSpinBox(self.group2Threshold)
         self.spinboxThresholdingMaximum.setObjectName(u"spinboxThresholdingMaximum")
-        sizePolicy3.setHeightForWidth(self.spinboxThresholdingMaximum.sizePolicy().hasHeightForWidth())
-        self.spinboxThresholdingMaximum.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.spinboxThresholdingMaximum.sizePolicy().hasHeightForWidth())
+        self.spinboxThresholdingMaximum.setSizePolicy(sizePolicy2)
         self.spinboxThresholdingMaximum.setMaximum(255)
         self.spinboxThresholdingMaximum.setValue(255)
 
@@ -335,6 +172,200 @@ class Ui_PropertiesDock(object):
 
         self.layoutScrollAreaPropertiesDock.addWidget(self.group2Threshold, 2, 0, 1, 1)
 
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.layoutScrollAreaPropertiesDock.addItem(self.verticalSpacer, 5, 0, 1, 1)
+
+        self.group0Downscale = QGroupBox(self.scrollAreaWidgetContents)
+        self.group0Downscale.setObjectName(u"group0Downscale")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.group0Downscale.sizePolicy().hasHeightForWidth())
+        self.group0Downscale.setSizePolicy(sizePolicy3)
+        self.layoutDownscale = QFormLayout(self.group0Downscale)
+        self.layoutDownscale.setObjectName(u"layoutDownscale")
+        self.labelDownscaleMaxSize = QLabel(self.group0Downscale)
+        self.labelDownscaleMaxSize.setObjectName(u"labelDownscaleMaxSize")
+
+        self.layoutDownscale.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelDownscaleMaxSize)
+
+        self.spinboxDownscaleMaxSize = QSpinBox(self.group0Downscale)
+        self.spinboxDownscaleMaxSize.setObjectName(u"spinboxDownscaleMaxSize")
+        self.spinboxDownscaleMaxSize.setMaximum(3000)
+        self.spinboxDownscaleMaxSize.setValue(800)
+
+        self.layoutDownscale.setWidget(1, QFormLayout.ItemRole.FieldRole, self.spinboxDownscaleMaxSize)
+
+        self.labelDownscaleEnabled = QLabel(self.group0Downscale)
+        self.labelDownscaleEnabled.setObjectName(u"labelDownscaleEnabled")
+
+        self.layoutDownscale.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelDownscaleEnabled)
+
+        self.checkboxDownscaleEnabled = QCheckBox(self.group0Downscale)
+        self.checkboxDownscaleEnabled.setObjectName(u"checkboxDownscaleEnabled")
+        self.checkboxDownscaleEnabled.setChecked(True)
+
+        self.layoutDownscale.setWidget(0, QFormLayout.ItemRole.FieldRole, self.checkboxDownscaleEnabled)
+
+
+        self.layoutScrollAreaPropertiesDock.addWidget(self.group0Downscale, 0, 0, 1, 1)
+
+        self.group1Blur = QGroupBox(self.scrollAreaWidgetContents)
+        self.group1Blur.setObjectName(u"group1Blur")
+        sizePolicy3.setHeightForWidth(self.group1Blur.sizePolicy().hasHeightForWidth())
+        self.group1Blur.setSizePolicy(sizePolicy3)
+        self.layoutBlur = QFormLayout(self.group1Blur)
+        self.layoutBlur.setObjectName(u"layoutBlur")
+        self.labelBlurEnabled = QLabel(self.group1Blur)
+        self.labelBlurEnabled.setObjectName(u"labelBlurEnabled")
+
+        self.layoutBlur.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelBlurEnabled)
+
+        self.labelBlurKernelSize = QLabel(self.group1Blur)
+        self.labelBlurKernelSize.setObjectName(u"labelBlurKernelSize")
+
+        self.layoutBlur.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelBlurKernelSize)
+
+        self.spinboxBlurKernelSize = QSpinBox(self.group1Blur)
+        self.spinboxBlurKernelSize.setObjectName(u"spinboxBlurKernelSize")
+        self.spinboxBlurKernelSize.setMinimum(1)
+        self.spinboxBlurKernelSize.setSingleStep(2)
+        self.spinboxBlurKernelSize.setValue(5)
+
+        self.layoutBlur.setWidget(1, QFormLayout.ItemRole.FieldRole, self.spinboxBlurKernelSize)
+
+        self.checkboxBlurEnabled = QCheckBox(self.group1Blur)
+        self.checkboxBlurEnabled.setObjectName(u"checkboxBlurEnabled")
+        self.checkboxBlurEnabled.setChecked(True)
+
+        self.layoutBlur.setWidget(0, QFormLayout.ItemRole.FieldRole, self.checkboxBlurEnabled)
+
+
+        self.layoutScrollAreaPropertiesDock.addWidget(self.group1Blur, 1, 0, 1, 1)
+
+        self.group3Canny = QGroupBox(self.scrollAreaWidgetContents)
+        self.group3Canny.setObjectName(u"group3Canny")
+        sizePolicy3.setHeightForWidth(self.group3Canny.sizePolicy().hasHeightForWidth())
+        self.group3Canny.setSizePolicy(sizePolicy3)
+        self.layoutCanny = QFormLayout(self.group3Canny)
+        self.layoutCanny.setObjectName(u"layoutCanny")
+        self.labelCannyEnabled = QLabel(self.group3Canny)
+        self.labelCannyEnabled.setObjectName(u"labelCannyEnabled")
+
+        self.layoutCanny.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelCannyEnabled)
+
+        self.checkboxCannyEnabled = QCheckBox(self.group3Canny)
+        self.checkboxCannyEnabled.setObjectName(u"checkboxCannyEnabled")
+        self.checkboxCannyEnabled.setChecked(True)
+
+        self.layoutCanny.setWidget(0, QFormLayout.ItemRole.FieldRole, self.checkboxCannyEnabled)
+
+        self.labelCannyThreshold1 = QLabel(self.group3Canny)
+        self.labelCannyThreshold1.setObjectName(u"labelCannyThreshold1")
+
+        self.layoutCanny.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelCannyThreshold1)
+
+        self.labelCannyThreshold2 = QLabel(self.group3Canny)
+        self.labelCannyThreshold2.setObjectName(u"labelCannyThreshold2")
+
+        self.layoutCanny.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelCannyThreshold2)
+
+        self.labelCannyApertureSize = QLabel(self.group3Canny)
+        self.labelCannyApertureSize.setObjectName(u"labelCannyApertureSize")
+
+        self.layoutCanny.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelCannyApertureSize)
+
+        self.layoutCannyThreshold1 = QHBoxLayout()
+        self.layoutCannyThreshold1.setObjectName(u"layoutCannyThreshold1")
+        self.sliderCannyThreshold1 = QSlider(self.group3Canny)
+        self.sliderCannyThreshold1.setObjectName(u"sliderCannyThreshold1")
+        sizePolicy1.setHeightForWidth(self.sliderCannyThreshold1.sizePolicy().hasHeightForWidth())
+        self.sliderCannyThreshold1.setSizePolicy(sizePolicy1)
+        self.sliderCannyThreshold1.setMaximum(255)
+        self.sliderCannyThreshold1.setValue(50)
+        self.sliderCannyThreshold1.setOrientation(Qt.Orientation.Horizontal)
+
+        self.layoutCannyThreshold1.addWidget(self.sliderCannyThreshold1)
+
+        self.spinboxCannyThreshold1 = QSpinBox(self.group3Canny)
+        self.spinboxCannyThreshold1.setObjectName(u"spinboxCannyThreshold1")
+        sizePolicy2.setHeightForWidth(self.spinboxCannyThreshold1.sizePolicy().hasHeightForWidth())
+        self.spinboxCannyThreshold1.setSizePolicy(sizePolicy2)
+        self.spinboxCannyThreshold1.setMaximum(255)
+        self.spinboxCannyThreshold1.setValue(50)
+
+        self.layoutCannyThreshold1.addWidget(self.spinboxCannyThreshold1)
+
+
+        self.layoutCanny.setLayout(1, QFormLayout.ItemRole.FieldRole, self.layoutCannyThreshold1)
+
+        self.layoutCannyThreshold2 = QHBoxLayout()
+        self.layoutCannyThreshold2.setObjectName(u"layoutCannyThreshold2")
+        self.sliderCannyThreshold2 = QSlider(self.group3Canny)
+        self.sliderCannyThreshold2.setObjectName(u"sliderCannyThreshold2")
+        sizePolicy1.setHeightForWidth(self.sliderCannyThreshold2.sizePolicy().hasHeightForWidth())
+        self.sliderCannyThreshold2.setSizePolicy(sizePolicy1)
+        self.sliderCannyThreshold2.setMaximum(255)
+        self.sliderCannyThreshold2.setValue(150)
+        self.sliderCannyThreshold2.setOrientation(Qt.Orientation.Horizontal)
+
+        self.layoutCannyThreshold2.addWidget(self.sliderCannyThreshold2)
+
+        self.spinboxCannyThreshold2 = QSpinBox(self.group3Canny)
+        self.spinboxCannyThreshold2.setObjectName(u"spinboxCannyThreshold2")
+        sizePolicy2.setHeightForWidth(self.spinboxCannyThreshold2.sizePolicy().hasHeightForWidth())
+        self.spinboxCannyThreshold2.setSizePolicy(sizePolicy2)
+        self.spinboxCannyThreshold2.setMaximum(255)
+        self.spinboxCannyThreshold2.setValue(150)
+
+        self.layoutCannyThreshold2.addWidget(self.spinboxCannyThreshold2)
+
+
+        self.layoutCanny.setLayout(2, QFormLayout.ItemRole.FieldRole, self.layoutCannyThreshold2)
+
+        self.spinboxCannyApertureSize = QSpinBox(self.group3Canny)
+        self.spinboxCannyApertureSize.setObjectName(u"spinboxCannyApertureSize")
+        self.spinboxCannyApertureSize.setMinimum(3)
+        self.spinboxCannyApertureSize.setMaximum(7)
+        self.spinboxCannyApertureSize.setSingleStep(2)
+
+        self.layoutCanny.setWidget(3, QFormLayout.ItemRole.FieldRole, self.spinboxCannyApertureSize)
+
+
+        self.layoutScrollAreaPropertiesDock.addWidget(self.group3Canny, 3, 0, 1, 1)
+
+        self.group4FindContour = QGroupBox(self.scrollAreaWidgetContents)
+        self.group4FindContour.setObjectName(u"group4FindContour")
+        self.formLayout_2 = QFormLayout(self.group4FindContour)
+        self.formLayout_2.setObjectName(u"formLayout_2")
+        self.labelFindContourEnabled = QLabel(self.group4FindContour)
+        self.labelFindContourEnabled.setObjectName(u"labelFindContourEnabled")
+
+        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelFindContourEnabled)
+
+        self.labelFindContourMethod = QLabel(self.group4FindContour)
+        self.labelFindContourMethod.setObjectName(u"labelFindContourMethod")
+
+        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelFindContourMethod)
+
+        self.comboboxFindContourMethod = QComboBox(self.group4FindContour)
+        self.comboboxFindContourMethod.addItem("")
+        self.comboboxFindContourMethod.addItem("")
+        self.comboboxFindContourMethod.addItem("")
+        self.comboboxFindContourMethod.addItem("")
+        self.comboboxFindContourMethod.setObjectName(u"comboboxFindContourMethod")
+
+        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.FieldRole, self.comboboxFindContourMethod)
+
+        self.checkboxFindContourEnabled = QCheckBox(self.group4FindContour)
+        self.checkboxFindContourEnabled.setObjectName(u"checkboxFindContourEnabled")
+
+        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.FieldRole, self.checkboxFindContourEnabled)
+
+
+        self.layoutScrollAreaPropertiesDock.addWidget(self.group4FindContour, 4, 0, 1, 1)
+
         self.scrollareaPropertiesDock.setWidget(self.scrollAreaWidgetContents)
 
         self.layoutPropertiesDock.addWidget(self.scrollareaPropertiesDock, 0, 0, 1, 1)
@@ -348,23 +379,6 @@ class Ui_PropertiesDock(object):
 
     def retranslateUi(self, PropertiesDock):
         PropertiesDock.setWindowTitle(QCoreApplication.translate("PropertiesDock", u"Properties", None))
-        self.group0Downscale.setTitle(QCoreApplication.translate("PropertiesDock", u"Downscale", None))
-        self.labelDownscaleMaxSize.setText(QCoreApplication.translate("PropertiesDock", u"Max Size", None))
-        self.spinboxDownscaleMaxSize.setSuffix(QCoreApplication.translate("PropertiesDock", u" px", None))
-        self.labelDownscaleEnabled.setText(QCoreApplication.translate("PropertiesDock", u"Enabled", None))
-        self.checkboxDownscaleEnabled.setText("")
-        self.group1Blur.setTitle(QCoreApplication.translate("PropertiesDock", u"Gaussian Blur", None))
-        self.labelBlurEnabled.setText(QCoreApplication.translate("PropertiesDock", u"Enabled", None))
-        self.labelBlurKernelSize.setText(QCoreApplication.translate("PropertiesDock", u"Kernel size", None))
-        self.spinboxBlurKernelSize.setSuffix(QCoreApplication.translate("PropertiesDock", u" px", None))
-        self.checkboxBlurEnabled.setText("")
-        self.group3Canny.setTitle(QCoreApplication.translate("PropertiesDock", u"Canny", None))
-        self.labelCannyEnabled.setText(QCoreApplication.translate("PropertiesDock", u"Enabled", None))
-        self.checkboxCannyEnabled.setText("")
-        self.labelCannyThreshold1.setText(QCoreApplication.translate("PropertiesDock", u"Threshold 1", None))
-        self.labelCannyThreshold2.setText(QCoreApplication.translate("PropertiesDock", u"Threshold 2", None))
-        self.labelCannyApertureSize.setText(QCoreApplication.translate("PropertiesDock", u"Aperture size", None))
-        self.spinboxCannyApertureSize.setSuffix(QCoreApplication.translate("PropertiesDock", u" px", None))
         self.group2Threshold.setTitle(QCoreApplication.translate("PropertiesDock", u"Thresholding", None))
         self.labelThresholdingMethod.setText(QCoreApplication.translate("PropertiesDock", u"Method", None))
         self.comboboxThresholdingMethod.setItemText(0, QCoreApplication.translate("PropertiesDock", u"None", None))
@@ -382,5 +396,31 @@ class Ui_PropertiesDock(object):
         self.checkboxThresholdingOtsu.setText("")
         self.labelThresholdingInverse.setText(QCoreApplication.translate("PropertiesDock", u"Inverse", None))
         self.checkboxThresholdingInverse.setText("")
+        self.group0Downscale.setTitle(QCoreApplication.translate("PropertiesDock", u"Downscale", None))
+        self.labelDownscaleMaxSize.setText(QCoreApplication.translate("PropertiesDock", u"Max Size", None))
+        self.spinboxDownscaleMaxSize.setSuffix(QCoreApplication.translate("PropertiesDock", u" px", None))
+        self.labelDownscaleEnabled.setText(QCoreApplication.translate("PropertiesDock", u"Enabled", None))
+        self.checkboxDownscaleEnabled.setText("")
+        self.group1Blur.setTitle(QCoreApplication.translate("PropertiesDock", u"Gaussian Blur", None))
+        self.labelBlurEnabled.setText(QCoreApplication.translate("PropertiesDock", u"Enabled", None))
+        self.labelBlurKernelSize.setText(QCoreApplication.translate("PropertiesDock", u"Kernel size", None))
+        self.spinboxBlurKernelSize.setSuffix(QCoreApplication.translate("PropertiesDock", u" px", None))
+        self.checkboxBlurEnabled.setText("")
+        self.group3Canny.setTitle(QCoreApplication.translate("PropertiesDock", u"Canny", None))
+        self.labelCannyEnabled.setText(QCoreApplication.translate("PropertiesDock", u"Enabled", None))
+        self.checkboxCannyEnabled.setText("")
+        self.labelCannyThreshold1.setText(QCoreApplication.translate("PropertiesDock", u"Threshold 1", None))
+        self.labelCannyThreshold2.setText(QCoreApplication.translate("PropertiesDock", u"Threshold 2", None))
+        self.labelCannyApertureSize.setText(QCoreApplication.translate("PropertiesDock", u"Aperture size", None))
+        self.spinboxCannyApertureSize.setSuffix(QCoreApplication.translate("PropertiesDock", u" px", None))
+        self.group4FindContour.setTitle(QCoreApplication.translate("PropertiesDock", u"Find Contour", None))
+        self.labelFindContourEnabled.setText(QCoreApplication.translate("PropertiesDock", u"Enabled", None))
+        self.labelFindContourMethod.setText(QCoreApplication.translate("PropertiesDock", u"Method", None))
+        self.comboboxFindContourMethod.setItemText(0, QCoreApplication.translate("PropertiesDock", u"None", None))
+        self.comboboxFindContourMethod.setItemText(1, QCoreApplication.translate("PropertiesDock", u"Simple", None))
+        self.comboboxFindContourMethod.setItemText(2, QCoreApplication.translate("PropertiesDock", u"Teh-Chin L1", None))
+        self.comboboxFindContourMethod.setItemText(3, QCoreApplication.translate("PropertiesDock", u"Teh-Chin KCOS", None))
+
+        self.checkboxFindContourEnabled.setText("")
     # retranslateUi
 

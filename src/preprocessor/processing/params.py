@@ -19,6 +19,21 @@ class ThresholdingMethod(Enum):
         raise NotImplementedError(msg)
 
 
+class ContourApproximationMethod(Enum):
+    NONE = "None"
+    SIMPLE = "Simple"
+    TC89_L1 = "Teh-Chin L1"
+    TC89_KCOS = "Teh-Chin KCOS"
+
+    @staticmethod
+    def from_string(method_name: str) -> "ContourApproximationMethod":
+        for method in ContourApproximationMethod:
+            if method.value == method_name:
+                return method
+        msg = f"Unknown ContourApproximationMethod: {method_name}"
+        raise NotImplementedError(msg)
+
+
 @dataclass
 class DownscaleParams:
     enabled: bool
@@ -51,11 +66,18 @@ class CannyParams:
 
 
 @dataclass
+class FindContourParams:
+    enabled: bool
+    method: ContourApproximationMethod
+
+
+@dataclass
 class QuadratDetectionParams:
     downscale: DownscaleParams
     blur: BlurParams
     thresholding: ThresholdingParams
     canny: CannyParams
+    findContour: FindContourParams
 
 
 defaultParams: QuadratDetectionParams = QuadratDetectionParams(
@@ -79,7 +101,11 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
     canny=CannyParams(
         enabled=True,
         threshold1=50,
-        threshold2=250,
+        threshold2=150,
         aperture_size=5,
+    ),
+    findContour=FindContourParams(
+        enabled=False,
+        method=ContourApproximationMethod.SIMPLE,
     ),
 )

@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QDockWidget, QWidget
 
 from preprocessor.gui.ui_properties_dock import Ui_PropertiesDock
 from preprocessor.gui.properties_dock_model import PropertiesDockModel
-from preprocessor.processing.params import ThresholdingMethod, defaultParams
+from preprocessor.processing.params import ThresholdingMethod, defaultParams, ContourApproximationMethod
 
 
 class PropertiesDockWidget(QDockWidget):
@@ -137,6 +137,22 @@ class PropertiesDockWidget(QDockWidget):
             lambda value: setattr(self.model, "canny_aperture_size", value)
         )
         self.model.on_canny_aperture_size_changed.connect(self.ui.spinboxCannyApertureSize.setValue)
+
+        # Find Contours
+        self.ui.checkboxFindContourEnabled.stateChanged.connect(
+            lambda value: setattr(self.model, "find_contour_enabled", value)
+        )
+        self.model.on_find_contour_enabled_changed.connect(self.ui.checkboxFindContourEnabled.setChecked)
+
+        def on_comboboxFindContourMethod_changed(i: int) -> None:
+            method_str = self.ui.comboboxFindContourMethod.itemText(i)
+            method = ContourApproximationMethod.from_string(method_str)
+            self.model.find_contour_method = method
+
+        self.ui.comboboxFindContourMethod.currentIndexChanged.connect(on_comboboxFindContourMethod_changed)
+        self.model.on_find_contour_method_changed.connect(
+            lambda method: self.ui.comboboxFindContourMethod.setCurrentText(method)
+        )
 
     def _trigger_initial_updates(self) -> None:
         # Downscale

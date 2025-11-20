@@ -7,6 +7,8 @@ from preprocessor.processing.params import (
     BlurParams,
     ThresholdingParams,
     CannyParams,
+    ContourApproximationMethod,
+    FindContourParams,
 )
 
 
@@ -240,6 +242,34 @@ class PropertiesDockModel(QObject):
             self.on_changed.emit()
             self._canny_aperture_size = value
 
+    _find_contour_enabled: bool = True
+    on_find_contour_enabled_changed: Signal = Signal(bool)
+
+    @property
+    def find_contour_enabled(self) -> bool:
+        return self._find_contour_enabled
+
+    @find_contour_enabled.setter
+    def find_contour_enabled(self, value: bool) -> None:
+        if self._find_contour_enabled != value:
+            self.on_find_contour_enabled_changed.emit(value)
+            self.on_changed.emit()
+            self._find_contour_enabled = value
+
+    _find_contour_method: ContourApproximationMethod = ContourApproximationMethod.SIMPLE
+    on_find_contour_method_changed: Signal = Signal(ContourApproximationMethod)
+
+    @property
+    def find_contour_method(self) -> ContourApproximationMethod:
+        return self._find_contour_method
+
+    @find_contour_method.setter
+    def find_contour_method(self, value: ContourApproximationMethod) -> None:
+        if self._find_contour_method != value:
+            self.on_find_contour_method_changed.emit(value)
+            self.on_changed.emit()
+            self._find_contour_method = value
+
     @property
     def params(self) -> QuadratDetectionParams:
         return QuadratDetectionParams(
@@ -265,6 +295,10 @@ class PropertiesDockModel(QObject):
                 threshold1=self.canny_threshold1,
                 threshold2=self.canny_threshold2,
                 aperture_size=self.canny_aperture_size,
+            ),
+            findContour=FindContourParams(
+                enabled=self.find_contour_enabled,
+                method=self.find_contour_method,
             ),
         )
 

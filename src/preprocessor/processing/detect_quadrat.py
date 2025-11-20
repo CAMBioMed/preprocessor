@@ -10,6 +10,8 @@ from preprocessor.processing.params import (
     CannyParams,
     ThresholdingParams,
     ThresholdingMethod,
+    FindContourParams,
+    ContourApproximationMethod,
 )
 
 logger = logging.getLogger(__name__)
@@ -40,6 +42,9 @@ def process_image(
 
     if params.canny.enabled:
         img = _canny_image(img, params.canny)
+
+    if params.findContour.enabled:
+        img = _find_contours(img, params.findContour)
 
     return img
 
@@ -140,4 +145,27 @@ def _canny_image(img: MatLike, params: CannyParams) -> MatLike:
     logger.debug(f"Cannying image to {threshold1}, {threshold2}...")
     img = cv2.Canny(img, threshold1, threshold2, apertureSize=params.aperture_size)
     logger.debug("Cannied image.")
+    return img
+
+
+def _find_contours(img: MatLike, params: FindContourParams) -> MatLike:
+    """Find contours in the image."""
+    logger.debug("Finding contours...")
+    method: int
+    if params.method == ContourApproximationMethod.NONE:
+        method = cv2.CHAIN_APPROX_NONE
+    elif params.method == ContourApproximationMethod.SIMPLE:
+        method = cv2.CHAIN_APPROX_SIMPLE
+    elif params.method == ContourApproximationMethod.TC89_L1:
+        method = cv2.CHAIN_APPROX_TC89_L1
+    elif params.method == ContourApproximationMethod.TC89_KCOS:
+        method = cv2.CHAIN_APPROX_TC89_KCOS
+    else:
+        msg = f"Unknown contour approximation method: {params.method}"
+        logger.error(msg)
+        raise NotImplementedError(msg)
+
+    contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, method)
+    logger.debug(f"Found {len(contours)} contours.")
+    img = cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
     return img
