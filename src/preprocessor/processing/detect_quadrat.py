@@ -253,12 +253,17 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]
         y = (a1 * c2 - a2 * c1) / det
         return (int(round(x)), int(round(y)))
 
+    def angle_difference(theta1: float, theta2: float) -> float:
+        a = theta1 % math.pi
+        b = theta2 % math.pi
+        diff = abs(a - b)
+        return min(diff, math.pi - diff)
+
     for i in range(len(lines)):
         for j in range(i + 1, len(lines)):
             theta1 = lines[i].theta
             theta2 = lines[j].theta
-            angle_diff = abs((theta1 - theta2) % math.pi)
-            # angle_diff = abs((theta1 - theta2 + math.pi) % math.pi - math.pi/2)
+            angle_diff = angle_difference(theta1, theta2)
             if angle_diff < angle_threshold:
                 continue  # skip nearly parallel lines
             pt = intersection(lines[i], lines[j])
