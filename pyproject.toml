@@ -204,6 +204,7 @@ section_whitelines = 1
 
 [tool.pyside6-project]
 files = [
+    "src/preprocessor/gui/mainwindow.ui",
     "src/preprocessor/gui/properties_dock.ui",
     "src/preprocessor/main.py",
 ]
