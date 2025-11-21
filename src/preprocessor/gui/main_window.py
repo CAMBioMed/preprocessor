@@ -262,6 +262,26 @@ class MainWindow(QMainWindow):
 
         return result
 
+    def _overlay_image(self, base: MatLike, overlay: MatLike) -> MatLike:
+        """Overlay one image on top of another with transparency.
+
+        Args:
+            base: The base image (H x W x 3).
+            overlay: The overlay image with alpha channel (H x W x 4).
+        """
+
+        # Extract RGB channels and alpha channel from overlay image
+        overlay_rgb = overlay[:, :, :3]
+        overlay_alpha = overlay[:, :, 3]
+        # Create mask by thresholding alpha channel
+        _, base_mask = cv2.threshold(overlay_alpha, 0, 255, cv2.THRESH_BINARY_INV)
+        # # Invert mask to create background mask
+        # base_mask = cv2.bitwise_not(mask)
+        # Apply background mask to background image
+        base_masked = cv2.bitwise_and(base, base, mask=base_mask)
+        # Combine masked background image and overlay image
+        return cv2.bitwise_or(base_masked, overlay_rgb)
+
     def _on_process_image_finished(self, result: QuadratDetectionResult, token: int) -> None:
         """Handle worker finished processing the image."""
         # logger.debug("Finishing processing...")
@@ -293,13 +313,7 @@ class MainWindow(QMainWindow):
                         bgr_img = cv2.cvtColor(display_img, cv2.COLOR_GRAY2BGR)
                     else:
                         bgr_img = display_img
-                    bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2BGRA)
-                    display_img = cv2.addWeighted(bgr_img, 0.7, debug_img, 0.3, 0)  # semi-transparent
-
-                # Draw debug image on top of original
-                # bgr_img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-                # bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2BGRA)
-                # img = cv2.addWeighted(bgr_img, 0.7, debug_img, 0.3, 0)  # semi-transparent
+                    display_img = self._overlay_image(bgr_img, debug_img)
 
                 # logger.debug("Converting image...")
                 qimg = array2qimage(display_img)
