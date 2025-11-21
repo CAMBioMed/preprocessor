@@ -6,6 +6,7 @@ from typing import cast
 import cv2
 import numpy as np
 from cv2.typing import MatLike
+from sklearn.cluster import KMeans
 
 from preprocessor.processing.params import (
     QuadratDetectionParams,
@@ -271,9 +272,48 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]
                 x, y = pt
                 if 0 <= x < width and 0 <= y < height:
                     corners.append(pt)
-                    cv2.circle(debug_img, pt, 3, (255, 0, 0, 255), -1)
-    logger.debug(f"Found {len(corners)} corners.")
-    return corners
+                    # cv2.circle(debug_img, pt, 3, (255, 0, 0, 255), -1)
+    logger.debug(f"Found {len(corners)} candidate corners.")
+    if not corners:
+        return []
+
+    points = np.array(corners)  # shape (N,2)
+
+    # Compute the centroid of the corners
+    centroid = points.mean(axis=0)
+
+    # Convert points to angles around the centroid
+    vecs = points - centroid
+    angles = np.arctan2(vecs[:, 1], vecs[:, 0])  # range [-pi, pi]
+
+    # Cluster by angles into 4 quadrants
+    circle_coords = np.column_stack([np.cos(angles), np.sin(angles)])
+    kmeans = KMeans(n_clusters=4, n_init='auto').fit(circle_coords)
+    labels = kmeans.labels_
+
+    # For each cluster, pick the points closes to the centroid
+    corner_points = []
+    for c in range(4):
+        group = points[labels == c]
+        dists = np.linalg.norm(group - centroid, axis=1)
+        corner_points.append(group[np.argmin(dists)])
+
+    # Order the points clockwise starting from top-left
+    corner_points_np = np.array(corner_points)
+    # sort by y
+    top, bottom = corner_points_np[corner_points_np[:, 1].argsort()][:2], corner_points_np[corner_points_np[:, 1].argsort()][2:]
+    # sort each pair by x
+    tl, tr = top[top[:, 0].argsort()]
+    bl, br = bottom[bottom[:, 0].argsort()]
+    ordered_corners = np.array([tl, tr, br, bl])
+
+    for c in ordered_corners:
+        cv2.circle(debug_img, (c[0], c[1]), 2, (255, 0, 0, 255), -1)
+
+    def to_tuple(p: np.ndarray) -> tuple[int, int]:
+        return (int(p[0]), int(p[1]))
+
+    return list(map(to_tuple, ordered_corners))
 
 
 def _find_contours(img: MatLike, debug_img: MatLike, params: FindContourParams) -> MatLike:
