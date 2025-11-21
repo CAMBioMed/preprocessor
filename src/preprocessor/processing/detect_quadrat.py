@@ -1,7 +1,6 @@
 import logging
 import math
 from dataclasses import dataclass
-from typing import cast
 
 import cv2
 import numpy as np
@@ -73,7 +72,7 @@ def process_image(
 def _read_image(image_path: str) -> MatLike | None:
     """Read the image from the given path."""
     logger.debug(f"Reading image {image_path}...")
-    img = cv2.imread(image_path, cv2.IMREAD_COLOR_BGR)
+    img = cv2.imread(image_path, cv2.IMREAD_COLOR_RGB)
     logger.debug(f"Read image {image_path}")
     return img  # can be None
 
@@ -252,7 +251,7 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]
             return None
         x = (b2 * c1 - b1 * c2) / det
         y = (a1 * c2 - a2 * c1) / det
-        return (int(round(x)), int(round(y)))
+        return round(x), round(y)
 
     def angle_difference(theta1: float, theta2: float) -> float:
         a = theta1 % math.pi
@@ -288,7 +287,7 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]
 
     # Cluster by angles into 4 quadrants
     circle_coords = np.column_stack([np.cos(angles), np.sin(angles)])
-    kmeans = KMeans(n_clusters=4, n_init='auto').fit(circle_coords)
+    kmeans = KMeans(n_clusters=4, n_init="auto").fit(circle_coords)
     labels = kmeans.labels_
 
     # For each cluster, pick the points closes to the centroid
@@ -301,7 +300,10 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]
     # Order the points clockwise starting from top-left
     corner_points_np = np.array(corner_points)
     # sort by y
-    top, bottom = corner_points_np[corner_points_np[:, 1].argsort()][:2], corner_points_np[corner_points_np[:, 1].argsort()][2:]
+    top, bottom = (
+        corner_points_np[corner_points_np[:, 1].argsort()][:2],
+        corner_points_np[corner_points_np[:, 1].argsort()][2:],
+    )
     # sort each pair by x
     tl, tr = top[top[:, 0].argsort()]
     bl, br = bottom[bottom[:, 0].argsort()]

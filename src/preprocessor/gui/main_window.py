@@ -269,7 +269,6 @@ class MainWindow(QMainWindow):
             base: The base image (H x W x 3).
             overlay: The overlay image with alpha channel (H x W x 4).
         """
-
         # Extract RGB channels and alpha channel from overlay image
         overlay_rgb = overlay[:, :, :3]
         overlay_alpha = overlay[:, :, 3]
