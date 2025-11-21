@@ -87,13 +87,21 @@ class FindContourParams:
 
 
 @dataclass
+class FixPerspectiveParams:
+    enabled: bool
+    target_width: int
+    target_height: int
+
+
+@dataclass
 class QuadratDetectionParams:
     downscale: DownscaleParams
     blur: BlurParams
     thresholding: ThresholdingParams
     canny: CannyParams
     hough: HoughParams
-    findContour: FindContourParams
+    find_contour: FindContourParams
+    fix_perspective: FixPerspectiveParams
 
 
 defaultParams: QuadratDetectionParams = QuadratDetectionParams(
@@ -124,8 +132,8 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
         enabled=True,
         probabilistic=False,
         rho=1,
-        theta=2,  # degrees
-        threshold=50,
+        theta=3,  # degrees
+        threshold=65,
         srn=0.0,
         stn=0.0,
         min_theta=0.0,
@@ -133,8 +141,13 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
         min_line_length=50,
         max_line_gap=10,
     ),
-    findContour=FindContourParams(
+    find_contour=FindContourParams(
         enabled=False,
         method=ContourApproximationMethod.SIMPLE,
+    ),
+    fix_perspective=FixPerspectiveParams(
+        enabled=True,
+        target_width=300,
+        target_height=300,
     ),
 )

@@ -1,0 +1,48 @@
+import logging
+import math
+
+import cv2
+import numpy as np
+from cv2.typing import MatLike, Point2f
+
+logger = logging.getLogger(__name__)
+
+
+def fix_perspective(
+    img: MatLike,
+    src_pts: list[Point2f],
+    tgt_width: int,
+    tgt_height: int,
+) -> MatLike:
+    """Applies a perspective transformation to the input image.
+
+    Args:
+        img: The input image to be transformed.
+        src_pts: A list of four points defining the source quadrilateral in the input image (top-left, top-right, bottom-right, bottom-left).
+        tgt_width: The width of the target image, in pixels.
+        tgt_height: The height of the target image, in pixels.
+    """
+
+    # tgt_height = math.sqrt(
+    #     (src_pts[2][0] - src_pts[1][0]) * (src_pts[2][0] - src_pts[1][0])
+    #     + (src_pts[2][1] - src_pts[1][1]) * (src_pts[2][1] - src_pts[1][1])
+    # )
+    # tgt_width = ratio * tgt_height
+    # src_tl = src_pts[0]
+    src_pts2 = np.array(src_pts, dtype=np.float32)
+    tgt_pts = np.array(
+        [
+            [0.0, 0.0],  # top-left
+            [tgt_width, 0.0],  # top-right
+            [tgt_width, 0.0 + tgt_height],  # bottom-right
+            [0.0, 0.0 + tgt_height],  # bottom-left
+        ],
+        dtype=np.float32,
+    )
+
+    M = cv2.getPerspectiveTransform(src_pts2, tgt_pts)
+
+    transformed = np.zeros((tgt_width, tgt_height), dtype=np.uint8)
+    dst = cv2.warpPerspective(img, M, transformed.shape)
+
+    return dst

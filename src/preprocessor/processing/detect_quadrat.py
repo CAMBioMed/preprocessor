@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import cv2
 import numpy as np
-from cv2.typing import MatLike
+from cv2.typing import MatLike, Point2f
 from sklearn.cluster import KMeans
 
 from preprocessor.processing.params import (
@@ -26,20 +26,16 @@ logger = logging.getLogger(__name__)
 class QuadratDetectionResult:
     original: MatLike | None
     processed: MatLike | None
+    final: MatLike | None
     debug: MatLike | None
+    corners: list[Point2f] = None
 
 
-def process_image(
-    image_path: str | None,
+def detect_quadrat(
+    original_img: MatLike,
     params: QuadratDetectionParams,
 ) -> QuadratDetectionResult:
     """Process the image and return it."""
-    if not image_path:
-        return QuadratDetectionResult(None, None, None)
-
-    original_img = _read_image(image_path)
-    if original_img is None:
-        return QuadratDetectionResult(None, None, None)
 
     if params.downscale.enabled:
         original_img = _downscale_image(original_img, params.downscale)
@@ -58,23 +54,16 @@ def process_image(
     if params.canny.enabled:
         img = _canny_image(img, params.canny)
 
+    corners: list[Point2f] = []
     if params.hough.enabled:
         (debug_img, lines) = _hough(img, debug_img, params.hough)
         corners = _find_corners(lines, debug_img)
         logger.debug(f"Detected corners: {corners}")
 
-    if params.findContour.enabled:
-        debug_img = _find_contours(img, debug_img, params.findContour)
+    if params.find_contour.enabled:
+        debug_img = _find_contours(img, debug_img, params.find_contour)
 
-    return QuadratDetectionResult(original_img, img, debug_img)
-
-
-def _read_image(image_path: str) -> MatLike | None:
-    """Read the image from the given path."""
-    logger.debug(f"Reading image {image_path}...")
-    img = cv2.imread(image_path, cv2.IMREAD_COLOR_RGB)
-    logger.debug(f"Read image {image_path}")
-    return img  # can be None
+    return QuadratDetectionResult(original_img, img, debug_img, None, corners)
 
 
 def _downscale_image(img: MatLike, params: DownscaleParams) -> MatLike:
@@ -234,10 +223,10 @@ def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> tuple[MatLi
     return (debug_img, result)
 
 
-def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]]:
+def _find_corners(lines: list[Line], debug_img: MatLike) -> list[Point2f]:
     """Find corners from the detected lines."""
     logger.debug("Finding corners from lines...")
-    corners: list[tuple[int, int]] = []
+    corners: list[Point2f] = []
     angle_threshold = math.radians(20)  # minimum angle difference to consider lines non-parallel
     height, width = debug_img.shape[:2]
 
@@ -271,7 +260,7 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]
                 x, y = pt
                 if 0 <= x < width and 0 <= y < height:
                     corners.append(pt)
-                    # cv2.circle(debug_img, pt, 3, (255, 0, 0, 255), -1)
+                    cv2.circle(debug_img, pt, 2, (255, 0, 0, 255), -1)
     logger.debug(f"Found {len(corners)} candidate corners.")
     if not corners:
         return []
@@ -310,10 +299,10 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]
     ordered_corners = np.array([tl, tr, br, bl])
 
     for c in ordered_corners:
-        cv2.circle(debug_img, (c[0], c[1]), 2, (255, 0, 0, 255), -1)
+        cv2.circle(debug_img, (c[0], c[1]), 2, (0, 255, 0, 255), -1)
 
     def to_tuple(p: np.ndarray) -> tuple[int, int]:
-        return (int(p[0]), int(p[1]))
+        return int(p[0]), int(p[1])
 
     return list(map(to_tuple, ordered_corners))
 
