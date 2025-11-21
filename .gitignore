@@ -17,3 +17,6 @@ _version.py
 
 # IntelliJ
 .idea/
+
+# Big photos
+/examples/

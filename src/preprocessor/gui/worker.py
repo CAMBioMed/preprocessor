@@ -1,7 +1,8 @@
 import logging
 import sys
 import traceback
-from typing import Callable, Any
+from typing import Any
+from collections.abc import Callable
 
 from PySide6.QtCore import Slot, QRunnable, Signal, QObject
 
@@ -11,14 +12,15 @@ logger = logging.getLogger(__name__)
 
 # Based on: https://www.pythonguis.com/tutorials/multithreading-pyside6-applications-qthreadpool/
 
+
 class WorkerManager:
     """Manages a pool of worker threads to run tasks in the background."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Note sure what the trade-off is between using QThreadPool.globalInstance() vs creating a new QThreadPool().
         self.threadpool = QThreadPool.globalInstance()
 
-    def start(self, worker: QRunnable):
+    def start(self, worker: QRunnable) -> None:
         """Start a worker in the thread pool."""
         # By default, the threadpool will take ownership of the worker
         # and (as autoDelete is enabled) clean it up when done.
@@ -63,12 +65,12 @@ class Worker(QRunnable):
         worker_manager.start(worker)
     """
 
-    fn: Callable
+    fn: Callable[..., Any]
     args: tuple[Any, ...]
     kwargs: dict[str, Any]
     signals: WorkerSignals
 
-    def __init__(self, fn: Callable, *args, **kwargs):
+    def __init__(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
         """
         :param fn: The task (callable) to run in the background.
         :param args: Positional arguments for the task.
@@ -83,7 +85,7 @@ class Worker(QRunnable):
         self.kwargs["progress_callback"] = self.signals.progress
 
     @Slot()
-    def run(self):
+    def run(self) -> None:
         try:
             logger.debug("Starting worker task.")
             result = self.fn(*self.args, **self.kwargs)
