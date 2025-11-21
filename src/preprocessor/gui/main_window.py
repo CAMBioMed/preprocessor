@@ -148,6 +148,7 @@ class MainWindow(QMainWindow):
         self.view_debug_button.setStatusTip("View the debug image")
         self.view_debug_button.triggered.connect(self._on_parameter_change)
         self.view_debug_button.setCheckable(True)
+        self.view_debug_button.setChecked(True)
         toolbar.addAction(self.view_debug_button)
 
     def create_statusbar(self) -> None:

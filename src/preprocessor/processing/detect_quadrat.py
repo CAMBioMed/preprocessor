@@ -1,6 +1,7 @@
 import logging
 import math
 from dataclasses import dataclass
+from typing import cast
 
 import cv2
 import numpy as np
@@ -58,7 +59,9 @@ def process_image(
         img = _canny_image(img, params.canny)
 
     if params.hough.enabled:
-        debug_img = _hough(img, debug_img, params.hough)
+        (debug_img, lines) = _hough(img, debug_img, params.hough)
+        corners = _find_corners(lines, debug_img)
+        logger.debug(f"Detected corners: {corners}")
 
     if params.findContour.enabled:
         debug_img = _find_contours(img, debug_img, params.findContour)
@@ -163,9 +166,20 @@ def _canny_image(img: MatLike, params: CannyParams) -> MatLike:
     return img
 
 
-def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> MatLike:
+@dataclass
+class Line:
+    rho: float
+    theta: float  # radians
+
+
+def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> tuple[MatLike, list[Line]]:
     """Apply Hough Transform to detect lines in the image."""
     logger.debug("Applying Hough Transform...")
+
+    result: list[Line] = []
+    rho: float
+    theta: float
+
     if params.probabilistic:
         lines = cv2.HoughLinesP(
             img,
@@ -182,6 +196,12 @@ def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> MatLike:
                 pt1 = (x1, y1)
                 pt2 = (x2, y2)
                 cv2.line(debug_img, pt1, pt2, (0, 255, 0), 1, cv2.LINE_AA)
+                # Convert to (rho, theta)
+                a = x2 - x1
+                b = y2 - y1
+                theta = math.atan2(b, a)
+                rho = x1 * math.cos(theta) + y1 * math.sin(theta)
+                result.append(Line(rho, theta))
         else:
             logger.debug("No lines found.")
     else:
@@ -200,6 +220,7 @@ def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> MatLike:
             for i in range(len(lines)):
                 rho = lines[i][0][0]
                 theta = lines[i][0][1]
+                result.append(Line(rho, theta))
                 a = math.cos(theta)
                 b = math.sin(theta)
                 x0 = a * rho
@@ -209,7 +230,45 @@ def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> MatLike:
                 cv2.line(debug_img, pt1, pt2, (0, 0, 255), 1, cv2.LINE_AA)
         else:
             logger.debug("No lines found.")
-    return debug_img
+
+    return (debug_img, result)
+
+
+def _find_corners(lines: list[Line], debug_img: MatLike) -> list[tuple[int, int]]:
+    """Find corners from the detected lines."""
+    logger.debug("Finding corners from lines...")
+    corners: list[tuple[int, int]] = []
+    angle_threshold = math.radians(20)  # minimum angle difference to consider lines non-parallel
+    height, width = debug_img.shape[:2]
+
+    def intersection(line1: Line, line2: Line) -> tuple[int, int] | None:
+        # Solve for intersection of two lines in (rho, theta) form
+        # Line: x*cos(theta) + y*sin(theta) = rho
+        a1, b1, c1 = math.cos(line1.theta), math.sin(line1.theta), line1.rho
+        a2, b2, c2 = math.cos(line2.theta), math.sin(line2.theta), line2.rho
+        det = a1 * b2 - a2 * b1
+        if abs(det) < 1e-10:
+            return None
+        x = (b2 * c1 - b1 * c2) / det
+        y = (a1 * c2 - a2 * c1) / det
+        return (int(round(x)), int(round(y)))
+
+    for i in range(len(lines)):
+        for j in range(i + 1, len(lines)):
+            theta1 = lines[i].theta
+            theta2 = lines[j].theta
+            angle_diff = abs((theta1 - theta2) % math.pi)
+            # angle_diff = abs((theta1 - theta2 + math.pi) % math.pi - math.pi/2)
+            if angle_diff < angle_threshold:
+                continue  # skip nearly parallel lines
+            pt = intersection(lines[i], lines[j])
+            if pt is not None:
+                x, y = pt
+                if 0 <= x < width and 0 <= y < height:
+                    corners.append(pt)
+                    cv2.circle(debug_img, pt, 3, (255, 0, 0, 255), -1)
+    logger.debug(f"Found {len(corners)} corners.")
+    return corners
 
 
 def _find_contours(img: MatLike, debug_img: MatLike, params: FindContourParams) -> MatLike:

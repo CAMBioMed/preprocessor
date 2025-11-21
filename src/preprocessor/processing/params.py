@@ -108,7 +108,7 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
     thresholding=ThresholdingParams(
         method=ThresholdingMethod.BINARY,
         inverse=False,
-        threshold=225,
+        threshold=150,
         maximum=255,
         block_size=3,
         C=1.0,
@@ -121,7 +121,7 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
         aperture_size=5,
     ),
     hough=HoughParams(
-        enabled=False,
+        enabled=True,
         probabilistic=False,
         rho=1,
         theta=2,  # degrees
