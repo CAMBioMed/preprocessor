@@ -28,6 +28,7 @@ class QuadratDetectionResult:
     processed: MatLike | None
     final: MatLike | None
     debug: MatLike | None
+    scale: float = 1.0
     corners: list[Point2f] = None
 
 
@@ -38,7 +39,9 @@ def detect_quadrat(
     """Process the image and return it."""
 
     if params.downscale.enabled:
-        original_img = _downscale_image(original_img, params.downscale)
+        original_img, scale = _downscale_image(original_img, params.downscale)
+    else:
+        scale = 1.0
 
     img = _grayscale_image(original_img)
 
@@ -57,16 +60,16 @@ def detect_quadrat(
     corners: list[Point2f] = []
     if params.hough.enabled:
         (debug_img, lines) = _hough(img, debug_img, params.hough)
-        corners = _find_corners(lines, debug_img)
+        corners = _find_corners(lines, debug_img, scale)
         logger.debug(f"Detected corners: {corners}")
 
     if params.find_contour.enabled:
         debug_img = _find_contours(img, debug_img, params.find_contour)
 
-    return QuadratDetectionResult(original_img, img, original_img, debug_img, corners)
+    return QuadratDetectionResult(original_img, img, original_img, debug_img, scale, corners)
 
 
-def _downscale_image(img: MatLike, params: DownscaleParams) -> MatLike:
+def _downscale_image(img: MatLike, params: DownscaleParams) -> tuple[MatLike, float]:
     """Downscale the image to the given maximum size, for preview processing to speed up worker."""
     try:
         h, w = img.shape[:2]
@@ -77,10 +80,11 @@ def _downscale_image(img: MatLike, params: DownscaleParams) -> MatLike:
             logger.debug(f"Downscaling image to {new_w}x{new_h} pixels...")
             img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
             logger.debug(f"Downscaled image to {new_w}x{new_h} pixels")
+            return img, scale
     except Exception:
         # if resizing fails for any reason, continue with original image
         pass
-    return img
+    return img, 1.0
 
 
 def _grayscale_image(img: MatLike) -> MatLike:
@@ -223,7 +227,7 @@ def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> tuple[MatLi
     return (debug_img, result)
 
 
-def _find_corners(lines: list[Line], debug_img: MatLike) -> list[Point2f]:
+def _find_corners(lines: list[Line], debug_img: MatLike, scale: float = 1.0) -> list[Point2f]:
     """Find corners from the detected lines."""
     logger.debug("Finding corners from lines...")
     corners: list[Point2f] = []
@@ -296,7 +300,7 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[Point2f]:
     # sort each pair by x
     tl, tr = top[top[:, 0].argsort()]
     bl, br = bottom[bottom[:, 0].argsort()]
-    ordered_corners = np.array([tl, tr, br, bl])
+    ordered_corners = np.array([tl, tr, bl, br])
 
     for c in ordered_corners:
         cv2.circle(debug_img, (c[0], c[1]), 2, (0, 255, 0, 255), -1)
@@ -304,7 +308,10 @@ def _find_corners(lines: list[Line], debug_img: MatLike) -> list[Point2f]:
     def to_tuple(p: np.ndarray) -> tuple[int, int]:
         return int(p[0]), int(p[1])
 
-    return list(map(to_tuple, ordered_corners))
+    # Scale all corners back to original image size
+    unscaled_corners = ordered_corners / scale
+
+    return list(map(to_tuple, unscaled_corners))
 
 
 def _find_contours(img: MatLike, debug_img: MatLike, params: FindContourParams) -> MatLike:

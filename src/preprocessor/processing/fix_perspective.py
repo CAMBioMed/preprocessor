@@ -29,20 +29,16 @@ def fix_perspective(
     # )
     # tgt_width = ratio * tgt_height
     # src_tl = src_pts[0]
-    src_pts2 = np.array(src_pts, dtype=np.float32)
-    tgt_pts = np.array(
-        [
-            [0.0, 0.0],  # top-left
-            [tgt_width, 0.0],  # top-right
-            [tgt_width, 0.0 + tgt_height],  # bottom-right
-            [0.0, 0.0 + tgt_height],  # bottom-left
-        ],
-        dtype=np.float32,
-    )
+    src_pts2 = np.float32(src_pts)
+    tgt_pts = np.float32([
+        [      0.0,        0.0],  # top-left
+        [tgt_width,        0.0],  # top-right
+        [      0.0, tgt_height],  # bottom-left
+        [tgt_width, tgt_height],  # bottom-right
+    ])
 
     M = cv2.getPerspectiveTransform(src_pts2, tgt_pts)
 
-    transformed = np.zeros((tgt_width, tgt_height), dtype=np.uint8)
-    dst = cv2.warpPerspective(img, M, transformed.shape)
+    dst = cv2.warpPerspective(img, M, (tgt_width, tgt_height))
 
     return dst

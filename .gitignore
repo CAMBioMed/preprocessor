@@ -20,3 +20,6 @@ _version.py
 
 # Big photos
 /examples/
+
+# MacOS
+.DS_Store

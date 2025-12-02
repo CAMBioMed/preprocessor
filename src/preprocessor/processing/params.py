@@ -147,7 +147,7 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
     ),
     fix_perspective=FixPerspectiveParams(
         enabled=True,
-        target_width=300,
-        target_height=300,
+        target_width=1024,
+        target_height=1024,
     ),
 )
