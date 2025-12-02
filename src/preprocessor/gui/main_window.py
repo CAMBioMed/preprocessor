@@ -143,8 +143,16 @@ class MainWindow(QMainWindow):
         self.view_processed_button.setStatusTip("View the processed image")
         self.view_processed_button.triggered.connect(self._on_parameter_change)
         self.view_processed_button.setCheckable(True)
-        self.view_processed_button.setChecked(True)
+        # self.view_processed_button.setChecked(True)
         toolbar.addAction(self.view_processed_button)
+
+        view_debug_button_icon = QIcon("src/preprocessor/icons/fugue16/images-flickr.png")
+        self.view_debug_button = QAction(view_debug_button_icon, "&View Debug", view_group)
+        self.view_debug_button.setStatusTip("View the debug image")
+        self.view_debug_button.triggered.connect(self._on_parameter_change)
+        self.view_debug_button.setCheckable(True)
+        self.view_debug_button.setChecked(True)
+        toolbar.addAction(self.view_debug_button)
 
         view_final_button_icon = QIcon("src/preprocessor/icons/fugue16/image-saturation.png")
         self.view_final_button = QAction(view_final_button_icon, "&View final", view_group)
@@ -152,14 +160,6 @@ class MainWindow(QMainWindow):
         self.view_final_button.triggered.connect(self._on_parameter_change)
         self.view_final_button.setCheckable(True)
         toolbar.addAction(self.view_final_button)
-
-        view_debug_button_icon = QIcon("src/preprocessor/icons/fugue16/images-flickr.png")
-        self.view_debug_button = QAction(view_debug_button_icon, "&View Debug", self)
-        self.view_debug_button.setStatusTip("View the debug image")
-        self.view_debug_button.triggered.connect(self._on_parameter_change)
-        self.view_debug_button.setCheckable(True)
-        self.view_debug_button.setChecked(True)
-        toolbar.addAction(self.view_debug_button)
 
     def create_statusbar(self) -> None:
         """Create the main window status bar."""
@@ -326,25 +326,27 @@ class MainWindow(QMainWindow):
                     display_img = result.original
                 elif self.view_processed_button.isChecked():
                     display_img = result.processed
+                elif self.view_debug_button.isChecked():
+                    display_img = result.debug
                 elif self.view_final_button.isChecked():
                     display_img = result.final
                 else:
                     display_img = None  # will be handled below
-
-                if (
-                    display_img is not None
-                    and self.view_debug_button.isChecked()
-                    and result.debug is not None
-                ):
-                    debug_img = result.debug
-                    # Overlay debug image on display image
-                    if self.view_processed_button.isChecked():
-                        bgr_img = cv2.cvtColor(display_img, cv2.COLOR_GRAY2BGR)
-                    elif self.view_final_button.isChecked():
-                        bgr_img = debug_img
-                    else:
-                        bgr_img = display_img
-                    display_img = self._overlay_image(bgr_img, debug_img)
+                #
+                # if (
+                #     display_img is not None
+                #     and self.view_debug_button.isChecked()
+                #     and result.debug is not None
+                # ):
+                #     debug_img = result.debug
+                #     # Overlay debug image on display image
+                #     if self.view_processed_button.isChecked():
+                #         bgr_img = cv2.cvtColor(display_img, cv2.COLOR_GRAY2BGR)
+                #     elif self.view_final_button.isChecked():
+                #         bgr_img = debug_img
+                #     else:
+                #         bgr_img = display_img
+                #     display_img = self._overlay_image(bgr_img, debug_img)
 
                 # logger.debug("Converting image...")
                 qimg = array2qimage(display_img)

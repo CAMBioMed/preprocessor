@@ -42,9 +42,6 @@ def detect_quadrat(
 
     img = _grayscale_image(original_img)
 
-    # Create transparent empty image
-    debug_img = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint8)
-
     if params.blur.enabled:
         img = _blur_image(img, params.blur)
 
@@ -53,6 +50,9 @@ def detect_quadrat(
 
     if params.canny.enabled:
         img = _canny_image(img, params.canny)
+
+    # Create copy of processed image
+    debug_img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
     corners: list[Point2f] = []
     if params.hough.enabled:
@@ -63,7 +63,7 @@ def detect_quadrat(
     if params.find_contour.enabled:
         debug_img = _find_contours(img, debug_img, params.find_contour)
 
-    return QuadratDetectionResult(original_img, img, debug_img, None, corners)
+    return QuadratDetectionResult(original_img, img, original_img, debug_img, corners)
 
 
 def _downscale_image(img: MatLike, params: DownscaleParams) -> MatLike:
