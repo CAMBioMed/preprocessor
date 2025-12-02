@@ -23,3 +23,4 @@ uv run pyside6-project build
 
 > [!NOTE]
 > I tried adding the [hatch-pyside](https://github.com/s-ball/hatch-pyside) plugin to Hatch to make this step automatic, but the plugin does not support PySide6 > 6.8 and doesn't understand the `pyproject.toml` file.
+
