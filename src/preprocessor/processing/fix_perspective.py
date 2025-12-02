@@ -28,14 +28,15 @@ def fix_perspective(
     #     + (src_pts[2][1] - src_pts[1][1]) * (src_pts[2][1] - src_pts[1][1])
     # )
     # tgt_width = ratio * tgt_height
-    # src_tl = src_pts[0]
     src_pts2 = np.float32(src_pts)
+    # fmt: off
     tgt_pts = np.float32([
         [      0.0,        0.0],  # top-left
         [tgt_width,        0.0],  # top-right
         [      0.0, tgt_height],  # bottom-left
         [tgt_width, tgt_height],  # bottom-right
     ])
+    # fmt: on
 
     M = cv2.getPerspectiveTransform(src_pts2, tgt_pts)
 

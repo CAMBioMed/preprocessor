@@ -273,7 +273,7 @@ class MainWindow(QMainWindow):
             return QuadratDetectionResult(None, None, None, None)
 
         result = detect_quadrat(img, params)
-        if params.fix_perspective.enabled and result.corners is not None:
+        if params.fix_perspective.enabled and result.corners is not None and len(result.corners) == 4:
             final_img = fix_perspective(
                 img,
                 result.corners,

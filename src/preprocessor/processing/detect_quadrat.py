@@ -288,18 +288,24 @@ def _find_corners(lines: list[Line], debug_img: MatLike, scale: float = 1.0) -> 
     for c in range(4):
         group = points[labels == c]
         dists = np.linalg.norm(group - centroid, axis=1)
+        if dists.size == 0:
+            continue
         corner_points.append(group[np.argmin(dists)])
+
+    if len(corner_points) < 4:
+        logger.debug("Could not find 4 distinct corners.")
+        return []
 
     # Order the points clockwise starting from top-left
     corner_points_np = np.array(corner_points)
     # sort by y
     top, bottom = (
-        corner_points_np[corner_points_np[:, 1].argsort()][:2],
-        corner_points_np[corner_points_np[:, 1].argsort()][2:],
+        corner_points_np[corner_points_np[:,1].argsort()][:2],
+        corner_points_np[corner_points_np[:,1].argsort()][2:],
     )
     # sort each pair by x
-    tl, tr = top[top[:, 0].argsort()]
-    bl, br = bottom[bottom[:, 0].argsort()]
+    tl, tr = top[top[:,0].argsort()]
+    bl, br = bottom[bottom[:,0].argsort()]
     ordered_corners = np.array([tl, tr, bl, br])
 
     for c in ordered_corners:
