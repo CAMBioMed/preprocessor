@@ -1,5 +1,4 @@
 import logging
-import math
 
 import cv2
 import numpy as np
@@ -14,15 +13,15 @@ def fix_perspective(
     tgt_width: int,
     tgt_height: int,
 ) -> MatLike:
-    """Applies a perspective transformation to the input image.
+    """Apply a perspective transformation to the input image.
 
     Args:
         img: The input image to be transformed.
-        src_pts: A list of four points defining the source quadrilateral in the input image (top-left, top-right, bottom-right, bottom-left).
+        src_pts: A list of four points defining the source quadrilateral in the input image
+            (top-left, top-right, bottom-left, bottom-right).
         tgt_width: The width of the target image, in pixels.
         tgt_height: The height of the target image, in pixels.
     """
-
     # tgt_height = math.sqrt(
     #     (src_pts[2][0] - src_pts[1][0]) * (src_pts[2][0] - src_pts[1][0])
     #     + (src_pts[2][1] - src_pts[1][1]) * (src_pts[2][1] - src_pts[1][1])

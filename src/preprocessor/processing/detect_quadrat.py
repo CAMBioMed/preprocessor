@@ -37,7 +37,6 @@ def detect_quadrat(
     params: QuadratDetectionParams,
 ) -> QuadratDetectionResult:
     """Process the image and return it."""
-
     if params.downscale.enabled:
         original_img, scale = _downscale_image(original_img, params.downscale)
     else:
@@ -300,12 +299,12 @@ def _find_corners(lines: list[Line], debug_img: MatLike, scale: float = 1.0) -> 
     corner_points_np = np.array(corner_points)
     # sort by y
     top, bottom = (
-        corner_points_np[corner_points_np[:,1].argsort()][:2],
-        corner_points_np[corner_points_np[:,1].argsort()][2:],
+        corner_points_np[corner_points_np[:, 1].argsort()][:2],
+        corner_points_np[corner_points_np[:, 1].argsort()][2:],
     )
     # sort each pair by x
-    tl, tr = top[top[:,0].argsort()]
-    bl, br = bottom[bottom[:,0].argsort()]
+    tl, tr = top[top[:, 0].argsort()]
+    bl, br = bottom[bottom[:, 0].argsort()]
     ordered_corners = np.array([tl, tr, bl, br])
 
     for c in ordered_corners:

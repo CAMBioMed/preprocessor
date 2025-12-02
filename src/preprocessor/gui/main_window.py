@@ -286,8 +286,7 @@ class MainWindow(QMainWindow):
                 final=final_img,
                 debug=result.debug,
             )
-        else:
-            return result
+        return result
 
     def _overlay_image(self, base: MatLike, overlay: MatLike) -> MatLike:
         """Overlay one image on top of another with transparency.
