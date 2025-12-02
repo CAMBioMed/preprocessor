@@ -10,6 +10,7 @@ from preprocessor.processing.params import (
     ContourApproximationMethod,
     FindContourParams,
     HoughParams,
+    FixPerspectiveParams,
 )
 
 
@@ -432,6 +433,48 @@ class PropertiesDockModel(QObject):
             self.on_find_contour_method_changed.emit(value)
             self.on_changed.emit()
 
+    _fix_perspective_enabled: bool = False
+    on_fix_perspective_enabled_changed: Signal = Signal(bool)
+
+    @property
+    def fix_perspective_enabled(self) -> bool:
+        return self._fix_perspective_enabled
+
+    @fix_perspective_enabled.setter
+    def fix_perspective_enabled(self, value: bool) -> None:
+        if self._fix_perspective_enabled != value:
+            self._fix_perspective_enabled = value
+            self.on_fix_perspective_enabled_changed.emit(value)
+            self.on_changed.emit()
+
+    _fix_perspective_target_width: int = 500
+    on_fix_perspective_target_width_changed: Signal = Signal(int)
+
+    @property
+    def fix_perspective_target_width(self) -> int:
+        return self._fix_perspective_target_width
+
+    @fix_perspective_target_width.setter
+    def fix_perspective_target_width(self, value: int) -> None:
+        if self._fix_perspective_target_width != value:
+            self._fix_perspective_target_width = value
+            self.on_fix_perspective_target_width_changed.emit(value)
+            self.on_changed.emit()
+
+    _fix_perspective_target_height: int = 700
+    on_fix_perspective_target_height_changed: Signal = Signal(int)
+
+    @property
+    def fix_perspective_target_height(self) -> int:
+        return self._fix_perspective_target_height
+
+    @fix_perspective_target_height.setter
+    def fix_perspective_target_height(self, value: int) -> None:
+        if self._fix_perspective_target_height != value:
+            self._fix_perspective_target_height = value
+            self.on_fix_perspective_target_height_changed.emit(value)
+            self.on_changed.emit()
+
     @property
     def params(self) -> QuadratDetectionParams:
         return QuadratDetectionParams(
@@ -471,9 +514,14 @@ class PropertiesDockModel(QObject):
                 min_line_length=self.hough_min_line_length,
                 max_line_gap=self.hough_max_line_gap,
             ),
-            findContour=FindContourParams(
+            find_contour=FindContourParams(
                 enabled=self.find_contour_enabled,
                 method=self.find_contour_method,
+            ),
+            fix_perspective=FixPerspectiveParams(
+                enabled=self.fix_perspective_enabled,
+                target_width=self.fix_perspective_target_width,
+                target_height=self.fix_perspective_target_height,
             ),
         )
 
@@ -510,5 +558,9 @@ class PropertiesDockModel(QObject):
         self.hough_min_line_length = value.hough.min_line_length
         self.hough_max_line_gap = value.hough.max_line_gap
 
-        self.find_contour_enabled = value.findContour.enabled
-        self.find_contour_method = value.findContour.method
+        self.find_contour_enabled = value.find_contour.enabled
+        self.find_contour_method = value.find_contour.method
+
+        self.fix_perspective_enabled = value.fix_perspective.enabled
+        self.fix_perspective_target_width = value.fix_perspective.target_width
+        self.fix_perspective_target_height = value.fix_perspective.target_height

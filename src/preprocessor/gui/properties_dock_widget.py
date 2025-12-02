@@ -223,6 +223,21 @@ class PropertiesDockWidget(QDockWidget):
             lambda method: self.ui.comboboxFindContourMethod.setCurrentText(method)
         )
 
+        self.ui.checkboxFixPerspectiveEnabled.stateChanged.connect(
+            lambda value: setattr(self.model, "fix_perspective_enabled", value)
+        )
+        self.model.on_fix_perspective_enabled_changed.connect(self.ui.checkboxFixPerspectiveEnabled.setChecked)
+
+        self.ui.spinboxFixPerspectiveWidth.valueChanged.connect(
+            lambda value: setattr(self.model, "fix_perspective_target_width", value)
+        )
+        self.model.on_fix_perspective_target_width_changed.connect(self.ui.spinboxFixPerspectiveWidth.setValue)
+
+        self.ui.spinboxFixPerspectiveHeight.valueChanged.connect(
+            lambda value: setattr(self.model, "fix_perspective_target_height", value)
+        )
+        self.model.on_fix_perspective_target_height_changed.connect(self.ui.spinboxFixPerspectiveHeight.setValue)
+
     def _trigger_initial_updates(self) -> None:
         # Downscale
         self.model.on_downscale_enabled_changed.emit(self.model.downscale_enabled)
@@ -263,6 +278,11 @@ class PropertiesDockWidget(QDockWidget):
         # Find Contours
         self.model.on_find_contour_enabled_changed.emit(self.model.find_contour_enabled)
         self.model.on_find_contour_method_changed.emit(self.model.find_contour_method)
+
+        # Fix Perspective
+        self.model.on_fix_perspective_enabled_changed.emit(self.model.fix_perspective_enabled)
+        self.model.on_fix_perspective_target_width_changed.emit(self.model.fix_perspective_target_width)
+        self.model.on_fix_perspective_target_height_changed.emit(self.model.fix_perspective_target_height)
 
         # Overall
         self.model.on_changed.emit()

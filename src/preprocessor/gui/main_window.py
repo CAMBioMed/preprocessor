@@ -20,7 +20,9 @@ from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.main_window_model import MainWindowModel
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
-from preprocessor.processing.detect_quadrat import process_image, QuadratDetectionResult
+from preprocessor.processing.detect_quadrat import detect_quadrat, QuadratDetectionResult
+from preprocessor.processing.fix_perspective import fix_perspective
+from preprocessor.processing.load_image import load_image
 from preprocessor.processing.params import QuadratDetectionParams
 from preprocessor._version import __version__
 from preprocessor.gui.worker import Worker, WorkerManager
@@ -104,6 +106,7 @@ class MainWindow(QMainWindow):
 
     view_original_button: QAction
     view_processed_button: QAction
+    view_final_button: QAction
     view_debug_button: QAction
 
     def create_toolbar(self) -> None:
@@ -140,15 +143,23 @@ class MainWindow(QMainWindow):
         self.view_processed_button.setStatusTip("View the processed image")
         self.view_processed_button.triggered.connect(self._on_parameter_change)
         self.view_processed_button.setCheckable(True)
-        self.view_processed_button.setChecked(True)
+        # self.view_processed_button.setChecked(True)
         toolbar.addAction(self.view_processed_button)
 
         view_debug_button_icon = QIcon("src/preprocessor/icons/fugue16/images-flickr.png")
-        self.view_debug_button = QAction(view_debug_button_icon, "&View Debug", self)
+        self.view_debug_button = QAction(view_debug_button_icon, "&View Debug", view_group)
         self.view_debug_button.setStatusTip("View the debug image")
         self.view_debug_button.triggered.connect(self._on_parameter_change)
         self.view_debug_button.setCheckable(True)
+        self.view_debug_button.setChecked(True)
         toolbar.addAction(self.view_debug_button)
+
+        view_final_button_icon = QIcon("src/preprocessor/icons/fugue16/image-saturation.png")
+        self.view_final_button = QAction(view_final_button_icon, "&View final", view_group)
+        self.view_final_button.setStatusTip("View the final image")
+        self.view_final_button.triggered.connect(self._on_parameter_change)
+        self.view_final_button.setCheckable(True)
+        toolbar.addAction(self.view_final_button)
 
     def create_statusbar(self) -> None:
         """Create the main window status bar."""
@@ -255,11 +266,46 @@ class MainWindow(QMainWindow):
     ) -> QuadratDetectionResult:
         """Process the image and return it."""
         if not image_path:
-            return QuadratDetectionResult(None, None, None)
+            return QuadratDetectionResult(None, None, None, None)
 
-        result = process_image(image_path, params)
+        img = load_image(image_path)
+        if img is None:
+            return QuadratDetectionResult(None, None, None, None)
 
+        result = detect_quadrat(img, params)
+        if params.fix_perspective.enabled and result.corners is not None and len(result.corners) == 4:
+            final_img = fix_perspective(
+                img,
+                result.corners,
+                params.fix_perspective.target_width,
+                params.fix_perspective.target_height,
+            )
+            return QuadratDetectionResult(
+                original=result.original,
+                processed=result.processed,
+                final=final_img,
+                debug=result.debug,
+            )
         return result
+
+    def _overlay_image(self, base: MatLike, overlay: MatLike) -> MatLike:
+        """Overlay one image on top of another with transparency.
+
+        Args:
+            base: The base image (H x W x 3).
+            overlay: The overlay image with alpha channel (H x W x 4).
+        """
+        # Extract RGB channels and alpha channel from overlay image
+        overlay_rgb = overlay[:, :, :3]
+        overlay_alpha = overlay[:, :, 3]
+        # Create mask by thresholding alpha channel
+        _, base_mask = cv2.threshold(overlay_alpha, 0, 255, cv2.THRESH_BINARY_INV)
+        # # Invert mask to create background mask
+        # base_mask = cv2.bitwise_not(mask)
+        # Apply background mask to background image
+        base_masked = cv2.bitwise_and(base, base, mask=base_mask)
+        # Combine masked background image and overlay image
+        return cv2.bitwise_or(base_masked, overlay_rgb)
 
     def _on_process_image_finished(self, result: QuadratDetectionResult, token: int) -> None:
         """Handle worker finished processing the image."""
@@ -282,23 +328,27 @@ class MainWindow(QMainWindow):
                     display_img = result.original
                 elif self.view_processed_button.isChecked():
                     display_img = result.processed
+                elif self.view_debug_button.isChecked():
+                    display_img = result.debug
+                elif self.view_final_button.isChecked():
+                    display_img = result.final
                 else:
                     display_img = None  # will be handled below
-
-                if display_img is not None and self.view_debug_button.isChecked() and result.debug is not None:
-                    debug_img = result.debug
-                    # Overlay debug image on display image
-                    if self.view_processed_button.isChecked():
-                        bgr_img = cv2.cvtColor(display_img, cv2.COLOR_GRAY2BGR)
-                    else:
-                        bgr_img = display_img
-                    bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2BGRA)
-                    display_img = cv2.addWeighted(bgr_img, 0.7, debug_img, 0.3, 0)  # semi-transparent
-
-                # Draw debug image on top of original
-                # bgr_img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-                # bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2BGRA)
-                # img = cv2.addWeighted(bgr_img, 0.7, debug_img, 0.3, 0)  # semi-transparent
+                #
+                # if (
+                #     display_img is not None
+                #     and self.view_debug_button.isChecked()
+                #     and result.debug is not None
+                # ):
+                #     debug_img = result.debug
+                #     # Overlay debug image on display image
+                #     if self.view_processed_button.isChecked():
+                #         bgr_img = cv2.cvtColor(display_img, cv2.COLOR_GRAY2BGR)
+                #     elif self.view_final_button.isChecked():
+                #         bgr_img = debug_img
+                #     else:
+                #         bgr_img = display_img
+                #     display_img = self._overlay_image(bgr_img, debug_img)
 
                 # logger.debug("Converting image...")
                 qimg = array2qimage(display_img)
@@ -315,6 +365,7 @@ class MainWindow(QMainWindow):
                 self.central_widget.message = ""
                 # logger.debug("Displayed image.")
             except Exception as e:
+                logger.error("Error displaying image", exc_info=e)
                 self.central_widget.message = f"Error: {e}"
 
         # Schedule the UI update on the main thread using a single-shot timer

@@ -36,6 +36,7 @@ Import the project into PyCharm, then set it to use UV as the Python interpreter
 ## Run Configuration
 Create a new 'Python' Run Configuration:
 
+- Run: `uv (preprocessor)`
 - Module: `preprocessor.main`
-- Script parameters: `ui`
-- Before launch: Run external tool 'UV Sync' (create this external tool as described below)
+- Script parameters: `gui`
+- Before launch: Run external tool 'UV Sync' (create this external tool as described above)
