@@ -20,6 +20,7 @@ class HSVThresholdParams:
         assert 0 <= self.value_max <= 255, "value_max must be in the range [0, 255]"
 
         # Adjustment
+        # FIXME: Adjustment doesn't work because it gets overwritten immediately after by replace()
         new_hue_min = min(self.hue_min, self.hue_max)
         new_hue_max = max(self.hue_min, self.hue_max)
         self.hue_min = new_hue_min

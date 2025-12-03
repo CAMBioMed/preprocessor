@@ -32,27 +32,27 @@ class HSVThresholdModel(QObject):
 
     @property
     def hue_min(self) -> int:
-        return self._params.hue_min
+        return self.params.hue_min
 
     @hue_min.setter
     def hue_min(self, value: int) -> None:
-        if self._params.hue_min == value:
-            return
-        self._params = replace(self._params, hue_min=value)
-        self.on_hue_min_changed.emit(self._params.hue_min)
-        self.on_changed.emit()
+        # if self._params.hue_min == value:
+        #     return
+        self.params = replace(self.params, hue_min=value)
+        # self.on_hue_min_changed.emit(self._params.hue_min)
+        # self.on_changed.emit()
 
     @property
     def hue_max(self) -> int:
-        return self._params.hue_max
+        return self.params.hue_max
 
     @hue_max.setter
     def hue_max(self, value: int) -> None:
-        if self._params.hue_max == value:
-            return
-        self._params = replace(self._params, hue_max=value)
-        self.on_hue_max_changed.emit(self._params.hue_max)
-        self.on_changed.emit()
+        # if self._params.hue_max == value:
+        #     return
+        self.params = replace(self.params, hue_max=value)
+        # self.on_hue_max_changed.emit(self._params.hue_max)
+        # self.on_changed.emit()
 
     @property
     def saturation_min(self) -> int:
@@ -60,47 +60,50 @@ class HSVThresholdModel(QObject):
 
     @saturation_min.setter
     def saturation_min(self, value: int) -> None:
-        if self._params.saturation_min == value:
-            return
-        self._params = replace(self._params, saturation_min=value)
-        self.on_saturation_min_changed.emit(self._params.saturation_min)
-        self.on_changed.emit()
+        # if self._params.saturation_min == value:
+        #     return
+        self.params = replace(self.params, saturation_min=value)
+        # self.on_saturation_min_changed.emit(self._params.saturation_min)
+        # self.on_changed.emit()
 
     @property
     def saturation_max(self) -> int:
-        return self._params.saturation_max
+        return self.params.saturation_max
 
     @saturation_max.setter
     def saturation_max(self, value: int) -> None:
-        if self._params.saturation_max == value:
-            return
-        self._params = replace(self._params, saturation_max=value)
-        self.on_saturation_max_changed.emit(self._params.saturation_max)
-        self.on_changed.emit()
+        # if self._params.saturation_max == value:
+        #     return
+        self.params = replace(self.params, saturation_max=value)
+        # self.on_saturation_max_changed.emit(self._params.saturation_max)
+        # self.on_changed.emit()
 
     @property
     def value_min(self) -> int:
-        return self._params.value_min
+        return self.params.value_min
 
     @value_min.setter
     def value_min(self, value: int) -> None:
-        if self._params.value_min == value:
-            return
-        self._params = replace(self._params, value_min=value)
-        self.on_value_min_changed.emit(self._params.value_min)
-        self.on_changed.emit()
+        # if self._params.value_min == value:
+        #     return
+        self.params = replace(self.params, value_min=value)
+        # self.on_value_min_changed.emit(self._params.value_min)
+        # self.on_changed.emit()
+        # self.trigger_signals(previousParams)
 
     @property
     def value_max(self) -> int:
-        return self._params.value_max
+        return self.params.value_max
 
     @value_max.setter
     def value_max(self, value: int) -> None:
-        if self._params.value_max == value:
-            return
-        self._params = replace(self._params, value_max=value)
-        self.on_value_max_changed.emit(self._params.value_max)
-        self.on_changed.emit()
+        # if self._params.value_max == value:
+        #     return
+        # previousParams = self._params
+        self.params = replace(self.params, value_max=value)
+        # self.on_value_max_changed.emit(self._params.value_max)
+        # self.on_changed.emit()
+        # self.trigger_signals(previousParams)
 
     @property
     def params(self) -> HSVThresholdParams:
@@ -109,14 +112,32 @@ class HSVThresholdModel(QObject):
     @params.setter
     def params(self, value: HSVThresholdParams) -> None:
         # Apply the changes
+        oldValue = self._params
         self._params = value
+        self.trigger_signals(oldValue)
 
-        # Trigger the signals unconditionally
-        # (This allows us to refresh the UI by triggering all signals.)
-        self.on_hue_min_changed.emit(self._params.hue_min)
-        self.on_hue_max_changed.emit(self._params.hue_max)
-        self.on_saturation_min_changed.emit(self._params.saturation_min)
-        self.on_saturation_max_changed.emit(self._params.saturation_max)
-        self.on_value_min_changed.emit(self._params.value_min)
-        self.on_value_max_changed.emit(self._params.value_max)
-        self.on_changed.emit()
+        # # Trigger the signals unconditionally
+        # # (This allows us to refresh the UI by triggering all signals.)
+        # self.on_hue_min_changed.emit(self._params.hue_min)
+        # self.on_hue_max_changed.emit(self._params.hue_max)
+        # self.on_saturation_min_changed.emit(self._params.saturation_min)
+        # self.on_saturation_max_changed.emit(self._params.saturation_max)
+        # self.on_value_min_changed.emit(self._params.value_min)
+        # self.on_value_max_changed.emit(self._params.value_max)
+        # self.on_changed.emit()
+
+    def trigger_signals(self, previous: HSVThresholdParams | None) -> None:
+        if not previous or self._params.hue_min != previous.hue_min:
+            self.on_hue_min_changed.emit(self._params.hue_min)
+        if not previous or self._params.hue_max != previous.hue_max:
+            self.on_hue_max_changed.emit(self._params.hue_max)
+        if not previous or self._params.saturation_min != previous.saturation_min:
+            self.on_saturation_min_changed.emit(self._params.saturation_min)
+        if not previous or self._params.saturation_max != previous.saturation_max:
+            self.on_saturation_max_changed.emit(self._params.saturation_max)
+        if not previous or self._params.value_min != previous.value_min:
+            self.on_value_min_changed.emit(self._params.value_min)
+        if not previous or self._params.value_max != previous.value_max:
+            self.on_value_max_changed.emit(self._params.value_max)
+        if not previous or self._params != previous:
+            self.on_changed.emit()
