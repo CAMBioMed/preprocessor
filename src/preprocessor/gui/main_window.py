@@ -216,11 +216,12 @@ class MainWindow(QMainWindow):
         self.restoreState(cast(QByteArray, self.settings.value("windowState", QByteArray())))
 
     def on_file_open(self) -> None:
-        path = QFileDialog.getOpenFileName(self, "Open")[0]
-        if not path:
+        # Support opening multiple files
+        paths, _ = QFileDialog.getOpenFileNames(self, "Open Images")
+        if not paths:
             return
         # Append
-        self.thumbnail_dock.model.image_paths = self.thumbnail_dock.model.image_paths + [path]
+        self.thumbnail_dock.model.image_paths = self.thumbnail_dock.model.image_paths + paths
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
