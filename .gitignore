@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+.qtcreator/
 
 # Virtual environments
 .venv

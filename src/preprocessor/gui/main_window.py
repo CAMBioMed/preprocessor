@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 from cv2.typing import MatLike
 
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.hsv_threshold_widget import HSVThresholdWidget
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.main_window_model import MainWindowModel
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
@@ -182,6 +183,10 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.properties_dock)
 
         self.properties_dock.model.on_changed.connect(self._on_parameter_change)
+
+        self.hsv_threshold_widget = HSVThresholdWidget(self.properties_dock.ui.scrollAreaWidgetContents)
+        self.properties_dock.ui.layoutScrollAreaPropertiesDock.addWidget(self.hsv_threshold_widget, 7, 0, 1, 1)
+
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
