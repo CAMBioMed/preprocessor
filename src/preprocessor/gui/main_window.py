@@ -198,8 +198,7 @@ class MainWindow(QMainWindow):
             Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea
         )
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.thumbnail_dock)
-
-
+        self.thumbnail_dock.on_thumbnail_selected.connect(self._display_image)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
@@ -218,9 +217,10 @@ class MainWindow(QMainWindow):
 
     def on_file_open(self) -> None:
         path = QFileDialog.getOpenFileName(self, "Open")[0]
-        if path:
-            self._display_image(str(path))
-        self.thumbnail_dock.add_thumbnail(str(path), "Img!")
+        if not path:
+            return
+        # Append
+        self.thumbnail_dock.model.image_paths = self.thumbnail_dock.model.image_paths + [path]
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
