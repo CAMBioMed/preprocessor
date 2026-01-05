@@ -29,7 +29,9 @@ class QuadratDetectionResult:
     final: MatLike | None
     debug: MatLike | None
     scale: float = 1.0
-    corners: list[Point2f] = None
+
+    corners: list[Point2f] | None = None
+    """Corners clockwise from the top-left."""
 
 
 def detect_quadrat(
@@ -64,6 +66,7 @@ def detect_quadrat(
 
     if params.find_contour.enabled:
         debug_img = _find_contours(img, debug_img, params.find_contour)
+
 
     return QuadratDetectionResult(original_img, img, original_img, debug_img, scale, corners)
 
@@ -226,7 +229,7 @@ def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> tuple[MatLi
     return (debug_img, result)
 
 
-def _find_corners(lines: list[Line], debug_img: MatLike, scale: float = 1.0) -> list[Point2f]:
+def _find_corners(lines: list[Line], debug_img: MatLike, scale: float = 1.0, draw_debug: bool = True) -> list[Point2f]:
     """Find corners from the detected lines."""
     logger.debug("Finding corners from lines...")
     corners: list[Point2f] = []
@@ -305,13 +308,19 @@ def _find_corners(lines: list[Line], debug_img: MatLike, scale: float = 1.0) -> 
     # sort each pair by x
     tl, tr = top[top[:, 0].argsort()]
     bl, br = bottom[bottom[:, 0].argsort()]
-    ordered_corners = np.array([tl, tr, bl, br])
+    ordered_corners = np.array([tl, tr, br, bl])  # Clockwise from the top-left
 
     for c in ordered_corners:
         cv2.circle(debug_img, (c[0], c[1]), 2, (0, 255, 0, 255), -1)
 
     def to_tuple(p: np.ndarray) -> tuple[int, int]:
         return int(p[0]), int(p[1])
+
+    if draw_debug and len(ordered_corners) > 1:
+        for i in range(len(ordered_corners)):
+            pt1 = (int(ordered_corners[i][0]), int(ordered_corners[i][1]))
+            pt2 = (int(ordered_corners[(i + 1) % 4][0]), int(ordered_corners[(i + 1) % 4][1]))
+            cv2.line(debug_img, pt1, pt2, (255, 0, 255), 2, cv2.LINE_AA)
 
     # Scale all corners back to original image size
     unscaled_corners = ordered_corners / scale
