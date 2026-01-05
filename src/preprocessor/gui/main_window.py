@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QToolBar,
     QWidget,
-    QFileDialog,
+    QFileDialog, QDockWidget, QListWidget, QVBoxLayout, QGridLayout,
 )
 from cv2.typing import MatLike
 
@@ -21,6 +21,7 @@ from preprocessor.gui.hsv_threshold_widget import HSVThresholdWidget
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.main_window_model import MainWindowModel
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
+from preprocessor.gui.thumbnail_list_widget import ThumbnailListWidget
 from preprocessor.processing.detect_quadrat import detect_quadrat, QuadratDetectionResult
 from preprocessor.processing.fix_perspective import fix_perspective
 from preprocessor.processing.load_image import load_image
@@ -40,6 +41,8 @@ class MainWindow(QMainWindow):
 
     properties_dock: PropertiesDockWidget
     """The dock widget showing properties."""
+    thumbnail_dock: ThumbnailListWidget
+    """The dock widget showing image thumbnails."""
     central_widget: QImageEditor
     """The central widget showing the image."""
     _debounce_timer: QTimer
@@ -57,6 +60,7 @@ class MainWindow(QMainWindow):
         self.create_toolbar()
         self.create_central_widget()
         self.create_properties_dock()
+        self.create_thumbnail_list()
         self.create_statusbar()
 
         self.model = MainWindowModel()
@@ -187,6 +191,15 @@ class MainWindow(QMainWindow):
         self.hsv_threshold_widget = HSVThresholdWidget(self.properties_dock.ui.scrollAreaWidgetContents)
         self.properties_dock.ui.layoutScrollAreaPropertiesDock.addWidget(self.hsv_threshold_widget, 7, 0, 1, 1)
 
+    def create_thumbnail_list(self) -> None:
+        """Create the thumbnail list dock widget."""
+        self.thumbnail_dock = ThumbnailListWidget()
+        self.thumbnail_dock.setAllowedAreas(
+            Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea
+        )
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.thumbnail_dock)
+
+
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
@@ -207,6 +220,7 @@ class MainWindow(QMainWindow):
         path = QFileDialog.getOpenFileName(self, "Open")[0]
         if path:
             self._display_image(str(path))
+        self.thumbnail_dock.add_thumbnail(str(path), "Img!")
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
