@@ -31,6 +31,8 @@ from preprocessor.gui.worker import Worker, WorkerManager
 
 from qimage2ndarray import array2qimage
 
+from preprocessor.processing.save_image import save_image
+
 logger = logging.getLogger(__name__)
 
 
@@ -97,6 +99,12 @@ class MainWindow(QMainWindow):
         open_action.setShortcut(QKeySequence.StandardKey.Open)
         file_menu.addAction(open_action)
 
+        save_action = QAction("&Save", self)
+        save_action.setStatusTip("Save the processed image")
+        save_action.triggered.connect(self.on_file_save)
+        save_action.setShortcut(QKeySequence.StandardKey.Save)
+        file_menu.addAction(save_action)
+
         exit_action = QAction("&Exit", self)
         exit_action.setStatusTip("Exit the application")
         exit_action.triggered.connect(self.close)
@@ -131,6 +139,13 @@ class MainWindow(QMainWindow):
         open_button.triggered.connect(self.on_file_open)
         open_button.setCheckable(False)
         toolbar.addAction(open_button)
+
+        save_button_icon = QIcon("src/preprocessor/icons/fugue16/disk-black.png")
+        save_button = QAction(save_button_icon, "&Save", self)
+        save_button.setStatusTip("Save the processed image")
+        save_button.triggered.connect(self.on_file_save)
+        save_button.setCheckable(False)
+        toolbar.addAction(save_button)
 
         toolbar.addSeparator()
 
@@ -223,11 +238,32 @@ class MainWindow(QMainWindow):
         # Append
         self.thumbnail_dock.model.image_paths = self.thumbnail_dock.model.image_paths + paths
 
+    def on_file_save(self) -> None:
+        current_image_path = self._current_image_path
+        if not current_image_path:
+            return
+        # New image path has the `-processed` suffix
+        new_image_path_parts = current_image_path.rsplit(".", 1)
+        new_image_path: str
+        if len(new_image_path_parts) == 2:
+            new_image_path = f"{new_image_path_parts[0]}-processed.{new_image_path_parts[1]}"
+        else:
+            new_image_path = f"{current_image_path}-processed"
+        current_result = self._current_image_result
+        if current_result is None:
+            return
+        save_path, _ = QFileDialog.getSaveFileName(self, "Save Processed Image", new_image_path)
+        if not save_path:
+            return
+        save_image(save_path, current_result)
+
     def on_help_about(self) -> None:
         show_about_dialog(self)
 
     _current_image_path: str | None = None
     """Path to the currently displayed image, or None."""
+    _current_image_result: QuadratDetectionResult | None = None
+    """The result of processing the current image, or None."""
     _latest_token: int = 0
     """Token to identify the latest processing request."""
     _worker_manager: WorkerManager = WorkerManager()
@@ -257,7 +293,9 @@ class MainWindow(QMainWindow):
 
         @Slot()
         def act(progress_callback: Signal) -> QuadratDetectionResult:
-            return self._process_image(image_path, params, progress_callback)
+            result = self._process_image(image_path, params, progress_callback)
+            self._current_image_result = result
+            return result
 
         # logger.debug(f"Refcount on_result pre: {sys.getrefcount(on_result)}")
         # logger.debug(f"Refcount on_progress pre: {sys.getrefcount(on_progress)}")
