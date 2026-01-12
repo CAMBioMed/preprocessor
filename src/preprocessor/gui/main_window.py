@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QToolBar,
     QWidget,
-    QFileDialog, QDockWidget, QListWidget, QVBoxLayout, QGridLayout,
+    QFileDialog, QDockWidget, QListWidget, QVBoxLayout, QGridLayout, QProgressDialog,
 )
 from cv2.typing import MatLike
 
@@ -269,7 +269,7 @@ class MainWindow(QMainWindow):
             try:
                 # Synchronously process image using current parameters.
                 params = self.properties_dock.model.params
-                result = self._process_image(current_image_path, params, lambda *_: None)
+                result = self._process_image(current_image_path, params, None)
                 # If processing produced no usable processed image, abort save.
                 if result is None or getattr(result, "processed", None) is None:
                     logger.debug(f"No processed result for {current_image_path}; aborting save.")
@@ -298,39 +298,75 @@ class MainWindow(QMainWindow):
         if not save_path:
             return
         image_paths = self.thumbnail_dock.model.image_paths
+        if not image_paths:
+            return
+
         params = self.properties_dock.model.params
         import os
-        for image_path in image_paths:
-            # Ensure we have a processed result; compute synchronously if missing
-            result = self.thumbnail_dock.model.get_result_for_path(image_path)
-            if result is None or getattr(result, "processed", None) is None:
-                try:
-                    result = self._process_image(image_path, params, lambda *_: None)
-                    if result is None or getattr(result, "processed", None) is None:
-                        logger.debug(f"Skipping save for {image_path}: processing failed or produced no processed image")
-                        continue
-                    try:
-                        self.thumbnail_dock.model.set_result_for_path(image_path, result)
-                    except Exception:
-                        logger.exception("Failed to store result in thumbnail model after synchronous processing")
-                except Exception:
-                    logger.exception(f"Synchronous processing for {image_path} failed")
-                    continue
 
-            # New image path has the `-processed` suffix
-            image_path_parts = image_path.rsplit(".", 1)
-            if len(image_path_parts) == 2:
-                new_image_path = f"{image_path_parts[0]}-processed.{image_path_parts[1]}"
-            else:
-                new_image_path = f"{image_path}-processed"
-            # Construct full save path
-            filename = os.path.basename(new_image_path)
-            full_save_path = os.path.join(save_path, filename)
+        total = len(image_paths)
+        progress = QProgressDialog("Processing and saving images...", "Cancel", 0, total, self)
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.setValue(0)
+
+        try:
+            for idx, image_path in enumerate(image_paths):
+                # handle cancellation
+                if progress.wasCanceled():
+                    logger.debug("Save-all cancelled by user")
+                    break
+
+                filename = os.path.basename(image_path)
+                progress.setLabelText(f"Processing {filename} ({idx + 1}/{total})")
+                # Keep UI responsive
+                QApplication.processEvents()
+
+                # Ensure we have a processed result; compute synchronously if missing
+                result = self.thumbnail_dock.model.get_result_for_path(image_path)
+                if result is None or getattr(result, "processed", None) is None:
+                    try:
+                        result = self._process_image(image_path, params, None)
+                        if result is None or getattr(result, "processed", None) is None:
+                            logger.debug(f"Skipping save for {image_path}: processing failed or produced no processed image")
+                            progress.setValue(idx + 1)
+                            continue
+                        try:
+                            self.thumbnail_dock.model.set_result_for_path(image_path, result)
+                        except Exception:
+                            logger.exception("Failed to store result in thumbnail model after synchronous processing")
+                    except Exception:
+                        logger.exception(f"Synchronous processing for {image_path} failed")
+                        progress.setValue(idx + 1)
+                        continue
+
+                # New image path has the `-processed` suffix
+                image_path_parts = image_path.rsplit(".", 1)
+                if len(image_path_parts) == 2:
+                    new_image_path = f"{image_path_parts[0]}-processed.{image_path_parts[1]}"
+                else:
+                    new_image_path = f"{image_path}-processed"
+
+                # Construct full save path and save
+                filename_out = os.path.basename(new_image_path)
+                full_save_path = os.path.join(save_path, filename_out)
+                try:
+                    save_image(full_save_path, result)
+                    logger.debug(f"Saved processed image to {full_save_path}")
+                except Exception as e:
+                    logger.error(f"Failed to save processed image to {full_save_path}", exc_info=e)
+
+                # advance progress and keep UI responsive
+                progress.setValue(idx + 1)
+                QApplication.processEvents()
+
+        finally:
+            progress.close()
             try:
-                save_image(full_save_path, result)
-                logger.debug(f"Saved processed image to {full_save_path}")
-            except Exception as e:
-                logger.error(f"Failed to save processed image to {full_save_path}", exc_info=e)
+                # Clear any transient message
+                self.central_widget.message = ""
+            except Exception:
+                pass
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
@@ -393,7 +429,7 @@ class MainWindow(QMainWindow):
         self._worker_manager.start(worker)
 
     def _process_image(
-        self, image_path: str | None, params: QuadratDetectionParams, _progress_callback: Signal
+        self, image_path: str | None, params: QuadratDetectionParams, _progress_callback: Signal | None
     ) -> QuadratDetectionResult:
         """Process the image and return it."""
         if not image_path:
