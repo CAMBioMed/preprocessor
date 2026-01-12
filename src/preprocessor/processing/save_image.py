@@ -1,9 +1,11 @@
 import logging
+from typing import Sequence, TypeVar
 
 import cv2
-from cv2.typing import MatLike
+from cv2.typing import MatLike, Point2f
 
 from preprocessor.processing.detect_quadrat import QuadratDetectionResult
+from preprocessor.processing.json import serialize_photo_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +33,7 @@ def save_image(path: str, result: QuadratDetectionResult, quality: int = 95, is_
 
     # Save JSON file with parameters
     json_path = f"{path}.json"
-    json_data = {
-        "quality": q,
-        "detection": {
-            "corners": list(result.corners),
-        }
-    }
+    json_data = serialize_photo_metadata(result, q)
     ok = _write_json_file(json_path, json_data)
 
     return ok

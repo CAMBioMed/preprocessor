@@ -343,6 +343,7 @@ class MainWindow(QMainWindow):
                 processed=result.processed,
                 final=final_img,
                 debug=result.debug,
+                corners=result.corners,
             )
         return result
 
