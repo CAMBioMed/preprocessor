@@ -139,18 +139,25 @@ class MainWindow(QMainWindow):
 
         # open_button_icon = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.FolderOpen))
         open_button_icon = QIcon("src/preprocessor/icons/fugue16/folder-open-image.png")
-        open_button = QAction(open_button_icon, "&Open", self)
+        open_button = QAction(open_button_icon, "&Open...", self)
         open_button.setStatusTip("Open an image")
         open_button.triggered.connect(self.on_file_open)
         open_button.setCheckable(False)
         toolbar.addAction(open_button)
 
         save_button_icon = QIcon("src/preprocessor/icons/fugue16/disk-black.png")
-        save_button = QAction(save_button_icon, "&Save", self)
+        save_button = QAction(save_button_icon, "&Save...", self)
         save_button.setStatusTip("Save the processed image")
         save_button.triggered.connect(self.on_file_save)
         save_button.setCheckable(False)
         toolbar.addAction(save_button)
+
+        save_all_button_icon = QIcon("src/preprocessor/icons/fugue16/disks-black.png")
+        save_all_button = QAction(save_all_button_icon, "Save &All...", self)
+        save_all_button.setStatusTip("Save all processed images")
+        save_all_button.triggered.connect(self.on_file_save_all)
+        save_all_button.setCheckable(False)
+        toolbar.addAction(save_all_button)
 
         toolbar.addSeparator()
 
