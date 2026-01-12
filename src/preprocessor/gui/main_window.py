@@ -93,17 +93,22 @@ class MainWindow(QMainWindow):
 
         file_menu = menu.addMenu("&File")
 
-        open_action = QAction("&Open", self)
+        open_action = QAction("&Open...", self)
         open_action.setStatusTip("Open an image")
         open_action.triggered.connect(self.on_file_open)
         open_action.setShortcut(QKeySequence.StandardKey.Open)
         file_menu.addAction(open_action)
 
-        save_action = QAction("&Save", self)
+        save_action = QAction("&Save...", self)
         save_action.setStatusTip("Save the processed image")
         save_action.triggered.connect(self.on_file_save)
         save_action.setShortcut(QKeySequence.StandardKey.Save)
         file_menu.addAction(save_action)
+
+        save_all_action = QAction("Save &All...", self)
+        save_all_action.setStatusTip("Save all processed images")
+        save_all_action.triggered.connect(self.on_file_save_all)
+        file_menu.addAction(save_all_action)
 
         exit_action = QAction("&Exit", self)
         exit_action.setStatusTip("Exit the application")
@@ -257,6 +262,33 @@ class MainWindow(QMainWindow):
         if not save_path:
             return
         save_image(save_path, current_result)
+
+    def on_file_save_all(self) -> None:
+        save_path = QFileDialog.getExistingDirectory(self, "Select Directory to Save All Processed Images")
+        if not save_path:
+            return
+        image_paths = self.thumbnail_dock.model.image_paths
+        for image_path in image_paths:
+            result = self.thumbnail_dock.model.get_result_for_path(image_path)
+            if result is None:
+                logger.debug(f"Skipping save for {image_path}: no result")
+                continue
+            # New image path has the `-processed` suffix
+            image_path_parts = image_path.rsplit(".", 1)
+            new_image_path: str
+            if len(image_path_parts) == 2:
+                new_image_path = f"{image_path_parts[0]}-processed.{image_path_parts[1]}"
+            else:
+                new_image_path = f"{image_path}-processed"
+            # Construct full save path
+            import os
+            filename = os.path.basename(new_image_path)
+            full_save_path = os.path.join(save_path, filename)
+            try:
+                save_image(full_save_path, result)
+                logger.debug(f"Saved processed image to {full_save_path}")
+            except Exception as e:
+                logger.error(f"Failed to save processed image to {full_save_path}", exc_info=e)
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
