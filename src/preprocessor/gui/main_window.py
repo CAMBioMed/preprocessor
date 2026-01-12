@@ -213,6 +213,7 @@ class MainWindow(QMainWindow):
             Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea
         )
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.thumbnail_dock)
+        # When a thumbnail is selected, either show stored result or schedule processing
         self.thumbnail_dock.on_thumbnail_selected.connect(self._display_image)
 
     def closeEvent(self, event: QCloseEvent) -> None:
@@ -269,8 +270,15 @@ class MainWindow(QMainWindow):
     _worker_manager: WorkerManager = WorkerManager()
 
     def _display_image(self, image_path: str) -> None:
-        """Schedule background processing of the image and show the result when ready."""
+        """Display the image: show stored result if available, otherwise schedule processing."""
         self._current_image_path = str(image_path)
+        # Check model for existing result
+        stored = self.thumbnail_dock.model.get_result_for_path(self._current_image_path)
+        if stored is not None and getattr(stored, "processed", None) is not None:
+            # Use stored result directly
+            self._current_image_result = stored
+            self._display_result(stored)
+            return
         # schedule background processing
         self._schedule_processing(self._current_image_path)
 
@@ -285,7 +293,8 @@ class MainWindow(QMainWindow):
 
         @Slot(object)
         def on_result(result: QuadratDetectionResult) -> None:
-            self._on_process_image_finished(result, token)
+            # pass image_path along so we can store result for the right path
+            self._on_process_image_finished(result, token, image_path)
 
         @Slot(float)
         def on_progress(p: float) -> None:
@@ -293,21 +302,13 @@ class MainWindow(QMainWindow):
 
         @Slot()
         def act(progress_callback: Signal) -> QuadratDetectionResult:
+            # Do not set UI state here (worker thread). Return the result to main thread.
             result = self._process_image(image_path, params, progress_callback)
-            self._current_image_result = result
             return result
-
-        # logger.debug(f"Refcount on_result pre: {sys.getrefcount(on_result)}")
-        # logger.debug(f"Refcount on_progress pre: {sys.getrefcount(on_progress)}")
-        # logger.debug(f"Refcount act pre: {sys.getrefcount(act)}")
 
         worker = Worker(act)
         worker.signals.result.connect(on_result)
         worker.signals.progress.connect(on_progress)
-
-        # logger.debug(f"Refcount on_result post: {sys.getrefcount(on_result)}")
-        # logger.debug(f"Refcount on_progress post: {sys.getrefcount(on_progress)}")
-        # logger.debug(f"Refcount act post: {sys.getrefcount(act)}")
 
         try:
             # Clear pixmap and show small text so users know processing is happening
@@ -315,9 +316,7 @@ class MainWindow(QMainWindow):
             self.central_widget.message = "Processing..."
         except Exception:
             pass
-        # logger.debug(f"Refcount worker pre: {sys.getrefcount(worker)}")
         self._worker_manager.start(worker)
-        # logger.debug(f"Refcount worker post: {sys.getrefcount(worker)}")
 
     def _process_image(
         self, image_path: str | None, params: QuadratDetectionParams, _progress_callback: Signal
@@ -366,9 +365,35 @@ class MainWindow(QMainWindow):
         # Combine masked background image and overlay image
         return cv2.bitwise_or(base_masked, overlay_rgb)
 
-    def _on_process_image_finished(self, result: QuadratDetectionResult, token: int) -> None:
+    def _display_result(self, result: QuadratDetectionResult) -> None:
+        """Display a given processing result in the central widget (main thread)."""
+        if result is None or result.processed is None:
+            logger.debug("Display skipped: no result")
+            return
+
+        try:
+            display_img: MatLike | None
+            if self.view_original_button.isChecked():
+                display_img = result.original
+            elif self.view_processed_button.isChecked():
+                display_img = result.processed
+            elif self.view_debug_button.isChecked():
+                display_img = result.debug
+            elif self.view_final_button.isChecked():
+                display_img = result.final
+            else:
+                display_img = None  # will be handled below
+
+            qimg = array2qimage(display_img)
+            qpixmap = QtGui.QPixmap.fromImage(qimg)
+            self.central_widget.pixmap = qpixmap
+            self.central_widget.message = ""
+        except Exception as e:
+            logger.error("Error displaying image", exc_info=e)
+            self.central_widget.message = f"Error: {e}"
+
+    def _on_process_image_finished(self, result: QuadratDetectionResult, token: int, image_path: str | None) -> None:
         """Handle worker finished processing the image."""
-        # logger.debug("Finishing processing...")
         # Only update the display if this is the latest request
         if token != self._latest_token:
             logger.debug("Finishing processing, skipped: not latest")
@@ -378,59 +403,23 @@ class MainWindow(QMainWindow):
             logger.debug("Finishing processing, skipped: no result")
             return
 
-        def apply() -> None:
+        # Store result in the thumbnail model for this path (so subsequent clicks reuse it)
+        if image_path:
             try:
-                # logger.debug("Combining images...")
+                self.thumbnail_dock.model.set_result_for_path(image_path, result)
+            except Exception:
+                logger.exception("Failed to store result in thumbnail model")
 
-                display_img: MatLike | None
-                if self.view_original_button.isChecked():
-                    display_img = result.original
-                elif self.view_processed_button.isChecked():
-                    display_img = result.processed
-                elif self.view_debug_button.isChecked():
-                    display_img = result.debug
-                elif self.view_final_button.isChecked():
-                    display_img = result.final
-                else:
-                    display_img = None  # will be handled below
-                #
-                # if (
-                #     display_img is not None
-                #     and self.view_debug_button.isChecked()
-                #     and result.debug is not None
-                # ):
-                #     debug_img = result.debug
-                #     # Overlay debug image on display image
-                #     if self.view_processed_button.isChecked():
-                #         bgr_img = cv2.cvtColor(display_img, cv2.COLOR_GRAY2BGR)
-                #     elif self.view_final_button.isChecked():
-                #         bgr_img = debug_img
-                #     else:
-                #         bgr_img = display_img
-                #     display_img = self._overlay_image(bgr_img, debug_img)
+        # Update current pointers
+        self._current_image_result = result
 
-                # logger.debug("Converting image...")
-                qimg = array2qimage(display_img)
-                # h, w = result.shape[:2]
-                # bytes_per_line = result.strides[0]
-                # self._image_ref = result
-                # qformat = QtGui.QImage.Format.Format_Grayscale8
-                # qimg = QtGui.QImage(self._image_ref.data, w, h, bytes_per_line, qformat)
-                # logger.debug("Converted image")
+        # Display result (we are already on main thread because signal handlers run on main)
+        try:
+            self._display_result(result)
+        except Exception as e:
+            logger.error("Error scheduling display", exc_info=e)
+            self.central_widget.message = f"Error: {e}"
 
-                # logger.debug("Displaying image...")
-                qpixmap = QtGui.QPixmap.fromImage(qimg)
-                self.central_widget.pixmap = qpixmap
-                self.central_widget.message = ""
-                # logger.debug("Displayed image.")
-            except Exception as e:
-                logger.error("Error displaying image", exc_info=e)
-                self.central_widget.message = f"Error: {e}"
-
-        # Schedule the UI update on the main thread using a single-shot timer
-        # logger.debug("Scheduling display on UI...")
-        QtCore.QTimer.singleShot(0, apply)
-        logger.debug("Scheduled display on UI")
 
 
 def sigint_handler(*_args: Any) -> None:

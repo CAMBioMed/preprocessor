@@ -33,13 +33,18 @@ class ThumbnailListWidget(QDockWidget):
             for image_path in self.model.image_paths:
                 label = image_path.split("/")[-1]  # Use filename as label
                 item = QListWidgetItem(QIcon(image_path), label)
+                # store path explicitly on the item for robust retrieval
+                item.setData(Qt.ItemDataRole.UserRole, image_path)
                 self.thumbnail_list.addItem(item)
 
         self.model.on_image_paths_changed.connect(_update_thumbnails)
 
         def _on_item_clicked(item: QListWidgetItem) -> None:
-            index = self.thumbnail_list.row(item)
-            image_path = self.model.image_paths[index]
+            # Prefer the stored UserRole path; fallback to row lookup
+            image_path = item.data(Qt.ItemDataRole.UserRole)
+            if not image_path:
+                index = self.thumbnail_list.row(item)
+                image_path = self.model.image_paths[index]
             self.on_thumbnail_selected.emit(image_path)
 
         self.thumbnail_list.itemClicked.connect(_on_item_clicked)
