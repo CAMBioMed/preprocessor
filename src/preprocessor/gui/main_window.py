@@ -262,7 +262,30 @@ class MainWindow(QMainWindow):
             new_image_path = f"{new_image_path_parts[0]}-processed.{new_image_path_parts[1]}"
         else:
             new_image_path = f"{current_image_path}-processed"
+
+        # If no result is available, compute it first (synchronously)
         current_result = self._current_image_result
+        if current_result is None:
+            try:
+                # Synchronously process image using current parameters.
+                params = self.properties_dock.model.params
+                result = self._process_image(current_image_path, params, lambda *_: None)
+                # If processing produced no usable processed image, abort save.
+                if result is None or getattr(result, "processed", None) is None:
+                    logger.debug(f"No processed result for {current_image_path}; aborting save.")
+                    return
+                # Store result for future clicks/saves
+                try:
+                    self.thumbnail_dock.model.set_result_for_path(current_image_path, result)
+                except Exception:
+                    logger.exception("Failed to store result in thumbnail model after synchronous processing")
+                # Update current pointers so UI reflects the new result
+                self._current_image_result = result
+                current_result = result
+            except Exception:
+                logger.exception("Synchronous processing for save failed")
+                return
+
         if current_result is None:
             return
         save_path, _ = QFileDialog.getSaveFileName(self, "Save Processed Image", new_image_path)
@@ -275,20 +298,32 @@ class MainWindow(QMainWindow):
         if not save_path:
             return
         image_paths = self.thumbnail_dock.model.image_paths
+        params = self.properties_dock.model.params
+        import os
         for image_path in image_paths:
+            # Ensure we have a processed result; compute synchronously if missing
             result = self.thumbnail_dock.model.get_result_for_path(image_path)
-            if result is None:
-                logger.debug(f"Skipping save for {image_path}: no result")
-                continue
+            if result is None or getattr(result, "processed", None) is None:
+                try:
+                    result = self._process_image(image_path, params, lambda *_: None)
+                    if result is None or getattr(result, "processed", None) is None:
+                        logger.debug(f"Skipping save for {image_path}: processing failed or produced no processed image")
+                        continue
+                    try:
+                        self.thumbnail_dock.model.set_result_for_path(image_path, result)
+                    except Exception:
+                        logger.exception("Failed to store result in thumbnail model after synchronous processing")
+                except Exception:
+                    logger.exception(f"Synchronous processing for {image_path} failed")
+                    continue
+
             # New image path has the `-processed` suffix
             image_path_parts = image_path.rsplit(".", 1)
-            new_image_path: str
             if len(image_path_parts) == 2:
                 new_image_path = f"{image_path_parts[0]}-processed.{image_path_parts[1]}"
             else:
                 new_image_path = f"{image_path}-processed"
             # Construct full save path
-            import os
             filename = os.path.basename(new_image_path)
             full_save_path = os.path.join(save_path, filename)
             try:
