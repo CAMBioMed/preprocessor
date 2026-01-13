@@ -59,6 +59,36 @@ class PhotoModel(QObject):
             self.on_blue_shift_changed.emit()
             self.on_changed.emit()
 
+    _camera_matrix: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None = None
+    on_camera_matrix_changed: Signal = Signal()
+
+    @property
+    def camera_matrix(self) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
+        """3x3 camera matrix or None."""
+        return self._camera_matrix
+
+    @camera_matrix.setter
+    def camera_matrix(self, value: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None) -> None:
+        if self._camera_matrix != value:
+            self._camera_matrix = value
+            self.on_camera_matrix_changed.emit()
+            self.on_changed.emit()
+
+    _distortion_coefficients: tuple[Point2f, ...] | None = None
+    on_distortion_coefficients_changed: Signal = Signal()
+
+    @property
+    def distortion_coefficients(self) -> tuple[Point2f, ...] | None:
+        """Sequence of distortion coefficients as Point2f or None."""
+        return self._distortion_coefficients
+
+    @distortion_coefficients.setter
+    def distortion_coefficients(self, value: tuple[Point2f, ...] | None) -> None:
+        if self._distortion_coefficients != value:
+            self._distortion_coefficients = value
+            self.on_distortion_coefficients_changed.emit()
+            self.on_changed.emit()
+
     def serialize(self) -> dict:
         """
         Serialize this PhotoModel into basic Python types suitable for JSON.
@@ -66,10 +96,14 @@ class PhotoModel(QObject):
         qc = [[float(x), float(y)] for (x, y) in self.quadrat_corners] if self.quadrat_corners is not None else None
         rs = [float(self._red_shift[0]), float(self._red_shift[1])] if self._red_shift is not None else None
         bs = [float(self._blue_shift[0]), float(self._blue_shift[1])] if self._blue_shift is not None else None
+        cm = [[float(v) for v in row] for row in self._camera_matrix] if self._camera_matrix is not None else None
+        dc = [[float(x), float(y)] for (x, y) in self._distortion_coefficients] if self._distortion_coefficients is not None else None
         return {
             "quadrat_corners": qc,
             "red_shift": rs,
             "blue_shift": bs,
+            "camera_matrix": cm,
+            "distortion_coefficients": dc,
         }
 
     def deserialize(self, data: dict) -> None:
@@ -110,3 +144,28 @@ class PhotoModel(QObject):
                 self.blue_shift = bs
             else:
                 self.blue_shift = None
+
+        if "camera_matrix" in data:
+            cm_raw = data.get("camera_matrix", None)
+            if cm_raw is not None:
+                try:
+                    cm_rows = [tuple(float(v) for v in row) for row in cm_raw]  # type: ignore[arg-type]
+                except Exception:
+                    raise ValueError("camera_matrix must be a 3x3 numeric structure or None")
+                if len(cm_rows) != 3 or any(len(r) != 3 for r in cm_rows):
+                    raise ValueError("camera_matrix must be 3x3")
+                self.camera_matrix = (cm_rows[0], cm_rows[1], cm_rows[2])  # type: ignore[arg-type]
+            else:
+                self.camera_matrix = None
+
+        if "distortion_coefficients" in data:
+            d_raw = data.get("distortion_coefficients", None)
+            if d_raw is not None:
+                try:
+                    dc = tuple((float(pt[0]), float(pt[1])) for pt in d_raw)  # type: ignore[arg-type]
+                except Exception:
+                    raise ValueError("distortion_coefficients must be a sequence of [x,y] pairs or None")
+                self.distortion_coefficients = dc
+            else:
+                self.distortion_coefficients = None
+
