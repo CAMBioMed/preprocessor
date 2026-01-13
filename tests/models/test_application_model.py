@@ -1,5 +1,7 @@
 import unittest
 
+from PySide6.QtCore import Slot
+
 from preprocessor.model.model import ProjectModel
 
 
@@ -13,13 +15,15 @@ class TestApplicationModel(unittest.TestCase):
         app_model = ApplicationModel()
 
         raised_on_changed = False
+        @Slot()
         def handle_on_changed() -> None:
             nonlocal raised_on_changed
             raised_on_changed = True
         app_model.on_changed.connect(handle_on_changed)
 
         raised_on_current_project_changed = None
-        def handle_on_current_project_changed(project: object) -> None:
+        @Slot(object)
+        def handle_on_current_project_changed(project: ProjectModel) -> None:
             nonlocal raised_on_current_project_changed
             raised_on_current_project_changed = project
         app_model.on_current_project_changed.connect(handle_on_current_project_changed)
@@ -32,7 +36,7 @@ class TestApplicationModel(unittest.TestCase):
         self.assertEqual(raised_on_changed, False)
         self.assertEqual(raised_on_current_project_changed, None)
 
-        # Act
+        # Act: Set current_project to project_model0
         raised_on_changed = False
         app_model.current_project = project_model0
 
@@ -42,7 +46,7 @@ class TestApplicationModel(unittest.TestCase):
         self.assertEqual(raised_on_changed, True)
         self.assertEqual(raised_on_current_project_changed, project_model0)
 
-        # Act
+        # Act: Set current_project to project_model1
         raised_on_changed = False
         project_model1 = ProjectModel()
         app_model.current_project = project_model1
@@ -54,7 +58,7 @@ class TestApplicationModel(unittest.TestCase):
         self.assertEqual(raised_on_changed, True)
         self.assertEqual(raised_on_current_project_changed, project_model1)
 
-        # Act
+        # Act: Set current_project to None
         raised_on_changed = False
         app_model.current_project = None
 
