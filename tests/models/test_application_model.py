@@ -2,15 +2,13 @@ import unittest
 
 from PySide6.QtCore import Slot
 
+from preprocessor.model.model import ApplicationModel
 from preprocessor.model.model import ProjectModel
 
 
 
 class TestApplicationModel(unittest.TestCase):
     def test_current_project(self) -> None:
-        # Imports
-        from preprocessor.model.model import ApplicationModel
-
         # Arrange
         app_model = ApplicationModel()
 

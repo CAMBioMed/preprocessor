@@ -1,6 +1,20 @@
 import dataclasses
 
 from PySide6.QtCore import QObject, Signal
+from PySide6.QtWidgets import QListWidget
+
+
+class PhotoModel(QObject):
+    """
+    The model for a single photo in the project.
+
+    This includes photo-specific settings.
+    """
+
+    on_changed: Signal = Signal()
+
+    def __init__(self) -> None:
+        super().__init__()
 
 
 class ProjectModel(QObject):
@@ -15,6 +29,18 @@ class ProjectModel(QObject):
     def __init__(self) -> None:
         super().__init__()
 
+    _photos: QList[PhotoModel] = dataclasses.field(default_factory=list)
+    on_photos_changed: Signal = Signal()
+
+    @property
+    def photos(self) -> QList[PhotoModel]:
+        """The list of photos in the project."""
+        x = QListWidget()
+        x.findChildren()
+        return self._photos
+
+
+
 
 class ApplicationModel(QObject):
     """
@@ -24,9 +50,6 @@ class ApplicationModel(QObject):
     """
 
     on_changed: Signal = Signal()
-
-    # def _handle_changed(self) -> None:
-    #     self.on_changed.emit()
 
     def __init__(self) -> None:
         super().__init__()
@@ -44,12 +67,10 @@ class ApplicationModel(QObject):
         old_project = self._current_project
         if old_project != project:
             if old_project is not None:
-                # old_project.on_changed.disconnect(self._handle_changed)
                 old_project.setParent(None)
             self._current_project = project
             if project is not None:
                 project.setParent(self)
-                # project.on_changed.connect(self._handle_changed)
             self.on_current_project_changed.emit(project)
             self.on_changed.emit()
 
