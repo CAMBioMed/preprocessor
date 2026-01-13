@@ -15,7 +15,8 @@ class ProjectModel(QObject):
 
     def __init__(self) -> None:
         super().__init__()
-        _photos = QListModel[PhotoModel](parent = self)
+        # store the photos list on the instance
+        self._photos = QListModel[PhotoModel](parent = self)
 
     _photos: QListModel[PhotoModel]
 
@@ -23,4 +24,3 @@ class ProjectModel(QObject):
     def photos(self) -> QListModel[PhotoModel]:
         """The list of photos in the project."""
         return self._photos
-

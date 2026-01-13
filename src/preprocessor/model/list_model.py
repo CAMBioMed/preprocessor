@@ -85,3 +85,7 @@ class QListModel(QObject, Generic[E]):
 
     def append(self, value: E) -> None:
         self.insert(len(self._items), value)
+
+    def remove(self, value: E) -> None:
+        index = self._items.index(value)
+        del self[index]
