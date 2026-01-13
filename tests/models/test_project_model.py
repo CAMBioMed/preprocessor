@@ -1,6 +1,5 @@
 import unittest
 
-from PySide6.QtCore import Slot
 
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.model.photo_model import PhotoModel
