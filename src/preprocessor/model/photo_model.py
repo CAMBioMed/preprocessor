@@ -29,13 +29,47 @@ class PhotoModel(QObject):
             self.on_quadrat_corners_changed.emit()
             self.on_changed.emit()
 
+    _red_shift: tuple[float, float] | None = None
+    on_red_shift_changed: Signal = Signal()
+
+    @property
+    def red_shift(self) -> tuple[float, float] | None:
+        """The red channel shift in (x, y) directions to correct chromatic aberration."""
+        return self._red_shift
+
+    @red_shift.setter
+    def red_shift(self, value: tuple[float, float] | None) -> None:
+        if self._red_shift != value:
+            self._red_shift = value
+            self.on_red_shift_changed.emit()
+            self.on_changed.emit()
+
+    _blue_shift: tuple[float, float] | None = None
+    on_blue_shift_changed: Signal = Signal()
+
+    @property
+    def blue_shift(self) -> tuple[float, float] | None:
+        """The blue channel shift in (x, y) directions to correct chromatic aberration."""
+        return self._blue_shift
+
+    @blue_shift.setter
+    def blue_shift(self, value: tuple[float, float] | None) -> None:
+        if self._blue_shift != value:
+            self._blue_shift = value
+            self.on_blue_shift_changed.emit()
+            self.on_changed.emit()
+
     def serialize(self) -> dict:
         """
         Serialize this PhotoModel into basic Python types suitable for JSON.
         """
         qc = [[float(x), float(y)] for (x, y) in self.quadrat_corners] if self.quadrat_corners is not None else None
+        rs = [float(self._red_shift[0]), float(self._red_shift[1])] if self._red_shift is not None else None
+        bs = [float(self._blue_shift[0]), float(self._blue_shift[1])] if self._blue_shift is not None else None
         return {
             "quadrat_corners": qc,
+            "red_shift": rs,
+            "blue_shift": bs,
         }
 
     def deserialize(self, data: dict) -> None:
@@ -55,3 +89,24 @@ class PhotoModel(QObject):
             else:
                 self.quadrat_corners = None
 
+        if "red_shift" in data:
+            r = data.get("red_shift", None)
+            if r is not None:
+                try:
+                    rs = (float(r[0]), float(r[1]))  # type: ignore[arg-type]
+                except Exception:
+                    raise ValueError("red_shift must be a pair of numbers or None")
+                self.red_shift = rs
+            else:
+                self.red_shift = None
+
+        if "blue_shift" in data:
+            b = data.get("blue_shift", None)
+            if b is not None:
+                try:
+                    bs = (float(b[0]), float(b[1]))  # type: ignore[arg-type]
+                except Exception:
+                    raise ValueError("blue_shift must be a pair of numbers or None")
+                self.blue_shift = bs
+            else:
+                self.blue_shift = None
