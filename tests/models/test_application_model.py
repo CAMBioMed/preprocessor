@@ -2,8 +2,8 @@ import unittest
 
 from PySide6.QtCore import Slot
 
-from preprocessor.model.model import ApplicationModel
-from preprocessor.model.model import ProjectModel
+from preprocessor.model.application_model import ApplicationModel
+from preprocessor.model.application_model import ProjectModel
 
 
 
