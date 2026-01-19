@@ -32,8 +32,11 @@ class MainWindow2(QMainWindow):
         self.read_settings()
 
     def _connect_signals(self) -> None:
-        self.ui.menuHelp_About.triggered.connect(self.on_help_about)
+        # File menu
         self.ui.menuFile_Exit.triggered.connect(self.close)
+
+        # Help menu
+        self.ui.menuHelp_About.triggered.connect(self.on_help_about)
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
