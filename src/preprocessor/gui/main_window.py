@@ -5,7 +5,7 @@ from typing import cast, Any
 
 import cv2
 from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Slot, Signal
+from PySide6.QtCore import Qt, QSettings, QByteArray, QTimer, Slot, Signal, QCoreApplication
 from PySide6.QtGui import QAction, QIcon, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
@@ -19,6 +19,7 @@ from cv2.typing import MatLike
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.hsv_threshold_widget import HSVThresholdWidget
 from preprocessor.gui.image_editor import QImageEditor
+from preprocessor.gui.main_window2 import MainWindow2
 from preprocessor.gui.main_window_model import MainWindowModel
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_list_widget import ThumbnailListWidget
@@ -560,9 +561,14 @@ def show_application() -> None:
     # Disable allocation limit
     QtGui.QImageReader.setAllocationLimit(0)
 
+    QCoreApplication.setOrganizationName("CAMBioMed")
+    QCoreApplication.setOrganizationDomain("cambiomed-biodiversa.com")
+    QCoreApplication.setApplicationName("Preprocessor")
+
     app = QApplication(sys.argv)
+    app.setApplicationName("CAMBioMed Preprocessor")
     app.setApplicationVersion(__version__)
-    window = MainWindow()
+    window = MainWindow2()
     window.show()
     setup_sigint_handler()
     exit_code = app.exec_()
