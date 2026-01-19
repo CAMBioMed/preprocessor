@@ -89,10 +89,16 @@
    <property name="text">
     <string>E&amp;xit</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::QuitRole</enum>
+   </property>
   </action>
   <action name="menuHelp_About">
    <property name="text">
     <string>&amp;About...</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::AboutRole</enum>
    </property>
   </action>
   <action name="menuView_ShowOriginal">

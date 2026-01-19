@@ -1,6 +1,8 @@
-from PySide6.QtGui import QCloseEvent
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCloseEvent, QAction
 from PySide6.QtWidgets import QMainWindow, QWidget
 
+from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_list_widget import ThumbnailListWidget
@@ -12,12 +14,12 @@ class MainWindow2(QMainWindow):
     ui: Ui_Main
     model: ApplicationModel
 
-    # properties_dock: PropertiesDockWidget
-    # """The dock widget showing properties."""
-    # thumbnail_dock: ThumbnailListWidget
-    # """The dock widget showing image thumbnails."""
-    # central_widget: QImageEditor
-    # """The central widget showing the image."""
+    properties_dock: PropertiesDockWidget
+    """The dock widget showing properties."""
+    thumbnail_dock: ThumbnailListWidget
+    """The dock widget showing image thumbnails."""
+    central_widget: QImageEditor
+    """The central widget showing the image."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -30,8 +32,11 @@ class MainWindow2(QMainWindow):
         self.read_settings()
 
     def _connect_signals(self) -> None:
-        pass
+        self.ui.menuHelp_About.triggered.connect(self.on_help_about)
+        self.ui.menuFile_Exit.triggered.connect(self.close)
 
+    def on_help_about(self) -> None:
+        show_about_dialog(self)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
