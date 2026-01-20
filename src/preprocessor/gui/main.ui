@@ -78,9 +78,6 @@
    <property name="text">
     <string>&amp;Open Project...</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
   </action>
   <action name="menuFile_Exit">
    <property name="icon">
@@ -140,9 +137,6 @@
    <property name="text">
     <string>&amp;New Project...</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
-   </property>
   </action>
   <action name="menuFile_SaveProject">
    <property name="icon">
@@ -150,9 +144,6 @@
    </property>
    <property name="text">
     <string>&amp;Save Project</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="menuFile_SaveProjectAs">
