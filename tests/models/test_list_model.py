@@ -137,8 +137,8 @@ class TestQListModel(unittest.TestCase):
         # Arrange
         calls = []
 
-        def slot() -> None:
-            calls.append(1)
+        def slot(added, removed) -> None:
+            calls.append((list(added), list(removed)))
 
         self.model.on_changed.connect(slot)
 

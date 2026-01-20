@@ -147,3 +147,37 @@ class TestProjectModel(unittest.TestCase):
         with self.assertRaises(ValueError):
             project.deserialize(bad)
 
+    def test_dirty_flag(self) -> None:
+        # Arrange
+        project = ProjectModel()
+
+        # Initial state: clean
+        self.assertFalse(project.dirty)
+
+        # Act: append a photo -> project becomes dirty
+        p = PhotoModel()
+        project.photos.append(p)
+        self.assertTrue(project.dirty)
+
+        # Act: mark clean externally
+        project.mark_clean()
+        self.assertFalse(project.dirty)
+
+        # Act: change a child photo property -> project becomes dirty
+        p.original_filename = "changed.jpg"
+        self.assertTrue(project.dirty)
+
+        # Act: mark clean again and modify another child property
+        project.mark_clean()
+        p.quadrat_corners = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
+        self.assertTrue(project.dirty)
+
+        # Act: mark_dirty explicitly
+        project.mark_clean()
+        project.mark_dirty()
+        self.assertTrue(project.dirty)
+
+        # Also ensure removing a photo marks dirty
+        project.mark_clean()
+        project.photos.remove(p)
+        self.assertTrue(project.dirty)

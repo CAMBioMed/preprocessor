@@ -31,6 +31,7 @@
     <addaction name="menuFile_OpenProject"/>
     <addaction name="menuFile_SaveProject"/>
     <addaction name="menuFile_SaveProjectAs"/>
+    <addaction name="menuFile_CloseProject"/>
     <addaction name="separator"/>
     <addaction name="menuFile_Exit"/>
    </widget>
@@ -170,6 +171,14 @@
    </property>
    <property name="statusTip">
     <string>Save the current project under a new name.</string>
+   </property>
+  </action>
+  <action name="menuFile_CloseProject">
+   <property name="text">
+    <string>&amp;Close Project</string>
+   </property>
+   <property name="statusTip">
+    <string>Close the current project.</string>
    </property>
   </action>
  </widget>

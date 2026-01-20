@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QAction, QKeySequence
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.icons import GuiIcons
@@ -82,6 +82,7 @@ class MainWindow2(QMainWindow):
         self.ui.menuFile_OpenProject.triggered.connect(self.on_open_project)
         self.ui.menuFile_SaveProject.triggered.connect(self.on_save_project)
         self.ui.menuFile_SaveProjectAs.triggered.connect(self.on_save_project_as)
+        self.ui.menuFile_CloseProject.triggered.connect(self.on_close_project)
         self.ui.menuFile_Exit.triggered.connect(self.close)
 
         # Help menu
@@ -103,7 +104,16 @@ class MainWindow2(QMainWindow):
             #  Thus cancel
             self.on_close_project()
         new_project = ProjectModel()
-        new_project.load_from_file(path)
+        try:
+            new_project.load_from_file(path)
+        except ValueError as exc:
+            # Likely a serialization version mismatch or corrupt file — inform the user
+            QMessageBox.critical(
+                self,
+                "Open Project Failed",
+                f"Failed to open project file:\n{path}\n\n{exc}",
+            )
+            return
         self.model.current_project = new_project
         self.model.current_project.file_path = path
 
@@ -125,7 +135,17 @@ class MainWindow2(QMainWindow):
         self.model.current_project.file_path = path
 
     def on_close_project(self) -> None:
-        # TODO: Check for unsaved changes
+        if self.model.current_project is not None and self.model.current_project.dirty:
+            result = QMessageBox.question(
+                self,
+                "Unsaved Changes",
+                "The current project has unsaved changes. Do you want to save them before closing?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
+            )
+            if result == QMessageBox.StandardButton.Yes:
+                self.on_save_project()
+            elif result == QMessageBox.StandardButton.Cancel:
+                return
         self.model.current_project = None
 
     def on_help_about(self) -> None:

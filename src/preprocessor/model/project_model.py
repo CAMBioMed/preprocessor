@@ -6,7 +6,7 @@ from preprocessor.model.photo_model import PhotoModel
 # Add imports for file IO
 import json
 from pathlib import Path
-from typing import Union
+from typing import Union, Set, Iterable
 
 
 class ProjectModel(QObject):
@@ -25,6 +25,16 @@ class ProjectModel(QObject):
         super().__init__()
         # store the photos list on the instance
         self._photos = QListModel[PhotoModel](parent = self)
+
+        # track which PhotoModel instances we've connected to
+        self._connected_photos: Set[PhotoModel] = set()
+
+        # wire photos list changes to mark dirty and (re)wire photo handlers
+        self.photos.on_changed.connect(self._on_photos_changed)
+        # wire any existing photos without generating a photos-changed event / dirty mark
+        for photo in list(self.photos):
+            photo.on_changed.connect(self._on_photo_changed)
+            self._connected_photos.add(photo)
 
     _file_path: Union[str, Path, None] = None
     on_file_path_changed: Signal = Signal(object)
@@ -51,6 +61,56 @@ class ProjectModel(QObject):
     def photos(self) -> QListModel[PhotoModel]:
         """The list of photos in the project."""
         return self._photos
+
+    _dirty: bool = False
+    on_dirty_changed: Signal = Signal(bool)
+
+    @property
+    def dirty(self) -> bool:
+        """Whether the project has unsaved changes."""
+        return self._dirty
+
+    def _set_dirty(self, value: bool) -> None:
+        if self._dirty != value:
+            self._dirty = value
+            self.on_dirty_changed.emit(value)
+
+    def mark_clean(self) -> None:
+        """Mark the project as clean (no unsaved changes)."""
+        self._set_dirty(False)
+
+    def mark_dirty(self) -> None:
+        """Mark the project as dirty (has unsaved changes)."""
+        self._set_dirty(True)
+
+    # internal handlers for wiring child signals
+    def _on_photos_changed(self, added: Iterable[PhotoModel], removed: Iterable[PhotoModel]) -> None:
+        """
+        Called when the photos QListModel changes.
+        Marks project dirty and (re)wires per-photo on_changed handlers.
+        """
+        # any modification to the list counts as a dirty change
+        self.mark_dirty()
+
+        added_set = set(added)
+        removed_set = set(removed)
+
+        # connect to newly added photos
+        for photo in (added_set - self._connected_photos):
+            photo.on_changed.connect(self._on_photo_changed)
+            self._connected_photos.add(photo)
+        # disconnect and forget removed photos
+        for photo in (self._connected_photos & removed_set):
+            try:
+                photo.on_changed.disconnect(self._on_photo_changed)
+            except Exception:
+                # ignore if already disconnected
+                pass
+            self._connected_photos.remove(photo)
+
+    def _on_photo_changed(self) -> None:
+        """Called when any child PhotoModel reports a change."""
+        self.mark_dirty()
 
     def serialize(self) -> dict:
         """

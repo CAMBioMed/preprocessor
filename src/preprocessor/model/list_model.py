@@ -9,7 +9,8 @@ class QListModel(QObject, Generic[E]):
     A list-like container for QObjects that automatically manages parent-child relationships.
     """
 
-    on_changed: Signal = Signal()
+    # emit (added_items: list[E], removed_items: list[E])
+    on_changed: Signal = Signal(list, list)
     """Signal emitted whenever the list is modified."""
 
     def __init__(self, iterable: Optional[Iterable[E]] = None, parent: Optional[QObject] = None) -> None:
@@ -58,6 +59,8 @@ class QListModel(QObject, Generic[E]):
             for old in old_items:
                 old.setParent(None)
             self._items[index] = items
+            # emit added / removed lists
+            self.on_changed.emit(items, list(old_items))
         else:
             if not isinstance(value, QObject):
                 raise TypeError("QObjectList only accepts QObjects")
@@ -65,7 +68,7 @@ class QListModel(QObject, Generic[E]):
             old.setParent(None)
             value.setParent(self)
             self._items[index] = value
-        self.on_changed.emit()
+            self.on_changed.emit([value], [old])
 
     @overload
     def __delitem__(self, index: int) -> None:
@@ -80,14 +83,16 @@ class QListModel(QObject, Generic[E]):
         for item in items:
             item.setParent(None)
         del self._items[index]
-        self.on_changed.emit()
+        # emit removed list
+        self.on_changed.emit([], list(items))
 
     def insert(self, index: int, value: E) -> None:
         if not isinstance(value, QObject):
             raise TypeError("QObjectList only accepts QObjects")
         value.setParent(self)
         self._items.insert(index, value)
-        self.on_changed.emit()
+        # emit added list
+        self.on_changed.emit([value], [])
 
     def append(self, value: E) -> None:
         self.insert(len(self._items), value)
