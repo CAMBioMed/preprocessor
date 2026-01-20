@@ -6,6 +6,7 @@ from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.icons import GuiIcons
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
+from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.thumbnail_list_widget import ThumbnailListWidget
 from preprocessor.gui.ui_main import Ui_Main
 from preprocessor.model.application_model import ApplicationModel
@@ -17,7 +18,7 @@ class MainWindow2(QMainWindow):
 
     properties_dock: PropertiesDockWidget
     """The dock widget showing properties."""
-    thumbnail_dock: ThumbnailListWidget
+    thumbnail_dock: ThumbnailDockWidget
     """The dock widget showing image thumbnails."""
     central_widget: QImageEditor
     """The central widget showing the image."""
@@ -67,7 +68,7 @@ class MainWindow2(QMainWindow):
 
     def _create_thumbnail_dock(self) -> None:
         """Create the thumbnail list dock widget."""
-        self.thumbnail_dock = ThumbnailListWidget()
+        self.thumbnail_dock = ThumbnailDockWidget(self)
         self.thumbnail_dock.setAllowedAreas(
             Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea
         )
