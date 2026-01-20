@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QAction, QKeySequence
 from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
+from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.icons import GuiIcons
@@ -38,6 +39,10 @@ class MainWindow2(QMainWindow):
         self.read_settings()
         # ensure actions reflect whether there is a current project
         self._update_project_actions()
+        # track and bind to the current project's file_path changes for title updates
+        self._bound_project: ProjectModel | None = None
+        self._bind_project_signals(self.model.current_project)
+        self._update_window_title()
 
     def _update_project_actions(self) -> None:
         """Enable or disable file actions depending on whether a project is open."""
@@ -46,6 +51,40 @@ class MainWindow2(QMainWindow):
         self.ui.menuFile_SaveProject.setEnabled(has_project)
         self.ui.menuFile_SaveProjectAs.setEnabled(has_project)
         self.ui.menuFile_CloseProject.setEnabled(has_project)
+
+    def _bind_project_signals(self, project: ProjectModel | None) -> None:
+        """Connect/disconnect signals for the currently bound project."""
+        # avoid rebinding the same project
+        if self._bound_project is project:
+            return
+        # disconnect previous
+        if self._bound_project is not None:
+            try:
+                self._bound_project.on_file_path_changed.disconnect(self._on_project_file_path_changed)
+            except Exception:
+                pass
+        self._bound_project = project
+        # connect new
+        if project is not None:
+            project.on_file_path_changed.connect(self._on_project_file_path_changed)
+
+    def _on_project_file_path_changed(self, _path) -> None:
+        """Called when the project's file_path changes."""
+        self._update_window_title()
+
+    def _update_window_title(self) -> None:
+        """Set the window title to include the current project's name, if any."""
+        base_title = "Cambiomed Preprocessor"
+        proj = self.model.current_project
+        if proj is None:
+            self.setWindowTitle(base_title)
+            return
+        fp = proj.file_path
+        if fp:
+            name = Path(fp).name
+        else:
+            name = "Untitled Project"
+        self.setWindowTitle(f"{base_title} — {name}")
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
@@ -104,7 +143,9 @@ class MainWindow2(QMainWindow):
     def on_new_project(self) -> None:
         new_project = ProjectModel()
         self.model.current_project = new_project
+        self._bind_project_signals(new_project)
         self._update_project_actions()
+        self._update_window_title()
 
     def on_open_project(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, "Open Project", "", "Project Files (*.pbproj);;All Files (*)")
@@ -127,7 +168,9 @@ class MainWindow2(QMainWindow):
             return
         self.model.current_project = new_project
         self.model.current_project.file_path = path
+        self._bind_project_signals(new_project)
         self._update_project_actions()
+        self._update_window_title()
 
     def on_save_project(self) -> None:
         if self.model.current_project is None:
@@ -146,6 +189,7 @@ class MainWindow2(QMainWindow):
         self.model.current_project.save_to_file(path)
         self.model.current_project.file_path = path
         self._update_project_actions()
+        self._update_window_title()
 
     def on_close_project(self) -> None:
         if self.model.current_project is not None and self.model.current_project.dirty:
@@ -160,7 +204,9 @@ class MainWindow2(QMainWindow):
             elif result == QMessageBox.StandardButton.Cancel:
                 return
         self.model.current_project = None
+        self._bind_project_signals(None)
         self._update_project_actions()
+        self._update_window_title()
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
