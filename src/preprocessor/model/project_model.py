@@ -16,6 +16,9 @@ class ProjectModel(QObject):
     This includes the project-specific settings.
     """
 
+    # serialization version for the project JSON format
+    SERIAL_VERSION: int = 1
+
     on_changed: Signal = Signal()
 
     def __init__(self) -> None:
@@ -55,6 +58,7 @@ class ProjectModel(QObject):
         """
         # Serialize each PhotoModel using its serialize() method
         return {
+            "version": self.SERIAL_VERSION,
             "photos": [p.serialize() for p in self.photos],
         }
 
@@ -64,6 +68,11 @@ class ProjectModel(QObject):
         Uses the setters so signals are emitted only on change.
         If a key doesn't occur in the data, it is not set.
         """
+        # Validate serialization version
+        ver = data.get("version", None)
+        if ver != self.SERIAL_VERSION:
+            raise ValueError(f"Unsupported project version: {ver!r}, expected {self.SERIAL_VERSION}")
+
         if "photos" in data:
             photos_raw = data.get("photos", None)
             # If explicit None -> clear list

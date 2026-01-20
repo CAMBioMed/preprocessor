@@ -52,7 +52,9 @@ class TestProjectModel(unittest.TestCase):
         # Act: serialize
         s = project.serialize()
 
-        # Assert serialized structure
+        # Assert serialized structure includes version
+        self.assertIn("version", s)
+        self.assertEqual(s["version"], ProjectModel.SERIAL_VERSION)
         self.assertIn("photos", s)
         self.assertIsInstance(s["photos"], list)
         self.assertEqual(len(s["photos"]), 1)
@@ -69,7 +71,7 @@ class TestProjectModel(unittest.TestCase):
 
         new_project.on_changed.connect(handle_changed)
 
-        # Act: deserialize
+        # Act: deserialize (valid version included)
         new_project.deserialize(s)
 
         # Assert: one photo restored with properties
@@ -80,9 +82,9 @@ class TestProjectModel(unittest.TestCase):
         self.assertEqual(restored.red_shift, (1.0, 2.0))
         self.assertTrue(changed)
 
-        # Act: clear photos via deserialize with None
+        # Act: clear photos via deserialize with None (include version)
         changed = False
-        new_project.deserialize({"photos": None})
+        new_project.deserialize({"version": ProjectModel.SERIAL_VERSION, "photos": None})
 
         # Assert: photos cleared and on_changed emitted
         self.assertEqual(len(new_project.photos), 0)
@@ -135,3 +137,13 @@ class TestProjectModel(unittest.TestCase):
         missing = Path("/nonexistent/path/does_not_exist.json")
         with self.assertRaises(FileNotFoundError):
             project.load_from_file(missing)
+
+    def test_deserialize_version_mismatch_raises(self) -> None:
+        # Arrange
+        project = ProjectModel()
+        bad = {"version": ProjectModel.SERIAL_VERSION + 1, "photos": []}
+
+        # Act / Assert
+        with self.assertRaises(ValueError):
+            project.deserialize(bad)
+
