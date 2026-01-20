@@ -1,5 +1,13 @@
 import unittest
 
+# ensure a Qt app context for QObject usage in tests if not present
+from PySide6.QtCore import QCoreApplication
+if QCoreApplication.instance() is None:
+    QCoreApplication([])
+
+import json
+import tempfile
+from pathlib import Path
 
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.model.photo_model import PhotoModel
@@ -79,3 +87,51 @@ class TestProjectModel(unittest.TestCase):
         # Assert: photos cleared and on_changed emitted
         self.assertEqual(len(new_project.photos), 0)
         self.assertTrue(changed)
+
+    def test_save_and_load_file(self) -> None:
+        # Arrange: create project with one photo
+        project = ProjectModel()
+        p = PhotoModel()
+        p.original_filename = "fileX.jpg"
+        p.red_shift = (3.0, 4.0)
+        project.photos.append(p)
+
+        # Use a temporary directory and file path
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "project.json"
+
+            # Act: save to file
+            project.save_to_file(path)
+
+            # Assert file exists and JSON matches serialize()
+            self.assertTrue(path.exists())
+            with path.open("r", encoding="utf-8") as fh:
+                data = json.load(fh)
+            self.assertEqual(data, project.serialize())
+
+            # Arrange: fresh project to load into and watch for on_changed
+            new_project = ProjectModel()
+            changed = False
+
+            def handle_changed() -> None:
+                nonlocal changed
+                changed = True
+
+            new_project.on_changed.connect(handle_changed)
+
+            # Act: load from file
+            new_project.load_from_file(path)
+
+            # Assert: loaded project restored and on_changed fired
+            self.assertEqual(len(new_project.photos), 1)
+            loaded = new_project.photos[0]
+            self.assertIsInstance(loaded, PhotoModel)
+            self.assertEqual(loaded.original_filename, "fileX.jpg")
+            self.assertEqual(loaded.red_shift, (3.0, 4.0))
+            self.assertTrue(changed)
+
+    def test_load_missing_file_raises(self) -> None:
+        project = ProjectModel()
+        missing = Path("/nonexistent/path/does_not_exist.json")
+        with self.assertRaises(FileNotFoundError):
+            project.load_from_file(missing)

@@ -3,6 +3,11 @@ from PySide6.QtCore import QObject, Signal
 from preprocessor.model.list_model import QListModel
 from preprocessor.model.photo_model import PhotoModel
 
+# Add imports for file IO
+import json
+from pathlib import Path
+from typing import Union
+
 
 class ProjectModel(QObject):
     """
@@ -64,3 +69,26 @@ class ProjectModel(QObject):
                     self.photos.append(photo)
                 # Signal that project changed
                 self.on_changed.emit()
+
+    def save_to_file(self, path: Union[str, Path]) -> None:
+        """
+        Write the serialized project JSON to the given file path.
+        Parent directories will be created if necessary.
+        """
+        p = Path(path)
+        if p.parent:
+            p.parent.mkdir(parents=True, exist_ok=True)
+        with p.open("w", encoding="utf-8") as fh:
+            json.dump(self.serialize(), fh, indent=2)
+
+    def load_from_file(self, path: Union[str, Path]) -> None:
+        """
+        Load project JSON from the given file path and apply via deserialize().
+        Raises FileNotFoundError if the path does not exist.
+        """
+        p = Path(path)
+        if not p.exists():
+            raise FileNotFoundError(str(p))
+        with p.open("r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        self.deserialize(data)
