@@ -78,6 +78,9 @@
    <property name="text">
     <string>&amp;Open Project...</string>
    </property>
+   <property name="statusTip">
+    <string>Open an existing project.</string>
+   </property>
   </action>
   <action name="menuFile_Exit">
    <property name="icon">
@@ -86,6 +89,9 @@
    <property name="text">
     <string>E&amp;xit</string>
    </property>
+   <property name="statusTip">
+    <string>Exit the application.</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::QuitRole</enum>
    </property>
@@ -93,6 +99,9 @@
   <action name="menuHelp_About">
    <property name="text">
     <string>&amp;About...</string>
+   </property>
+   <property name="statusTip">
+    <string>About this application.</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::AboutRole</enum>
@@ -137,6 +146,9 @@
    <property name="text">
     <string>&amp;New Project...</string>
    </property>
+   <property name="statusTip">
+    <string>Create a new project.</string>
+   </property>
   </action>
   <action name="menuFile_SaveProject">
    <property name="icon">
@@ -145,6 +157,9 @@
    <property name="text">
     <string>&amp;Save Project</string>
    </property>
+   <property name="statusTip">
+    <string>Save the current project.</string>
+   </property>
   </action>
   <action name="menuFile_SaveProjectAs">
    <property name="icon">
@@ -152,6 +167,9 @@
    </property>
    <property name="text">
     <string>Save Project &amp;As...</string>
+   </property>
+   <property name="statusTip">
+    <string>Save the current project under a new name.</string>
    </property>
   </action>
  </widget>
