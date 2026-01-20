@@ -129,6 +129,7 @@ class PhotoModel(QObject):
         cm = [[float(v) for v in row] for row in self._camera_matrix] if self._camera_matrix is not None else None
         dc = [[float(x), float(y)] for (x, y) in self._distortion_coefficients] if self._distortion_coefficients is not None else None
         return {
+            "original_filename": self._original_filename,
             "quadrat_corners": qc,
             "red_shift": rs,
             "blue_shift": bs,
@@ -142,6 +143,16 @@ class PhotoModel(QObject):
         Uses the setters so signals are emitted only on change.
         If a key doesn't occur in the data, it is not set.
         """
+        if "original_filename" in data:
+            of = data.get("original_filename", "")
+            if of is not None:
+                if not isinstance(of, str):
+                    raise ValueError("original_filename must be a string or None")
+                self.original_filename = of
+            else:
+                # treat None as clearing to empty string
+                self.original_filename = ""
+
         if "quadrat_corners" in data:
             qcs = data.get("quadrat_corners", None)
             if qcs is not None:

@@ -64,6 +64,8 @@ class TestPhotoModel(unittest.TestCase):
         s_none = photo.serialize()
 
         # Assert
+        self.assertIn("original_filename", s_none)
+        self.assertEqual(s_none["original_filename"], "")
         self.assertIn("quadrat_corners", s_none)
         self.assertIsNone(s_none["quadrat_corners"])
         self.assertIn("red_shift", s_none)
@@ -80,6 +82,7 @@ class TestPhotoModel(unittest.TestCase):
         photo.quadrat_corners = corners
         photo.red_shift = (0.3, -0.2)
         photo.blue_shift = (0.0, 0.5)
+        photo.original_filename = "img_001.jpg"
         camera = (
             (1000.0, 0.0, 512.0),
             (0.0, 1000.0, 384.0),
@@ -92,6 +95,7 @@ class TestPhotoModel(unittest.TestCase):
 
         # Assert
         self.assertEqual(s, {
+            "original_filename": "img_001.jpg",
             "quadrat_corners": [[0.1, 0.2], [1.1, 0.2], [1.1, 1.2], [0.1, 1.2]],
             "red_shift": [0.3, -0.2],
             "blue_shift": [0.0, 0.5],
@@ -108,6 +112,7 @@ class TestPhotoModel(unittest.TestCase):
         raised_camera = False
         raised_distortion = False
         raised_changed = False
+        raised_original = False
 
         @Slot()
         def handle_quadrat() -> None:
@@ -143,20 +148,28 @@ class TestPhotoModel(unittest.TestCase):
             nonlocal raised_distortion
             raised_distortion = True
 
+        @Slot()
+        def handle_original() -> None:
+            nonlocal raised_original
+            raised_original = True
+
         new_photo.on_red_shift_changed.connect(handle_red)
         new_photo.on_blue_shift_changed.connect(handle_blue)
         new_photo.on_camera_matrix_changed.connect(handle_camera)
         new_photo.on_distortion_coefficients_changed.connect(handle_distortion)
+        new_photo.on_original_filename_changed.connect(handle_original)
 
         # Act
         new_photo.deserialize(s)
 
         # Assert
+        self.assertEqual(new_photo.original_filename, "img_001.jpg")
         self.assertEqual(new_photo.quadrat_corners, corners)
         self.assertEqual(new_photo.red_shift, (0.3, -0.2))
         self.assertEqual(new_photo.blue_shift, (0.0, 0.5))
         self.assertEqual(new_photo.camera_matrix, camera)
         self.assertEqual(new_photo.distortion_coefficients, distortion)
+        self.assertTrue(raised_original)
         self.assertTrue(raised_quadrat)
         self.assertTrue(raised_quadrat_corners_changed)
         self.assertTrue(raised_red)
@@ -173,12 +186,15 @@ class TestPhotoModel(unittest.TestCase):
         raised_camera = False
         raised_distortion = False
         raised_changed = False
-        new_photo.deserialize({"quadrat_corners": None, "red_shift": None, "blue_shift": None, "camera_matrix": None, "distortion_coefficients": None})
+        raised_original = False
+        new_photo.deserialize({"original_filename": None, "quadrat_corners": None, "red_shift": None, "blue_shift": None, "camera_matrix": None, "distortion_coefficients": None})
 
         # Assert
+        self.assertEqual(new_photo.original_filename, "")
         self.assertIsNone(new_photo.quadrat_corners)
         self.assertIsNone(new_photo.camera_matrix)
         self.assertIsNone(new_photo.distortion_coefficients)
+        self.assertTrue(raised_original)
         self.assertTrue(raised_quadrat)
         self.assertTrue(raised_quadrat_corners_changed)
         self.assertTrue(raised_red)
