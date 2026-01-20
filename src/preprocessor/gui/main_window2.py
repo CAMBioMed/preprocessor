@@ -36,6 +36,16 @@ class MainWindow2(QMainWindow):
         self._connect_signals()
 
         self.read_settings()
+        # ensure actions reflect whether there is a current project
+        self._update_project_actions()
+
+    def _update_project_actions(self) -> None:
+        """Enable or disable file actions depending on whether a project is open."""
+        has_project = self.model.current_project is not None
+        # Save, Save As and Close should only be enabled when there's a current project
+        self.ui.menuFile_SaveProject.setEnabled(has_project)
+        self.ui.menuFile_SaveProjectAs.setEnabled(has_project)
+        self.ui.menuFile_CloseProject.setEnabled(has_project)
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
@@ -94,6 +104,7 @@ class MainWindow2(QMainWindow):
     def on_new_project(self) -> None:
         new_project = ProjectModel()
         self.model.current_project = new_project
+        self._update_project_actions()
 
     def on_open_project(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, "Open Project", "", "Project Files (*.pbproj);;All Files (*)")
@@ -116,6 +127,7 @@ class MainWindow2(QMainWindow):
             return
         self.model.current_project = new_project
         self.model.current_project.file_path = path
+        self._update_project_actions()
 
     def on_save_project(self) -> None:
         if self.model.current_project is None:
@@ -133,6 +145,7 @@ class MainWindow2(QMainWindow):
             return
         self.model.current_project.save_to_file(path)
         self.model.current_project.file_path = path
+        self._update_project_actions()
 
     def on_close_project(self) -> None:
         if self.model.current_project is not None and self.model.current_project.dirty:
@@ -147,6 +160,7 @@ class MainWindow2(QMainWindow):
             elif result == QMessageBox.StandardButton.Cancel:
                 return
         self.model.current_project = None
+        self._update_project_actions()
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
