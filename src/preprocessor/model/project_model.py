@@ -23,6 +23,25 @@ class ProjectModel(QObject):
         # store the photos list on the instance
         self._photos = QListModel[PhotoModel](parent = self)
 
+    _file_path: Union[str, Path, None] = None
+    on_file_path_changed: Signal = Signal(object)
+
+    @property
+    def file_path(self) -> Union[str, Path, None]:
+        """
+        The file path where the project is saved, or None if not saved yet.
+
+        This property is not serialized/deserialized.
+        """
+        return self._file_path
+
+    @file_path.setter
+    def file_path(self, path: Union[str, Path, None]) -> None:
+        old_path = self._file_path
+        if old_path != path:
+            self._file_path = path
+            self.on_file_path_changed.emit(path)
+
     _photos: QListModel[PhotoModel]
 
     @property

@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QAction, QKeySequence
-from PySide6.QtWidgets import QMainWindow, QWidget
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.icons import GuiIcons
@@ -95,13 +95,38 @@ class MainWindow2(QMainWindow):
         self.model.current_project = new_project
 
     def on_open_project(self) -> None:
-        pass
+        path, _ = QFileDialog.getOpenFileName(self, "Open Project", "", "Project Files (*.pbproj);;All Files (*)")
+        if not path:
+            return
+        if self.model.current_project is not None:
+            # TODO: On unsaved changes, maybe the user doesn't want to open another project
+            #  Thus cancel
+            self.on_close_project()
+        new_project = ProjectModel()
+        new_project.load_from_file(path)
+        self.model.current_project = new_project
+        self.model.current_project.file_path = path
 
     def on_save_project(self) -> None:
-        pass
+        if self.model.current_project is None:
+            return
+        if self.model.current_project.file_path is None:
+            self.on_save_project_as()
+            return
+        self.model.current_project.save_to_file(self.model.current_project.file_path)
 
     def on_save_project_as(self) -> None:
-        pass
+        if self.model.current_project is None:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "Save Project As", "", "Project Files (*.pbproj);;All Files (*)")
+        if not path:
+            return
+        self.model.current_project.save_to_file(path)
+        self.model.current_project.file_path = path
+
+    def on_close_project(self) -> None:
+        # TODO: Check for unsaved changes
+        self.model.current_project = None
 
     def on_help_about(self) -> None:
         show_about_dialog(self)
