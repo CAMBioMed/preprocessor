@@ -10,6 +10,7 @@ from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.thumbnail_list_widget import ThumbnailListWidget
 from preprocessor.gui.ui_main import Ui_Main
 from preprocessor.model.application_model import ApplicationModel
+from preprocessor.model.project_model import ProjectModel
 
 
 class MainWindow2(QMainWindow):
@@ -77,6 +78,10 @@ class MainWindow2(QMainWindow):
     def _connect_signals(self) -> None:
         """Connect signals to slots."""
         # File menu
+        self.ui.menuFile_NewProject.triggered.connect(self.on_new_project)
+        self.ui.menuFile_OpenProject.triggered.connect(self.on_open_project)
+        self.ui.menuFile_SaveProject.triggered.connect(self.on_save_project)
+        self.ui.menuFile_SaveProjectAs.triggered.connect(self.on_save_project_as)
         self.ui.menuFile_Exit.triggered.connect(self.close)
 
         # Help menu
@@ -84,6 +89,19 @@ class MainWindow2(QMainWindow):
 
         # When a thumbnail is selected, either show stored result or schedule processing
         # self.thumbnail_dock.on_thumbnail_selected.connect(self._display_image)
+
+    def on_new_project(self) -> None:
+        new_project = ProjectModel()
+        self.model.current_project = new_project
+
+    def on_open_project(self) -> None:
+        pass
+
+    def on_save_project(self) -> None:
+        pass
+
+    def on_save_project_as(self) -> None:
+        pass
 
     def on_help_about(self) -> None:
         show_about_dialog(self)

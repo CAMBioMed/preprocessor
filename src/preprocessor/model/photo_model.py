@@ -14,6 +14,36 @@ class PhotoModel(QObject):
     def __init__(self) -> None:
         super().__init__()
 
+    _original_filename: str = ""
+    on_original_filename_changed: Signal = Signal()
+
+    @property
+    def original_filename(self) -> str:
+        """The original filename of the photo."""
+        return self._original_filename
+
+    @original_filename.setter
+    def original_filename(self, value: str) -> None:
+        if self._original_filename != value:
+            self._original_filename = value
+            self.on_original_filename_changed.emit()
+            self.on_changed.emit()
+
+    _metadata_filename: str = ""
+    on_metadata_filename_changed: Signal = Signal()
+
+    @property
+    def metadata_filename(self) -> str:
+        """The filename of the metadata file associated with the photo."""
+        return self._metadata_filename
+
+    @metadata_filename.setter
+    def metadata_filename(self, value: str) -> None:
+        if self._metadata_filename != value:
+            self._metadata_filename = value
+            self.on_metadata_filename_changed.emit()
+            self.on_changed.emit()
+
     _quadrat_corners: tuple[Point2f, Point2f, Point2f, Point2f] | None = None
     on_quadrat_corners_changed: Signal = Signal()
 
