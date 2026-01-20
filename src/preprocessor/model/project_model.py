@@ -29,7 +29,10 @@ class ProjectModel(QObject):
         """
         Serialize this model into basic Python types suitable for JSON.
         """
-        pass
+        # Serialize each PhotoModel using its serialize() method
+        return {
+            "photos": [p.serialize() for p in self.photos],
+        }
 
     def deserialize(self, data: dict) -> None:
         """
@@ -37,4 +40,27 @@ class ProjectModel(QObject):
         Uses the setters so signals are emitted only on change.
         If a key doesn't occur in the data, it is not set.
         """
-        pass
+        if "photos" in data:
+            photos_raw = data.get("photos", None)
+            # If explicit None -> clear list
+            if photos_raw is None:
+                # remove existing photos
+                # clear the QListModel by removing items
+                # iterate copy to avoid modification during iteration
+                for item in list(self.photos):
+                    self.photos.remove(item)
+                # Signal that project changed
+                self.on_changed.emit()
+            else:
+                # Expecting iterable of dicts
+                # Clear existing photos first
+                for item in list(self.photos):
+                    self.photos.remove(item)
+                # Recreate PhotoModel instances from serialized data
+                for pic_data in photos_raw:
+                    photo = PhotoModel()
+                    # Let the photo deserialize itself (will emit its own signals)
+                    photo.deserialize(pic_data)
+                    self.photos.append(photo)
+                # Signal that project changed
+                self.on_changed.emit()

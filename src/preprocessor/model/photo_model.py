@@ -29,21 +29,6 @@ class PhotoModel(QObject):
             self.on_original_filename_changed.emit()
             self.on_changed.emit()
 
-    _metadata_filename: str = ""
-    on_metadata_filename_changed: Signal = Signal()
-
-    @property
-    def metadata_filename(self) -> str:
-        """The filename of the metadata file associated with the photo."""
-        return self._metadata_filename
-
-    @metadata_filename.setter
-    def metadata_filename(self, value: str) -> None:
-        if self._metadata_filename != value:
-            self._metadata_filename = value
-            self.on_metadata_filename_changed.emit()
-            self.on_changed.emit()
-
     _quadrat_corners: tuple[Point2f, Point2f, Point2f, Point2f] | None = None
     on_quadrat_corners_changed: Signal = Signal()
 

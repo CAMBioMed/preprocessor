@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Sequence, Iterable, MutableSequence, Optional, cast, overload, List
+from typing import TypeVar, Generic, Sequence, Iterable, MutableSequence, Optional, cast, overload, List, Iterator
 from PySide6.QtCore import QObject, Signal
 
 E = TypeVar("E", bound=QObject)
@@ -21,6 +21,12 @@ class QListModel(QObject, Generic[E]):
 
     def __len__(self) -> int:
         return len(self._items)
+
+    def __iter__(self) -> Iterator[E]:
+        """
+        Allow iteration over the items in the QListModel.
+        """
+        return iter(self._items)
 
     @overload
     def __getitem__(self, index: int) -> E:

@@ -154,3 +154,28 @@ class TestQListModel(unittest.TestCase):
         self.model[0:0] = [Item("d")]
         self.assertEqual(len(calls), 5)
 
+    def test_iterable(self) -> None:
+        # Arrange
+        items = [Item(str(i)) for i in range(3)]
+        for it in items:
+            self.model.append(it)
+
+        # Act: collect via list()
+        collected = list(self.model)
+
+        # Assert list() produced the same order and items, and parents are intact
+        self.assertEqual(collected, items)
+        for it in collected:
+            self.assertIs(it.parent(), self.model)
+
+        # Act: use for-in loop to gather names
+        names = []
+        for it in self.model:
+            names.append(it.name)
+
+        # Assert
+        self.assertEqual(names, ["0", "1", "2"])
+
+        # Act: iter() returns an iterator
+        it_obj = iter(self.model)
+        self.assertTrue(hasattr(it_obj, "__next__"))
