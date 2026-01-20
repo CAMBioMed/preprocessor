@@ -15,6 +15,18 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="layoutPropertiesDock">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="QScrollArea" name="scrollareaPropertiesDock">
       <property name="widgetResizable">
@@ -24,9 +36,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-937</y>
-         <width>460</width>
-         <height>1403</height>
+         <y>0</y>
+         <width>477</width>
+         <height>1415</height>
         </rect>
        </property>
        <property name="sizePolicy">

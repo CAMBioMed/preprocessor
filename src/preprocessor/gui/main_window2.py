@@ -3,6 +3,7 @@ from PySide6.QtGui import QCloseEvent, QAction, QKeySequence
 from PySide6.QtWidgets import QMainWindow, QWidget
 
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.icons import GuiIcons
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_list_widget import ThumbnailListWidget
@@ -25,7 +26,8 @@ class MainWindow2(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_Main()
         self.ui.setupUi(self)
-        self._setupKeyboardShortcuts()
+        self._setup_icons()
+        self._setup_keyboard_shortcuts()
         self._create_thumbnail_dock()
 
         self.model = ApplicationModel()
@@ -33,7 +35,19 @@ class MainWindow2(QMainWindow):
 
         self.read_settings()
 
-    def _setupKeyboardShortcuts(self) -> None:
+    def _setup_icons(self) -> None:
+        """Set up icons for actions."""
+        # File menu
+        self.ui.menuFile_NewProject.setIcon(GuiIcons.ProjectNew)
+        self.ui.menuFile_OpenProject.setIcon(GuiIcons.ProjectOpen)
+        self.ui.menuFile_SaveProject.setIcon(GuiIcons.ProjectSave)
+        self.ui.menuFile_SaveProjectAs.setIcon(GuiIcons.ProjectSaveAs)
+        self.ui.menuFile_Exit.setIcon(GuiIcons.ApplicationExit)
+
+        # Help menu
+        self.ui.menuHelp_About.setIcon(GuiIcons.HelpAbout)
+
+    def _setup_keyboard_shortcuts(self) -> None:
         """
         Set up keyboard shortcuts for actions.
 
