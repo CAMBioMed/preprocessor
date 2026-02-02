@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QAction, QKeySequence, QIcon
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QListWidget
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QListWidget, QListWidgetItem
 from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
@@ -236,15 +236,38 @@ class MainWindow2(QMainWindow):
         """Called when the current project's dirty state changes."""
         self._update_window_title()
 
-    def on_photos_changed(self) -> None:
+    def on_photos_changed(self, added: list[PhotoModel], removed: list[PhotoModel]) -> None:
         """Called when the current project's photos change."""
         if self.model.current_project is None:
             return
         self._update_window_title()
         thumbnail_list: QListWidget = self.thumbnail_dock.ui.thumbnailListWidget
-        thumbnail_list.clear()
-        for photo in self.model.current_project.photos:
-            thumbnail_list.addItem(photo.original_filename)
+
+        # Remove items corresponding to removed PhotoModel instances
+        for photo in removed:
+            # find by stored PhotoModel in UserRole or fallback to matching text
+            found_index = None
+            for i in range(thumbnail_list.count()):
+                item = thumbnail_list.item(i)
+                item_photo = item.data(Qt.ItemDataRole.UserRole)
+                if item_photo is photo or item.text() == (photo.original_filename or ""):
+                    found_index = i
+                    break
+            if found_index is not None:
+                # takeItem returns the removed QListWidgetItem; Qt will handle deletion by parent
+                thumbnail_list.takeItem(found_index)
+
+        # Insert items for added PhotoModel instances at the correct index to preserve order
+        photos_list = list(self.model.current_project.photos)
+        for photo in added:
+            try:
+                insert_index = photos_list.index(photo)
+            except ValueError:
+                insert_index = thumbnail_list.count()
+            item = QListWidgetItem(photo.original_filename)
+            item.setData(Qt.ItemDataRole.UserRole, photo)
+            # insert at the position matching the project's photo index
+            thumbnail_list.insertItem(insert_index, item)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
