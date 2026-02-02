@@ -74,6 +74,7 @@ class ProjectModel(QObject):
         if self._dirty != value:
             self._dirty = value
             self.on_dirty_changed.emit(value)
+            self.on_changed.emit()
 
     def mark_clean(self) -> None:
         """Mark the project as clean (no unsaved changes)."""
@@ -111,6 +112,7 @@ class ProjectModel(QObject):
     def _on_photo_changed(self) -> None:
         """Called when any child PhotoModel reports a change."""
         self.mark_dirty()
+        self.on_changed.emit()
 
     def serialize(self) -> dict:
         """
@@ -166,8 +168,10 @@ class ProjectModel(QObject):
         p = Path(path)
         if p.parent:
             p.parent.mkdir(parents=True, exist_ok=True)
+        data = self.serialize()
         with p.open("w", encoding="utf-8") as fh:
-            json.dump(self.serialize(), fh, indent=2)
+            json.dump(data, fh, indent=2)
+        self.mark_clean()
 
     def load_from_file(self, path: Union[str, Path]) -> None:
         """
@@ -180,3 +184,4 @@ class ProjectModel(QObject):
         with p.open("r", encoding="utf-8") as fh:
             data = json.load(fh)
         self.deserialize(data)
+        self.mark_clean()
