@@ -36,11 +36,11 @@ class ProjectModel(QObject):
             photo.on_changed.connect(self._on_photo_changed)
             self._connected_photos.add(photo)
 
-    _file_path: Union[str, Path, None] = None
+    _file_path: Path | None = None
     on_file_path_changed: Signal = Signal(object)
 
     @property
-    def file_path(self) -> Union[str, Path, None]:
+    def file_path(self) -> Path | None:
         """
         The file path where the project is saved, or None if not saved yet.
 
@@ -49,7 +49,7 @@ class ProjectModel(QObject):
         return self._file_path
 
     @file_path.setter
-    def file_path(self, path: Union[str, Path, None]) -> None:
+    def file_path(self, path: Path | None) -> None:
         old_path = self._file_path
         if old_path != path:
             self._file_path = path

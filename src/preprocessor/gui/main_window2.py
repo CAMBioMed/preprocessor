@@ -67,7 +67,7 @@ class MainWindow2(QMainWindow):
         if project is not None:
             project.on_file_path_changed.connect(self._on_project_file_path_changed)
 
-    def _on_project_file_path_changed(self, _path) -> None:
+    def _on_project_file_path_changed(self, _path: Path | None) -> None:
         """Called when the project's file_path changes."""
         self._update_window_title()
 
@@ -167,7 +167,7 @@ class MainWindow2(QMainWindow):
             )
             return
         self.model.current_project = new_project
-        self.model.current_project.file_path = path
+        self.model.current_project.file_path = Path(path)
         self._bind_project_signals(new_project)
         self._update_project_actions()
         self._update_window_title()
@@ -187,7 +187,7 @@ class MainWindow2(QMainWindow):
         if not path:
             return
         self.model.current_project.save_to_file(path)
-        self.model.current_project.file_path = path
+        self.model.current_project.file_path = Path(path)
         self._update_project_actions()
         self._update_window_title()
 
