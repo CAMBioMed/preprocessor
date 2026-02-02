@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QAction, QKeySequence, QIcon
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QListWidget
 from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
@@ -52,7 +52,7 @@ class MainWindow2(QMainWindow):
         self.ui.menuFile_SaveProjectAs.setEnabled(has_project)
         self.ui.menuFile_CloseProject.setEnabled(has_project)
         self.thumbnail_dock.ui.addPhotoAction.setEnabled(has_project)
-        self.thumbnail_dock.ui.removeThumbnailAction.setEnabled(has_project)
+        self.thumbnail_dock.ui.removePhotoAction.setEnabled(has_project)
 
     def _bind_project_signals(self, project: ProjectModel | None) -> None:
         """Connect/disconnect signals for the currently bound project."""
@@ -71,7 +71,7 @@ class MainWindow2(QMainWindow):
             return
         project.on_file_path_changed.connect(self._on_project_file_path_changed)
         project.on_dirty_changed.connect(self.on_dirty_changed)
-        project.photos.on_changed.connect(self.on_dirty_changed)
+        project.photos.on_changed.connect(self.on_photos_changed)
 
     def _on_project_file_path_changed(self, _path: Path | None) -> None:
         """Called when the project's file_path changes."""
@@ -165,6 +165,9 @@ class MainWindow2(QMainWindow):
             #  Thus cancel
             self.on_close_project()
         new_project = ProjectModel()
+        self.model.current_project = new_project
+        self.model.current_project.file_path = Path(path)
+        self._bind_project_signals(new_project)
         try:
             new_project.load_from_file(path)
         except ValueError as exc:
@@ -175,9 +178,6 @@ class MainWindow2(QMainWindow):
                 f"Failed to open project file:\n{path}\n\n{exc}",
             )
             return
-        self.model.current_project = new_project
-        self.model.current_project.file_path = Path(path)
-        self._bind_project_signals(new_project)
         self._update_project_actions()
         self._update_window_title()
 
@@ -238,7 +238,13 @@ class MainWindow2(QMainWindow):
 
     def on_photos_changed(self) -> None:
         """Called when the current project's photos change."""
+        if self.model.current_project is None:
+            return
         self._update_window_title()
+        thumbnail_list: QListWidget = self.thumbnail_dock.ui.thumbnailListWidget
+        thumbnail_list.clear()
+        for photo in self.model.current_project.photos:
+            thumbnail_list.addItem(photo.original_filename)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()

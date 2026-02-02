@@ -9,7 +9,7 @@ class Ui_ThumbnailDock(object):
     mainLayout: QGridLayout
     toolbar: QToolBar
     addPhotoAction: QAction
-    removeThumbnailAction: QAction
+    removePhotoAction: QAction
     thumbnailListWidget: QListWidget
 
     def setupUi(self, parent: QDockWidget) -> None:
@@ -33,11 +33,13 @@ class Ui_ThumbnailDock(object):
         self.mainLayout.addWidget(self.toolbar, 0, 0, 1, 1)
 
         # Toolbar actions
-        addPhotoActionIcon = QIcon.fromTheme(QIcon.ThemeIcon.InsertImage)
-        self.addPhotoAction = QAction(addPhotoActionIcon, "&Add Photos...", parent)
+        self.addPhotoAction = QAction("&Add Photos...", parent)
         self.addPhotoAction.setStatusTip("Add photos to the project.")
         self.toolbar.addAction(self.addPhotoAction)
-        self.removeThumbnailAction = self.toolbar.addAction("Remove Thumbnail")
+
+        self.removePhotoAction = QAction("&Remove Photos", parent)
+        self.removePhotoAction.setStatusTip("Remove photos from the project.")
+        self.toolbar.addAction(self.removePhotoAction)
 
         # Thumbnail list
         self.thumbnailListWidget = QListWidget(self.dockWidgetContents)
