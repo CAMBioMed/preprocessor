@@ -11,7 +11,9 @@ class ThumbnailDockWidget(QDockWidget):
         QDockWidget.__init__(self, parent)
         self.ui = Ui_ThumbnailDock()
         self.ui.setupUi(self)
+        self._setup_icons()
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
-        self.ui.addPhotoAction.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.InsertImage)))
+        self.ui.addPhotoAction.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/image--plus.png")))
+        self.ui.removeThumbnailAction.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/image--minus.png")))
