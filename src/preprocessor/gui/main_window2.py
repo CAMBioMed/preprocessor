@@ -1,10 +1,9 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QCloseEvent, QAction, QKeySequence
+from PySide6.QtGui import QCloseEvent, QAction, QKeySequence, QIcon
 from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
 from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
-from preprocessor.gui.icons import GuiIcons
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
@@ -89,14 +88,15 @@ class MainWindow2(QMainWindow):
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
         # File menu
-        self.ui.menuFile_NewProject.setIcon(GuiIcons.ProjectNew)
-        self.ui.menuFile_OpenProject.setIcon(GuiIcons.ProjectOpen)
-        self.ui.menuFile_SaveProject.setIcon(GuiIcons.ProjectSave)
-        self.ui.menuFile_SaveProjectAs.setIcon(GuiIcons.ProjectSaveAs)
-        self.ui.menuFile_Exit.setIcon(GuiIcons.ApplicationExit)
+        self.ui.menuFile_NewProject.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew)))
+        self.ui.menuFile_OpenProject.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen)))
+        self.ui.menuFile_OpenProject.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/folder-open-image.png")))
+        self.ui.menuFile_SaveProject.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/disk-black.png")))
+        self.ui.menuFile_SaveProjectAs.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/disks-black.png")))
+        self.ui.menuFile_Exit.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)))
 
         # Help menu
-        self.ui.menuHelp_About.setIcon(GuiIcons.HelpAbout)
+        self.ui.menuHelp_About.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.HelpAbout)))
 
     def _setup_keyboard_shortcuts(self) -> None:
         """

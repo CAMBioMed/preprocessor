@@ -1,6 +1,6 @@
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDockWidget, QWidget
 
-from preprocessor.gui.icons import GuiIcons
 from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
 
 
@@ -14,4 +14,4 @@ class ThumbnailDockWidget(QDockWidget):
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
-        self.ui.addPhotoAction.setIcon(GuiIcons.AddPhoto)
+        self.ui.addPhotoAction.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.InsertImage)))
