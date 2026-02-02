@@ -1,5 +1,5 @@
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QCloseEvent, QAction, QKeySequence, QIcon
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon, QPixmap
 from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QListWidget, QListWidgetItem
 from pathlib import Path
 
@@ -7,7 +7,6 @@ from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
-from preprocessor.gui.thumbnail_list_widget import ThumbnailListWidget
 from preprocessor.gui.ui_main import Ui_Main
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
@@ -37,9 +36,7 @@ class MainWindow2(QMainWindow):
         self._connect_signals()
 
         self.read_settings()
-        # ensure actions reflect whether there is a current project
         self._update_project_actions()
-        # track and bind to the current project's file_path changes for title updates
         self._bound_project: ProjectModel | None = None
         self._bind_project_signals(self.model.current_project)
         self._update_window_title()
@@ -47,7 +44,6 @@ class MainWindow2(QMainWindow):
     def _update_project_actions(self) -> None:
         """Enable or disable file actions depending on whether a project is open."""
         has_project = self.model.current_project is not None
-        # Save, Save As and Close should only be enabled when there's a current project
         self.ui.menuFile_SaveProject.setEnabled(has_project)
         self.ui.menuFile_SaveProjectAs.setEnabled(has_project)
         self.ui.menuFile_CloseProject.setEnabled(has_project)
@@ -56,22 +52,19 @@ class MainWindow2(QMainWindow):
 
     def _bind_project_signals(self, project: ProjectModel | None) -> None:
         """Connect/disconnect signals for the currently bound project."""
-        # avoid rebinding the same project
-        if self._bound_project is project:
-            return
-        # disconnect previous
-        if self._bound_project is not None:
-            try:
-                self._bound_project.on_file_path_changed.disconnect(self._on_project_file_path_changed)
-            except Exception:
-                pass
+        # Disconnect previous project
+        old_project = self._bound_project
+        if old_project is not None:
+            old_project.on_file_path_changed.disconnect(self._on_project_file_path_changed)
+            old_project.on_dirty_changed.disconnect(self.on_dirty_changed)
+            old_project.photos.on_changed.disconnect(self.on_photos_changed)
+
         self._bound_project = project
-        # connect new
-        if project is None:
-            return
-        project.on_file_path_changed.connect(self._on_project_file_path_changed)
-        project.on_dirty_changed.connect(self.on_dirty_changed)
-        project.photos.on_changed.connect(self.on_photos_changed)
+        # Connect new project
+        if project is not None:
+            project.on_file_path_changed.connect(self._on_project_file_path_changed)
+            project.on_dirty_changed.connect(self.on_dirty_changed)
+            project.photos.on_changed.connect(self.on_photos_changed)
 
     def _on_project_file_path_changed(self, _path: Path | None) -> None:
         """Called when the project's file_path changes."""
@@ -188,7 +181,6 @@ class MainWindow2(QMainWindow):
             self.on_save_project_as()
             return
         self.model.current_project.save_to_file(self.model.current_project.file_path)
-        # self._update_window_title()
 
     def on_save_project_as(self) -> None:
         if self.model.current_project is None:
@@ -198,7 +190,6 @@ class MainWindow2(QMainWindow):
             return
         self.model.current_project.save_to_file(path)
         self.model.current_project.file_path = Path(path)
-        # self._update_window_title()
 
     def on_close_project(self) -> None:
         if self.model.current_project is not None and self.model.current_project.dirty:
@@ -230,7 +221,6 @@ class MainWindow2(QMainWindow):
             model = PhotoModel()
             model.original_filename = path
             project.photos.append(model)
-        # self._update_window_title()
 
     def on_dirty_changed(self) -> None:
         """Called when the current project's dirty state changes."""
@@ -245,14 +235,19 @@ class MainWindow2(QMainWindow):
 
         # Remove items corresponding to removed PhotoModel instances
         for photo in removed:
-            # find by stored PhotoModel in UserRole or fallback to matching text
+            # Find by stored PhotoModel in UserRole or fallback to matching filename
             found_index = None
             for i in range(thumbnail_list.count()):
                 item = thumbnail_list.item(i)
                 item_photo = item.data(Qt.ItemDataRole.UserRole)
-                if item_photo is photo or item.text() == (photo.original_filename or ""):
+                # Compare by identity first, then by basename of original filename
+                if item_photo is photo:
                     found_index = i
                     break
+                if photo.original_filename:
+                    if item.text() == Path(photo.original_filename).name:
+                        found_index = i
+                        break
             if found_index is not None:
                 # takeItem returns the removed QListWidgetItem; Qt will handle deletion by parent
                 thumbnail_list.takeItem(found_index)
@@ -264,9 +259,19 @@ class MainWindow2(QMainWindow):
                 insert_index = photos_list.index(photo)
             except ValueError:
                 insert_index = thumbnail_list.count()
-            item = QListWidgetItem(photo.original_filename)
+
+            # Show basename as text; if there's an image file, load it as a thumbnail icon
+            display_text = Path(photo.original_filename).name if photo.original_filename else ""
+            item = QListWidgetItem(display_text)
+
+            if photo.original_filename:
+                pix = QPixmap(str(photo.original_filename))
+                if not pix.isNull():
+                    thumb = pix.scaled(QSize(64, 64), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                    item.setIcon(QIcon(thumb))
+
             item.setData(Qt.ItemDataRole.UserRole, photo)
-            # insert at the position matching the project's photo index
+            # Insert at the position matching the project's photo index
             thumbnail_list.insertItem(insert_index, item)
 
     def closeEvent(self, event: QCloseEvent) -> None:
