@@ -33,6 +33,8 @@
     <addaction name="menuFile_SaveProjectAs"/>
     <addaction name="menuFile_CloseProject"/>
     <addaction name="separator"/>
+    <addaction name="menuFile_ExportAll"/>
+    <addaction name="separator"/>
     <addaction name="menuFile_Exit"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
@@ -179,6 +181,11 @@
    </property>
    <property name="statusTip">
     <string>Close the current project.</string>
+   </property>
+  </action>
+  <action name="menuFile_ExportAll">
+   <property name="text">
+    <string>E&amp;xport All...</string>
    </property>
   </action>
  </widget>

@@ -26,11 +26,11 @@ dependencies = [
 
 # CLI launcher
 [project.scripts]
-preprocessor = "preprocessor.__main__:main"
+preprocessor = "preprocessor.main:main"
 
 # For Windows GUI launcher (no console)
 [project.gui-scripts]
-preprocessor-gui = "preprocessor.__main__:main_gui"
+preprocessor-gui = "preprocessor.main:main_gui"
 
 [dependency-groups]
 dev = [
@@ -204,21 +204,21 @@ section_whitelines = 1
 
 [tool.pyside6-project]
 files = [
+    "src/preprocessor/__main__.py",
     "src/preprocessor/gui/hsv_threshold.ui",
     "src/preprocessor/gui/main.ui",
     "src/preprocessor/gui/properties_dock.ui",
-    "src/preprocessor/main.py",
+    "src/preprocessor/gui/export_dialog.ui",
 ]
 
 # Publishing
 [tool.briefcase]
 project_name = "CAMBioMed Preprocessor"
 bundle = "com.cambiomed-biodiversa"
-version = "0.0.1"  # Briefcase cannot derive the version from Git (yet) https://github.com/beeware/briefcase/issues/474
+# Briefcase cannot derive the version from Git (yet) https://github.com/beeware/briefcase/issues/474
+version = "0.0.1"
 #url = "https://cambiomed-biodiversa.com/preprocessor"
 license.file = "LICENSE.md"
-#author = "Daniel A. A. Pelsmaeker"
-#author_email = "developer@pelsmaeker.net"
 
 [tool.briefcase.app.preprocessor]
 formal_name = "CAMBioMed Preprocessor"
@@ -234,20 +234,11 @@ test_sources = [
 
 [tool.briefcase.app.preprocessor.macOS]
 universal_build = true
-min_os_version = "13.0"  # WORKAROUND: https://github.com/beeware/briefcase/issues/2658#issuecomment-3832236695
+# WORKAROUND: https://github.com/beeware/briefcase/issues/2658#issuecomment-3832236695
+min_os_version = "13.0"
 requires = [
     "std-nslog~=1.0.3",
 ]
-
-#[tool.briefcase.app.preprocessor.linux]
-#
-#[tool.briefcase.app.preprocessor.linux.system.debian]
-#
-#[tool.briefcase.app.preprocessor.linux.system.rhel]
-#
-#[tool.briefcase.app.preprocessor.linux.system.suse]
-#
-#[tool.briefcase.app.preprocessor.linux.system.arch]
 
 [tool.briefcase.app.preprocessor.linux.appimage]
 manylinux = "manylinux_2_28"
@@ -256,5 +247,3 @@ manylinux = "manylinux_2_28"
 flatpak_runtime = "org.gnome.Platform"
 flatpak_runtime_version = "48"
 flatpak_sdk = "org.gnome.Sdk"
-
-#[tool.briefcase.app.preprocessor.windows]

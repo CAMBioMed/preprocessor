@@ -1,9 +1,10 @@
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon, QPixmap
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QListWidget, QListWidgetItem
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QListWidget, QListWidgetItem, QDialog
 from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.export_dialog import ExportDialog
 from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
@@ -50,6 +51,7 @@ class MainWindow2(QMainWindow):
         self.ui.menuFile_SaveProject.setEnabled(has_project)
         self.ui.menuFile_SaveProjectAs.setEnabled(has_project)
         self.ui.menuFile_CloseProject.setEnabled(has_project)
+        self.ui.menuFile_ExportAll.setEnabled(has_project)
         self.thumbnail_dock.ui.addPhotoAction.setEnabled(has_project)
         self.thumbnail_dock.ui.removePhotoAction.setEnabled(has_project)
 
@@ -137,36 +139,37 @@ class MainWindow2(QMainWindow):
     def _connect_signals(self) -> None:
         """Connect signals to slots."""
         # File menu
-        self.ui.menuFile_NewProject.triggered.connect(self.on_new_project)
-        self.ui.menuFile_OpenProject.triggered.connect(self.on_open_project)
-        self.ui.menuFile_SaveProject.triggered.connect(self.on_save_project)
-        self.ui.menuFile_SaveProjectAs.triggered.connect(self.on_save_project_as)
-        self.ui.menuFile_CloseProject.triggered.connect(self.on_close_project)
+        self.ui.menuFile_NewProject.triggered.connect(self._handle_new_project_action)
+        self.ui.menuFile_OpenProject.triggered.connect(self._handle_open_project_action)
+        self.ui.menuFile_SaveProject.triggered.connect(self._handle_save_project_action)
+        self.ui.menuFile_SaveProjectAs.triggered.connect(self._handle_save_project_as_action)
+        self.ui.menuFile_CloseProject.triggered.connect(self._handle_close_project_action)
+        self.ui.menuFile_ExportAll.triggered.connect(self._handle_export_all_action)
         self.ui.menuFile_Exit.triggered.connect(self.close)
 
         # Help menu
-        self.ui.menuHelp_About.triggered.connect(self.on_help_about)
+        self.ui.menuHelp_About.triggered.connect(self._handle_help_about_action)
 
         # When a thumbnail is selected, either show stored result or schedule processing
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_selection_changed.connect(self._handle_photo_selection_changed)
 
-    def on_new_project(self) -> None:
+    def _handle_new_project_action(self) -> None:
         new_project = ProjectModel()
         self.model.current_project = new_project
         self._bind_project_signals(new_project)
         self._update_project_actions()
         self._update_window_title()
 
-    def on_open_project(self) -> None:
+    def _handle_open_project_action(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, "Open Project", "", "Project Files (*.pbproj);;All Files (*)")
         if not path:
             return
         if self.model.current_project is not None:
             # TODO: On unsaved changes, maybe the user doesn't want to open another project
             #  Thus cancel
-            self.on_close_project()
+            self._handle_close_project_action()
         new_project = ProjectModel()
         self.model.current_project = new_project
         self.model.current_project.file_path = Path(path)
@@ -184,15 +187,15 @@ class MainWindow2(QMainWindow):
         self._update_project_actions()
         self._update_window_title()
 
-    def on_save_project(self) -> None:
+    def _handle_save_project_action(self) -> None:
         if self.model.current_project is None:
             return
         if self.model.current_project.file_path is None:
-            self.on_save_project_as()
+            self._handle_save_project_as_action()
             return
         self.model.current_project.save_to_file(self.model.current_project.file_path)
 
-    def on_save_project_as(self) -> None:
+    def _handle_save_project_as_action(self) -> None:
         if self.model.current_project is None:
             return
         path, _ = QFileDialog.getSaveFileName(self, "Save Project As", "", "Project Files (*.pbproj);;All Files (*)")
@@ -201,7 +204,7 @@ class MainWindow2(QMainWindow):
         self.model.current_project.save_to_file(path)
         self.model.current_project.file_path = Path(path)
 
-    def on_close_project(self) -> None:
+    def _handle_close_project_action(self) -> None:
         if self.model.current_project is not None and self.model.current_project.dirty:
             result = QMessageBox.question(
                 self,
@@ -210,7 +213,7 @@ class MainWindow2(QMainWindow):
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
             )
             if result == QMessageBox.StandardButton.Yes:
-                self.on_save_project()
+                self._handle_save_project_action()
             elif result == QMessageBox.StandardButton.Cancel:
                 return
         self.model.current_project = None
@@ -218,7 +221,14 @@ class MainWindow2(QMainWindow):
         self._update_project_actions()
         self._update_window_title()
 
-    def on_help_about(self) -> None:
+    def _handle_export_all_action(self) -> None:
+        if self.model.current_project is None:
+            return
+        dialog = ExportDialog(self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            pass
+
+    def _handle_help_about_action(self) -> None:
         show_about_dialog(self)
 
     def _handle_add_photos_action(self) -> None:
