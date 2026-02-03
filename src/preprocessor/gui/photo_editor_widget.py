@@ -51,8 +51,8 @@ class PhotoEditorWidget(QWidget):
             corners = self._photo.quadrat_corners
             qcorners = [QPoint(int(round(x)), int(round(y))) for x, y in corners]
 
+        # Draw a shaded overlay outside the quadrat (if any)
         if qcorners is not None:
-            # create a path that is the full widget rect minus the quadrat polygon
             path = QPainterPath()
             path.addRect(self.rect())
             poly = QPolygonF(qcorners)
