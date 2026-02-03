@@ -36,14 +36,15 @@ class PhotoEditorWidget(QWidget):
     def paintEvent(self, _event: QPaintEvent) -> None:
         painter = QPainter(self)
 
+        # Draw the photo pixmap, scaled to fit the widget
         if self._pixmap is not None:
             ratio = min(1.0 * self.width() / self._pixmap.width(), 1.0 * self.height() / self._pixmap.height())
             size = self._pixmap.size() * ratio
             scaled_pixmap = self._pixmap.scaled(size, Qt.AspectRatioMode.KeepAspectRatio)
             painter.drawPixmap(QRect(QPoint(), size), scaled_pixmap)
 
+        # Draw a crosshair centered at the mouse position
         if self._mouse_position is not None:
-            # Draw a crosshair centered at the mouse position
             length = 10                             # Arm length, in pixels
             offset = 5                              # Gap size, in pixels
             width = 2                               # Line width, in pixels
@@ -64,6 +65,17 @@ class PhotoEditorWidget(QWidget):
 
             painter.setPen(QPen(line_color, width, Qt.PenStyle.SolidLine))
             draw_crosshair()
+
+        # Draw the quadrat outline (if any)
+        if self._photo is not None and self._photo.quadrat_corners is not None:
+            corners = self._photo.quadrat_corners
+            qcorners = [QPoint(int(round(x)), int(round(y))) for x, y in corners]
+            painter.setPen(QPen(Qt.GlobalColor.green, 2, Qt.PenStyle.SolidLine))
+            painter.drawLine(qcorners[0], qcorners[1])
+            painter.drawLine(qcorners[1], qcorners[2])
+            painter.drawLine(qcorners[2], qcorners[3])
+            painter.drawLine(qcorners[3], qcorners[0])
+
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self._mouse_position = event.pos()
