@@ -89,7 +89,7 @@ class PhotoEditorWidget(QWidget):
             self._photo.quadrat_corners = None
         else:
             img_pts = [self._widget_to_image_point(p) for p in pts]
-            self._photo.quadrat_corners = tuple((float(x), float(y)) for x, y in img_pts)
+            self._photo.quadrat_corners = tuple((float(x), float(y)) for x, y in img_pts)  # type: ignore[assignment]
 
     def paintEvent(self, _event: QPaintEvent) -> None:
         painter = QPainter(self)
@@ -108,7 +108,7 @@ class PhotoEditorWidget(QWidget):
             qcorners = None
 
         # Draw shaded overlay outside the quadrat (if any)
-        if qcorners is not None:
+        if qcorners is not None and len(qcorners) >= 1:
             path = QPainterPath()
             path.addRect(self.rect())
             poly = QPolygonF(qcorners)
@@ -142,7 +142,7 @@ class PhotoEditorWidget(QWidget):
         # Draw a crosshair centered at the mouse position (drawn last so it's visible)
         if self._mouse_position is not None:
             length = 10                             # Arm length, in pixels
-            offset = 5                              # Gap size, in pixels
+            gap = 5                                 # Gap size, in pixels
             width = 2                               # Line width, in pixels
             border = 1                              # Border width, in pixels
             border_color = Qt.GlobalColor.white     # Border color
@@ -151,10 +151,10 @@ class PhotoEditorWidget(QWidget):
             y = self._mouse_position.y()
 
             def draw_crosshair() -> None:
-                painter.drawLine(QPoint(x - offset - length, y), QPoint(x - offset, y))
-                painter.drawLine(QPoint(x + offset, y), QPoint(x + offset + length, y))
-                painter.drawLine(QPoint(x, y - offset - length), QPoint(x, y - offset))
-                painter.drawLine(QPoint(x, y + offset), QPoint(x, y + offset + length))
+                painter.drawLine(QPoint(x - gap - length, y), QPoint(x - gap, y))
+                painter.drawLine(QPoint(x + gap, y), QPoint(x + gap + length, y))
+                painter.drawLine(QPoint(x, y - gap - length), QPoint(x, y - gap))
+                painter.drawLine(QPoint(x, y + gap), QPoint(x, y + gap + length))
 
             painter.setPen(QPen(border_color, width + border * 2, Qt.PenStyle.SolidLine))
             draw_crosshair()
