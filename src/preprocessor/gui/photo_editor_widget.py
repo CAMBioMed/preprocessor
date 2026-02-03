@@ -39,8 +39,19 @@ class PhotoEditorWidget(QWidget):
             painter.drawPixmap(QRect(QPoint(), size), scaled_pixmap)
 
         if self._mouse_position is not None:
-            painter.setPen(QPen(Qt.GlobalColor.red, 15, Qt.PenStyle.SolidLine))
-            painter.drawEllipse(self._mouse_position, 15, 15)
+            # Draw a crosshair centered at the mouse position
+            length = 10                 # Arm length, in pixels
+            offset = 5                  # Gap size, in pixels
+            width = 2                   # Line width, in pixels
+            color = Qt.GlobalColor.red  # Line color
+            pen = QPen(color, width, Qt.PenStyle.SolidLine)
+            painter.setPen(pen)
+            x = self._mouse_position.x()
+            y = self._mouse_position.y()
+            painter.drawLine(QPoint(x - offset - length, y), QPoint(x - offset, y))
+            painter.drawLine(QPoint(x + offset, y), QPoint(x + offset + length, y))
+            painter.drawLine(QPoint(x, y - offset - length), QPoint(x, y - offset))
+            painter.drawLine(QPoint(x, y + offset), QPoint(x, y + offset + length))
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self._mouse_position = event.pos()
