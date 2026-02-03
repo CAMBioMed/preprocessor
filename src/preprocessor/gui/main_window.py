@@ -533,43 +533,4 @@ class MainWindow(QMainWindow):
 
 
 
-def sigint_handler(*_args: Any) -> None:
-    """Handle the SIGINT signal."""
-    sys.stderr.write("\r")
-    QApplication.quit()
 
-
-signal_timer: QTimer
-
-
-def setup_sigint_handler(interval: int = 200) -> None:
-    """Process any pending SIGINT signals."""
-    # Based on: https://stackoverflow.com/a/4939113/146622
-    # The Qt application main event loop doesn't run on the Python interpreter, so it doesn't process signals.
-    # Setup timer to periodically run the Python interpreter to check for (SIGINT) signals from outside.
-
-    global signal_timer  # Prevent garbage collection # noqa: PLW0603
-
-    signal.signal(signal.SIGINT, sigint_handler)
-    signal_timer = QTimer()
-    signal_timer.start(interval)
-    signal_timer.timeout.connect(lambda: None)  # Let the interpreter run each time.
-
-
-def show_application() -> None:
-    """Show the main application window."""
-    # Disable allocation limit
-    QtGui.QImageReader.setAllocationLimit(0)
-
-    QCoreApplication.setOrganizationName("CAMBioMed")
-    QCoreApplication.setOrganizationDomain("cambiomed-biodiversa.com")
-    QCoreApplication.setApplicationName("Preprocessor")
-
-    app = QApplication(sys.argv)
-    app.setApplicationName("CAMBioMed Preprocessor")
-    app.setApplicationVersion(__version__)
-    window = MainWindow2()
-    window.show()
-    setup_sigint_handler()
-    exit_code = app.exec_()
-    sys.exit(exit_code)
