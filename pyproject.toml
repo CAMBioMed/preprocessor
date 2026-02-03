@@ -3,7 +3,8 @@ dynamic = ["version", "urls"]
 name = "preprocessor"
 description = "Benthic image preprocessor"
 keywords = ["preprocessor"]
-license = "Apache-2.0"
+license-expression = "Apache-2.0"
+license-file = "LICENSE.md"
 license-files = ["LICENSE.md"]
 readme = "README.md"
 authors = [
@@ -12,7 +13,7 @@ authors = [
 maintainers = [
   {name = "Daniel A. A. Pelsmaeker", email = "developer@pelsmaeker.net"},
 ]
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.12"
 dependencies = [
   "click>=8.3.1",
   "numpy>=2.2.6",
@@ -25,11 +26,11 @@ dependencies = [
 
 # CLI launcher
 [project.scripts]
-preprocessor = "preprocessor.main:main"
+preprocessor = "preprocessor.__main__:main"
 
 # For Windows GUI launcher (no console)
 [project.gui-scripts]
-preprocessor-gui = "preprocessor.main:main_gui"
+preprocessor-gui = "preprocessor.__main__:main_gui"
 
 [dependency-groups]
 dev = [
@@ -208,3 +209,52 @@ files = [
     "src/preprocessor/gui/properties_dock.ui",
     "src/preprocessor/main.py",
 ]
+
+# Publishing
+[tool.briefcase]
+project_name = "CAMBioMed Preprocessor"
+bundle = "com.cambiomed-biodiversa"
+version = "0.0.1"  # Briefcase cannot derive the version from Git (yet) https://github.com/beeware/briefcase/issues/474
+#url = "https://cambiomed-biodiversa.com/preprocessor"
+license.file = "LICENSE.md"
+#author = "Daniel A. A. Pelsmaeker"
+#author_email = "developer@pelsmaeker.net"
+
+[tool.briefcase.app.preprocessor]
+formal_name = "CAMBioMed Preprocessor"
+#description = "My first application"
+#long_description = """More details about the app should go here.
+#"""
+sources = [
+    "src/preprocessor",
+]
+test_sources = [
+    "tests",
+]
+
+[tool.briefcase.app.preprocessor.macOS]
+universal_build = true
+min_os_version = "13.0"  # WORKAROUND: https://github.com/beeware/briefcase/issues/2658#issuecomment-3832236695
+requires = [
+    "std-nslog~=1.0.3",
+]
+
+#[tool.briefcase.app.preprocessor.linux]
+#
+#[tool.briefcase.app.preprocessor.linux.system.debian]
+#
+#[tool.briefcase.app.preprocessor.linux.system.rhel]
+#
+#[tool.briefcase.app.preprocessor.linux.system.suse]
+#
+#[tool.briefcase.app.preprocessor.linux.system.arch]
+
+[tool.briefcase.app.preprocessor.linux.appimage]
+manylinux = "manylinux_2_28"
+
+[tool.briefcase.app.preprocessor.linux.flatpak]
+flatpak_runtime = "org.gnome.Platform"
+flatpak_runtime_version = "48"
+flatpak_sdk = "org.gnome.Sdk"
+
+#[tool.briefcase.app.preprocessor.windows]

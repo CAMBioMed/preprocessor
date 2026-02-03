@@ -19,6 +19,11 @@ _version.py
 # IntelliJ
 .idea/
 
+# BeeWare Briefcase
+/.briefcase/
+/logs/
+*.dist-info/
+
 # Big photos
 /examples/
 

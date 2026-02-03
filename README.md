@@ -12,7 +12,7 @@
 - Format code: `uv run ruff format .` (`make format`)
 - Build package: `uv build` (`make build`)
 - Mypy type checking: `uv run mypy src tests` (`make typecheck`)
-
+- Run briefcase app with app update and updating dependencies: `uvx briefcase run -u -r`
 
 ## Create UI files
 To create or update the generated Python UI files, use the following command:
