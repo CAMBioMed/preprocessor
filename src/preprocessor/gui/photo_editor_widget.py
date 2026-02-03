@@ -16,6 +16,10 @@ class PhotoEditorWidget(QWidget):
     """Current photo pixmap."""
     _photo: PhotoModel | None
     """Current photo model."""
+    _drag_index: int | None
+    """Index of corner being dragged (None when not dragging)."""
+    _handle_radius: int
+    """Visual radius for handles (in widget pixels)."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
@@ -23,9 +27,7 @@ class PhotoEditorWidget(QWidget):
         self._pixmap = None
         self._photo = None
 
-        # index of corner being dragged (None when not dragging)
-        self._drag_index: int | None = None
-        # visual radius for handles (in widget pixels)
+        self._drag_index = None
         self._handle_radius = 8
 
         self.setMouseTracking(True)
@@ -37,7 +39,7 @@ class PhotoEditorWidget(QWidget):
         else:
             self._pixmap = None
             self._photo = None
-        # stop any active drag when switching photos
+        # Stop any active dragging when switching photos
         self._drag_index = None
         self.update()
 
