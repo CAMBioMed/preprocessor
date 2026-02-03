@@ -14,7 +14,7 @@ class ThumbnailDockWidget(QDockWidget):
 
     on_add_photos_action: Signal = Signal()
     on_remove_photos_action: Signal = Signal(object)
-    on_selection_changed: Signal = Signal(PhotoModel)
+    on_selection_changed: Signal = Signal(object)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QDockWidget.__init__(self, parent)
@@ -49,19 +49,19 @@ class ThumbnailDockWidget(QDockWidget):
 
     def _handle_remove_photos_action(self) -> None:
         selected_items = self.ui.thumbnailListWidget.selectedItems()
-        photos_to_remove = [
+        selected_photos = [
             item.data(Qt.ItemDataRole.UserRole) for item in selected_items
             if item.data(Qt.ItemDataRole.UserRole) is not None
         ]
-        self.on_remove_photos_action.emit(photos_to_remove)
+        self.on_remove_photos_action.emit(selected_photos)
 
     def _handle_selection_changed(self) -> None:
         selected_items = self.ui.thumbnailListWidget.selectedItems()
-        if selected_items:
-            item = selected_items[0]
-            photo = item.data(Qt.ItemDataRole.UserRole)
-            if photo is not None:
-                self.on_selection_changed.emit(photo)
+        selected_photos = [
+            item.data(Qt.ItemDataRole.UserRole) for item in selected_items
+            if item.data(Qt.ItemDataRole.UserRole) is not None
+        ]
+        self.on_selection_changed.emit(selected_photos)
 
     def update_thumbnails(self, photos: QListModel[PhotoModel]) -> None:
         """Update the thumbnails to match the given list of photos."""

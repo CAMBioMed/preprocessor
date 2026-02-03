@@ -246,9 +246,12 @@ class MainWindow2(QMainWindow):
         self._update_window_title()
         self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
 
-    def _handle_photo_selection_changed(self, photo: PhotoModel) -> None:
+    def _handle_photo_selection_changed(self, selected: list[PhotoModel]) -> None:
         """Called when the selected photo changes."""
-        self.central_widget.show_photo(photo)
+        if not selected:
+            self.central_widget.show_photo(None)
+            return
+        self.central_widget.show_photo(selected[0])
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
