@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'properties_dock.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.0
+## Created by: Qt User Interface Compiler version 6.10.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -30,12 +30,13 @@ class Ui_PropertiesDock(object):
         self.dockWidgetContents.setObjectName(u"dockWidgetContents")
         self.layoutPropertiesDock = QGridLayout(self.dockWidgetContents)
         self.layoutPropertiesDock.setObjectName(u"layoutPropertiesDock")
+        self.layoutPropertiesDock.setContentsMargins(0, 0, 0, 0)
         self.scrollareaPropertiesDock = QScrollArea(self.dockWidgetContents)
         self.scrollareaPropertiesDock.setObjectName(u"scrollareaPropertiesDock")
         self.scrollareaPropertiesDock.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, -937, 460, 1403))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 477, 1415))
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

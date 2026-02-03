@@ -19,7 +19,7 @@ def mainwindow_setup(w):
 
 app = QtWidgets.QApplication(sys.argv)
 
-window = loader.load("mainwindow.ui", None)
+window = loader.load("main.ui", None)
 mainwindow_setup(window)
 window.show()
 app.exec()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Main</class>
+ <widget class="QMainWindow" name="Main">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>CAMBioMed Preprocessor</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
@@ -20,14 +20,19 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="menuFile_Open"/>
+    <addaction name="menuFile_NewProject"/>
+    <addaction name="menuFile_OpenProject"/>
+    <addaction name="menuFile_SaveProject"/>
+    <addaction name="menuFile_SaveProjectAs"/>
+    <addaction name="menuFile_CloseProject"/>
+    <addaction name="separator"/>
     <addaction name="menuFile_Exit"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
@@ -60,22 +65,22 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="menuFile_Open"/>
+   <addaction name="menuFile_OpenProject"/>
    <addaction name="separator"/>
    <addaction name="menuView_ShowOriginal"/>
    <addaction name="menuView_ShowLensCorrected"/>
    <addaction name="menuView_ShowColorCorrected"/>
    <addaction name="menuView_ShowPerspectiveCorrected"/>
   </widget>
-  <action name="menuFile_Open">
+  <action name="menuFile_OpenProject">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
    </property>
    <property name="text">
-    <string>&amp;Open...</string>
+    <string>&amp;Open Project...</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
+   <property name="statusTip">
+    <string>Open an existing project.</string>
    </property>
   </action>
   <action name="menuFile_Exit">
@@ -85,10 +90,22 @@
    <property name="text">
     <string>E&amp;xit</string>
    </property>
+   <property name="statusTip">
+    <string>Exit the application.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::QuitRole</enum>
+   </property>
   </action>
   <action name="menuHelp_About">
    <property name="text">
     <string>&amp;About...</string>
+   </property>
+   <property name="statusTip">
+    <string>About this application.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::AboutRole</enum>
    </property>
   </action>
   <action name="menuView_ShowOriginal">
@@ -121,6 +138,47 @@
    </property>
    <property name="text">
     <string>Show &amp;Perspective Corrected</string>
+   </property>
+  </action>
+  <action name="menuFile_NewProject">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentNew"/>
+   </property>
+   <property name="text">
+    <string>&amp;New Project...</string>
+   </property>
+   <property name="statusTip">
+    <string>Create a new project.</string>
+   </property>
+  </action>
+  <action name="menuFile_SaveProject">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
+   </property>
+   <property name="text">
+    <string>&amp;Save Project</string>
+   </property>
+   <property name="statusTip">
+    <string>Save the current project.</string>
+   </property>
+  </action>
+  <action name="menuFile_SaveProjectAs">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentSaveAs"/>
+   </property>
+   <property name="text">
+    <string>Save Project &amp;As...</string>
+   </property>
+   <property name="statusTip">
+    <string>Save the current project under a new name.</string>
+   </property>
+  </action>
+  <action name="menuFile_CloseProject">
+   <property name="text">
+    <string>&amp;Close Project</string>
+   </property>
+   <property name="statusTip">
+    <string>Close the current project.</string>
    </property>
   </action>
  </widget>
