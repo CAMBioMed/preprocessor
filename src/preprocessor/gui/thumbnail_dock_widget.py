@@ -1,3 +1,4 @@
+from importlib import resources as _importlib_resources
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QSize, Signal
@@ -5,10 +6,9 @@ from PySide6.QtGui import QIcon, QKeySequence, QPixmap
 from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem
 
 from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
+from preprocessor.gui.utils import icon_from_resource
 from preprocessor.model.list_model import QListModel
 from preprocessor.model.photo_model import PhotoModel
-
-
 class ThumbnailDockWidget(QDockWidget):
     ui: Ui_ThumbnailDock
 
@@ -29,8 +29,8 @@ class ThumbnailDockWidget(QDockWidget):
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
         # Toolbar
-        self.ui.addPhotoAction.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/image--plus.png")))
-        self.ui.removePhotoAction.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/image--minus.png")))
+        self.ui.addPhotoAction.setIcon(icon_from_resource("icons/fugue16/image--plus.png"))
+        self.ui.removePhotoAction.setIcon(icon_from_resource("icons/fugue16/image--minus.png"))
 
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up keyboard shortcuts for actions."""

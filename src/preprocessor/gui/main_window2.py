@@ -9,6 +9,7 @@ from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.ui_main import Ui_Main
+from preprocessor.gui.utils import icon_from_resource
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
@@ -93,9 +94,10 @@ class MainWindow2(QMainWindow):
         # File menu
         self.ui.menuFile_NewProject.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew)))
         self.ui.menuFile_OpenProject.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen)))
-        self.ui.menuFile_OpenProject.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/folder-open-image.png")))
-        self.ui.menuFile_SaveProject.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/disk-black.png")))
-        self.ui.menuFile_SaveProjectAs.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/disks-black.png")))
+        # prefer packaged resource icon if available
+        self.ui.menuFile_OpenProject.setIcon(icon_from_resource("icons/fugue16/folder-open-image.png"))
+        self.ui.menuFile_SaveProject.setIcon(icon_from_resource("icons/fugue16/disk-black.png"))
+        self.ui.menuFile_SaveProjectAs.setIcon(icon_from_resource("icons/fugue16/disks-black.png"))
         self.ui.menuFile_Exit.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)))
 
         # Help menu
