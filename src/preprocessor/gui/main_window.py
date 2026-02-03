@@ -307,7 +307,7 @@ class MainWindow(QMainWindow):
 
         total = len(image_paths)
         progress = QProgressDialog("Processing and saving images...", "Cancel", 0, total, self)
-        progress.setWindowModality(Qt.WindowModal)
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
         progress.setMinimumDuration(0)
         progress.setValue(0)
 
