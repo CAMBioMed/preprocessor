@@ -1,4 +1,5 @@
 from pathlib import Path
+import math
 
 from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen, QEnterEvent, QPainterPath, QPolygonF, QColor
@@ -20,6 +21,8 @@ class PhotoEditorWidget(QWidget):
     """Index of corner being dragged (None when not dragging)."""
     _handle_radius: int
     """Visual radius for handles (in widget pixels)."""
+    _edit_points: list[QPoint] | None
+    """Working copy of points in widget coordinates while the user is editing."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
@@ -29,6 +32,9 @@ class PhotoEditorWidget(QWidget):
 
         self._drag_index = None
         self._handle_radius = 8
+
+        # working copy used during editing (widget coordinates). None when not editing.
+        self._edit_points = None
 
         self.setMouseTracking(True)
 
@@ -41,6 +47,8 @@ class PhotoEditorWidget(QWidget):
             self._photo = None
         # Stop any active dragging when switching photos
         self._drag_index = None
+        # discard any unfinished edit when switching photos
+        self._edit_points = None
         self.update()
 
     def _current_pixmap_info(self) -> tuple[float, QPoint, QSize]:
@@ -76,7 +84,10 @@ class PhotoEditorWidget(QWidget):
         """Return quadrat corners as widget QPoint instances (empty list if none).
         The stored PhotoModel.quadrat_corners are interpreted as image coordinates
         and are scaled to match the rendered (scaled) pixmap.
+        If an edit is in progress, return the working copy instead.
         """
+        if self._edit_points is not None:
+            return list(self._edit_points)
         if self._photo is None or self._photo.quadrat_corners is None:
             return []
         return [self._image_to_widget_point(x, y) for x, y in self._photo.quadrat_corners]
@@ -90,6 +101,9 @@ class PhotoEditorWidget(QWidget):
         if not pts:
             self._photo.quadrat_corners = None
         else:
+            # Ensure a stable ordering before storing so polygon stays simple
+            if len(pts) >= 3:
+                pts = self._order_points_by_angle(pts)
             img_pts = [self._widget_to_image_point(p) for p in pts]
             self._photo.quadrat_corners = tuple((float(x), float(y)) for x, y in img_pts)  # type: ignore[assignment]
 
@@ -103,11 +117,8 @@ class PhotoEditorWidget(QWidget):
             pixmap_rect = QRect(offset, size)
             painter.drawPixmap(pixmap_rect, scaled_pixmap)
 
-        # Determine quadrat points from model (as widget points)
-        if self._photo is not None and self._photo.quadrat_corners is not None:
-            qcorners = [self._image_to_widget_point(x, y) for x, y in self._photo.quadrat_corners]
-        else:
-            qcorners = None
+        # Determine quadrat points from model or working copy (as widget points)
+        qcorners = self._widget_points()
 
         # Draw shaded overlay outside the quadrat (if any)
         if qcorners is not None and len(qcorners) >= 1:
@@ -185,27 +196,34 @@ class PhotoEditorWidget(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             hit = self._find_handle_index(event.pos())
             if hit is not None:
-                # Begin dragging an existing point
+                # Begin dragging an existing point: make a working copy if needed
+                if self._edit_points is None:
+                    self._edit_points = self._widget_points()
                 self._drag_index = hit
             else:
-                # Add new point if less than 4 exist, and start dragging it
+                # Add new point if less than 4 exist, and start editing it (do not persist yet)
                 pts = self._widget_points()
                 if len(pts) < 4:
-                    pts.append(event.pos())
-                    self._write_widget_points(pts)
-                    self._drag_index = len(pts) - 1
+                    # initialize working copy if not present
+                    if self._edit_points is None:
+                        self._edit_points = pts
+                    self._edit_points.append(event.pos())
+                    self._drag_index = len(self._edit_points) - 1
             self._mouse_position = event.pos()
             self.update()
         elif event.button() == Qt.MouseButton.RightButton:
             hit = self._find_handle_index(event.pos())
             if hit is not None:
-                # Remove an existing point under the cursor
+                # Remove an existing point under the cursor immediately (right-click is immediate)
                 pts = self._widget_points()
                 del pts[hit]
+                # persist removal immediately
                 self._write_widget_points(pts if pts else None)
                 # stop any drag if removing dragged point
                 if self._drag_index == hit:
                     self._drag_index = None
+                # discard any working copy after committing
+                self._edit_points = None
                 self.update()
             else:
                 self._mouse_position = event.pos()
@@ -214,15 +232,22 @@ class PhotoEditorWidget(QWidget):
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self._mouse_position = event.pos()
         if self._drag_index is not None and self._photo is not None:
-            # Dragging
-            pts = self._widget_points()
+            # Dragging: update the working copy only (do not persist yet)
+            if self._edit_points is None:
+                self._edit_points = self._widget_points()
+            pts = self._edit_points
             if 0 <= self._drag_index < len(pts):
                 pts[self._drag_index] = event.pos()
-                self._write_widget_points(pts)
+            # do not call _write_widget_points here
         self.update()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        # Stop dragging
+        # Stop dragging and persist any working edits
+        if self._edit_points is not None:
+            # commit working copy into the model
+            self._write_widget_points(self._edit_points if self._edit_points else None)
+            # discard working copy after commit
+            self._edit_points = None
         self._drag_index = None
         self._mouse_position = event.pos()
         self.update()
@@ -234,8 +259,22 @@ class PhotoEditorWidget(QWidget):
 
     def leaveEvent(self, event: QEvent) -> None:
         """Restore the OS mouse cursor when leaving the editor."""
+        # If an edit was in progress, commit it when dragging is ended by leaving
+        if self._edit_points is not None:
+            self._write_widget_points(self._edit_points if self._edit_points else None)
+            self._edit_points = None
         self.unsetCursor()
         self._mouse_position = None
         self._drag_index = None     # Stop dragging (if any)
         self.update()
         super().leaveEvent(event)
+
+    def _order_points_by_angle(self, pts: list[QPoint]) -> list[QPoint]:
+        """Return points sorted by angle around their centroid (counter-clockwise).
+        This ordering yields a simple polygon (no self intersections) for small point sets.
+        """
+        if not pts:
+            return pts
+        cx = sum(p.x() for p in pts) / len(pts)
+        cy = sum(p.y() for p in pts) / len(pts)
+        return sorted(pts, key=lambda p: math.atan2(p.y() - cy, p.x() - cx))
