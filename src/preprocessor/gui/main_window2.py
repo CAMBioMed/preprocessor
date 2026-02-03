@@ -267,7 +267,7 @@ class MainWindow2(QMainWindow):
             if photo.original_filename:
                 pix = QPixmap(str(photo.original_filename))
                 if not pix.isNull():
-                    thumb = pix.scaled(QSize(64, 64), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                    thumb = pix.scaled(QSize(120, 120), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
                     item.setIcon(QIcon(thumb))
 
             item.setData(Qt.ItemDataRole.UserRole, photo)

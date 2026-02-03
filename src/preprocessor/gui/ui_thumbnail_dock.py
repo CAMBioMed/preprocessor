@@ -1,7 +1,7 @@
 # Manually created
 from PySide6.QtCore import QSize, QMetaObject, Qt
 from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QToolBar, QDockWidget, QGridLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QToolBar, QDockWidget, QGridLayout, QListView
 
 
 class Ui_ThumbnailDock(object):
@@ -45,9 +45,12 @@ class Ui_ThumbnailDock(object):
         self.thumbnailListWidget = QListWidget(self.dockWidgetContents)
         self.thumbnailListWidget.setObjectName(u"thumbnailListWidget")
         self.thumbnailListWidget.setViewMode(QListWidget.ViewMode.IconMode)
-        self.thumbnailListWidget.setIconSize(QSize(100, 100))
-        self.thumbnailListWidget.setResizeMode(QListWidget.ResizeMode.Adjust)
+        self.thumbnailListWidget.setIconSize(QSize(120, 120))
         self.thumbnailListWidget.setSpacing(10)
+        self.thumbnailListWidget.setFlow(QListView.Flow.LeftToRight)
+        self.thumbnailListWidget.setMovement(QListView.Movement.Static)
+        self.thumbnailListWidget.setResizeMode(QListWidget.ResizeMode.Adjust)
+        self.thumbnailListWidget.setWrapping(False)
         self.mainLayout.addWidget(self.thumbnailListWidget, 0, 1, 1, 1)
 
         parent.setWidget(self.dockWidgetContents)
