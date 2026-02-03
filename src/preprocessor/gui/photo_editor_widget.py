@@ -14,6 +14,8 @@ class PhotoEditorWidget(QWidget):
     """Current mouse position over the photo."""
     _pixmap: QPixmap | None
     """Current photo pixmap."""
+    _photo: PhotoModel | None
+    """Current photo model."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
@@ -25,8 +27,10 @@ class PhotoEditorWidget(QWidget):
     def show_photo(self, photo: PhotoModel | None) -> None:
         if photo is not None:
             self._pixmap = QPixmap(str(photo.original_filename))
+            self._photo = photo
         else:
             self._pixmap = None
+            self._photo = None
         self.update()
 
     def paintEvent(self, _event: QPaintEvent) -> None:
@@ -49,17 +53,17 @@ class PhotoEditorWidget(QWidget):
             x = self._mouse_position.x()
             y = self._mouse_position.y()
 
+            def draw_crosshair() -> None:
+                painter.drawLine(QPoint(x - offset - length, y), QPoint(x - offset, y))
+                painter.drawLine(QPoint(x + offset, y), QPoint(x + offset + length, y))
+                painter.drawLine(QPoint(x, y - offset - length), QPoint(x, y - offset))
+                painter.drawLine(QPoint(x, y + offset), QPoint(x, y + offset + length))
+
             painter.setPen(QPen(border_color, width + border * 2, Qt.PenStyle.SolidLine))
-            painter.drawLine(QPoint(x - offset - length, y), QPoint(x - offset, y))
-            painter.drawLine(QPoint(x + offset, y), QPoint(x + offset + length, y))
-            painter.drawLine(QPoint(x, y - offset - length), QPoint(x, y - offset))
-            painter.drawLine(QPoint(x, y + offset), QPoint(x, y + offset + length))
+            draw_crosshair()
 
             painter.setPen(QPen(line_color, width, Qt.PenStyle.SolidLine))
-            painter.drawLine(QPoint(x - offset - length, y), QPoint(x - offset, y))
-            painter.drawLine(QPoint(x + offset, y), QPoint(x + offset + length, y))
-            painter.drawLine(QPoint(x, y - offset - length), QPoint(x, y - offset))
-            painter.drawLine(QPoint(x, y + offset), QPoint(x, y + offset + length))
+            draw_crosshair()
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self._mouse_position = event.pos()
