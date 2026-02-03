@@ -231,48 +231,7 @@ class MainWindow2(QMainWindow):
         if self.model.current_project is None:
             return
         self._update_window_title()
-        thumbnail_list: QListWidget = self.thumbnail_dock.ui.thumbnailListWidget
-
-        # Remove items corresponding to removed PhotoModel instances
-        for photo in removed:
-            # Find by stored PhotoModel in UserRole or fallback to matching filename
-            found_index = None
-            for i in range(thumbnail_list.count()):
-                item = thumbnail_list.item(i)
-                item_photo = item.data(Qt.ItemDataRole.UserRole)
-                # Compare by identity first, then by basename of original filename
-                if item_photo is photo:
-                    found_index = i
-                    break
-                if photo.original_filename:
-                    if item.text() == Path(photo.original_filename).name:
-                        found_index = i
-                        break
-            if found_index is not None:
-                # takeItem returns the removed QListWidgetItem; Qt will handle deletion by parent
-                thumbnail_list.takeItem(found_index)
-
-        # Insert items for added PhotoModel instances at the correct index to preserve order
-        photos_list = list(self.model.current_project.photos)
-        for photo in added:
-            try:
-                insert_index = photos_list.index(photo)
-            except ValueError:
-                insert_index = thumbnail_list.count()
-
-            # Show basename as text; if there's an image file, load it as a thumbnail icon
-            display_text = Path(photo.original_filename).name if photo.original_filename else ""
-            item = QListWidgetItem(display_text)
-
-            if photo.original_filename:
-                pix = QPixmap(str(photo.original_filename))
-                if not pix.isNull():
-                    thumb = pix.scaled(QSize(120, 120), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-                    item.setIcon(QIcon(thumb))
-
-            item.setData(Qt.ItemDataRole.UserRole, photo)
-            # Insert at the position matching the project's photo index
-            thumbnail_list.insertItem(insert_index, item)
+        self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
