@@ -269,7 +269,8 @@ class PhotoEditorWidget(QWidget):
         self.update()
         super().leaveEvent(event)
 
-    def _order_points_by_angle(self, pts: list[QPoint]) -> list[QPoint]:
+    @staticmethod
+    def _order_points_by_angle(pts: list[QPoint]) -> list[QPoint]:
         """Return points sorted by angle around their centroid (counter-clockwise).
         This ordering yields a simple polygon (no self intersections) for small point sets.
         """
