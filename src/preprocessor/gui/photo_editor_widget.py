@@ -40,14 +40,22 @@ class PhotoEditorWidget(QWidget):
 
         if self._mouse_position is not None:
             # Draw a crosshair centered at the mouse position
-            length = 10                 # Arm length, in pixels
-            offset = 5                  # Gap size, in pixels
-            width = 2                   # Line width, in pixels
-            color = Qt.GlobalColor.red  # Line color
-            pen = QPen(color, width, Qt.PenStyle.SolidLine)
-            painter.setPen(pen)
+            length = 10                             # Arm length, in pixels
+            offset = 5                              # Gap size, in pixels
+            width = 2                               # Line width, in pixels
+            border = 1                              # Border width, in pixels
+            border_color = Qt.GlobalColor.white     # Border color
+            line_color = Qt.GlobalColor.red         # Line color
             x = self._mouse_position.x()
             y = self._mouse_position.y()
+
+            painter.setPen(QPen(border_color, width + border * 2, Qt.PenStyle.SolidLine))
+            painter.drawLine(QPoint(x - offset - length, y), QPoint(x - offset, y))
+            painter.drawLine(QPoint(x + offset, y), QPoint(x + offset + length, y))
+            painter.drawLine(QPoint(x, y - offset - length), QPoint(x, y - offset))
+            painter.drawLine(QPoint(x, y + offset), QPoint(x, y + offset + length))
+
+            painter.setPen(QPen(line_color, width, Qt.PenStyle.SolidLine))
             painter.drawLine(QPoint(x - offset - length, y), QPoint(x - offset, y))
             painter.drawLine(QPoint(x + offset, y), QPoint(x + offset + length, y))
             painter.drawLine(QPoint(x, y - offset - length), QPoint(x, y - offset))
