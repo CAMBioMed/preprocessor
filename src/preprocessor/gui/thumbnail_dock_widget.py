@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtGui import QIcon, QKeySequence, QPixmap
 from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem
 
@@ -12,12 +12,17 @@ from preprocessor.model.photo_model import PhotoModel
 class ThumbnailDockWidget(QDockWidget):
     ui: Ui_ThumbnailDock
 
+    on_add_photos_action: Signal = Signal()
+    on_remove_photos_action: Signal = Signal(object)
+    on_selection_changed: Signal = Signal(PhotoModel)
+
     def __init__(self, parent: QWidget | None = None) -> None:
         QDockWidget.__init__(self, parent)
         self.ui = Ui_ThumbnailDock()
         self.ui.setupUi(self)
         self._setup_icons()
         self._setup_keyboard_shortcuts()
+        self._connect_signals()
 
         self.model = None
 
@@ -27,12 +32,36 @@ class ThumbnailDockWidget(QDockWidget):
         self.ui.addPhotoAction.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/image--plus.png")))
         self.ui.removePhotoAction.setIcon(QIcon(QIcon("src/preprocessor/icons/fugue16/image--minus.png")))
 
-
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up keyboard shortcuts for actions."""
         # Toolbar
         self.ui.addPhotoAction.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Equal)
         self.ui.removePhotoAction.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Backspace)
+
+    def _connect_signals(self) -> None:
+        """Connect UI signals to internal handlers."""
+        self.ui.addPhotoAction.triggered.connect(self._handle_add_photos_action)
+        self.ui.removePhotoAction.triggered.connect(self._handle_remove_photos_action)
+        self.ui.thumbnailListWidget.itemSelectionChanged.connect(self._handle_selection_changed)
+
+    def _handle_add_photos_action(self) -> None:
+        self.on_add_photos_action.emit()
+
+    def _handle_remove_photos_action(self) -> None:
+        selected_items = self.ui.thumbnailListWidget.selectedItems()
+        photos_to_remove = [
+            item.data(Qt.ItemDataRole.UserRole) for item in selected_items
+            if item.data(Qt.ItemDataRole.UserRole) is not None
+        ]
+        self.on_remove_photos_action.emit(photos_to_remove)
+
+    def _handle_selection_changed(self) -> None:
+        selected_items = self.ui.thumbnailListWidget.selectedItems()
+        if selected_items:
+            item = selected_items[0]
+            photo = item.data(Qt.ItemDataRole.UserRole)
+            if photo is not None:
+                self.on_selection_changed.emit(photo)
 
     def update_thumbnails(self, photos: QListModel[PhotoModel]) -> None:
         """Update the thumbnails to match the given list of photos."""

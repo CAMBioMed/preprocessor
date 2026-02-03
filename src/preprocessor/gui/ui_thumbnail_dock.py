@@ -5,6 +5,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QToolBar, QDock
 
 
 class Ui_ThumbnailDock(object):
+    """Provides thumbnail dock UI."""
+
     dockWidgetContents: QWidget
     mainLayout: QGridLayout
     toolbar: QToolBar
@@ -55,4 +57,4 @@ class Ui_ThumbnailDock(object):
 
         parent.setWidget(self.dockWidgetContents)
 
-        QMetaObject.connectSlotsByName(parent)
+        # QMetaObject.connectSlotsByName(parent)

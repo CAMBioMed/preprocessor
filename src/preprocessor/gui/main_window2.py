@@ -5,6 +5,7 @@ from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.image_editor import QImageEditor
+from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.ui_main import Ui_Main
@@ -21,7 +22,7 @@ class MainWindow2(QMainWindow):
     """The dock widget showing properties."""
     thumbnail_dock: ThumbnailDockWidget
     """The dock widget showing image thumbnails."""
-    central_widget: QImageEditor
+    central_widget: PhotoEditorWidget
     """The central widget showing the image."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -31,6 +32,7 @@ class MainWindow2(QMainWindow):
         self._setup_icons()
         self._setup_keyboard_shortcuts()
         self._create_thumbnail_dock()
+        self._create_photo_editor()
 
         self.model = ApplicationModel()
         self._connect_signals()
@@ -56,15 +58,15 @@ class MainWindow2(QMainWindow):
         old_project = self._bound_project
         if old_project is not None:
             old_project.on_file_path_changed.disconnect(self._on_project_file_path_changed)
-            old_project.on_dirty_changed.disconnect(self.on_dirty_changed)
-            old_project.photos.on_changed.disconnect(self.on_photos_changed)
+            old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
+            old_project.photos.on_changed.disconnect(self._handle_photos_changed)
 
         self._bound_project = project
         # Connect new project
         if project is not None:
             project.on_file_path_changed.connect(self._on_project_file_path_changed)
-            project.on_dirty_changed.connect(self.on_dirty_changed)
-            project.photos.on_changed.connect(self.on_photos_changed)
+            project.on_dirty_changed.connect(self._handle_dirty_changed)
+            project.photos.on_changed.connect(self._handle_photos_changed)
 
     def _on_project_file_path_changed(self, _path: Path | None) -> None:
         """Called when the project's file_path changes."""
@@ -125,6 +127,11 @@ class MainWindow2(QMainWindow):
         )
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.thumbnail_dock)
 
+    def _create_photo_editor(self) -> None:
+        """Create the central photo editor widget."""
+        self.central_widget = PhotoEditorWidget(self)
+        self.setCentralWidget(self.central_widget)
+
     def _connect_signals(self) -> None:
         """Connect signals to slots."""
         # File menu
@@ -139,8 +146,9 @@ class MainWindow2(QMainWindow):
         self.ui.menuHelp_About.triggered.connect(self.on_help_about)
 
         # When a thumbnail is selected, either show stored result or schedule processing
-        self.thumbnail_dock.ui.addPhotoAction.triggered.connect(self.on_add_photos)
-        # self.thumbnail_dock.on_thumbnail_selected.triggered.connect(self._display_image)
+        self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
+        self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
+        self.thumbnail_dock.on_selection_changed.connect(self._handle_photo_selection_changed)
 
     def on_new_project(self) -> None:
         new_project = ProjectModel()
@@ -211,7 +219,7 @@ class MainWindow2(QMainWindow):
     def on_help_about(self) -> None:
         show_about_dialog(self)
 
-    def on_add_photos(self) -> None:
+    def _handle_add_photos_action(self) -> None:
         assert self.model.current_project is not None
         paths, _ = QFileDialog.getOpenFileNames(self, "Add Photo", "", "Photos (*.jpg;*.jpeg);;All Files (*)")
         if not paths:
@@ -222,16 +230,25 @@ class MainWindow2(QMainWindow):
             model.original_filename = path
             project.photos.append(model)
 
-    def on_dirty_changed(self) -> None:
+    def _handle_remove_photos_action(self, selected: list[PhotoModel]) -> None:
+        assert self.model.current_project is not None
+        for photo in selected:
+            self.model.current_project.photos.remove(photo)
+
+    def _handle_dirty_changed(self) -> None:
         """Called when the current project's dirty state changes."""
         self._update_window_title()
 
-    def on_photos_changed(self, added: list[PhotoModel], removed: list[PhotoModel]) -> None:
+    def _handle_photos_changed(self, added: list[PhotoModel], removed: list[PhotoModel]) -> None:
         """Called when the current project's photos change."""
         if self.model.current_project is None:
             return
         self._update_window_title()
         self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
+
+    def _handle_photo_selection_changed(self, photo: PhotoModel) -> None:
+        """Called when the selected photo changes."""
+        self.central_widget.show_photo(photo)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
