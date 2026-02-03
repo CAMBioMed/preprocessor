@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from PySide6.QtCore import QPoint, Qt, QRect
-from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
+from PySide6.QtCore import QPoint, Qt, QRect, QEvent
+from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen, QEnterEvent
 from PySide6.QtWidgets import QWidget
 
 from preprocessor.model.photo_model import PhotoModel
@@ -56,3 +56,15 @@ class PhotoEditorWidget(QWidget):
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self._mouse_position = event.pos()
         self.update()
+
+    def enterEvent(self, event: QEnterEvent) -> None:
+        """Hide the OS mouse cursor while inside the editor."""
+        self.setCursor(Qt.CursorShape.BlankCursor)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent) -> None:
+        """Restore the OS mouse cursor when leaving the editor."""
+        self.unsetCursor()
+        self._mouse_position = None
+        self.update()
+        super().leaveEvent(event)
