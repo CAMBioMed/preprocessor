@@ -9,6 +9,7 @@ from preprocessor.gui.ui_export_dialog import Ui_ExportDialog
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.fix_perspective import fix_perspective
 from preprocessor.processing.load_image import load_image
+from preprocessor.processing.save_image import save_image_and_metadata, save_image
 
 
 class ExportDialog(QDialog):
@@ -175,28 +176,31 @@ class _ExportWorker(QObject):
             self.finished.emit()
             return
 
+        assert self.project.export_path is not None, "Export path must be set before running export worker"
+
         for idx, photo in enumerate(photos, start=1):
             if self._stop_requested:
                 self.status.emit("Export canceled.")
                 break
 
             # Update status
-            name = Path(photo.original_filename).name
-            self.status.emit(f"Exporting {idx}/{total}: {name}")
-            # TODO: perform actual export of `photo` to self.project.export_path
+            output_name = Path(photo.original_filename).name
+            output_path = self.project.export_path / output_name
+            self.status.emit(f"Exporting {idx}/{total}: {output_name}")
 
             img = load_image(photo.original_filename)
             assert img is not None, f"Failed to load image {photo.original_filename}"
-            # final_img = fix_perspective(
-            #     img,
-            #     photo.quadrat_corners,
-            #     self.project.target_width,
-            #     self.project.target_height,
-            # )
+            assert self.project.target_width is not None
+            assert self.project.target_height is not None
+            final_img = fix_perspective(
+                img,
+                list(photo.quadrat_corners),  # TODO: Fix when None
+                self.project.target_width,
+                self.project.target_height,
+            )
+            ok = save_image(output_path, final_img)
+            assert ok, f"Failed to save image to {output_path}"
 
-            # Simulate work (short sleep)
-            time.sleep(0.05)
-            # report progress
             self.progress.emit(idx, total)
 
         self.finished.emit()

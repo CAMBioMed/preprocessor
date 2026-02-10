@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import Sequence, TypeVar
 
 import cv2
@@ -9,7 +10,28 @@ from preprocessor.processing.json import serialize_photo_metadata
 
 logger = logging.getLogger(__name__)
 
-def save_image(path: str, result: QuadratDetectionResult, quality: int = 95, is_rgb: bool = False) -> bool:
+
+def save_image(path: Path, img: MatLike | None, quality: int = 95, is_rgb: bool = False) -> bool:
+    """
+    Save image data to the given path as JPEG,
+    and saves a JSON file alongside it with the same name
+    containing the parameters.
+    - `quality` : JPEG quality, 0-100 (higher = better)
+    - `is_rgb` : Whether the input is RGB (instead of BGR)
+    Returns True on success.
+    """
+    # Clamp quality
+    q = max(0, min(100, int(quality)))
+
+    # Save JPEG image
+    if img is None:
+        logger.error("No image data to save")
+        return False
+
+    ok = _save_jpeg_image(path, img, quality=q, is_rgb=is_rgb)
+    return ok
+
+def save_image_and_metadata(path: str, result: QuadratDetectionResult, quality: int = 95, is_rgb: bool = False) -> bool:
     """
     Save image data to the given path as JPEG,
     and saves a JSON file alongside it with the same name
@@ -27,7 +49,7 @@ def save_image(path: str, result: QuadratDetectionResult, quality: int = 95, is_
         logger.error("No image data to save")
         return False
 
-    ok = _save_jpeg_image(path, img, quality=q, is_rgb=is_rgb)
+    ok = _save_jpeg_image(Path(path), img, quality=q, is_rgb=is_rgb)
     if not ok:
         return False
 
@@ -38,7 +60,7 @@ def save_image(path: str, result: QuadratDetectionResult, quality: int = 95, is_
 
     return ok
 
-def _save_jpeg_image(path: str, img: MatLike, quality: int, is_rgb: bool = False) -> bool:
+def _save_jpeg_image(path: Path, img: MatLike, quality: int, is_rgb: bool = False) -> bool:
     """
     Save image data to the given path as JPEG,
     and saves a JSON file alongside it with the same name
@@ -63,7 +85,7 @@ def _save_jpeg_image(path: str, img: MatLike, quality: int, is_rgb: bool = False
 
     # Params for JPEG quality
     params = [cv2.IMWRITE_JPEG_QUALITY, quality]
-    ok = cv2.imwrite(path, img, params)
+    ok = cv2.imwrite(str(path), img, params)
 
     if not ok:
         logger.error(f"Failed to save JPEG image: {path}")
