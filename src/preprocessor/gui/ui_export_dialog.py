@@ -18,7 +18,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
     QFormLayout, QFrame, QHBoxLayout, QLabel,
     QLineEdit, QProgressBar, QPushButton, QScrollArea,
-    QSizePolicy, QVBoxLayout, QWidget)
+    QSizePolicy, QSpinBox, QVBoxLayout, QWidget)
 
 class Ui_ExportDialog(object):
     def setupUi(self, ExportDialog):
@@ -28,96 +28,154 @@ class Ui_ExportDialog(object):
         ExportDialog.resize(597, 317)
         self.verticalLayout = QVBoxLayout(ExportDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.scrollArea = QScrollArea(ExportDialog)
-        self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setFrameShape(QFrame.Shape.NoFrame)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 573, 223))
-        self.formLayout_2 = QFormLayout(self.scrollAreaWidgetContents)
+        self.frmMain = QScrollArea(ExportDialog)
+        self.frmMain.setObjectName(u"frmMain")
+        self.frmMain.setFrameShape(QFrame.Shape.NoFrame)
+        self.frmMain.setWidgetResizable(True)
+        self.layMain = QWidget()
+        self.layMain.setObjectName(u"layMain")
+        self.layMain.setGeometry(QRect(0, 0, 573, 223))
+        self.formLayout_2 = QFormLayout(self.layMain)
         self.formLayout_2.setObjectName(u"formLayout_2")
-        self.formLayout_2.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+        self.formLayout_2.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         self.formLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.lblOutputDirectory = QLabel(self.scrollAreaWidgetContents)
+        self.lblOutputDirectory = QLabel(self.layMain)
         self.lblOutputDirectory.setObjectName(u"lblOutputDirectory")
 
         self.formLayout_2.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblOutputDirectory)
 
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.txtOutputDir = QLineEdit(self.scrollAreaWidgetContents)
+        self.layOutputDir = QHBoxLayout()
+        self.layOutputDir.setObjectName(u"layOutputDir")
+        self.txtOutputDir = QLineEdit(self.layMain)
         self.txtOutputDir.setObjectName(u"txtOutputDir")
 
-        self.horizontalLayout_2.addWidget(self.txtOutputDir)
+        self.layOutputDir.addWidget(self.txtOutputDir)
 
-        self.btnOutputDir = QPushButton(self.scrollAreaWidgetContents)
+        self.btnOutputDir = QPushButton(self.layMain)
         self.btnOutputDir.setObjectName(u"btnOutputDir")
 
-        self.horizontalLayout_2.addWidget(self.btnOutputDir)
+        self.layOutputDir.addWidget(self.btnOutputDir)
 
 
-        self.formLayout_2.setLayout(0, QFormLayout.ItemRole.FieldRole, self.horizontalLayout_2)
+        self.formLayout_2.setLayout(0, QFormLayout.ItemRole.FieldRole, self.layOutputDir)
 
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.lblTargetWidth = QLabel(self.layMain)
+        self.lblTargetWidth.setObjectName(u"lblTargetWidth")
 
-        self.verticalLayout.addWidget(self.scrollArea)
+        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.LabelRole, self.lblTargetWidth)
 
-        self.frame = QFrame(ExportDialog)
-        self.frame.setObjectName(u"frame")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
+        self.layTargetWidth = QHBoxLayout()
+        self.layTargetWidth.setObjectName(u"layTargetWidth")
+        self.numTargetWidth = QSpinBox(self.layMain)
+        self.numTargetWidth.setObjectName(u"numTargetWidth")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
-        self.frame.setSizePolicy(sizePolicy)
-        self.frame.setFrameShape(QFrame.Shape.NoFrame)
-        self.frame.setFrameShadow(QFrame.Shadow.Raised)
-        self.formLayout = QFormLayout(self.frame)
+        sizePolicy.setHeightForWidth(self.numTargetWidth.sizePolicy().hasHeightForWidth())
+        self.numTargetWidth.setSizePolicy(sizePolicy)
+        self.numTargetWidth.setMinimum(128)
+        self.numTargetWidth.setMaximum(10240)
+
+        self.layTargetWidth.addWidget(self.numTargetWidth)
+
+        self.lblTargetWidth_Value = QLabel(self.layMain)
+        self.lblTargetWidth_Value.setObjectName(u"lblTargetWidth_Value")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy1.setHorizontalStretch(6)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.lblTargetWidth_Value.sizePolicy().hasHeightForWidth())
+        self.lblTargetWidth_Value.setSizePolicy(sizePolicy1)
+
+        self.layTargetWidth.addWidget(self.lblTargetWidth_Value)
+
+
+        self.formLayout_2.setLayout(1, QFormLayout.ItemRole.FieldRole, self.layTargetWidth)
+
+        self.layTargetHeight = QHBoxLayout()
+        self.layTargetHeight.setObjectName(u"layTargetHeight")
+        self.numTargetHeight = QSpinBox(self.layMain)
+        self.numTargetHeight.setObjectName(u"numTargetHeight")
+        sizePolicy.setHeightForWidth(self.numTargetHeight.sizePolicy().hasHeightForWidth())
+        self.numTargetHeight.setSizePolicy(sizePolicy)
+        self.numTargetHeight.setMinimum(128)
+        self.numTargetHeight.setMaximum(10240)
+
+        self.layTargetHeight.addWidget(self.numTargetHeight)
+
+        self.lblTargetHeight_Value = QLabel(self.layMain)
+        self.lblTargetHeight_Value.setObjectName(u"lblTargetHeight_Value")
+        sizePolicy1.setHeightForWidth(self.lblTargetHeight_Value.sizePolicy().hasHeightForWidth())
+        self.lblTargetHeight_Value.setSizePolicy(sizePolicy1)
+
+        self.layTargetHeight.addWidget(self.lblTargetHeight_Value)
+
+
+        self.formLayout_2.setLayout(2, QFormLayout.ItemRole.FieldRole, self.layTargetHeight)
+
+        self.lblTargetHeight = QLabel(self.layMain)
+        self.lblTargetHeight.setObjectName(u"lblTargetHeight")
+
+        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblTargetHeight)
+
+        self.frmMain.setWidget(self.layMain)
+
+        self.verticalLayout.addWidget(self.frmMain)
+
+        self.frmProgress = QFrame(ExportDialog)
+        self.frmProgress.setObjectName(u"frmProgress")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.frmProgress.sizePolicy().hasHeightForWidth())
+        self.frmProgress.setSizePolicy(sizePolicy2)
+        self.frmProgress.setFrameShape(QFrame.Shape.NoFrame)
+        self.frmProgress.setFrameShadow(QFrame.Shadow.Raised)
+        self.formLayout = QFormLayout(self.frmProgress)
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
         self.formLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.prbProgress = QProgressBar(self.frame)
+        self.layProgress = QHBoxLayout()
+        self.layProgress.setObjectName(u"layProgress")
+        self.prbProgress = QProgressBar(self.frmProgress)
         self.prbProgress.setObjectName(u"prbProgress")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(6)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.prbProgress.sizePolicy().hasHeightForWidth())
-        self.prbProgress.setSizePolicy(sizePolicy1)
-        self.prbProgress.setValue(24)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(5)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.prbProgress.sizePolicy().hasHeightForWidth())
+        self.prbProgress.setSizePolicy(sizePolicy3)
+        self.prbProgress.setValue(0)
 
-        self.horizontalLayout.addWidget(self.prbProgress)
+        self.layProgress.addWidget(self.prbProgress)
 
-        self.lblProgress_Status = QLabel(self.frame)
+        self.lblProgress_Status = QLabel(self.frmProgress)
         self.lblProgress_Status.setObjectName(u"lblProgress_Status")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy2.setHorizontalStretch(1)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.lblProgress_Status.sizePolicy().hasHeightForWidth())
-        self.lblProgress_Status.setSizePolicy(sizePolicy2)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy4.setHorizontalStretch(1)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.lblProgress_Status.sizePolicy().hasHeightForWidth())
+        self.lblProgress_Status.setSizePolicy(sizePolicy4)
         self.lblProgress_Status.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.horizontalLayout.addWidget(self.lblProgress_Status)
+        self.layProgress.addWidget(self.lblProgress_Status)
 
 
-        self.formLayout.setLayout(0, QFormLayout.ItemRole.FieldRole, self.horizontalLayout)
+        self.formLayout.setLayout(0, QFormLayout.ItemRole.FieldRole, self.layProgress)
 
-        self.lblProgress = QLabel(self.frame)
+        self.lblProgress = QLabel(self.frmProgress)
         self.lblProgress.setObjectName(u"lblProgress")
 
         self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblProgress)
 
 
-        self.verticalLayout.addWidget(self.frame)
+        self.verticalLayout.addWidget(self.frmProgress)
 
-        self.dialogButtons = QDialogButtonBox(ExportDialog)
-        self.dialogButtons.setObjectName(u"dialogButtons")
-        self.dialogButtons.setOrientation(Qt.Orientation.Horizontal)
-        self.dialogButtons.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Close|QDialogButtonBox.StandardButton.SaveAll)
-        self.dialogButtons.setCenterButtons(False)
+        self.btnsDialog = QDialogButtonBox(ExportDialog)
+        self.btnsDialog.setObjectName(u"btnsDialog")
+        self.btnsDialog.setOrientation(Qt.Orientation.Horizontal)
+        self.btnsDialog.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Close|QDialogButtonBox.StandardButton.SaveAll)
+        self.btnsDialog.setCenterButtons(False)
 
-        self.verticalLayout.addWidget(self.dialogButtons)
+        self.verticalLayout.addWidget(self.btnsDialog)
 
 
         self.retranslateUi(ExportDialog)
@@ -129,7 +187,11 @@ class Ui_ExportDialog(object):
         ExportDialog.setWindowTitle(QCoreApplication.translate("ExportDialog", u"Export", None))
         self.lblOutputDirectory.setText(QCoreApplication.translate("ExportDialog", u"Output directory:", None))
         self.btnOutputDir.setText(QCoreApplication.translate("ExportDialog", u"Browse", None))
-        self.lblProgress_Status.setText(QCoreApplication.translate("ExportDialog", u"0/100 (0%)", None))
+        self.lblTargetWidth.setText(QCoreApplication.translate("ExportDialog", u"Target width:", None))
+        self.lblTargetWidth_Value.setText(QCoreApplication.translate("ExportDialog", u"0 px", None))
+        self.lblTargetHeight_Value.setText(QCoreApplication.translate("ExportDialog", u"0 px", None))
+        self.lblTargetHeight.setText(QCoreApplication.translate("ExportDialog", u"Target height:", None))
+        self.lblProgress_Status.setText(QCoreApplication.translate("ExportDialog", u"Ready", None))
         self.lblProgress.setText(QCoreApplication.translate("ExportDialog", u"Progress:", None))
     # retranslateUi
 

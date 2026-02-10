@@ -36,6 +36,7 @@ class ProjectModel(QObject):
             photo.on_changed.connect(self._handle_photo_changed)
             self._connected_photos.add(photo)
 
+
     _file_path: Path | None = None
     on_file_path_changed: Signal = Signal(object)
 
@@ -55,6 +56,7 @@ class ProjectModel(QObject):
             self._file_path = path
             self.on_file_path_changed.emit(path)
 
+
     _export_path: Path | None = None
     on_export_path_changed: Signal = Signal(object)
 
@@ -71,6 +73,39 @@ class ProjectModel(QObject):
         if old_path != path:
             self._export_path = path
             self.on_export_path_changed.emit(path)
+
+
+    _target_width: int | None = None
+    on_target_width_changed: Signal = Signal(object)
+
+    @property
+    def target_width(self) -> int | None:
+        """The target width for perspective correction, or None if not set."""
+        return self._target_width
+
+    @target_width.setter
+    def target_width(self, value: int | None) -> None:
+        old_value = self._target_width
+        if old_value != value:
+            self._target_width = value
+            self.on_target_width_changed.emit(value)
+
+
+    _target_height: int | None = None
+    on_target_height_changed: Signal = Signal(object)
+
+    @property
+    def target_height(self) -> int | None:
+        """The target height for perspective correction, or None if not set."""
+        return self._target_height
+
+    @target_height.setter
+    def target_height(self, value: int | None) -> None:
+        old_value = self._target_height
+        if old_value != value:
+            self._target_height = value
+            self.on_target_height_changed.emit(value)
+
 
     _photos: QListModel[PhotoModel]
 
@@ -139,6 +174,8 @@ class ProjectModel(QObject):
         return {
             "version": self.SERIAL_VERSION,
             "export_path": str(self.export_path) if self.export_path else None,
+            "target_width": self.target_width,
+            "target_height": self.target_height,
             "photos": [p.serialize() for p in self.photos],
         }
 
@@ -159,6 +196,20 @@ class ProjectModel(QObject):
                 self.export_path = Path(export_path_raw)
             else:
                 self.export_path = None
+
+        if "target_width" in data:
+            target_width_raw = data.get("target_width", None)
+            if target_width_raw is not None:
+                self.target_width = int(target_width_raw)
+            else:
+                self.target_width = None
+
+        if "target_height" in data:
+            target_height_raw = data.get("target_height", None)
+            if target_height_raw is not None:
+                self.target_height = int(target_height_raw)
+            else:
+                self.target_height = None
 
         if "photos" in data:
             photos_raw = data.get("photos", None)
