@@ -2,7 +2,15 @@ from pathlib import Path
 import time
 
 from PySide6.QtCore import Signal, Slot, QObject, QThread
-from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox, QDialogButtonBox
+from PySide6.QtWidgets import (
+    QDialog,
+    QWidget,
+    QFileDialog,
+    QMessageBox,
+    QDialogButtonBox,
+    QListWidgetItem,
+    QStyle,
+)
 from cv2.typing import MatLike
 
 from preprocessor.gui.ui_export_dialog import Ui_ExportDialog
@@ -92,6 +100,7 @@ class ExportDialog(QDialog):
         thread.started.connect(worker.run)
         worker.progress.connect(self._on_worker_progress)
         worker.status.connect(self._on_worker_status)
+        worker.message.connect(self._on_worker_message)  # <-- connect message signal
         worker.finished.connect(self._on_worker_finished)
         worker.finished.connect(thread.quit)
         thread.finished.connect(thread.deleteLater)
@@ -128,6 +137,24 @@ class ExportDialog(QDialog):
         self._worker_thread = None
         self.ui.lblProgress_Status.setText("Export finished.")
 
+    @Slot(str, str)
+    def _on_worker_message(self, severity: str, text: str) -> None:
+        """
+        Append a message to the dialog's message list with an icon.
+        severity: 'error' | 'warning' | 'info' (fallback to info)
+        """
+        if not hasattr(self.ui, "lstMessages"):
+            return
+        item = QListWidgetItem(text)
+        if severity == "error":
+            icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical)
+        elif severity == "warning":
+            icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)
+        else:
+            icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
+        item.setIcon(icon)
+        self.ui.lstMessages.addItem(item)
+
     def _handle_cancel(self) -> None:
         if self._worker is not None:
             # If an export is in progress, ask for confirmation before canceling
@@ -159,6 +186,7 @@ class _ExportWorker(QObject):
     """
     progress: Signal = Signal(int, int)  # processed, total
     status: Signal = Signal(str)
+    message: Signal = Signal(str, str)  # severity, text
     finished: Signal = Signal()
 
     def __init__(self, project: ProjectModel) -> None:
@@ -173,35 +201,83 @@ class _ExportWorker(QObject):
         if total == 0:
             self.status.emit("No photos to export.")
             self.progress.emit(0, 0)
+            self.message.emit("info", "No photos to export.")
             self.finished.emit()
             return
 
         assert self.project.export_path is not None, "Export path must be set before running export worker"
+
+        success_count = 0
 
         for idx, photo in enumerate(photos, start=1):
             if self._stop_requested:
                 self.status.emit("Export canceled.")
                 break
 
-            # Update status
-            output_name = Path(photo.original_filename).name
-            output_path = self.project.export_path / output_name
-            self.status.emit(f"Exporting {idx}/{total}: {output_name}")
+            try:
+                # Prepare names/paths
+                output_name = Path(photo.original_filename).name if photo.original_filename else f"photo_{idx}.png"
+                output_path = self.project.export_path / output_name
+                self.status.emit(f"Exporting {idx}/{total}: {output_name}")
 
-            img = load_image(photo.original_filename)
-            assert img is not None, f"Failed to load image {photo.original_filename}"
-            assert self.project.target_width is not None
-            assert self.project.target_height is not None
-            final_img = fix_perspective(
-                img,
-                list(photo.quadrat_corners),  # TODO: Fix when None
-                self.project.target_width,
-                self.project.target_height,
-            )
-            ok = save_image(output_path, final_img)
-            assert ok, f"Failed to save image to {output_path}"
+                # Load image
+                img = load_image(photo.original_filename)
+                if img is None:
+                    self.message.emit("warning", f"Failed to load image: {photo.original_filename or output_name}")
+                    # continue to next photo but still report progress
+                    self.progress.emit(idx, total)
+                    continue
 
+                # Ensure quadrat corners are set
+                if not photo.quadrat_corners:
+                    self.message.emit("warning", f"Skipping {output_name}: quadrat corners not set.")
+                    self.progress.emit(idx, total)
+                    continue
+
+                # Ensure target sizes are present
+                if self.project.target_width is None or self.project.target_height is None:
+                    self.message.emit("error", "Target width/height not set for export.")
+                    self.progress.emit(idx, total)
+                    continue
+
+                # Process perspective; guard against processing errors
+                try:
+                    final_img = fix_perspective(
+                        img,
+                        list(photo.quadrat_corners),
+                        self.project.target_width,
+                        self.project.target_height,
+                    )
+                except Exception as e:
+                    self.message.emit("error", f"Processing failed for {output_name}: {e}")
+                    self.progress.emit(idx, total)
+                    continue
+
+                # Save result
+                ok = save_image(output_path, final_img)
+                if not ok:
+                    self.message.emit("error", f"Failed to save image to {output_path}")
+                    self.progress.emit(idx, total)
+                    continue
+
+                # successful save
+                success_count += 1
+
+                # successful step; optionally send an info message
+                # self.message.emit("info", f"Exported {output_name}")
+
+            except Exception as e:
+                # Catch-all per-photo to avoid aborting the entire export
+                self.message.emit("error", f"Unexpected error for photo {idx}: {e}")
+
+            # report progress after each photo (whether success or failure)
             self.progress.emit(idx, total)
+
+        # Final summary message: canceled vs finished
+        if self._stop_requested:
+            self.message.emit("info", f"Export canceled after {success_count}/{total} photos exported.")
+        else:
+            self.message.emit("info", f"Export finished: {success_count}/{total} photos exported.")
 
         self.finished.emit()
 

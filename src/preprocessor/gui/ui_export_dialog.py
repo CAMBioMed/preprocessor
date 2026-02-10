@@ -17,15 +17,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
     QFormLayout, QFrame, QHBoxLayout, QLabel,
-    QLineEdit, QProgressBar, QPushButton, QScrollArea,
-    QSizePolicy, QSpinBox, QVBoxLayout, QWidget)
+    QLineEdit, QListWidget, QListWidgetItem, QProgressBar,
+    QPushButton, QScrollArea, QSizePolicy, QSpinBox,
+    QVBoxLayout, QWidget)
 
 class Ui_ExportDialog(object):
     def setupUi(self, ExportDialog):
         if not ExportDialog.objectName():
             ExportDialog.setObjectName(u"ExportDialog")
         ExportDialog.setWindowModality(Qt.WindowModality.ApplicationModal)
-        ExportDialog.resize(597, 317)
+        ExportDialog.resize(597, 438)
         self.verticalLayout = QVBoxLayout(ExportDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.frmMain = QScrollArea(ExportDialog)
@@ -34,7 +35,7 @@ class Ui_ExportDialog(object):
         self.frmMain.setWidgetResizable(True)
         self.layMain = QWidget()
         self.layMain.setObjectName(u"layMain")
-        self.layMain.setGeometry(QRect(0, 0, 573, 223))
+        self.layMain.setGeometry(QRect(0, 0, 573, 122))
         self.formLayout_2 = QFormLayout(self.layMain)
         self.formLayout_2.setObjectName(u"formLayout_2")
         self.formLayout_2.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
@@ -134,6 +135,11 @@ class Ui_ExportDialog(object):
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
         self.formLayout.setContentsMargins(0, 0, 0, 0)
+        self.lblProgress = QLabel(self.frmProgress)
+        self.lblProgress.setObjectName(u"lblProgress")
+
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblProgress)
+
         self.layProgress = QHBoxLayout()
         self.layProgress.setObjectName(u"layProgress")
         self.prbProgress = QProgressBar(self.frmProgress)
@@ -159,12 +165,22 @@ class Ui_ExportDialog(object):
         self.layProgress.addWidget(self.lblProgress_Status)
 
 
-        self.formLayout.setLayout(0, QFormLayout.ItemRole.FieldRole, self.layProgress)
+        self.formLayout.setLayout(2, QFormLayout.ItemRole.FieldRole, self.layProgress)
 
-        self.lblProgress = QLabel(self.frmProgress)
-        self.lblProgress.setObjectName(u"lblProgress")
+        self.lblMessages = QLabel(self.frmProgress)
+        self.lblMessages.setObjectName(u"lblMessages")
 
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblProgress)
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.lblMessages)
+
+        self.lstMessages = QListWidget(self.frmProgress)
+        self.lstMessages.setObjectName(u"lstMessages")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.lstMessages.sizePolicy().hasHeightForWidth())
+        self.lstMessages.setSizePolicy(sizePolicy5)
+
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.FieldRole, self.lstMessages)
 
 
         self.verticalLayout.addWidget(self.frmProgress)
@@ -191,7 +207,8 @@ class Ui_ExportDialog(object):
         self.lblTargetWidth_Value.setText(QCoreApplication.translate("ExportDialog", u"0 px", None))
         self.lblTargetHeight_Value.setText(QCoreApplication.translate("ExportDialog", u"0 px", None))
         self.lblTargetHeight.setText(QCoreApplication.translate("ExportDialog", u"Target height:", None))
-        self.lblProgress_Status.setText(QCoreApplication.translate("ExportDialog", u"Ready", None))
         self.lblProgress.setText(QCoreApplication.translate("ExportDialog", u"Progress:", None))
+        self.lblProgress_Status.setText(QCoreApplication.translate("ExportDialog", u"Ready", None))
+        self.lblMessages.setText(QCoreApplication.translate("ExportDialog", u"Messages:", None))
     # retranslateUi
 
