@@ -224,7 +224,7 @@ class MainWindow2(QMainWindow):
     def _handle_export_all_action(self) -> None:
         if self.model.current_project is None:
             return
-        dialog = ExportDialog(self)
+        dialog = ExportDialog(self.model.current_project, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             pass
 
