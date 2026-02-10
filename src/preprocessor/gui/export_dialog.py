@@ -25,7 +25,8 @@ class ExportDialog(QDialog):
         self.ui = Ui_ExportDialog()
         self.ui.setupUi(self)
         self.ui.dialogButtons.button(QDialogButtonBox.StandardButton.SaveAll).setText("Export All")
-        self.ui.dialogButtons.button(QDialogButtonBox.StandardButton.Close).setVisible(False)
+        self.ui.dialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setVisible(False)
+        self.ui.dialogButtons.button(QDialogButtonBox.StandardButton.Close).setVisible(True)
 
         # Set the output directory to the last used export path, if available
         if self.current_project.export_path:
@@ -107,8 +108,8 @@ class ExportDialog(QDialog):
         self.ui.lblProgress_Status.setText("Export finished.")
 
     def _handle_cancel(self) -> None:
-        # If export in progress, ask for confirmation before canceling
         if self._worker is not None:
+            # If an export is in progress, ask for confirmation before canceling
             res = QMessageBox.question(
                 self,
                 "Cancel export",
@@ -116,14 +117,14 @@ class ExportDialog(QDialog):
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
             if res == QMessageBox.StandardButton.Yes:
-                # request stop; worker checks periodically
+                # Request stop (worker checks periodically)
                 if hasattr(self._worker, "request_stop"):
                     self._worker.request_stop()
                     self.ui.lblProgress_Status.setText("Canceling...")
-                # do not close dialog immediately; wait for worker to finish cleaning up
+                # Do not close dialog immediately; wait for worker to finish cleaning up
             return
 
-        # No export in progress -> just reject
+        # No export in progress, just close the dialog
         self.reject()
 
     def _handle_close(self) -> None:

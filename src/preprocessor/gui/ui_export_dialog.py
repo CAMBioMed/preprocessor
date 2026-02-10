@@ -24,17 +24,21 @@ class Ui_ExportDialog(object):
     def setupUi(self, ExportDialog):
         if not ExportDialog.objectName():
             ExportDialog.setObjectName(u"ExportDialog")
-        ExportDialog.resize(478, 244)
+        ExportDialog.setWindowModality(Qt.WindowModality.ApplicationModal)
+        ExportDialog.resize(597, 317)
         self.verticalLayout = QVBoxLayout(ExportDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.scrollArea = QScrollArea(ExportDialog)
         self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setFrameShape(QFrame.Shape.NoFrame)
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 452, 122))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 573, 223))
         self.formLayout_2 = QFormLayout(self.scrollAreaWidgetContents)
         self.formLayout_2.setObjectName(u"formLayout_2")
+        self.formLayout_2.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+        self.formLayout_2.setContentsMargins(0, 0, 0, 0)
         self.lblOutputDirectory = QLabel(self.scrollAreaWidgetContents)
         self.lblOutputDirectory.setObjectName(u"lblOutputDirectory")
 
@@ -66,10 +70,12 @@ class Ui_ExportDialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
         self.frame.setSizePolicy(sizePolicy)
-        self.frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame.setFrameShape(QFrame.Shape.NoFrame)
         self.frame.setFrameShadow(QFrame.Shadow.Raised)
         self.formLayout = QFormLayout(self.frame)
         self.formLayout.setObjectName(u"formLayout")
+        self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+        self.formLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.prbProgress = QProgressBar(self.frame)
@@ -120,7 +126,7 @@ class Ui_ExportDialog(object):
     # setupUi
 
     def retranslateUi(self, ExportDialog):
-        ExportDialog.setWindowTitle(QCoreApplication.translate("ExportDialog", u"Dialog", None))
+        ExportDialog.setWindowTitle(QCoreApplication.translate("ExportDialog", u"Export", None))
         self.lblOutputDirectory.setText(QCoreApplication.translate("ExportDialog", u"Output directory:", None))
         self.btnOutputDir.setText(QCoreApplication.translate("ExportDialog", u"Browse", None))
         self.lblProgress_Status.setText(QCoreApplication.translate("ExportDialog", u"0/100 (0%)", None))
