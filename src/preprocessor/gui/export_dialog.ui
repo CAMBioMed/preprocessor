@@ -25,7 +25,7 @@
         <x>0</x>
         <y>0</y>
         <width>452</width>
-        <height>112</height>
+        <height>122</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_2">
@@ -118,7 +118,7 @@
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::SaveAll</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Close|QDialogButtonBox::StandardButton::SaveAll</set>
      </property>
      <property name="centerButtons">
       <bool>false</bool>
@@ -128,38 +128,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>dialogButtons</sender>
-   <signal>accepted()</signal>
-   <receiver>ExportDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>dialogButtons</sender>
-   <signal>rejected()</signal>
-   <receiver>ExportDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

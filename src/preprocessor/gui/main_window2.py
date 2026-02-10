@@ -60,18 +60,18 @@ class MainWindow2(QMainWindow):
         # Disconnect previous project
         old_project = self._bound_project
         if old_project is not None:
-            old_project.on_file_path_changed.disconnect(self._on_project_file_path_changed)
+            old_project.on_file_path_changed.disconnect(self._handle_project_file_path_changed)
             old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
             old_project.photos.on_changed.disconnect(self._handle_photos_changed)
 
         self._bound_project = project
         # Connect new project
         if project is not None:
-            project.on_file_path_changed.connect(self._on_project_file_path_changed)
+            project.on_file_path_changed.connect(self._handle_project_file_path_changed)
             project.on_dirty_changed.connect(self._handle_dirty_changed)
             project.photos.on_changed.connect(self._handle_photos_changed)
 
-    def _on_project_file_path_changed(self, _path: Path | None) -> None:
+    def _handle_project_file_path_changed(self, _path: Path | None) -> None:
         """Called when the project's file_path changes."""
         self._update_window_title()
 

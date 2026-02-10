@@ -32,7 +32,7 @@ class Ui_ExportDialog(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 452, 112))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 452, 122))
         self.formLayout_2 = QFormLayout(self.scrollAreaWidgetContents)
         self.formLayout_2.setObjectName(u"formLayout_2")
         self.lblOutputDirectory = QLabel(self.scrollAreaWidgetContents)
@@ -108,15 +108,13 @@ class Ui_ExportDialog(object):
         self.dialogButtons = QDialogButtonBox(ExportDialog)
         self.dialogButtons.setObjectName(u"dialogButtons")
         self.dialogButtons.setOrientation(Qt.Orientation.Horizontal)
-        self.dialogButtons.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.SaveAll)
+        self.dialogButtons.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Close|QDialogButtonBox.StandardButton.SaveAll)
         self.dialogButtons.setCenterButtons(False)
 
         self.verticalLayout.addWidget(self.dialogButtons)
 
 
         self.retranslateUi(ExportDialog)
-        self.dialogButtons.accepted.connect(ExportDialog.accept)
-        self.dialogButtons.rejected.connect(ExportDialog.reject)
 
         QMetaObject.connectSlotsByName(ExportDialog)
     # setupUi
