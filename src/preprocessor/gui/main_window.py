@@ -32,7 +32,7 @@ from preprocessor.gui.worker import Worker, WorkerManager
 
 from qimage2ndarray import array2qimage
 
-from preprocessor.processing.save_image import save_image
+from preprocessor.processing.save_image import save_image_and_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -292,7 +292,7 @@ class MainWindow(QMainWindow):
         save_path, _ = QFileDialog.getSaveFileName(self, "Save Processed Image", new_image_path)
         if not save_path:
             return
-        save_image(save_path, current_result)
+        save_image_and_metadata(save_path, current_result)
 
     def on_file_save_all(self) -> None:
         save_path = QFileDialog.getExistingDirectory(self, "Select Directory to Save All Processed Images")
@@ -352,7 +352,7 @@ class MainWindow(QMainWindow):
                 filename_out = os.path.basename(new_image_path)
                 full_save_path = os.path.join(save_path, filename_out)
                 try:
-                    save_image(full_save_path, result)
+                    save_image_and_metadata(full_save_path, result)
                     logger.debug(f"Saved processed image to {full_save_path}")
                 except Exception as e:
                     logger.error(f"Failed to save processed image to {full_save_path}", exc_info=e)
