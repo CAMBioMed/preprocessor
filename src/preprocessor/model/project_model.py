@@ -16,7 +16,7 @@ class ProjectModel(QObject):
     This includes the project-specific settings.
     """
 
-    # serialization version for the project JSON format
+    # Serialization JSON version
     SERIAL_VERSION: int = 1
 
     on_changed: Signal = Signal()
