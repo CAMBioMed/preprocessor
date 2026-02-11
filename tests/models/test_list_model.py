@@ -1,7 +1,7 @@
 import unittest
 
 from PySide6.QtCore import QObject, QCoreApplication
-from preprocessor.model.list_model import QListModel
+from preprocessor.model.qlistmodel import QListModel
 
 # Ensure a Qt application context exists for QObject usage in tests
 if QCoreApplication.instance() is None:

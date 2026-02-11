@@ -11,7 +11,7 @@ from pathlib import Path
 
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.model.photo_model import PhotoModel
-from preprocessor.model.list_model import QListModel
+from preprocessor.model.qlistmodel import QListModel
 
 
 

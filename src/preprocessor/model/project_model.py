@@ -1,6 +1,7 @@
 from PySide6.QtCore import QObject, Signal
 
-from preprocessor.model.list_model import QListModel
+from preprocessor.model.camera_model import CameraModel
+from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel
 
 # Add imports for file IO
@@ -113,6 +114,13 @@ class ProjectModel(QObject):
     def photos(self) -> QListModel[PhotoModel]:
         """The list of photos in the project."""
         return self._photos
+
+    _cameras: QListModel[CameraModel]
+
+    @property
+    def cameras(self) -> QListModel[CameraModel]:
+        """The list of cameras in the project."""
+        return self._cameras
 
     _dirty: bool = False
     on_dirty_changed: Signal = Signal(bool)
