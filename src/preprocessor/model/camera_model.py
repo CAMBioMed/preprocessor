@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Any, cast
+from typing import Optional, Any, cast, ClassVar
 
 from PySide6.QtCore import QObject, Signal
 from cv2.typing import Point2f
@@ -19,7 +19,7 @@ class CameraData(BaseModel):
     """
 
     # Serialization JSON version
-    SERIAL_VERSION: int = 1
+    SERIAL_VERSION: ClassVar[int] = 1
 
     file: Optional[Path] = None
     """The file path of the camera calibration file, or None if not set."""

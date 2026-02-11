@@ -1,4 +1,5 @@
 from PySide6.QtCore import QObject, Signal
+from pydantic import BaseModel
 
 from preprocessor.model.camera_model import CameraModel
 from preprocessor.model.qlistmodel import QListModel
@@ -7,7 +8,17 @@ from preprocessor.model.photo_model import PhotoModel
 # Add imports for file IO
 import json
 from pathlib import Path
-from typing import Union, Set, Iterable
+from typing import Union, Set, Iterable, ClassVar
+
+
+class ProjectData(BaseModel):
+    """
+    The data for a project, including project-specific settings.
+    """
+
+    # Serialization JSON version
+    SERIAL_VERSION: int = 1
+
 
 
 class ProjectModel(QObject):
@@ -18,7 +29,7 @@ class ProjectModel(QObject):
     """
 
     # Serialization JSON version
-    SERIAL_VERSION: int = 1
+    SERIAL_VERSION: ClassVar[int] = 1
 
     on_changed: Signal = Signal()
 
