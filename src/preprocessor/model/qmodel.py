@@ -34,7 +34,9 @@ class QModel(QObject, Generic[M]):
     """
 
     on_changed: Signal = Signal()
+    """Signal emitted whenever the model is modified."""
     on_dirty_changed: Signal = Signal(bool)
+    """Signal emitted when the dirty state changes."""
     _model_cls: Type[M]
     _model_version: int
     _data: M
@@ -69,7 +71,7 @@ class QModel(QObject, Generic[M]):
         if self._dirty != value:
             self._dirty = value
             try:
-                self.on_dirty_changed.emit()
+                self.on_dirty_changed.emit(value)
             except Exception:
                 pass
 
@@ -78,7 +80,15 @@ class QModel(QObject, Generic[M]):
         self._set_dirty(True)
 
     def mark_clean(self) -> None:
-        """Clear the dirty flag (set to False)."""
+        """Clear the dirty flag (set to False) recursively."""
+        from preprocessor.model.qlistmodel import QListModel
+
+        for attr_name in dir(self):
+            attr = getattr(self, attr_name)
+            if isinstance(attr, QModel):
+                attr.mark_clean()
+            elif isinstance(attr, QListModel):
+                attr.mark_clean()
         self._set_dirty(False)
 
     def _emit_field_signal(self, field_name: str) -> None:

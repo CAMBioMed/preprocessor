@@ -5,26 +5,31 @@ from pydantic import BaseModel
 
 from preprocessor.model.qmodel import QModel
 
-E = TypeVar("E", bound=QObject)
+E = TypeVar("E", bound=QModel)
 
 
 class QListModel(QObject, Generic[E]):
     """
-    A list-like container for QObjects that automatically manages parent-child relationships.
+    A list-like container for QModels that automatically manages parent-child relationships.
     """
 
     # emit (added_items: list[E], removed_items: list[E])
     on_changed: Signal = Signal(list, list)
     """Signal emitted whenever the list is modified."""
+    on_dirty_changed: Signal = Signal(bool)
+    """Signal emitted when the dirty state changes."""
 
     _items: List[E]
+    _dirty: bool
 
-    def __init__(self, iterable: Optional[Iterable[E]] = None, parent: Optional[QObject] = None) -> None:
+    def __init__(self, iterable: Optional[Iterable[E]] = None, parent: Optional[QModel] = None) -> None:
         super().__init__(parent)
         self._items = []
         if iterable:
             for item in iterable:
                 self.append(item)
+
+        self._dirty = False
 
     def __len__(self) -> int:
         return len(self._items)
@@ -65,7 +70,7 @@ class QListModel(QObject, Generic[E]):
             for old in old_items:
                 old.setParent(None)
             self._items[index] = items
-            # emit added / removed lists
+            self.mark_dirty()
             self.on_changed.emit(items, list(old_items))
         else:
             if not isinstance(value, QObject):
@@ -74,6 +79,7 @@ class QListModel(QObject, Generic[E]):
             old.setParent(None)
             value.setParent(self)
             self._items[index] = value
+            self.mark_dirty()
             self.on_changed.emit([value], [old])
 
     @overload
@@ -89,7 +95,7 @@ class QListModel(QObject, Generic[E]):
         for item in items:
             item.setParent(None)
         del self._items[index]
-        # emit removed list
+        self.mark_dirty()
         self.on_changed.emit([], list(items))
 
     def insert(self, index: SupportsIndex, value: E) -> None:
@@ -97,7 +103,7 @@ class QListModel(QObject, Generic[E]):
             raise TypeError("QObjectList only accepts QObjects")
         value.setParent(self)
         self._items.insert(index, value)
-        # emit added list
+        self.mark_dirty()
         self.on_changed.emit([value], [])
 
     def append(self, value: E) -> None:
@@ -109,6 +115,36 @@ class QListModel(QObject, Generic[E]):
 
     def index(self, value: E) -> int:
         return self._items.index(value)
+
+    @property
+    def dirty(self) -> bool:
+        """True if model has been modified since last clear_dirty()."""
+        return self._dirty
+
+    def _set_dirty(self, value: bool) -> None:
+        """Internal helper to update dirty state and emit dirty_changed when it changes."""
+        if self._dirty != value:
+            self._dirty = value
+            try:
+                self.on_dirty_changed.emit()
+            except Exception:
+                pass
+
+    def mark_dirty(self) -> None:
+        """Mark the model as dirty (set dirty flag to True)."""
+        self._set_dirty(True)
+
+    def mark_clean(self) -> None:
+        """Clear the dirty flag (set to False) recursively."""
+        for item in self._items:
+            item.mark_clean()
+        self._set_dirty(False)
+
+    def _handle_child_dirty_changed(self, dirty: bool) -> None:
+        """Called when any child model's dirty state changes."""
+        if dirty:
+            self.mark_dirty()
+
 
     def populate_from_data(self,
                            data_list: Iterable[BaseModel | dict] | None,
@@ -168,11 +204,13 @@ class QListModel(QObject, Generic[E]):
                 for a in added:
                     try:
                         a.on_changed.connect(child_changed_callback)  # type: ignore[attr-defined]
+                        a.on_dirty_changed.connect(self._handle_child_dirty_changed)
                     except Exception:
                         pass
                 for r in removed:
                     try:
                         r.on_changed.disconnect(child_changed_callback)  # type: ignore[attr-defined]
+                        r.on_dirty_changed.disconnect(self._handle_child_dirty_changed)
                     except Exception:
                         pass
 
