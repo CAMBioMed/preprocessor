@@ -1,8 +1,7 @@
-from importlib import resources as _importlib_resources
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QSize, Signal
-from PySide6.QtGui import QIcon, QKeySequence, QPixmap
+from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem
 
 from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
@@ -86,10 +85,9 @@ class ThumbnailDockWidget(QDockWidget):
                 if item_photo is photo:
                     found_index = i
                     break
-                if photo.original_filename:
-                    if item.text() == Path(photo.original_filename).name:
-                        found_index = i
-                        break
+                if photo.original_filename and item.text() == Path(photo.original_filename).name:
+                    found_index = i
+                    break
             if found_index is not None:
                 # takeItem returns the removed QListWidgetItem; Qt will handle deletion by parent
                 thumbnail_list.takeItem(found_index)
@@ -108,7 +106,11 @@ class ThumbnailDockWidget(QDockWidget):
             if photo.original_filename:
                 pix = QPixmap(str(photo.original_filename))
                 if not pix.isNull():
-                    thumb = pix.scaled(QSize(120, 120), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                    thumb = pix.scaled(
+                        QSize(120, 120),
+                        Qt.AspectRatioMode.KeepAspectRatio,
+                        Qt.TransformationMode.SmoothTransformation,
+                    )
                     item.setIcon(QIcon(thumb))
 
             item.setData(Qt.ItemDataRole.UserRole, photo)

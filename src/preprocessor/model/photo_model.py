@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, cast
 
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import Signal
 from cv2.typing import Point2f
 from pydantic import BaseModel, field_validator
 
@@ -10,9 +10,7 @@ from preprocessor.model.qmodel import QModel
 
 
 class PhotoData(BaseModel):
-    """
-    The data for a single photo in the project, used for serialization.
-    """
+    """The data for a single photo in the project, used for serialization."""
 
     original_filename: Path | None = None
     """The original path to the photo file, if set."""
@@ -29,7 +27,7 @@ class PhotoData(BaseModel):
 
     @classmethod
     @field_validator("original_filename", mode="before")
-    def _validate_original_filename(cls: type["PhotoData"], v: Any) -> Path | None:
+    def _validate_original_filename(cls: type["PhotoData"], v: Any) -> Path | None:  # noqa: ANN401
         if v is None:
             return None
         if isinstance(v, Path):
@@ -38,65 +36,73 @@ class PhotoData(BaseModel):
         try:
             s = str(v)
         except Exception as exc:
-            raise ValueError("original_filename must be a path-like string or None") from exc
+            msg = "original_filename must be a path-like string or None"
+            raise ValueError(msg) from exc
         s = s.strip()
         return Path(s) if s != "" else None
 
     @classmethod
     @field_validator("quadrat_corners", mode="before")
-    def _validate_quadrat_corners(cls: type["PhotoData"], v: Any) -> list[Point2f]:
+    def _validate_quadrat_corners(cls: type["PhotoData"], v: Any) -> list[Point2f]:  # noqa: ANN401
         if v is None:
             return []
         try:
-            corners = list((float(pt[0]), float(pt[1])) for pt in v)
+            corners = [(float(pt[0]), float(pt[1])) for pt in v]
         except Exception as exc:
-            raise ValueError("quadrat_corners must be an iterable of up to 4 [x,y] pairs or None") from exc
+            msg = "quadrat_corners must be an iterable of up to 4 [x,y] pairs or None"
+            raise ValueError(msg) from exc
         if len(corners) >= 4:
-            raise ValueError("quadrat_corners must contain up to 4 points")
+            msg = "quadrat_corners must contain up to 4 points"
+            raise ValueError(msg)
         return corners
 
     @classmethod
     @field_validator("red_shift", mode="before")
-    def _validate_red_shift(cls: type["PhotoData"], v: Any) -> tuple[float, float] | None:
+    def _validate_red_shift(cls: type["PhotoData"], v: Any) -> tuple[float, float] | None:  # noqa: ANN401
         if v is None:
             return None
         try:
             return float(v[0]), float(v[1])
         except Exception as exc:
-            raise ValueError("red_shift must be a pair of numbers or None") from exc
+            msg = "red_shift must be a pair of numbers or None"
+            raise ValueError(msg) from exc
 
     @classmethod
     @field_validator("blue_shift", mode="before")
-    def _validate_blue_shift(cls: type["PhotoData"], v: Any) -> tuple[float, float] | None:
+    def _validate_blue_shift(cls: type["PhotoData"], v: Any) -> tuple[float, float] | None:  # noqa: ANN401
         if v is None:
             return None
         try:
             return float(v[0]), float(v[1])
         except Exception as exc:
-            raise ValueError("blue_shift must be a pair of numbers or None") from exc
+            msg = "blue_shift must be a pair of numbers or None"
+            raise ValueError(msg) from exc
 
     @classmethod
     @field_validator("camera_matrix", mode="before")
-    def _validate_camera_matrix(cls: type["PhotoData"], v: Any) -> CameraMatrix | None:
+    def _validate_camera_matrix(cls: type["PhotoData"], v: Any) -> CameraMatrix | None:  # noqa: ANN401
         if v is None:
             return None
         try:
             rows = [tuple(float(x) for x in row) for row in v]
         except Exception as exc:
-            raise ValueError("camera_matrix must be a 3x3 numeric structure or None") from exc
+            msg = "camera_matrix must be a 3x3 numeric structure or None"
+            raise ValueError(msg) from exc
         if len(rows) != 3 or any(len(r) != 3 for r in rows):
-            raise ValueError("camera_matrix must be a 3x3 numeric structure")
+            msg = "camera_matrix must be a 3x3 numeric structure"
+            raise ValueError(msg)
         return cast(CameraMatrix, (rows[0], rows[1], rows[2]))
 
     @classmethod
     @field_validator("distortion_coefficients", mode="before")
-    def _validate_distortion(cls: type["PhotoData"], v: Any) -> tuple[Point2f, ...] | None:
+    def _validate_distortion(cls: type["PhotoData"], v: Any) -> tuple[Point2f, ...] | None:  # noqa: ANN401
         if v is None:
             return None
         try:
             pts = tuple((float(p[0]), float(p[1])) for p in v)
         except Exception as exc:
-            raise ValueError("distortion_coefficients must be a sequence of [x,y] pairs or None") from exc
+            msg = "distortion_coefficients must be a sequence of [x,y] pairs or None"
+            raise ValueError(msg) from exc
         return pts
 
 
@@ -150,12 +156,12 @@ class PhotoModel(QModel[PhotoData]):
         self._set_field("blue_shift", value)
 
     @property
-    def camera_matrix(self) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
+    def camera_matrix(self) -> CameraMatrix | None:
         """3x3 camera matrix or None."""
         return self._data.camera_matrix
 
     @camera_matrix.setter
-    def camera_matrix(self, value: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None) -> None:
+    def camera_matrix(self, value: CameraMatrix | None) -> None:
         self._set_field("camera_matrix", value)
 
     @property

@@ -1,9 +1,8 @@
 import logging
 from pathlib import Path
-from typing import Sequence, TypeVar
 
 import cv2
-from cv2.typing import MatLike, Point2f
+from cv2.typing import MatLike
 
 from preprocessor.processing.detect_quadrat import QuadratDetectionResult
 from preprocessor.processing.json import serialize_photo_metadata
@@ -69,7 +68,6 @@ def _save_jpeg_image(path: Path, img: MatLike, quality: int, is_rgb: bool = Fals
     - `is_rgb` : Whether the input is RGB (instead of BGR)
     Returns True on success.
     """
-
     # Handle common channel layouts
     if img.ndim == 3:
         ch = img.shape[2]
@@ -95,7 +93,7 @@ def _save_jpeg_image(path: Path, img: MatLike, quality: int, is_rgb: bool = Fals
 
 
 def _write_json_file(path: str, data: dict) -> bool:
-    import json
+    import json  # noqa: PLC0415
     try:
         with open(path, "w") as f:
             json.dump(data, f, indent=4)

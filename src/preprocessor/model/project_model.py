@@ -1,22 +1,20 @@
-from PySide6.QtCore import QObject, Signal
-from pydantic import BaseModel, Field
+from PySide6.QtCore import Signal
+from pydantic import BaseModel, Field, field_validator
 
 from preprocessor.model.camera_model import CameraModel, CameraData
 from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel, PhotoData
 
-# Add imports for file IO
 import json
 from pathlib import Path
-from typing import Union, Set, Iterable, ClassVar, Any
+from typing import ClassVar, Any
 
 from preprocessor.model.qmodel import QModel
+import contextlib
 
 
 class ProjectData(BaseModel):
-    """
-    The data for a project, including project-specific settings.
-    """
+    """The data for a project, including project-specific settings."""
 
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
@@ -33,6 +31,68 @@ class ProjectData(BaseModel):
     """The list of photos in the project."""
     cameras: list[CameraData] = []
     """The list of cameras in the project."""
+
+    @classmethod
+    @field_validator("file", mode="before")
+    def _validate_file(cls: type["ProjectData"], v: Any) -> Path | None:  # noqa: ANN401
+        if v is None:
+            return None
+        if isinstance(v, Path):
+            return v
+        # Coerce strings; raise helpful error for other types
+        try:
+            s = str(v)
+        except Exception as exc:
+            msg = "file must be a path-like string or None"
+            raise ValueError(msg) from exc
+        s = s.strip()
+        return Path(s) if s != "" else None
+
+    @classmethod
+    @field_validator("export_path", mode="before")
+    def _validate_export_path(cls: type["ProjectData"], v: Any) -> Path | None:  # noqa: ANN401
+        if v is None:
+            return None
+        if isinstance(v, Path):
+            return v
+        # Coerce strings; raise helpful error for other types
+        try:
+            s = str(v)
+        except Exception as exc:
+            msg = "export_path must be a path-like string or None"
+            raise ValueError(msg) from exc
+        s = s.strip()
+        return Path(s) if s != "" else None
+
+    @classmethod
+    @field_validator("target_width", mode="before")
+    def _validate_target_width(cls: type["ProjectData"], v: Any) -> int | None:  # noqa: ANN401
+        if v is None:
+            return None
+        try:
+            iv = int(v)
+        except Exception as exc:
+            msg = "target_width must be an integer or None"
+            raise ValueError(msg) from exc
+        if iv >= 1:
+            msg = "target_width must be non-negative and non-zero"
+            raise ValueError(msg)
+        return iv
+
+    @classmethod
+    @field_validator("target_height", mode="before")
+    def _validate_target_height(cls: type["ProjectData"], v: Any) -> int | None:  # noqa: ANN401
+        if v is None:
+            return None
+        try:
+            iv = int(v)
+        except Exception as exc:
+            msg = "target_height must be an integer or None"
+            raise ValueError(msg) from exc
+        if iv >= 1:
+            msg = "target_height must be non-negative and non-zero"
+            raise ValueError(msg)
+        return iv
 
 
 
@@ -54,8 +114,8 @@ class ProjectModel(QModel[ProjectData]):
         self._cameras = QListModel[CameraModel](parent = self)
 
         # Track which model instances we've connected to
-        self._connected_photos: Set[PhotoModel] = set()
-        self._connected_cameras: Set[CameraModel] = set()
+        self._connected_photos: set[PhotoModel] = set()
+        self._connected_cameras: set[CameraModel] = set()
 
         # wire photos list changes to mark dirty and (re)wire photo handlers
         self._photos.bind_to_model(self, "photos", self._handle_child_changed)
@@ -79,9 +139,7 @@ class ProjectModel(QModel[ProjectData]):
 
     @property
     def export_path(self) -> Path | None:
-        """
-        The file path where the photos will be exported to, or None if not set.
-        """
+        """The file path where the photos will be exported to, or None if not set."""
         return self._data.export_path
 
     @export_path.setter
@@ -119,28 +177,6 @@ class ProjectModel(QModel[ProjectData]):
         """The list of cameras in the project."""
         return self._cameras
 
-    # ----- sync helpers -----
-    # def _populate_lists_from_data(self) -> None:
-    #     """
-    #     Populate the QListModels from the current self._data (ProjectData).
-    #     Called at init and after deserialize().
-    #     """
-    #     # populate photos
-    #     for item in list(self._photos):
-    #         self._photos.remove(item)
-    #     if self._data.photos:
-    #         for pdata in self._data.photos:
-    #             pm = PhotoModel(data=pdata)
-    #             self._photos.append(pm)
-    #
-    #     # populate cameras
-    #     for item in list(self._cameras):
-    #         self._cameras.remove(item)
-    #     if self._data.cameras:
-    #         for cdata in self._data.cameras:
-    #             cm = CameraModel(data=cdata)
-    #             self._cameras.append(cm)
-
     def _populate_lists_from_data(self) -> None:
         """
         Populate the QListModels from the current self._data (ProjectData).
@@ -150,43 +186,12 @@ class ProjectModel(QModel[ProjectData]):
         self._cameras.populate_from_data(self._data.cameras, CameraModel)
 
     def _handle_child_changed(self) -> None:
-        """Called when any child model reports a change."""
+        """Handle a child model reporting a change."""
         self.mark_dirty()
-        try:
+        with contextlib.suppress(Exception):
             self.on_changed.emit()
-        except Exception:
-            pass
-    # # internal handlers for wiring child signals
-    # def _handle_photos_changed(self, added: Iterable[PhotoModel], removed: Iterable[PhotoModel]) -> None:
-    #     """
-    #     Called when the photos QListModel changes.
-    #     Marks project dirty and (re)wires per-photo on_changed handlers.
-    #     """
-    #     # any modification to the list counts as a dirty change
-    #     self.mark_dirty()
-    #
-    #     added_set = set(added)
-    #     removed_set = set(removed)
-    #
-    #     # connect to newly added photos
-    #     for photo in (added_set - self._connected_photos):
-    #         photo.on_changed.connect(self._handle_photo_changed)
-    #         self._connected_photos.add(photo)
-    #     # disconnect and forget removed photos
-    #     for photo in (self._connected_photos & removed_set):
-    #         try:
-    #             photo.on_changed.disconnect(self._handle_photo_changed)
-    #         except Exception:
-    #             # ignore if already disconnected
-    #             pass
-    #         self._connected_photos.remove(photo)
-    #
-    # def _handle_photo_changed(self) -> None:
-    #     """Called when any child PhotoModel reports a change."""
-    #     self.mark_dirty()
-    #     self.on_changed.emit()
 
-    def save_to_file(self, path: Union[str, Path]) -> None:
+    def save_to_file(self, path: str | Path) -> None:
         """
         Write the serialized project JSON to the given file path.
         Parent directories will be created if necessary.
@@ -199,7 +204,7 @@ class ProjectModel(QModel[ProjectData]):
             json.dump(data, fh, indent=2)
         self.mark_clean()
 
-    def load_from_file(self, path: Union[str, Path]) -> None:
+    def load_from_file(self, path: str | Path) -> None:
         """
         Load project JSON from the given file path and apply via deserialize().
         Raises FileNotFoundError if the path does not exist.

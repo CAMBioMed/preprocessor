@@ -32,12 +32,15 @@ def _serialize_point2f(pt: Point2f) -> list[float]:
 def _deserialize_point2f(data: list[float]) -> Point2f:
     """Convert a plain Python list of floats to a Point2f."""
     if not isinstance(data, (list, tuple)):
-        raise ValueError("data must be a list or tuple of two numeric values")
+        msg = "data must be a list or tuple of two numeric values"
+        raise ValueError(msg)
     if len(data) != 2:
-        raise ValueError("data must contain exactly two elements for a Point2f")
+        msg = "data must contain exactly two elements for a Point2f"
+        raise ValueError(msg)
     try:
         x = float(data[0])
         y = float(data[1])
     except Exception as exc:
-        raise ValueError("elements of data must be convertible to float") from exc
+        msg = "elements of data must be convertible to float"
+        raise ValueError(msg) from exc
     return x, y

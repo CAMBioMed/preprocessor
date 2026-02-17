@@ -29,20 +29,20 @@ class TestApplicationModel(unittest.TestCase):
         project_model0 = ProjectModel()
 
         # Assert
-        self.assertEqual(app_model.current_project, None)
-        self.assertEqual(project_model0.parent(), None)
-        self.assertEqual(raised_on_changed, False)
-        self.assertEqual(raised_on_current_project_changed, None)
+        assert app_model.current_project is None
+        assert project_model0.parent() is None
+        assert not raised_on_changed
+        assert raised_on_current_project_changed is None
 
         # Act: Set current_project to project_model0
         raised_on_changed = False
         app_model.current_project = project_model0
 
         # Assert
-        self.assertEqual(app_model.current_project, project_model0)
-        self.assertEqual(project_model0.parent(), app_model)
-        self.assertEqual(raised_on_changed, True)
-        self.assertEqual(raised_on_current_project_changed, project_model0)
+        assert app_model.current_project == project_model0
+        assert project_model0.parent() == app_model
+        assert raised_on_changed
+        assert raised_on_current_project_changed == project_model0
 
         # Act: Set current_project to project_model1
         raised_on_changed = False
@@ -50,19 +50,19 @@ class TestApplicationModel(unittest.TestCase):
         app_model.current_project = project_model1
 
         # Assert
-        self.assertEqual(app_model.current_project, project_model1)
-        self.assertEqual(project_model1.parent(), app_model)
-        self.assertEqual(project_model0.parent(), None)
-        self.assertEqual(raised_on_changed, True)
-        self.assertEqual(raised_on_current_project_changed, project_model1)
+        assert app_model.current_project == project_model1
+        assert project_model1.parent() == app_model
+        assert project_model0.parent() is None
+        assert raised_on_changed
+        assert raised_on_current_project_changed == project_model1
 
         # Act: Set current_project to None
         raised_on_changed = False
         app_model.current_project = None
 
         # Assert
-        self.assertEqual(app_model.current_project, None)
-        self.assertEqual(project_model1.parent(), None)
-        self.assertEqual(project_model0.parent(), None)
-        self.assertEqual(raised_on_changed, True)
-        self.assertEqual(raised_on_current_project_changed, None)
+        assert app_model.current_project is None
+        assert project_model1.parent() is None
+        assert project_model0.parent() is None
+        assert raised_on_changed
+        assert raised_on_current_project_changed is None

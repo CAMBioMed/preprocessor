@@ -1,15 +1,14 @@
 from pathlib import Path
-from typing import Generic, Type, TypeVar, Any
+from typing import TypeVar, Any
 
 from PySide6.QtCore import QObject, Signal
 from pydantic import BaseModel, ValidationError
+import contextlib
 
 M = TypeVar("M", bound=BaseModel)
 
-def _to_basic(obj: Any) -> Any:
-    """
-    Convert nested tuples/lists/Paths/primitives to JSON-friendly basic Python types (lists, numbers, strings).
-    """
+def _to_basic(obj: Any) -> Any:  # noqa: ANN401
+    """Convert nested tuples/lists/Paths/primitives to JSON-friendly basic Python types (lists, numbers, strings)."""
     if obj is None:
         return None
     if isinstance(obj, (str, int, float, bool)):
@@ -23,7 +22,7 @@ def _to_basic(obj: Any) -> Any:
     return str(obj)  # Fallback
 
 
-class QModel(QObject, Generic[M]):
+class QModel[M: BaseModel](QObject):
     """
     Reusable base class that holds a Pydantic model instance and provides
     helpers for setting fields with validation and emitting change signals.
@@ -37,13 +36,13 @@ class QModel(QObject, Generic[M]):
     """Signal emitted whenever the model is modified."""
     on_dirty_changed: Signal = Signal(bool)
     """Signal emitted when the dirty state changes."""
-    _model_cls: Type[M]
+    _model_cls: type[M]
     _model_version: int
     _data: M
     _dirty: bool
 
     def __init__(self,
-                 model_cls: Type[M],
+                 model_cls: type[M],
                  data: M | dict[str, Any] | None = None,
      ) -> None:
         super().__init__()
@@ -67,13 +66,24 @@ class QModel(QObject, Generic[M]):
         return self._dirty
 
     def _set_dirty(self, value: bool) -> None:
-        """Internal helper to update dirty state and emit dirty_changed when it changes."""
-        if self._dirty != value:
-            self._dirty = value
-            try:
-                self.on_dirty_changed.emit(value)
-            except Exception:
-                pass
+        """
+        Update dirty state.
+
+        Propagates clean state to the children, and emits on_dirty_changed when it changes.
+        """
+        if self._dirty == value:
+            return
+        self._dirty = value
+        if not value:
+            # Propagate clean state to children
+            from preprocessor.model.qlistmodel import QListModel  # noqa: PLC0415
+
+            for attr_name in dir(self):
+                attr = getattr(self, attr_name)
+                if isinstance(attr, (QModel, QListModel)):
+                    attr.mark_clean()
+        with contextlib.suppress(Exception):
+            self.on_dirty_changed.emit(value)
 
     def mark_dirty(self) -> None:
         """Mark the model as dirty (set dirty flag to True)."""
@@ -81,27 +91,16 @@ class QModel(QObject, Generic[M]):
 
     def mark_clean(self) -> None:
         """Clear the dirty flag (set to False) recursively."""
-        from preprocessor.model.qlistmodel import QListModel
-
-        for attr_name in dir(self):
-            attr = getattr(self, attr_name)
-            if isinstance(attr, QModel):
-                attr.mark_clean()
-            elif isinstance(attr, QListModel):
-                attr.mark_clean()
         self._set_dirty(False)
 
     def _emit_field_signal(self, field_name: str) -> None:
         sig = getattr(self, f"on_{field_name}_changed", None)
         if sig is not None and hasattr(sig, "emit"):
-            try:
+            with contextlib.suppress(Exception):
                 sig.emit()
-            except Exception:
-                # Ignore emit failures to avoid breaking model flow
-                pass
 
 
-    def _set_field(self, field: str, value: Any) -> None:
+    def _set_field(self, field: str, value: Any) -> None:  # noqa: ANN401
         """
         Validate and set a single field using the pydantic model.
 
@@ -121,10 +120,8 @@ class QModel(QObject, Generic[M]):
             if new.get(field) != old.get(field):
                 self._emit_field_signal(field)
             self._set_dirty(True)
-            try:
+            with contextlib.suppress(Exception):
                 self.on_changed.emit()
-            except Exception:
-                pass
 
 
     def serialize(self) -> dict[str, Any]:
@@ -145,13 +142,16 @@ class QModel(QObject, Generic[M]):
 
         # Ensure the model version matches
         if "model_version" not in incoming:
-            raise ValueError(f"Missing 'model_version' field in serialized data; expected version {self._model_version}")
+            msg = f"Missing 'model_version' field in serialized data; expected version {self._model_version}"
+            raise ValueError(msg)
         try:
             incoming_model_version = int(incoming["model_version"])
-        except Exception:
-            raise ValueError(f"Invalid 'model_version' value: {incoming.get('model_version')!r}")
+        except Exception as exc:
+            msg = f"Invalid 'model_version' value: {incoming.get('model_version')!r}"
+            raise ValueError(msg) from exc
         if incoming_model_version != self._model_version:
-            raise ValueError(f"Version mismatch: expected {self._model_version}, got {incoming_model_version}")
+            msg = f"Version mismatch: expected {self._model_version}, got {incoming_model_version}"
+            raise ValueError(msg)
         incoming.pop("model_version", None)
 
         # Update the model
@@ -166,11 +166,9 @@ class QModel(QObject, Generic[M]):
         new = new_model.model_dump()
         if new != old:
             self._data = new_model
-            for key in incoming.keys():
+            for key in incoming:
                 if new.get(key) != old.get(key):
                     self._emit_field_signal(key)
             self._set_dirty(True)
-            try:
+            with contextlib.suppress(Exception):
                 self.on_changed.emit()
-            except Exception:
-                pass

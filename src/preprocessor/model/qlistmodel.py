@@ -1,17 +1,16 @@
-from typing import TypeVar, Generic, Sequence, Iterable, MutableSequence, Optional, cast, overload, List, Iterator, \
-    SupportsIndex, Type, Callable
+from typing import TypeVar, cast, overload, SupportsIndex
+from collections.abc import Iterable, Iterator, Callable
 from PySide6.QtCore import QObject, Signal
 from pydantic import BaseModel
 
 from preprocessor.model.qmodel import QModel
+import contextlib
 
 E = TypeVar("E", bound=QModel)
 
 
-class QListModel(QObject, Generic[E]):
-    """
-    A list-like container for QModels that automatically manages parent-child relationships.
-    """
+class QListModel[E: QModel](QObject):
+    """A list-like container for QModels that automatically manages parent-child relationships."""
 
     # emit (added_items: list[E], removed_items: list[E])
     on_changed: Signal = Signal(list, list)
@@ -19,10 +18,10 @@ class QListModel(QObject, Generic[E]):
     on_dirty_changed: Signal = Signal(bool)
     """Signal emitted when the dirty state changes."""
 
-    _items: List[E]
+    _items: list[E]
     _dirty: bool
 
-    def __init__(self, iterable: Optional[Iterable[E]] = None, parent: Optional[QModel] = None) -> None:
+    def __init__(self, iterable: Iterable[E] | None = None, parent: QModel | None = None) -> None:
         super().__init__(parent)
         self._items = []
         if iterable:
@@ -35,9 +34,7 @@ class QListModel(QObject, Generic[E]):
         return len(self._items)
 
     def __iter__(self) -> Iterator[E]:
-        """
-        Allow iteration over the items in the QListModel.
-        """
+        """Allow iteration over the items in the QListModel."""
         return iter(self._items)
 
     @overload
@@ -64,7 +61,8 @@ class QListModel(QObject, Generic[E]):
             items = list(value)  # type: ignore[arg-type,call-overload]
             for item in items:
                 if not isinstance(item, QObject):
-                    raise TypeError("QObjectList only accepts QObjects")
+                    msg = "QObjectList only accepts QObjects"
+                    raise TypeError(msg)
                 item.setParent(self)
             old_items = self._items[index]
             for old in old_items:
@@ -74,7 +72,8 @@ class QListModel(QObject, Generic[E]):
             self.on_changed.emit(items, list(old_items))
         else:
             if not isinstance(value, QObject):
-                raise TypeError("QObjectList only accepts QObjects")
+                msg = "QObjectList only accepts QObjects"
+                raise TypeError(msg)
             old = self._items[index]
             old.setParent(None)
             value.setParent(self)
@@ -100,7 +99,8 @@ class QListModel(QObject, Generic[E]):
 
     def insert(self, index: SupportsIndex, value: E) -> None:
         if not isinstance(value, QObject):
-            raise TypeError("QObjectList only accepts QObjects")
+            msg = "QObjectList only accepts QObjects"
+            raise TypeError(msg)
         value.setParent(self)
         self._items.insert(index, value)
         self.mark_dirty()
@@ -122,13 +122,20 @@ class QListModel(QObject, Generic[E]):
         return self._dirty
 
     def _set_dirty(self, value: bool) -> None:
-        """Internal helper to update dirty state and emit dirty_changed when it changes."""
-        if self._dirty != value:
-            self._dirty = value
-            try:
-                self.on_dirty_changed.emit()
-            except Exception:
-                pass
+        """
+        Update dirty state.
+
+        Propagates clean state to the children, and emits on_dirty_changed when it changes.
+        """
+        if self._dirty == value:
+            return
+        self._dirty = value
+        if not value:
+            # Propagate clean state to children
+            for item in self._items:
+                item.mark_clean()
+        with contextlib.suppress(Exception):
+            self.on_dirty_changed.emit()
 
     def mark_dirty(self) -> None:
         """Mark the model as dirty (set dirty flag to True)."""
@@ -136,19 +143,17 @@ class QListModel(QObject, Generic[E]):
 
     def mark_clean(self) -> None:
         """Clear the dirty flag (set to False) recursively."""
-        for item in self._items:
-            item.mark_clean()
         self._set_dirty(False)
 
     def _handle_child_dirty_changed(self, dirty: bool) -> None:
-        """Called when any child model's dirty state changes."""
+        """Handle when any child model's dirty state changes."""
         if dirty:
             self.mark_dirty()
 
 
     def populate_from_data(self,
                            data_list: Iterable[BaseModel | dict] | None,
-                           model_cls: Type[QModel]) -> None:
+                           model_cls: type[QModel]) -> None:
         """
         Replace the contents of this QListModel with `model_cls(data=...)` instances
         created from each element in `data_list` (which may be pydantic models or dicts).
@@ -159,7 +164,7 @@ class QListModel(QObject, Generic[E]):
             self[:] = []
             return
 
-        items: List[E] = []
+        items: list[E] = []
         for d in data_list:
             # model_cls is expected to be a QModel subclass (returns a QObject)
             obj = model_cls(model_cls, data=d)  # type: ignore[arg-type]
@@ -194,7 +199,7 @@ class QListModel(QObject, Generic[E]):
           - connect `child.on_changed` -> `child_changed_callback` for added children
           - disconnect for removed children
           - call `owner._set_field(field_name, payload)` where payload is a list of
-            plain dicts (or None if empty)
+            plain dicts (or None if empty).
 
         Note: `owner._set_field` is used to validate and update the owner's pydantic model.
         """
@@ -214,7 +219,7 @@ class QListModel(QObject, Generic[E]):
                     except Exception:
                         pass
 
-            payload = [getattr(item, "_data").model_dump() for item in self._items] if len(self._items) > 0 else []
+            payload = [item._data.model_dump() for item in self._items] if len(self._items) > 0 else []
             # validate & update owner model (marks owner dirty if changed)
             owner._set_field(field_name, payload)
 

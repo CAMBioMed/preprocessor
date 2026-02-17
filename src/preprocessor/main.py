@@ -74,8 +74,7 @@ def main_gui() -> None:
     gui()
 
 def _excepthook(cls: type[BaseException], exception: BaseException, traceback_obj: TracebackType | None) -> None:
-    """Handle uncaught exceptions including Qt errors"""
-
+    """Handle uncaught exceptions including Qt errors."""
     # Build the error message string
     error_msg = f"{cls.__name__}: {exception}\n\n"
     error_msg += ''.join(traceback.format_tb(traceback_obj))

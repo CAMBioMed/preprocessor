@@ -1,5 +1,4 @@
 from pathlib import Path
-import time
 
 from PySide6.QtCore import Signal, Slot, QObject, QThread
 from PySide6.QtWidgets import (
@@ -11,13 +10,12 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QStyle,
 )
-from cv2.typing import MatLike
 
 from preprocessor.gui.ui_export_dialog import Ui_ExportDialog
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.fix_perspective import fix_perspective
 from preprocessor.processing.load_image import load_image
-from preprocessor.processing.save_image import save_image_and_metadata, save_image
+from preprocessor.processing.save_image import save_image
 
 
 class ExportDialog(QDialog):
@@ -48,8 +46,12 @@ class ExportDialog(QDialog):
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self._handle_close)
 
         # Update the displayed label when the spin boxes change
-        self.ui.numTargetWidth.valueChanged.connect(lambda v: self.ui.lblTargetWidth_Value.setText(str(int(v)) + " px"))
-        self.ui.numTargetHeight.valueChanged.connect(lambda v: self.ui.lblTargetHeight_Value.setText(str(int(v)) + " px"))
+        self.ui.numTargetWidth.valueChanged.connect(
+            lambda v: self.ui.lblTargetWidth_Value.setText(str(int(v)) + " px")
+        )
+        self.ui.numTargetHeight.valueChanged.connect(
+            lambda v: self.ui.lblTargetHeight_Value.setText(str(int(v)) + " px")
+        )
 
     def _set_initial_state(self) -> None:
         # Set the output directory to the last used export path, if available
@@ -164,11 +166,10 @@ class ExportDialog(QDialog):
                 "An export is in progress. Do you want to cancel?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
-            if res == QMessageBox.StandardButton.Yes:
+            if res == QMessageBox.StandardButton.Yes and hasattr(self._worker, "request_stop"):
                 # Request stop (worker checks periodically)
-                if hasattr(self._worker, "request_stop"):
-                    self._worker.request_stop()
-                    self.ui.lblProgress_Status.setText("Canceling...")
+                self._worker.request_stop()
+                self.ui.lblProgress_Status.setText("Canceling...")
                 # Do not close dialog immediately; wait for worker to finish cleaning up
             return
 
@@ -184,6 +185,7 @@ class _ExportWorker(QObject):
     Background worker that exports photos one by one.
     Emits progress and status updates; real export not implemented.
     """
+
     progress: Signal = Signal(int, int)  # processed, total
     status: Signal = Signal(str)
     message: Signal = Signal(str, str)  # severity, text
@@ -223,7 +225,10 @@ class _ExportWorker(QObject):
                 # Load image
                 img = load_image(photo.original_filename)
                 if img is None:
-                    self.message.emit("warning", f"Failed to load image: {photo.original_filename or output_name}")
+                    self.message.emit(
+                        "warning",
+                        f"Failed to load image: {photo.original_filename or output_name}",
+                    )
                     # continue to next photo but still report progress
                     self.progress.emit(idx, total)
                     continue

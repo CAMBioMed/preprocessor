@@ -9,9 +9,10 @@ import json
 import tempfile
 from pathlib import Path
 
-from preprocessor.model.project_model import ProjectModel
+from preprocessor.model.project_model import ProjectModel, ProjectData
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.qlistmodel import QListModel
+import pytest
 
 
 
@@ -21,25 +22,25 @@ class TestProjectModel(unittest.TestCase):
         project_model = ProjectModel()
 
         # Assert initial state
-        self.assertIsInstance(project_model.photos, QListModel)
-        self.assertEqual(project_model.photos.parent(), project_model)
+        assert isinstance(project_model.photos, QListModel)
+        assert project_model.photos.parent() == project_model
 
         # Act: add a photo
         photo0 = PhotoModel()
-        self.assertEqual(photo0.parent(), None)
+        assert photo0.parent() is None
 
         project_model.photos.append(photo0)
 
         # Assert: photo added and parent set to photos list
-        self.assertIs(project_model.photos[0], photo0)
-        self.assertEqual(photo0.parent(), project_model.photos)
+        assert project_model.photos[0] is photo0
+        assert photo0.parent() == project_model.photos
 
         # Act: remove the photo
         project_model.photos.remove(photo0)
 
         # Assert: removed and parent cleared
-        self.assertEqual(len(project_model.photos), 0)
-        self.assertEqual(photo0.parent(), None)
+        assert len(project_model.photos) == 0
+        assert photo0.parent() is None
 
     def test_serialize_deserialize_photos(self) -> None:
         # Arrange
@@ -53,13 +54,13 @@ class TestProjectModel(unittest.TestCase):
         s = project.serialize()
 
         # Assert serialized structure includes version
-        self.assertIn("version", s)
-        self.assertEqual(s["version"], ProjectModel.SERIAL_VERSION)
-        self.assertIn("photos", s)
-        self.assertIsInstance(s["photos"], list)
-        self.assertEqual(len(s["photos"]), 1)
-        self.assertEqual(s["photos"][0]["original_filename"], "picA.jpg")
-        self.assertEqual(s["photos"][0]["red_shift"], [1.0, 2.0])
+        assert "model_version" in s
+        assert s["model_version"] == ProjectData.SERIAL_VERSION
+        assert "photos" in s
+        assert isinstance(s["photos"], list)
+        assert len(s["photos"]) == 1
+        assert s["photos"][0]["original_filename"] == "picA.jpg"
+        assert s["photos"][0]["red_shift"] == [1.0, 2.0]
 
         # Arrange a fresh project to deserialize into and watch for on_changed
         new_project = ProjectModel()
@@ -75,20 +76,20 @@ class TestProjectModel(unittest.TestCase):
         new_project.deserialize(s)
 
         # Assert: one photo restored with properties
-        self.assertEqual(len(new_project.photos), 1)
+        assert len(new_project.photos) == 1
         restored = new_project.photos[0]
-        self.assertIsInstance(restored, PhotoModel)
-        self.assertEqual(restored.original_filename, "picA.jpg")
-        self.assertEqual(restored.red_shift, (1.0, 2.0))
-        self.assertTrue(changed)
+        assert isinstance(restored, PhotoModel)
+        assert restored.original_filename == "picA.jpg"
+        assert restored.red_shift == (1.0, 2.0)
+        assert changed
 
         # Act: clear photos via deserialize with None (include version)
         changed = False
-        new_project.deserialize({"version": ProjectModel.SERIAL_VERSION, "photos": None})
+        new_project.deserialize({"model_version": ProjectData.SERIAL_VERSION, "photos": None})
 
         # Assert: photos cleared and on_changed emitted
-        self.assertEqual(len(new_project.photos), 0)
-        self.assertTrue(changed)
+        assert len(new_project.photos) == 0
+        assert changed
 
     def test_save_and_load_file(self) -> None:
         # Arrange: create project with one photo
@@ -106,10 +107,10 @@ class TestProjectModel(unittest.TestCase):
             project.save_to_file(path)
 
             # Assert file exists and JSON matches serialize()
-            self.assertTrue(path.exists())
+            assert(path.exists())
             with path.open("r", encoding="utf-8") as fh:
                 data = json.load(fh)
-            self.assertEqual(data, project.serialize())
+            assert(data == project.serialize())
 
             # Arrange: fresh project to load into and watch for on_changed
             new_project = ProjectModel()
@@ -125,26 +126,26 @@ class TestProjectModel(unittest.TestCase):
             new_project.load_from_file(path)
 
             # Assert: loaded project restored and on_changed fired
-            self.assertEqual(len(new_project.photos), 1)
+            assert len(new_project.photos) == 1
             loaded = new_project.photos[0]
-            self.assertIsInstance(loaded, PhotoModel)
-            self.assertEqual(loaded.original_filename, "fileX.jpg")
-            self.assertEqual(loaded.red_shift, (3.0, 4.0))
-            self.assertTrue(changed)
+            assert isinstance(loaded, PhotoModel)
+            assert loaded.original_filename == "fileX.jpg"
+            assert loaded.red_shift == (3.0, 4.0)
+            assert changed
 
     def test_load_missing_file_raises(self) -> None:
         project = ProjectModel()
         missing = Path("/nonexistent/path/does_not_exist.json")
-        with self.assertRaises(FileNotFoundError):
+        with pytest.raises(FileNotFoundError):
             project.load_from_file(missing)
 
     def test_deserialize_version_mismatch_raises(self) -> None:
         # Arrange
         project = ProjectModel()
-        bad = {"version": ProjectModel.SERIAL_VERSION + 1, "photos": []}
+        bad = {"version": ProjectData.SERIAL_VERSION + 1, "photos": []}
 
         # Act / Assert
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             project.deserialize(bad)
 
     def test_dirty_flag(self) -> None:
@@ -152,32 +153,32 @@ class TestProjectModel(unittest.TestCase):
         project = ProjectModel()
 
         # Initial state: clean
-        self.assertFalse(project.dirty)
+        assert not project.dirty
 
         # Act: append a photo -> project becomes dirty
         p = PhotoModel()
         project.photos.append(p)
-        self.assertTrue(project.dirty)
+        assert project.dirty
 
         # Act: mark clean externally
         project.mark_clean()
-        self.assertFalse(project.dirty)
+        assert not project.dirty
 
         # Act: change a child photo property -> project becomes dirty
         p.original_filename = "changed.jpg"
-        self.assertTrue(project.dirty)
+        assert project.dirty
 
         # Act: mark clean again and modify another child property
         project.mark_clean()
         p.quadrat_corners = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
-        self.assertTrue(project.dirty)
+        assert project.dirty
 
         # Act: mark_dirty explicitly
         project.mark_clean()
         project.mark_dirty()
-        self.assertTrue(project.dirty)
+        assert project.dirty
 
         # Also ensure removing a photo marks dirty
         project.mark_clean()
         project.photos.remove(p)
-        self.assertTrue(project.dirty)
+        assert project.dirty

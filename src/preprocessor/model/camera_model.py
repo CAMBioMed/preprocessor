@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import Optional, Any, cast, ClassVar
+from typing import Any, cast, ClassVar
 
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import Signal
 from cv2.typing import Point2f
-from pydantic import BaseModel, field_validator, ValidationError, Field
+from pydantic import BaseModel, field_validator, Field
 
 from preprocessor.model.qmodel import QModel
 
@@ -14,9 +14,7 @@ CameraMatrix = tuple[
 ]
 
 class CameraData(BaseModel):
-    """
-    The data for a camera, used for serialization.
-    """
+    """The data for a camera, used for serialization."""
 
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
@@ -32,7 +30,7 @@ class CameraData(BaseModel):
 
     @classmethod
     @field_validator("file", mode="before")
-    def _validate_file(cls: type["CameraData"], v: Any) -> Path | None:
+    def _validate_file(cls: type["CameraData"], v: Any) -> Path | None:  # noqa: ANN401
         if v is None:
             return None
         if isinstance(v, Path):
@@ -41,32 +39,36 @@ class CameraData(BaseModel):
         try:
             s = str(v)
         except Exception as exc:
-            raise ValueError("file must be a path-like string or None") from exc
+            msg = "file must be a path-like string or None"
+            raise ValueError(msg) from exc
         s = s.strip()
         return Path(s) if s != "" else None
 
     @classmethod
     @field_validator("camera_matrix", mode="before")
-    def _validate_camera_matrix(cls: type["CameraData"], v: Any) -> CameraMatrix | None:
+    def _validate_camera_matrix(cls: type["CameraData"], v: Any) -> CameraMatrix | None:  # noqa: ANN401
         if v is None:
             return None
         try:
             rows = [tuple(float(x) for x in row) for row in v]
         except Exception as exc:
-            raise ValueError("camera_matrix must be a 3x3 numeric structure or None") from exc
+            msg = "camera_matrix must be a 3x3 numeric structure or None"
+            raise ValueError(msg) from exc
         if len(rows) != 3 or any(len(r) != 3 for r in rows):
-            raise ValueError("camera_matrix must be a 3x3 numeric structure")
+            msg = "camera_matrix must be a 3x3 numeric structure"
+            raise ValueError(msg)
         return cast(CameraMatrix, (rows[0], rows[1], rows[2]))
 
     @classmethod
     @field_validator("distortion_coefficients", mode="before")
-    def _validate_distortion(cls: type["CameraData"], v: Any) -> tuple[Point2f, ...] | None:
+    def _validate_distortion(cls: type["CameraData"], v: Any) -> tuple[Point2f, ...] | None:  # noqa: ANN401
         if v is None:
             return None
         try:
             pts = tuple((float(p[0]), float(p[1])) for p in v)
         except Exception as exc:
-            raise ValueError("distortion_coefficients must be a sequence of [x,y] pairs or None") from exc
+            msg = "distortion_coefficients must be a sequence of [x,y] pairs or None"
+            raise ValueError(msg) from exc
         return pts
 
 

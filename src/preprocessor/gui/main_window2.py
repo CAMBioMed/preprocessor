@@ -1,11 +1,10 @@
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon, QPixmap
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QListWidget, QListWidgetItem, QDialog
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QDialog
 from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.export_dialog import ExportDialog
-from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
@@ -72,7 +71,7 @@ class MainWindow2(QMainWindow):
             project.photos.on_changed.connect(self._handle_photos_changed)
 
     def _handle_project_file_changed(self, _path: Path | None) -> None:
-        """Called when the project's file changes."""
+        """Handle when the project's file changes."""
         self._update_window_title()
 
     def _update_window_title(self) -> None:
@@ -83,10 +82,7 @@ class MainWindow2(QMainWindow):
             self.setWindowTitle(base_title)
             return
         fp = proj.file
-        if fp:
-            name = Path(fp).name
-        else:
-            name = "Untitled Project"
+        name = Path(fp).name if fp else "Untitled Project"
         photo_count = len(proj.photos)
         dirty_marker = "*" if proj.dirty else ""
         self.setWindowTitle(f"{base_title} — {name} ({photo_count} photos){dirty_marker}")
@@ -248,18 +244,18 @@ class MainWindow2(QMainWindow):
             self.model.current_project.photos.remove(photo)
 
     def _handle_dirty_changed(self) -> None:
-        """Called when the current project's dirty state changes."""
+        """Handle when the current project's dirty state changes."""
         self._update_window_title()
 
-    def _handle_photos_changed(self, added: list[PhotoModel], removed: list[PhotoModel]) -> None:
-        """Called when the current project's photos change."""
+    def _handle_photos_changed(self) -> None:
+        """Handle when the current project's photos change."""
         if self.model.current_project is None:
             return
         self._update_window_title()
         self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
 
     def _handle_photo_selection_changed(self, selected: list[PhotoModel]) -> None:
-        """Called when the selected photo changes."""
+        """Handle when the selected photo changes."""
         if not selected:
             self.central_widget.show_photo(None)
             return

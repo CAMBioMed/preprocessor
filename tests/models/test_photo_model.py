@@ -26,18 +26,18 @@ class TestPhotoModel(unittest.TestCase):
         photo.on_changed.connect(handle_changed)
 
         # Assert initial state
-        self.assertIsNone(photo.quadrat_corners)
-        self.assertFalse(raised_quadrat_corners_changed)
-        self.assertFalse(raised_changed)
+        assert photo.quadrat_corners is None
+        assert not raised_quadrat_corners_changed
+        assert not raised_changed
 
         # Act: set quadrat corners
         corners = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
         photo.quadrat_corners = corners
 
         # Assert: property set and both signals fired
-        self.assertEqual(photo.quadrat_corners, corners)
-        self.assertTrue(raised_quadrat_corners_changed)
-        self.assertTrue(raised_changed)
+        assert photo.quadrat_corners == corners
+        assert raised_quadrat_corners_changed
+        assert raised_changed
 
         # Act: set same value again -> no signals
         raised_quadrat_corners_changed = False
@@ -45,16 +45,16 @@ class TestPhotoModel(unittest.TestCase):
         photo.quadrat_corners = corners
 
         # Assert: no signals fired when value unchanged
-        self.assertFalse(raised_quadrat_corners_changed)
-        self.assertFalse(raised_changed)
+        assert not raised_quadrat_corners_changed
+        assert not raised_changed
 
         # Act: clear the value
         photo.quadrat_corners = None
 
         # Assert: property cleared and signals fired
-        self.assertIsNone(photo.quadrat_corners)
-        self.assertTrue(raised_quadrat_corners_changed)
-        self.assertTrue(raised_changed)
+        assert photo.quadrat_corners is None
+        assert raised_quadrat_corners_changed
+        assert raised_changed
 
     def test_serialize_deserialize(self) -> None:
         # Arrange
@@ -64,18 +64,18 @@ class TestPhotoModel(unittest.TestCase):
         s_none = photo.serialize()
 
         # Assert
-        self.assertIn("original_filename", s_none)
-        self.assertEqual(s_none["original_filename"], "")
-        self.assertIn("quadrat_corners", s_none)
-        self.assertIsNone(s_none["quadrat_corners"])
-        self.assertIn("red_shift", s_none)
-        self.assertIn("blue_shift", s_none)
-        self.assertIsNone(s_none["red_shift"])
-        self.assertIsNone(s_none["blue_shift"])
-        self.assertIn("camera_matrix", s_none)
-        self.assertIn("distortion_coefficients", s_none)
-        self.assertIsNone(s_none["camera_matrix"])
-        self.assertIsNone(s_none["distortion_coefficients"])
+        assert "original_filename" in s_none
+        assert s_none["original_filename"] == ""
+        assert "quadrat_corners" in s_none
+        assert s_none["quadrat_corners"] is None
+        assert "red_shift" in s_none
+        assert "blue_shift" in s_none
+        assert s_none["red_shift"] is None
+        assert s_none["blue_shift"] is None
+        assert "camera_matrix" in s_none
+        assert "distortion_coefficients" in s_none
+        assert s_none["camera_matrix"] is None
+        assert s_none["distortion_coefficients"] is None
 
         # Act: Set corners and serialize
         corners = ((0.1, 0.2), (1.1, 0.2), (1.1, 1.2), (0.1, 1.2))
@@ -94,14 +94,14 @@ class TestPhotoModel(unittest.TestCase):
         s = photo.serialize()
 
         # Assert
-        self.assertEqual(s, {
+        assert s == {
             "original_filename": "img_001.jpg",
             "quadrat_corners": [[0.1, 0.2], [1.1, 0.2], [1.1, 1.2], [0.1, 1.2]],
             "red_shift": [0.3, -0.2],
             "blue_shift": [0.0, 0.5],
             "camera_matrix": [[1000.0, 0.0, 512.0], [0.0, 1000.0, 384.0], [0.0, 0.0, 1.0]],
             "distortion_coefficients": [[0.01, -0.02], [0.0, 0.0]],
-        })
+        }
 
         # Arrange: Deserialize into a fresh model and verify signals and value
         new_photo = PhotoModel()
@@ -121,7 +121,9 @@ class TestPhotoModel(unittest.TestCase):
 
         @Slot()
         def handle_changed() -> None:
-            nonlocal raised_quadrat_corners_changed, raised_red, raised_blue, raised_camera, raised_distortion, raised_changed
+            nonlocal raised_quadrat_corners_changed
+            nonlocal raised_red, raised_blue, raised_camera
+            nonlocal raised_distortion, raised_changed
             raised_quadrat_corners_changed = True
             raised_changed = True
 
@@ -163,20 +165,20 @@ class TestPhotoModel(unittest.TestCase):
         new_photo.deserialize(s)
 
         # Assert
-        self.assertEqual(new_photo.original_filename, "img_001.jpg")
-        self.assertEqual(new_photo.quadrat_corners, corners)
-        self.assertEqual(new_photo.red_shift, (0.3, -0.2))
-        self.assertEqual(new_photo.blue_shift, (0.0, 0.5))
-        self.assertEqual(new_photo.camera_matrix, camera)
-        self.assertEqual(new_photo.distortion_coefficients, distortion)
-        self.assertTrue(raised_original)
-        self.assertTrue(raised_quadrat)
-        self.assertTrue(raised_quadrat_corners_changed)
-        self.assertTrue(raised_red)
-        self.assertTrue(raised_blue)
-        self.assertTrue(raised_camera)
-        self.assertTrue(raised_distortion)
-        self.assertTrue(raised_changed)
+        assert new_photo.original_filename == "img_001.jpg"
+        assert new_photo.quadrat_corners == corners
+        assert new_photo.red_shift == (0.3, -0.2)
+        assert new_photo.blue_shift == (0.0, 0.5)
+        assert new_photo.camera_matrix == camera
+        assert new_photo.distortion_coefficients == distortion
+        assert raised_original
+        assert raised_quadrat
+        assert raised_quadrat_corners_changed
+        assert raised_red
+        assert raised_blue
+        assert raised_camera
+        assert raised_distortion
+        assert raised_changed
 
         # Act: Deserialize None to clear
         raised_quadrat = False
@@ -187,18 +189,25 @@ class TestPhotoModel(unittest.TestCase):
         raised_distortion = False
         raised_changed = False
         raised_original = False
-        new_photo.deserialize({"original_filename": None, "quadrat_corners": None, "red_shift": None, "blue_shift": None, "camera_matrix": None, "distortion_coefficients": None})
+        new_photo.deserialize({
+            "original_filename": None,
+            "quadrat_corners": None,
+            "red_shift": None,
+            "blue_shift": None,
+            "camera_matrix": None,
+            "distortion_coefficients": None,
+        })
 
         # Assert
-        self.assertEqual(new_photo.original_filename, "")
-        self.assertIsNone(new_photo.quadrat_corners)
-        self.assertIsNone(new_photo.camera_matrix)
-        self.assertIsNone(new_photo.distortion_coefficients)
-        self.assertTrue(raised_original)
-        self.assertTrue(raised_quadrat)
-        self.assertTrue(raised_quadrat_corners_changed)
-        self.assertTrue(raised_red)
-        self.assertTrue(raised_blue)
-        self.assertTrue(raised_camera)
-        self.assertTrue(raised_distortion)
-        self.assertTrue(raised_changed)
+        assert new_photo.original_filename == ""
+        assert new_photo.quadrat_corners is None
+        assert new_photo.camera_matrix is None
+        assert new_photo.distortion_coefficients is None
+        assert raised_original
+        assert raised_quadrat
+        assert raised_quadrat_corners_changed
+        assert raised_red
+        assert raised_blue
+        assert raised_camera
+        assert raised_distortion
+        assert raised_changed
