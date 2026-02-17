@@ -1,7 +1,7 @@
 import unittest
 from PySide6.QtCore import Slot
 
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.model.photo_model import PhotoModel, PhotoData
 
 
 class TestPhotoModel(unittest.TestCase):
@@ -26,12 +26,12 @@ class TestPhotoModel(unittest.TestCase):
         photo.on_changed.connect(handle_changed)
 
         # Assert initial state
-        assert photo.quadrat_corners is None
+        assert photo.quadrat_corners == []
         assert not raised_quadrat_corners_changed
         assert not raised_changed
 
         # Act: set quadrat corners
-        corners = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
+        corners = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
         photo.quadrat_corners = corners
 
         # Assert: property set and both signals fired
@@ -65,9 +65,9 @@ class TestPhotoModel(unittest.TestCase):
 
         # Assert
         assert "original_filename" in s_none
-        assert s_none["original_filename"] == ""
+        assert s_none["original_filename"] is None
         assert "quadrat_corners" in s_none
-        assert s_none["quadrat_corners"] is None
+        assert s_none["quadrat_corners"] == []
         assert "red_shift" in s_none
         assert "blue_shift" in s_none
         assert s_none["red_shift"] is None
@@ -78,7 +78,7 @@ class TestPhotoModel(unittest.TestCase):
         assert s_none["distortion_coefficients"] is None
 
         # Act: Set corners and serialize
-        corners = ((0.1, 0.2), (1.1, 0.2), (1.1, 1.2), (0.1, 1.2))
+        corners = [(0.1, 0.2), (1.1, 0.2), (1.1, 1.2), (0.1, 1.2)]
         photo.quadrat_corners = corners
         photo.red_shift = (0.3, -0.2)
         photo.blue_shift = (0.0, 0.5)
@@ -96,11 +96,11 @@ class TestPhotoModel(unittest.TestCase):
         # Assert
         assert s == {
             "original_filename": "img_001.jpg",
-            "quadrat_corners": [[0.1, 0.2], [1.1, 0.2], [1.1, 1.2], [0.1, 1.2]],
+            "quadrat_corners": [(0.1, 0.2), (1.1, 0.2), (1.1, 1.2), (0.1, 1.2)],
             "red_shift": [0.3, -0.2],
             "blue_shift": [0.0, 0.5],
-            "camera_matrix": [[1000.0, 0.0, 512.0], [0.0, 1000.0, 384.0], [0.0, 0.0, 1.0]],
-            "distortion_coefficients": [[0.01, -0.02], [0.0, 0.0]],
+            "camera_matrix": ((1000.0, 0.0, 512.0), (0.0, 1000.0, 384.0), (0.0, 0.0, 1.0)),
+            "distortion_coefficients": [(0.01, -0.02), (0.0, 0.0)],
         }
 
         # Arrange: Deserialize into a fresh model and verify signals and value
@@ -165,7 +165,7 @@ class TestPhotoModel(unittest.TestCase):
         new_photo.deserialize(s)
 
         # Assert
-        assert new_photo.original_filename == "img_001.jpg"
+        assert str(new_photo.original_filename) == "img_001.jpg"
         assert new_photo.quadrat_corners == corners
         assert new_photo.red_shift == (0.3, -0.2)
         assert new_photo.blue_shift == (0.0, 0.5)

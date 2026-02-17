@@ -193,7 +193,7 @@ class ProjectModel(QModel[ProjectData]):
         p = Path(path)
         if p.parent:
             p.parent.mkdir(parents=True, exist_ok=True)
-        data = self.serialize()
+        data = self.serialize(is_root = True)
         with p.open("w", encoding="utf-8") as fh:
             json.dump(data, fh, indent=2)
         self.mark_clean()
@@ -208,5 +208,5 @@ class ProjectModel(QModel[ProjectData]):
             raise FileNotFoundError(str(p))
         with p.open("r", encoding="utf-8") as fh:
             data = json.load(fh)
-        self.deserialize(data)
+        self.deserialize(data, is_root = True)
         self.mark_clean()

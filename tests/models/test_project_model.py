@@ -51,7 +51,7 @@ class TestProjectModel(unittest.TestCase):
         project.photos.append(p)
 
         # Act: serialize
-        s = project.serialize()
+        s = project.serialize(is_root = True)
 
         # Assert serialized structure includes version
         assert "model_version" in s
@@ -73,7 +73,7 @@ class TestProjectModel(unittest.TestCase):
         new_project.on_changed.connect(handle_changed)
 
         # Act: deserialize (valid version included)
-        new_project.deserialize(s)
+        new_project.deserialize(s, is_root = True)
 
         # Assert: one photo restored with properties
         assert len(new_project.photos) == 1
@@ -85,7 +85,7 @@ class TestProjectModel(unittest.TestCase):
 
         # Act: clear photos via deserialize with None (include version)
         changed = False
-        new_project.deserialize({"model_version": ProjectData.SERIAL_VERSION, "photos": None})
+        new_project.deserialize({"model_version": ProjectData.SERIAL_VERSION, "photos": None}, is_root = True)
 
         # Assert: photos cleared and on_changed emitted
         assert len(new_project.photos) == 0
@@ -110,7 +110,7 @@ class TestProjectModel(unittest.TestCase):
             assert path.exists()
             with path.open("r", encoding="utf-8") as fh:
                 data = json.load(fh)
-            assert data == project.serialize()
+            assert data == project.serialize(is_root = True)
 
             # Arrange: fresh project to load into and watch for on_changed
             new_project = ProjectModel()
@@ -142,11 +142,11 @@ class TestProjectModel(unittest.TestCase):
     def test_deserialize_version_mismatch_raises(self) -> None:
         # Arrange
         project = ProjectModel()
-        bad = {"version": ProjectData.SERIAL_VERSION + 1, "photos": []}
+        bad = {"model_version": ProjectData.SERIAL_VERSION + 1, "photos": []}
 
         # Act / Assert
         with pytest.raises(ValueError):  # noqa: PT011
-            project.deserialize(bad)
+            project.deserialize(bad, is_root = True)
 
     def test_dirty_flag(self) -> None:
         # Arrange

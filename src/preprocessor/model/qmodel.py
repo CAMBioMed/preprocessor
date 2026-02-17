@@ -124,14 +124,15 @@ class QModel[M: BaseModel](QObject):
             with contextlib.suppress(Exception):
                 self.on_changed.emit()
 
-    def serialize(self) -> dict[str, Any]:
+    def serialize(self, is_root: bool = False) -> dict[str, Any]:
         """Return a JSON-friendly dict (Paths -> str, tuples -> lists)."""
         d = self._data.model_dump()
         out = {k: _to_basic(v) for k, v in d.items()}
-        out["model_version"] = int(self._model_version)
+        if is_root:
+            out["model_version"] = int(self._model_version)
         return out
 
-    def deserialize(self, data: dict[str, Any]) -> None:
+    def deserialize(self, data: dict[str, Any], is_root: bool = False) -> None:
         """
         Merge `data` into the current model and validate; only keys present in `data` are considered
         for emitting per-field signals. Emits on_changed if anything changed.
@@ -139,19 +140,20 @@ class QModel[M: BaseModel](QObject):
         old = self._data.model_dump()
         incoming = dict(data)  # shallow copy
 
-        # Ensure the model version matches
-        if "model_version" not in incoming:
-            msg = f"Missing 'model_version' field in serialized data; expected version {self._model_version}"
-            raise ValueError(msg)
-        try:
-            incoming_model_version = int(incoming["model_version"])
-        except Exception as exc:
-            msg = f"Invalid 'model_version' value: {incoming.get('model_version')!r}"
-            raise ValueError(msg) from exc
-        if incoming_model_version != self._model_version:
-            msg = f"Version mismatch: expected {self._model_version}, got {incoming_model_version}"
-            raise ValueError(msg)
-        incoming.pop("model_version", None)
+        if is_root:
+            # Ensure the model version matches
+            if "model_version" not in incoming:
+                msg = f"Missing 'model_version' field in serialized data; expected version {self._model_version}"
+                raise ValueError(msg)
+            try:
+                incoming_model_version = int(incoming["model_version"])
+            except Exception as exc:
+                msg = f"Invalid 'model_version' value: {incoming.get('model_version')!r}"
+                raise ValueError(msg) from exc
+            if incoming_model_version != self._model_version:
+                msg = f"Version mismatch: expected {self._model_version}, got {incoming_model_version}"
+                raise ValueError(msg)
+            incoming.pop("model_version", None)
 
         # Update the model
         merged = {**old}
