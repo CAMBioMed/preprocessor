@@ -6,24 +6,27 @@ from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.project_model import ProjectModel
 
 
-
 class TestApplicationModel(unittest.TestCase):
     def test_current_project(self) -> None:
         # Arrange
         app_model = ApplicationModel()
 
         raised_on_changed = False
+
         @Slot()
         def handle_on_changed() -> None:
             nonlocal raised_on_changed
             raised_on_changed = True
+
         app_model.on_changed.connect(handle_on_changed)
 
         raised_on_current_project_changed = None
+
         @Slot(object)
         def handle_on_current_project_changed(project: ProjectModel) -> None:
             nonlocal raised_on_current_project_changed
             raised_on_current_project_changed = project
+
         app_model.on_current_project_changed.connect(handle_on_current_project_changed)
 
         project_model0 = ProjectModel()

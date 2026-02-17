@@ -7,11 +7,14 @@ from pydantic import BaseModel, field_validator, Field
 
 from preprocessor.model.qmodel import QModel
 
+# fmt: off
 CameraMatrix = tuple[
     tuple[float, float, float],
     tuple[float, float, float],
     tuple[float, float, float]
 ]
+# fmt: on
+
 
 class CameraData(BaseModel):
     """The data for a camera, used for serialization."""
@@ -73,7 +76,6 @@ class CameraData(BaseModel):
 
 
 class CameraModel(QModel[CameraData]):
-
     on_file_changed: Signal = Signal(object)
     on_name_changed: Signal = Signal(str)
     on_camera_matrix_changed: Signal = Signal()

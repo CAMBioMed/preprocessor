@@ -8,6 +8,8 @@ from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
 from preprocessor.gui.utils import icon_from_resource
 from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel
+
+
 class ThumbnailDockWidget(QDockWidget):
     ui: Ui_ThumbnailDock
 
@@ -49,7 +51,8 @@ class ThumbnailDockWidget(QDockWidget):
     def _handle_remove_photos_action(self) -> None:
         selected_items = self.ui.thumbnailListWidget.selectedItems()
         selected_photos = [
-            item.data(Qt.ItemDataRole.UserRole) for item in selected_items
+            item.data(Qt.ItemDataRole.UserRole)
+            for item in selected_items
             if item.data(Qt.ItemDataRole.UserRole) is not None
         ]
         self.on_remove_photos_action.emit(selected_photos)
@@ -57,7 +60,8 @@ class ThumbnailDockWidget(QDockWidget):
     def _handle_selection_changed(self) -> None:
         selected_items = self.ui.thumbnailListWidget.selectedItems()
         selected_photos = [
-            item.data(Qt.ItemDataRole.UserRole) for item in selected_items
+            item.data(Qt.ItemDataRole.UserRole)
+            for item in selected_items
             if item.data(Qt.ItemDataRole.UserRole) is not None
         ]
         self.on_selection_changed.emit(selected_photos)

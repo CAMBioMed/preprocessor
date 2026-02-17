@@ -30,6 +30,7 @@ def save_image(path: Path, img: MatLike | None, quality: int = 95, is_rgb: bool 
     ok = _save_jpeg_image(path, img, quality=q, is_rgb=is_rgb)
     return ok
 
+
 def save_image_and_metadata(path: str, result: QuadratDetectionResult, quality: int = 95, is_rgb: bool = False) -> bool:
     """
     Save image data to the given path as JPEG,
@@ -43,7 +44,7 @@ def save_image_and_metadata(path: str, result: QuadratDetectionResult, quality: 
     q = max(0, min(100, int(quality)))
 
     # Save JPEG image
-    img : MatLike | None = result.final
+    img: MatLike | None = result.final
     if img is None:
         logger.error("No image data to save")
         return False
@@ -58,6 +59,7 @@ def save_image_and_metadata(path: str, result: QuadratDetectionResult, quality: 
     ok = _write_json_file(json_path, json_data)
 
     return ok
+
 
 def _save_jpeg_image(path: Path, img: MatLike, quality: int, is_rgb: bool = False) -> bool:
     """
@@ -94,6 +96,7 @@ def _save_jpeg_image(path: Path, img: MatLike, quality: int, is_rgb: bool = Fals
 
 def _write_json_file(path: str, data: dict) -> bool:
     import json  # noqa: PLC0415
+
     try:
         with open(path, "w") as f:
             json.dump(data, f, indent=4)

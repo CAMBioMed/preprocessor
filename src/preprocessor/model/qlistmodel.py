@@ -150,10 +150,7 @@ class QListModel[E: QModel](QObject):
         if dirty:
             self.mark_dirty()
 
-
-    def populate_from_data(self,
-                           data_list: Iterable[BaseModel | dict] | None,
-                           model_cls: type[QModel]) -> None:
+    def populate_from_data(self, data_list: Iterable[BaseModel | dict] | None, model_cls: type[QModel]) -> None:
         """
         Replace the contents of this QListModel with `model_cls(data=...)` instances
         created from each element in `data_list` (which may be pydantic models or dicts).
@@ -189,10 +186,9 @@ class QListModel[E: QModel](QObject):
                     out.append({})
         return out
 
-    def bind_to_model(self,
-                      owner: QModel,
-                      field_name: str,
-                      child_changed_callback: Callable[..., None] | None = None) -> None:
+    def bind_to_model(
+        self, owner: QModel, field_name: str, child_changed_callback: Callable[..., None] | None = None
+    ) -> None:
         """
         Bind this QListModel to a parent `owner` (a QModel instance) and a pydantic
         `field_name`. Whenever the list changes this will:
@@ -203,6 +199,7 @@ class QListModel[E: QModel](QObject):
 
         Note: `owner._set_field` is used to validate and update the owner's pydantic model.
         """
+
         def _handler(added: list[E], removed: list[E]) -> None:
             # wire/unwire child change handlers
             if child_changed_callback is not None:

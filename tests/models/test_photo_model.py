@@ -189,14 +189,16 @@ class TestPhotoModel(unittest.TestCase):
         raised_distortion = False
         raised_changed = False
         raised_original = False
-        new_photo.deserialize({
-            "original_filename": None,
-            "quadrat_corners": None,
-            "red_shift": None,
-            "blue_shift": None,
-            "camera_matrix": None,
-            "distortion_coefficients": None,
-        })
+        new_photo.deserialize(
+            {
+                "original_filename": None,
+                "quadrat_corners": None,
+                "red_shift": None,
+                "blue_shift": None,
+                "camera_matrix": None,
+                "distortion_coefficients": None,
+            }
+        )
 
         # Assert
         assert new_photo.original_filename == ""

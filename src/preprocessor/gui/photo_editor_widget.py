@@ -154,12 +154,14 @@ class PhotoEditorWidget(QWidget):
 
         # Draw a crosshair centered at the mouse position (drawn last so it's visible)
         if self._mouse_position is not None:
+            # fmt: off
             length = 10                             # Arm length, in pixels
             gap = 5                                 # Gap size, in pixels
             width = 2                               # Line width, in pixels
             border = 1                              # Border width, in pixels
             border_color = Qt.GlobalColor.white     # Border color
             line_color = Qt.GlobalColor.red         # Line color
+            # fmt: on
             x = self._mouse_position.x()
             y = self._mouse_position.y()
 
@@ -265,7 +267,7 @@ class PhotoEditorWidget(QWidget):
             self._edit_points = None
         self.unsetCursor()
         self._mouse_position = None
-        self._drag_index = None     # Stop dragging (if any)
+        self._drag_index = None  # Stop dragging (if any)
         self.update()
         super().leaveEvent(event)
 

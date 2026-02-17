@@ -13,8 +13,10 @@ from preprocessor.model.qmodel import QModel
 if QCoreApplication.instance() is None:
     QCoreApplication([])
 
+
 class ItemData(BaseModel):
     name: str
+
 
 class Item(QModel[ItemData]):
     def __init__(self, data: ItemData | dict[str, Any] | None = None) -> None:
@@ -31,15 +33,15 @@ class Item(QModel[ItemData]):
     def __repr__(self) -> str:
         return f"Item({self.name})"
 
-class TestQListModel(unittest.TestCase):
 
+class TestQListModel(unittest.TestCase):
     def setUp(self) -> None:
         # Arrange: create an empty model (do not use subscription at runtime)
         self.model = QListModel[Item]()
 
     def test_append_and_len_and_parent(self) -> None:
         # Arrange
-        it = Item(ItemData(name = "a"))
+        it = Item(ItemData(name="a"))
 
         # Act
         self.model.append(it)
@@ -50,8 +52,8 @@ class TestQListModel(unittest.TestCase):
 
     def test_insert(self) -> None:
         # Arrange
-        a = Item(ItemData(name = "a"))
-        b = Item(ItemData(name = "b"))
+        a = Item(ItemData(name="a"))
+        b = Item(ItemData(name="b"))
         self.model.append(a)
 
         # Act
@@ -64,7 +66,7 @@ class TestQListModel(unittest.TestCase):
 
     def test_getitem_index_and_slice(self) -> None:
         # Arrange
-        items = [Item(ItemData(name = str(i))) for i in range(5)]
+        items = [Item(ItemData(name=str(i))) for i in range(5)]
         for it in items:
             self.model.append(it)
 
@@ -79,8 +81,8 @@ class TestQListModel(unittest.TestCase):
 
     def test_setitem_index(self) -> None:
         # Arrange
-        a = Item(ItemData(name = "a"))
-        b = Item(ItemData(name = "b"))
+        a = Item(ItemData(name="a"))
+        b = Item(ItemData(name="b"))
         self.model.append(a)
 
         # Act
@@ -94,16 +96,16 @@ class TestQListModel(unittest.TestCase):
     def test_setitem_slice(self) -> None:
         # Arrange
         orig = [
-            Item(ItemData(name = "1")),
-            Item(ItemData(name = "2")),
-            Item(ItemData(name = "3")),
-            Item(ItemData(name = "4")),
+            Item(ItemData(name="1")),
+            Item(ItemData(name="2")),
+            Item(ItemData(name="3")),
+            Item(ItemData(name="4")),
         ]
         for it in orig:
             self.model.append(it)
         replacements = [
-            Item(ItemData(name = "x")),
-            Item(ItemData(name = "y")),
+            Item(ItemData(name="x")),
+            Item(ItemData(name="y")),
         ]
 
         # Act
@@ -119,7 +121,7 @@ class TestQListModel(unittest.TestCase):
 
     def test_delitem_index_and_slice(self) -> None:
         # Arrange
-        items = [Item(ItemData(name = str(i))) for i in range(4)]
+        items = [Item(ItemData(name=str(i))) for i in range(4)]
         for it in items:
             self.model.append(it)
 
@@ -149,12 +151,12 @@ class TestQListModel(unittest.TestCase):
         with pytest.raises(TypeError):
             self.model.insert(0, object())  # type: ignore[arg-type]
         # setitem index to non-QObject (need an existing item first)
-        self.model.append(Item(ItemData(name = "a")))
+        self.model.append(Item(ItemData(name="a")))
         with pytest.raises(TypeError):
-            self.model[0] = object()   # type: ignore[call-overload]
+            self.model[0] = object()  # type: ignore[call-overload]
         # setitem slice with non-QObject in iterable
         with pytest.raises(TypeError):
-            self.model[0:1] = [object()]   # type: ignore[list-item]
+            self.model[0:1] = [object()]  # type: ignore[list-item]
 
     def test_on_changed_signal_emitted(self) -> None:
         # Arrange
@@ -166,20 +168,20 @@ class TestQListModel(unittest.TestCase):
         self.model.on_changed.connect(slot)
 
         # Act/Assert
-        self.model.append(Item(ItemData(name = "a")))
+        self.model.append(Item(ItemData(name="a")))
         assert len(calls) == 1
-        self.model.insert(0, Item(ItemData(name = "b")))
+        self.model.insert(0, Item(ItemData(name="b")))
         assert len(calls) == 2
-        self.model[0] = Item(ItemData(name = "c"))
+        self.model[0] = Item(ItemData(name="c"))
         assert len(calls) == 3
         del self.model[0]
         assert len(calls) == 4
-        self.model[0:0] = [Item(ItemData(name = "d"))]
+        self.model[0:0] = [Item(ItemData(name="d"))]
         assert len(calls) == 5
 
     def test_iterable(self) -> None:
         # Arrange
-        items = [Item(ItemData(name = str(i))) for i in range(3)]
+        items = [Item(ItemData(name=str(i))) for i in range(3)]
         for it in items:
             self.model.append(it)
 

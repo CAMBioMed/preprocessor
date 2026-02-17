@@ -107,7 +107,6 @@ class PhotoData(BaseModel):
 
 
 class PhotoModel(QModel[PhotoData]):
-
     on_original_filename_changed: Signal = Signal()
     on_quadrat_corners_changed: Signal = Signal()
     on_red_shift_changed: Signal = Signal()
@@ -117,7 +116,6 @@ class PhotoModel(QModel[PhotoData]):
 
     def __init__(self, data: PhotoData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=PhotoData, data=data)
-
 
     @property
     def original_filename(self) -> Path | None:

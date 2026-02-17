@@ -7,6 +7,7 @@ import contextlib
 
 M = TypeVar("M", bound=BaseModel)
 
+
 def _to_basic(obj: Any) -> Any:  # noqa: ANN401
     """Convert nested tuples/lists/Paths/primitives to JSON-friendly basic Python types (lists, numbers, strings)."""
     if obj is None:
@@ -41,10 +42,11 @@ class QModel[M: BaseModel](QObject):
     _data: M
     _dirty: bool
 
-    def __init__(self,
-                 model_cls: type[M],
-                 data: M | dict[str, Any] | None = None,
-     ) -> None:
+    def __init__(
+        self,
+        model_cls: type[M],
+        data: M | dict[str, Any] | None = None,
+    ) -> None:
         super().__init__()
         self._model_cls = model_cls
         self._model_version = int(getattr(model_cls, "SERIAL_VERSION", 1))
@@ -99,7 +101,6 @@ class QModel[M: BaseModel](QObject):
             with contextlib.suppress(Exception):
                 sig.emit()
 
-
     def _set_field(self, field: str, value: Any) -> None:  # noqa: ANN401
         """
         Validate and set a single field using the pydantic model.
@@ -123,14 +124,12 @@ class QModel[M: BaseModel](QObject):
             with contextlib.suppress(Exception):
                 self.on_changed.emit()
 
-
     def serialize(self) -> dict[str, Any]:
         """Return a JSON-friendly dict (Paths -> str, tuples -> lists)."""
         d = self._data.model_dump()
         out = {k: _to_basic(v) for k, v in d.items()}
         out["model_version"] = int(self._model_version)
         return out
-
 
     def deserialize(self, data: dict[str, Any]) -> None:
         """

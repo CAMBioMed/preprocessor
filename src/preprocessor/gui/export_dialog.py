@@ -19,7 +19,6 @@ from preprocessor.processing.save_image import save_image
 
 
 class ExportDialog(QDialog):
-
     current_project: ProjectModel
     ui: Ui_ExportDialog
 
@@ -46,12 +45,14 @@ class ExportDialog(QDialog):
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self._handle_close)
 
         # Update the displayed label when the spin boxes change
+        # fmt: off
         self.ui.numTargetWidth.valueChanged.connect(
             lambda v: self.ui.lblTargetWidth_Value.setText(str(int(v)) + " px")
         )
         self.ui.numTargetHeight.valueChanged.connect(
             lambda v: self.ui.lblTargetHeight_Value.setText(str(int(v)) + " px")
         )
+        # fmt: on
 
     def _set_initial_state(self) -> None:
         # Set the output directory to the last used export path, if available
@@ -143,6 +144,7 @@ class ExportDialog(QDialog):
     def _on_worker_message(self, severity: str, text: str) -> None:
         """
         Append a message to the dialog's message list with an icon.
+
         severity: 'error' | 'warning' | 'info' (fallback to info)
         """
         if not hasattr(self.ui, "lstMessages"):
@@ -223,7 +225,7 @@ class _ExportWorker(QObject):
                 self.status.emit(f"Exporting {idx}/{total}: {output_name}")
 
                 # Load image
-                img = load_image(photo.original_filename)
+                img = load_image(str(photo.original_filename))
                 if img is None:
                     self.message.emit(
                         "warning",
@@ -288,4 +290,3 @@ class _ExportWorker(QObject):
 
     def request_stop(self) -> None:
         self._stop_requested = True
-

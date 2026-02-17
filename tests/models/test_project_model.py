@@ -2,6 +2,7 @@ import unittest
 
 # ensure a Qt app context for QObject usage in tests if not present
 from PySide6.QtCore import QCoreApplication
+
 if QCoreApplication.instance() is None:
     QCoreApplication([])
 
@@ -13,7 +14,6 @@ from preprocessor.model.project_model import ProjectModel, ProjectData
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.qlistmodel import QListModel
 import pytest
-
 
 
 class TestProjectModel(unittest.TestCase):
@@ -107,10 +107,10 @@ class TestProjectModel(unittest.TestCase):
             project.save_to_file(path)
 
             # Assert file exists and JSON matches serialize()
-            assert(path.exists())
+            assert path.exists()
             with path.open("r", encoding="utf-8") as fh:
                 data = json.load(fh)
-            assert(data == project.serialize())
+            assert data == project.serialize()
 
             # Arrange: fresh project to load into and watch for on_changed
             new_project = ProjectModel()

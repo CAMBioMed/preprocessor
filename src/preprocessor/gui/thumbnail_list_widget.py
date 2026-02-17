@@ -6,7 +6,6 @@ from preprocessor.gui.thumbnail_list_model import ThumbnailListModel
 
 
 class ThumbnailListWidget(QDockWidget):
-
     model: ThumbnailListModel
 
     on_thumbnail_selected: Signal = Signal(str)
@@ -27,7 +26,6 @@ class ThumbnailListWidget(QDockWidget):
         self._connect_signals()
 
     def _connect_signals(self) -> None:
-
         def _update_thumbnails() -> None:
             self.thumbnail_list.clear()
             for image_path in self.model.image_paths:

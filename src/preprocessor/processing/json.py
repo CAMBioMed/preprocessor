@@ -14,13 +14,14 @@ from preprocessor.processing.detect_quadrat import QuadratDetectionResult
 #         row.append(v)
 #     return row
 
+
 def serialize_photo_metadata(result: QuadratDetectionResult, quality: int = 95) -> dict:
     corners = None if result.corners is None else [_serialize_point2f(pt) for pt in result.corners]
     return {
         "quality": quality,
         "detection": {
             "corners": corners,
-        }
+        },
     }
 
 

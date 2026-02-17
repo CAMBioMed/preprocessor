@@ -95,9 +95,7 @@ class ProjectData(BaseModel):
         return iv
 
 
-
 class ProjectModel(QModel[ProjectData]):
-
     on_file_changed: Signal = Signal(object)
     on_export_path_changed: Signal = Signal(object)
     on_target_width_changed: Signal = Signal(object)
@@ -110,8 +108,8 @@ class ProjectModel(QModel[ProjectData]):
         super().__init__(model_cls=ProjectData, data=data)
 
         # Create QListModel containers for interactive use
-        self._photos = QListModel[PhotoModel](parent = self)
-        self._cameras = QListModel[CameraModel](parent = self)
+        self._photos = QListModel[PhotoModel](parent=self)
+        self._cameras = QListModel[CameraModel](parent=self)
 
         # Track which model instances we've connected to
         self._connected_photos: set[PhotoModel] = set()
@@ -136,7 +134,6 @@ class ProjectModel(QModel[ProjectData]):
     def file(self, path: Path | None) -> None:
         self._set_field("file", path)
 
-
     @property
     def export_path(self) -> Path | None:
         """The file path where the photos will be exported to, or None if not set."""
@@ -145,7 +142,6 @@ class ProjectModel(QModel[ProjectData]):
     @export_path.setter
     def export_path(self, path: Path | None) -> None:
         self._set_field("export_path", path)
-
 
     @property
     def target_width(self) -> int | None:
@@ -156,7 +152,6 @@ class ProjectModel(QModel[ProjectData]):
     def target_width(self, value: int | None) -> None:
         self._set_field("target_width", value)
 
-
     @property
     def target_height(self) -> int | None:
         """The target height for perspective correction, or None if not set."""
@@ -165,7 +160,6 @@ class ProjectModel(QModel[ProjectData]):
     @target_height.setter
     def target_height(self, value: int | None) -> None:
         self._set_field("target_height", value)
-
 
     @property
     def photos(self) -> QListModel[PhotoModel]:
