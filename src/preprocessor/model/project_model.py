@@ -1,14 +1,16 @@
 from PySide6.QtCore import QObject, Signal
 from pydantic import BaseModel
 
-from preprocessor.model.camera_model import CameraModel
+from preprocessor.model.camera_model import CameraModel, CameraData
 from preprocessor.model.qlistmodel import QListModel
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.model.photo_model import PhotoModel, PhotoData
 
 # Add imports for file IO
 import json
 from pathlib import Path
-from typing import Union, Set, Iterable, ClassVar
+from typing import Union, Set, Iterable, ClassVar, Any
+
+from preprocessor.model.qmodel import QModel
 
 
 class ProjectData(BaseModel):
@@ -19,141 +21,129 @@ class ProjectData(BaseModel):
     # Serialization JSON version
     SERIAL_VERSION: int = 1
 
+    file: Path | None = None
+    """The file path of the project file, or None if not saved yet. This is not serialized/deserialized."""
+    export_path: Path | None = None
+    """The file path where the photos will be exported to, or None if not set."""
+    target_width: int | None = None
+    """The target width for perspective correction, or None if not set."""
+    target_height: int | None = None
+    """The target height for perspective correction, or None if not set."""
+    photos: list[PhotoData]
+    """The list of photos in the project."""
+    cameras: list[CameraData]
+    """The list of cameras in the project."""
 
 
-class ProjectModel(QObject):
-    """
-    The model for the entire current project.
 
-    This includes the project-specific settings.
-    """
+class ProjectModel(QModel[ProjectData]):
 
-    # Serialization JSON version
-    SERIAL_VERSION: ClassVar[int] = 1
+    on_file_changed: Signal = Signal(object)
+    on_export_path_changed: Signal = Signal(object)
+    on_target_width_changed: Signal = Signal(object)
+    on_target_height_changed: Signal = Signal(object)
 
-    on_changed: Signal = Signal()
+    _photos: QListModel[PhotoModel]
+    _cameras: QListModel[CameraModel]
 
-    def __init__(self) -> None:
-        super().__init__()
-        # store the photos list on the instance
+    def __init__(self, data: ProjectData | dict[str, Any] | None) -> None:
+        super().__init__(model_cls=ProjectData, data=data)
+
+        # Create QListModel containers for interactive use
         self._photos = QListModel[PhotoModel](parent = self)
+        self._cameras = QListModel[CameraModel](parent = self)
 
-        # track which PhotoModel instances we've connected to
+        # Track which model instances we've connected to
         self._connected_photos: Set[PhotoModel] = set()
+        self._connected_cameras: Set[CameraModel] = set()
 
         # wire photos list changes to mark dirty and (re)wire photo handlers
-        self.photos.on_changed.connect(self._handle_photos_changed)
+        self._photos.on_changed.connect(self._handle_photos_changed)
+        self._cameras.on_changed.connect(self._handle_cameras_changed)
+
         # wire any existing photos without generating a photos-changed event / dirty mark
         for photo in list(self.photos):
             photo.on_changed.connect(self._handle_photo_changed)
             self._connected_photos.add(photo)
 
 
-    _file_path: Path | None = None
-    on_file_path_changed: Signal = Signal(object)
-
     @property
-    def file_path(self) -> Path | None:
+    def file(self) -> Path | None:
         """
         The file path where the project is saved, or None if not saved yet.
 
         This property is not serialized/deserialized.
         """
-        return self._file_path
+        return self._data.file
 
-    @file_path.setter
-    def file_path(self, path: Path | None) -> None:
-        old_path = self._file_path
-        if old_path != path:
-            self._file_path = path
-            self.on_file_path_changed.emit(path)
+    @file.setter
+    def file(self, path: Path | None) -> None:
+        self._set_field("file", path)
 
-
-    _export_path: Path | None = None
-    on_export_path_changed: Signal = Signal(object)
 
     @property
     def export_path(self) -> Path | None:
         """
         The file path where the photos will be exported to, or None if not set.
         """
-        return self._export_path
+        return self._data.export_path
 
     @export_path.setter
     def export_path(self, path: Path | None) -> None:
-        old_path = self._export_path
-        if old_path != path:
-            self._export_path = path
-            self.on_export_path_changed.emit(path)
+        self._set_field("export_path", path)
 
-
-    _target_width: int | None = None
-    on_target_width_changed: Signal = Signal(object)
 
     @property
     def target_width(self) -> int | None:
         """The target width for perspective correction, or None if not set."""
-        return self._target_width
+        return self._data.target_width
 
     @target_width.setter
     def target_width(self, value: int | None) -> None:
-        old_value = self._target_width
-        if old_value != value:
-            self._target_width = value
-            self.on_target_width_changed.emit(value)
+        self._set_field("target_width", value)
 
-
-    _target_height: int | None = None
-    on_target_height_changed: Signal = Signal(object)
 
     @property
     def target_height(self) -> int | None:
         """The target height for perspective correction, or None if not set."""
-        return self._target_height
+        return self._data.target_height
 
     @target_height.setter
     def target_height(self, value: int | None) -> None:
-        old_value = self._target_height
-        if old_value != value:
-            self._target_height = value
-            self.on_target_height_changed.emit(value)
+        self._set_field("target_height", value)
 
-
-    _photos: QListModel[PhotoModel]
 
     @property
     def photos(self) -> QListModel[PhotoModel]:
         """The list of photos in the project."""
         return self._photos
 
-    _cameras: QListModel[CameraModel]
-
     @property
     def cameras(self) -> QListModel[CameraModel]:
         """The list of cameras in the project."""
         return self._cameras
 
-    _dirty: bool = False
-    on_dirty_changed: Signal = Signal(bool)
+    # ----- sync helpers -----
+    def _populate_lists_from_data(self) -> None:
+        """
+        Populate the QListModels from the current self._data (ProjectData).
+        Called at init and after deserialize().
+        """
+        # populate photos
+        for item in list(self._photos):
+            self._photos.remove(item)
+        if self._data.photos:
+            for pdata in self._data.photos:
+                pm = PhotoModel(data=pdata)
+                self._photos.append(pm)
 
-    @property
-    def dirty(self) -> bool:
-        """Whether the project has unsaved changes."""
-        return self._dirty
-
-    def _set_dirty(self, value: bool) -> None:
-        if self._dirty != value:
-            self._dirty = value
-            self.on_dirty_changed.emit(value)
-            self.on_changed.emit()
-
-    def mark_clean(self) -> None:
-        """Mark the project as clean (no unsaved changes)."""
-        self._set_dirty(False)
-
-    def mark_dirty(self) -> None:
-        """Mark the project as dirty (has unsaved changes)."""
-        self._set_dirty(True)
+        # populate cameras
+        for item in list(self._cameras):
+            self._cameras.remove(item)
+        if self._data.cameras:
+            for cdata in self._data.cameras:
+                cm = CameraModel(data=cdata)
+                self._cameras.append(cm)
 
     # internal handlers for wiring child signals
     def _handle_photos_changed(self, added: Iterable[PhotoModel], removed: Iterable[PhotoModel]) -> None:
@@ -184,76 +174,6 @@ class ProjectModel(QObject):
         """Called when any child PhotoModel reports a change."""
         self.mark_dirty()
         self.on_changed.emit()
-
-    def serialize(self) -> dict:
-        """
-        Serialize this model into basic Python types suitable for JSON.
-        """
-        # Serialize each PhotoModel using its serialize() method
-        return {
-            "version": self.SERIAL_VERSION,
-            "export_path": str(self.export_path) if self.export_path else None,
-            "target_width": self.target_width,
-            "target_height": self.target_height,
-            "photos": [p.serialize() for p in self.photos],
-        }
-
-    def deserialize(self, data: dict) -> None:
-        """
-        Deserialize state from a dict produced by serialize.
-        Uses the setters so signals are emitted only on change.
-        If a key doesn't occur in the data, it is not set.
-        """
-        # Validate serialization version
-        ver = data.get("version", None)
-        if ver != self.SERIAL_VERSION:
-            raise ValueError(f"Unsupported project version: {ver!r}, expected {self.SERIAL_VERSION}")
-
-        if "export_path" in data:
-            export_path_raw = data.get("export_path", None)
-            if export_path_raw is not None:
-                self.export_path = Path(export_path_raw)
-            else:
-                self.export_path = None
-
-        if "target_width" in data:
-            target_width_raw = data.get("target_width", None)
-            if target_width_raw is not None:
-                self.target_width = int(target_width_raw)
-            else:
-                self.target_width = None
-
-        if "target_height" in data:
-            target_height_raw = data.get("target_height", None)
-            if target_height_raw is not None:
-                self.target_height = int(target_height_raw)
-            else:
-                self.target_height = None
-
-        if "photos" in data:
-            photos_raw = data.get("photos", None)
-            # If explicit None -> clear list
-            if photos_raw is None:
-                # remove existing photos
-                # clear the QListModel by removing items
-                # iterate copy to avoid modification during iteration
-                for item in list(self.photos):
-                    self.photos.remove(item)
-                # Signal that project changed
-                self.on_changed.emit()
-            else:
-                # Expecting iterable of dicts
-                # Clear existing photos first
-                for item in list(self.photos):
-                    self.photos.remove(item)
-                # Recreate PhotoModel instances from serialized data
-                for pic_data in photos_raw:
-                    photo = PhotoModel()
-                    # Let the photo deserialize itself (will emit its own signals)
-                    photo.deserialize(pic_data)
-                    self.photos.append(photo)
-                # Signal that project changed
-                self.on_changed.emit()
 
     def save_to_file(self, path: Union[str, Path]) -> None:
         """

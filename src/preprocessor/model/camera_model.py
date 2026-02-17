@@ -21,8 +21,8 @@ class CameraData(BaseModel):
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
 
-    file: Optional[Path] = None
-    """The file path of the camera calibration file, or None if not set."""
+    file: Path | None = None
+    """The file path of the camera calibration file, or None if not set. This is not serialized/deserialized."""
     name: str = ""
     """The name of the camera."""
     camera_matrix: CameraMatrix | None = None
@@ -41,7 +41,7 @@ class CameraData(BaseModel):
         try:
             s = str(v)
         except Exception as exc:
-            raise ValueError("original_filename must be a path-like string or None") from exc
+            raise ValueError("file must be a path-like string or None") from exc
         s = s.strip()
         return Path(s) if s != "" else None
 

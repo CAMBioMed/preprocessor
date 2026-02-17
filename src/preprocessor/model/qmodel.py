@@ -71,7 +71,11 @@ class QModel(QObject, Generic[M]):
             except Exception:
                 pass
 
-    def clear_dirty(self) -> None:
+    def mark_dirty(self) -> None:
+        """Mark the model as dirty (set dirty flag to True)."""
+        self._set_dirty(True)
+
+    def mark_clean(self) -> None:
         """Clear the dirty flag (set to False)."""
         self._set_dirty(False)
 
