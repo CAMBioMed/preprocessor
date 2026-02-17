@@ -16,7 +16,7 @@ class PhotoData(BaseModel):
 
     original_filename: Path | None = None
     """The original path to the photo file, if set."""
-    quadrat_corners: tuple[Point2f, Point2f, Point2f, Point2f] | None = None
+    quadrat_corners: list[Point2f] = []
     """The corners of the quadrat in the photo, if set."""
     red_shift: tuple[float, float] | None = None
     """The red channel shift in (x, y) directions to correct chromatic aberration."""
@@ -44,15 +44,15 @@ class PhotoData(BaseModel):
 
     @classmethod
     @field_validator("quadrat_corners", mode="before")
-    def _validate_quadrat_corners(cls: type["PhotoData"], v: Any) -> tuple[Point2f, Point2f, Point2f, Point2f] | None:
+    def _validate_quadrat_corners(cls: type["PhotoData"], v: Any) -> list[Point2f]:
         if v is None:
-            return None
+            return []
         try:
-            corners = tuple((float(pt[0]), float(pt[1])) for pt in v)
+            corners = list((float(pt[0]), float(pt[1])) for pt in v)
         except Exception as exc:
-            raise ValueError("quadrat_corners must be an iterable of 4 [x,y] pairs or None") from exc
-        if len(corners) != 4:
-            raise ValueError("quadrat_corners must contain exactly 4 points")
+            raise ValueError("quadrat_corners must be an iterable of up to 4 [x,y] pairs or None") from exc
+        if len(corners) >= 4:
+            raise ValueError("quadrat_corners must contain up to 4 points")
         return corners
 
     @classmethod
@@ -123,12 +123,12 @@ class PhotoModel(QModel[PhotoData]):
         self._set_field("original_filename", value)
 
     @property
-    def quadrat_corners(self) -> tuple[Point2f, Point2f, Point2f, Point2f] | None:
+    def quadrat_corners(self) -> list[Point2f] | None:
         """The corners of the quadrat in the photo, if set."""
         return self._data.quadrat_corners
 
     @quadrat_corners.setter
-    def quadrat_corners(self, value: tuple[Point2f, Point2f, Point2f, Point2f] | None) -> None:
+    def quadrat_corners(self, value: list[Point2f] | None) -> None:
         self._set_field("quadrat_corners", value)
 
     @property

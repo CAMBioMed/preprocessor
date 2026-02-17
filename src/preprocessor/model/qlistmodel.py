@@ -176,7 +176,7 @@ class QListModel(QObject, Generic[E]):
                     except Exception:
                         pass
 
-            payload = [getattr(item, "_data").model_dump() for item in self._items] if len(self._items) > 0 else None
+            payload = [getattr(item, "_data").model_dump() for item in self._items] if len(self._items) > 0 else []
             # validate & update owner model (marks owner dirty if changed)
             owner._set_field(field_name, payload)
 

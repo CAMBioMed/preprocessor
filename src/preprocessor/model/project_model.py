@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject, Signal
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from preprocessor.model.camera_model import CameraModel, CameraData
 from preprocessor.model.qlistmodel import QListModel
@@ -19,9 +19,9 @@ class ProjectData(BaseModel):
     """
 
     # Serialization JSON version
-    SERIAL_VERSION: int = 1
+    SERIAL_VERSION: ClassVar[int] = 1
 
-    file: Path | None = None
+    file: Path | None = Field(default=None, exclude=True)
     """The file path of the project file, or None if not saved yet. This is not serialized/deserialized."""
     export_path: Path | None = None
     """The file path where the photos will be exported to, or None if not set."""
@@ -29,9 +29,9 @@ class ProjectData(BaseModel):
     """The target width for perspective correction, or None if not set."""
     target_height: int | None = None
     """The target height for perspective correction, or None if not set."""
-    photos: list[PhotoData]
+    photos: list[PhotoData] = []
     """The list of photos in the project."""
-    cameras: list[CameraData]
+    cameras: list[CameraData] = []
     """The list of cameras in the project."""
 
 
@@ -46,7 +46,7 @@ class ProjectModel(QModel[ProjectData]):
     _photos: QListModel[PhotoModel]
     _cameras: QListModel[CameraModel]
 
-    def __init__(self, data: ProjectData | dict[str, Any] | None) -> None:
+    def __init__(self, data: ProjectData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=ProjectData, data=data)
 
         # Create QListModel containers for interactive use

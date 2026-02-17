@@ -18,6 +18,8 @@ def _to_basic(obj: Any) -> Any:
         return str(obj)
     if isinstance(obj, (list, tuple)):
         return [_to_basic(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: _to_basic(v) for k, v in obj.items()}
     return str(obj)  # Fallback
 
 
@@ -132,15 +134,15 @@ class QModel(QObject, Generic[M]):
         incoming = dict(data)  # shallow copy
 
         # Ensure the model version matches
-        if "version" not in incoming:
-            raise ValueError(f"Missing 'version' field in serialized data; expected version {self._model_version}")
+        if "model_version" not in incoming:
+            raise ValueError(f"Missing 'model_version' field in serialized data; expected version {self._model_version}")
         try:
-            incoming_version = int(incoming["version"])
+            incoming_model_version = int(incoming["model_version"])
         except Exception:
-            raise ValueError(f"Invalid 'version' value: {incoming.get('version')!r}")
-        if incoming_version != self._model_version:
-            raise ValueError(f"Version mismatch: expected {self._model_version}, got {incoming_version}")
-        incoming.pop("version", None)
+            raise ValueError(f"Invalid 'model_version' value: {incoming.get('model_version')!r}")
+        if incoming_model_version != self._model_version:
+            raise ValueError(f"Version mismatch: expected {self._model_version}, got {incoming_model_version}")
+        incoming.pop("model_version", None)
 
         # Update the model
         merged = {**old}

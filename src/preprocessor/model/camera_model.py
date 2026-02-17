@@ -3,7 +3,7 @@ from typing import Optional, Any, cast, ClassVar
 
 from PySide6.QtCore import QObject, Signal
 from cv2.typing import Point2f
-from pydantic import BaseModel, field_validator, ValidationError
+from pydantic import BaseModel, field_validator, ValidationError, Field
 
 from preprocessor.model.qmodel import QModel
 
@@ -21,7 +21,7 @@ class CameraData(BaseModel):
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
 
-    file: Path | None = None
+    file: Path | None = Field(default=None, exclude=True)
     """The file path of the camera calibration file, or None if not set. This is not serialized/deserialized."""
     name: str = ""
     """The name of the camera."""

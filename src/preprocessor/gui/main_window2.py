@@ -60,19 +60,19 @@ class MainWindow2(QMainWindow):
         # Disconnect previous project
         old_project = self._bound_project
         if old_project is not None:
-            old_project.on_file_path_changed.disconnect(self._handle_project_file_path_changed)
+            old_project.on_file_changed.disconnect(self._handle_project_file_changed)
             old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
             old_project.photos.on_changed.disconnect(self._handle_photos_changed)
 
         self._bound_project = project
         # Connect new project
         if project is not None:
-            project.on_file_path_changed.connect(self._handle_project_file_path_changed)
+            project.on_file_changed.connect(self._handle_project_file_changed)
             project.on_dirty_changed.connect(self._handle_dirty_changed)
             project.photos.on_changed.connect(self._handle_photos_changed)
 
-    def _handle_project_file_path_changed(self, _path: Path | None) -> None:
-        """Called when the project's file_path changes."""
+    def _handle_project_file_changed(self, _path: Path | None) -> None:
+        """Called when the project's file changes."""
         self._update_window_title()
 
     def _update_window_title(self) -> None:
@@ -82,7 +82,7 @@ class MainWindow2(QMainWindow):
         if proj is None:
             self.setWindowTitle(base_title)
             return
-        fp = proj.file_path
+        fp = proj.file
         if fp:
             name = Path(fp).name
         else:
@@ -172,7 +172,7 @@ class MainWindow2(QMainWindow):
             self._handle_close_project_action()
         new_project = ProjectModel()
         self.model.current_project = new_project
-        self.model.current_project.file_path = Path(path)
+        self.model.current_project.file = Path(path)
         self._bind_project_signals(new_project)
         try:
             new_project.load_from_file(path)
@@ -190,10 +190,10 @@ class MainWindow2(QMainWindow):
     def _handle_save_project_action(self) -> None:
         if self.model.current_project is None:
             return
-        if self.model.current_project.file_path is None:
+        if self.model.current_project.file is None:
             self._handle_save_project_as_action()
             return
-        self.model.current_project.save_to_file(self.model.current_project.file_path)
+        self.model.current_project.save_to_file(self.model.current_project.file)
 
     def _handle_save_project_as_action(self) -> None:
         if self.model.current_project is None:
@@ -202,7 +202,7 @@ class MainWindow2(QMainWindow):
         if not path:
             return
         self.model.current_project.save_to_file(path)
-        self.model.current_project.file_path = Path(path)
+        self.model.current_project.file = Path(path)
 
     def _handle_close_project_action(self) -> None:
         if self.model.current_project is not None and self.model.current_project.dirty:
