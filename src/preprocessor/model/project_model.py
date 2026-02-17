@@ -58,14 +58,10 @@ class ProjectModel(QModel[ProjectData]):
         self._connected_cameras: Set[CameraModel] = set()
 
         # wire photos list changes to mark dirty and (re)wire photo handlers
-        self._photos.on_changed.connect(self._handle_photos_changed)
-        self._cameras.on_changed.connect(self._handle_cameras_changed)
+        self._photos.bind_to_model(self, "photos", self._handle_child_changed)
+        self._cameras.bind_to_model(self, "cameras", self._handle_child_changed)
 
-        # wire any existing photos without generating a photos-changed event / dirty mark
-        for photo in list(self.photos):
-            photo.on_changed.connect(self._handle_photo_changed)
-            self._connected_photos.add(photo)
-
+        self._populate_lists_from_data()
 
     @property
     def file(self) -> Path | None:
@@ -124,56 +120,71 @@ class ProjectModel(QModel[ProjectData]):
         return self._cameras
 
     # ----- sync helpers -----
+    # def _populate_lists_from_data(self) -> None:
+    #     """
+    #     Populate the QListModels from the current self._data (ProjectData).
+    #     Called at init and after deserialize().
+    #     """
+    #     # populate photos
+    #     for item in list(self._photos):
+    #         self._photos.remove(item)
+    #     if self._data.photos:
+    #         for pdata in self._data.photos:
+    #             pm = PhotoModel(data=pdata)
+    #             self._photos.append(pm)
+    #
+    #     # populate cameras
+    #     for item in list(self._cameras):
+    #         self._cameras.remove(item)
+    #     if self._data.cameras:
+    #         for cdata in self._data.cameras:
+    #             cm = CameraModel(data=cdata)
+    #             self._cameras.append(cm)
+
     def _populate_lists_from_data(self) -> None:
         """
         Populate the QListModels from the current self._data (ProjectData).
-        Called at init and after deserialize().
+        Uses the QListModel helper to reduce boilerplate.
         """
-        # populate photos
-        for item in list(self._photos):
-            self._photos.remove(item)
-        if self._data.photos:
-            for pdata in self._data.photos:
-                pm = PhotoModel(data=pdata)
-                self._photos.append(pm)
+        self._photos.populate_from_data(self._data.photos, PhotoModel)
+        self._cameras.populate_from_data(self._data.cameras, CameraModel)
 
-        # populate cameras
-        for item in list(self._cameras):
-            self._cameras.remove(item)
-        if self._data.cameras:
-            for cdata in self._data.cameras:
-                cm = CameraModel(data=cdata)
-                self._cameras.append(cm)
-
-    # internal handlers for wiring child signals
-    def _handle_photos_changed(self, added: Iterable[PhotoModel], removed: Iterable[PhotoModel]) -> None:
-        """
-        Called when the photos QListModel changes.
-        Marks project dirty and (re)wires per-photo on_changed handlers.
-        """
-        # any modification to the list counts as a dirty change
+    def _handle_child_changed(self) -> None:
+        """Called when any child model reports a change."""
         self.mark_dirty()
-
-        added_set = set(added)
-        removed_set = set(removed)
-
-        # connect to newly added photos
-        for photo in (added_set - self._connected_photos):
-            photo.on_changed.connect(self._handle_photo_changed)
-            self._connected_photos.add(photo)
-        # disconnect and forget removed photos
-        for photo in (self._connected_photos & removed_set):
-            try:
-                photo.on_changed.disconnect(self._handle_photo_changed)
-            except Exception:
-                # ignore if already disconnected
-                pass
-            self._connected_photos.remove(photo)
-
-    def _handle_photo_changed(self) -> None:
-        """Called when any child PhotoModel reports a change."""
-        self.mark_dirty()
-        self.on_changed.emit()
+        try:
+            self.on_changed.emit()
+        except Exception:
+            pass
+    # # internal handlers for wiring child signals
+    # def _handle_photos_changed(self, added: Iterable[PhotoModel], removed: Iterable[PhotoModel]) -> None:
+    #     """
+    #     Called when the photos QListModel changes.
+    #     Marks project dirty and (re)wires per-photo on_changed handlers.
+    #     """
+    #     # any modification to the list counts as a dirty change
+    #     self.mark_dirty()
+    #
+    #     added_set = set(added)
+    #     removed_set = set(removed)
+    #
+    #     # connect to newly added photos
+    #     for photo in (added_set - self._connected_photos):
+    #         photo.on_changed.connect(self._handle_photo_changed)
+    #         self._connected_photos.add(photo)
+    #     # disconnect and forget removed photos
+    #     for photo in (self._connected_photos & removed_set):
+    #         try:
+    #             photo.on_changed.disconnect(self._handle_photo_changed)
+    #         except Exception:
+    #             # ignore if already disconnected
+    #             pass
+    #         self._connected_photos.remove(photo)
+    #
+    # def _handle_photo_changed(self) -> None:
+    #     """Called when any child PhotoModel reports a change."""
+    #     self.mark_dirty()
+    #     self.on_changed.emit()
 
     def save_to_file(self, path: Union[str, Path]) -> None:
         """

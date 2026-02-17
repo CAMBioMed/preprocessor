@@ -1,6 +1,9 @@
 from typing import TypeVar, Generic, Sequence, Iterable, MutableSequence, Optional, cast, overload, List, Iterator, \
-    SupportsIndex
+    SupportsIndex, Type, Callable
 from PySide6.QtCore import QObject, Signal
+from pydantic import BaseModel
+
+from preprocessor.model.qmodel import QModel
 
 E = TypeVar("E", bound=QObject)
 
@@ -106,3 +109,76 @@ class QListModel(QObject, Generic[E]):
 
     def index(self, value: E) -> int:
         return self._items.index(value)
+
+    def populate_from_data(self,
+                           data_list: Iterable[BaseModel | dict] | None,
+                           model_cls: Type[QModel]) -> None:
+        """
+        Replace the contents of this QListModel with `model_cls(data=...)` instances
+        created from each element in `data_list` (which may be pydantic models or dicts).
+        Uses slice assignment to produce a single on_changed emission.
+        """
+        if not data_list:
+            # empty or None -> clear list
+            self[:] = []
+            return
+
+        items: List[E] = []
+        for d in data_list:
+            # model_cls is expected to be a QModel subclass (returns a QObject)
+            obj = model_cls(model_cls, data=d)  # type: ignore[arg-type]
+            # type: ignore for runtime: obj is a QObject/QModel instance and is E-compatible
+            items.append(cast(E, obj))
+        self[:] = items
+
+    def to_serializable_list(self) -> list[dict]:
+        """
+        Return a JSON-friendly list for serialization. Each child is expected
+        to implement `serialize()` (QModel does); fall back to `_data.model_dump()`.
+        """
+        out: list[dict] = []
+        for it in self._items:
+            if hasattr(it, "serialize"):
+                out.append(it.serialize())  # type: ignore[arg-type]
+            else:
+                # fallback to raw pydantic dump
+                try:
+                    out.append(it._data.model_dump())  # type: ignore[attr-defined]
+                except Exception:
+                    out.append({})
+        return out
+
+    def bind_to_model(self,
+                      owner: QModel,
+                      field_name: str,
+                      child_changed_callback: Callable[..., None] | None = None) -> None:
+        """
+        Bind this QListModel to a parent `owner` (a QModel instance) and a pydantic
+        `field_name`. Whenever the list changes this will:
+          - connect `child.on_changed` -> `child_changed_callback` for added children
+          - disconnect for removed children
+          - call `owner._set_field(field_name, payload)` where payload is a list of
+            plain dicts (or None if empty)
+
+        Note: `owner._set_field` is used to validate and update the owner's pydantic model.
+        """
+        def _handler(added: list[E], removed: list[E]) -> None:
+            # wire/unwire child change handlers
+            if child_changed_callback is not None:
+                for a in added:
+                    try:
+                        a.on_changed.connect(child_changed_callback)  # type: ignore[attr-defined]
+                    except Exception:
+                        pass
+                for r in removed:
+                    try:
+                        r.on_changed.disconnect(child_changed_callback)  # type: ignore[attr-defined]
+                    except Exception:
+                        pass
+
+            payload = [getattr(item, "_data").model_dump() for item in self._items] if len(self._items) > 0 else None
+            # validate & update owner model (marks owner dirty if changed)
+            owner._set_field(field_name, payload)
+
+        # connect handler
+        self.on_changed.connect(_handler)
