@@ -52,8 +52,15 @@ run-gui:                            ## Run the GUI interface
 ### =============================================================================
 ##@ Development
 ### =============================================================================
+.PHONY: build-ui
+build-ui:                           ## Build the UI files
+	echo "${INFO} Building UI files..."
+	uv run pyside6-project build
+	echo "${OK} Built UI files"
+
+
 .PHONY: build
-build: check                        ## Build the project
+build: build-ui check               ## Build the project
 	echo "${INFO} Building..."
 	uv build
 	echo "${OK} Built"

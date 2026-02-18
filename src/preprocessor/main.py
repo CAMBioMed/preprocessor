@@ -7,7 +7,7 @@ import signal
 import click
 import PySide6
 
-from preprocessor.gui.main_window2 import MainWindow2
+from preprocessor.gui.main_window import MainWindow
 from ._version import __version__  # type: ignore
 from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
@@ -51,7 +51,7 @@ def gui() -> None:
         app = QApplication(sys.argv)
         app.setApplicationName("CAMBioMed Preprocessor")
         app.setApplicationVersion(__version__)
-        window = MainWindow2()
+        window = MainWindow()
         window.show()
         _setup_sigint_handler()
         exit_code = app.exec()

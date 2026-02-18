@@ -23,7 +23,7 @@
      <height>24</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_File">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>
     </property>
@@ -37,13 +37,13 @@
     <addaction name="separator"/>
     <addaction name="menuFile_Exit"/>
    </widget>
-   <widget class="QMenu" name="menu_Help">
+   <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>&amp;Help</string>
     </property>
     <addaction name="menuHelp_About"/>
    </widget>
-   <widget class="QMenu" name="menu_View">
+   <widget class="QMenu" name="menuView">
     <property name="title">
      <string>&amp;View</string>
     </property>
@@ -52,9 +52,16 @@
     <addaction name="menuView_ShowColorCorrected"/>
     <addaction name="menuView_ShowPerspectiveCorrected"/>
    </widget>
-   <addaction name="menu_File"/>
-   <addaction name="menu_View"/>
-   <addaction name="menu_Help"/>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="menuEdit_DetectQuadrat"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -69,6 +76,7 @@
    </attribute>
    <addaction name="menuFile_OpenProject"/>
    <addaction name="separator"/>
+   <addaction name="menuEdit_DetectQuadrat"/>
    <addaction name="menuView_ShowOriginal"/>
    <addaction name="menuView_ShowLensCorrected"/>
    <addaction name="menuView_ShowColorCorrected"/>
@@ -186,6 +194,11 @@
   <action name="menuFile_ExportAll">
    <property name="text">
     <string>E&amp;xport All...</string>
+   </property>
+  </action>
+  <action name="menuEdit_DetectQuadrat">
+   <property name="text">
+    <string>Detect &amp;quadrat</string>
    </property>
   </action>
  </widget>

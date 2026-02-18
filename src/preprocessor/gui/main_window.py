@@ -15,7 +15,7 @@ from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
 
 
-class MainWindow2(QMainWindow):
+class MainWindow(QMainWindow):
     ui: Ui_Main
     model: ApplicationModel
 
@@ -143,6 +143,9 @@ class MainWindow2(QMainWindow):
         self.ui.menuFile_ExportAll.triggered.connect(self._handle_export_all_action)
         self.ui.menuFile_Exit.triggered.connect(self.close)
 
+        # Edit menu
+        self.ui.menuEdit_DetectQuadrat.triggered.connect(self._handle_detect_quadrat_action)
+
         # Help menu
         self.ui.menuHelp_About.triggered.connect(self._handle_help_about_action)
 
@@ -223,6 +226,13 @@ class MainWindow2(QMainWindow):
         dialog = ExportDialog(self.model.current_project, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             pass
+
+    def _handle_detect_quadrat_action(self) -> None:
+        if self.model.current_project is None:
+            return
+        #if self.model.cu
+        # TODO: Detect quadrat
+        pass
 
     def _handle_help_about_action(self) -> None:
         show_about_dialog(self)
