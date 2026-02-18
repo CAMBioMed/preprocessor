@@ -13,6 +13,9 @@ from preprocessor.gui.utils import icon_from_resource
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
+from preprocessor.processing.detect_quadrat import detect_quadrat
+from preprocessor.processing.load_image import load_image
+from preprocessor.processing.params import QuadratDetectionParams, defaultParams
 
 
 class MainWindow(QMainWindow):
@@ -226,10 +229,29 @@ class MainWindow(QMainWindow):
             pass
 
     def _handle_detect_quadrat_action(self) -> None:
-        if self.model.current_project is None:
+        if self.model.current_project is None or self.model.current_photo is None:
             return
         # TODO: Detect quadrat
-        pass
+
+        img = load_image(str(self.model.current_photo.original_filename))
+        if img is None:
+            QMessageBox.critical(
+                self,
+                "Load Image Failed",
+                f"Failed to load image:\n{self.model.current_photo.original_filename}",
+            )
+            return
+
+        params = defaultParams
+
+        result = detect_quadrat(img, params)
+        if result.corners is None:
+            # No corners detected
+            return
+
+        self.model.current_photo.quadrat_corners = result.corners
+        # Trigger updating the opened editor
+        self._handle_current_photo_changed(self.model.current_photo)
 
     def _handle_help_about_action(self) -> None:
         show_about_dialog(self)
@@ -263,7 +285,7 @@ class MainWindow(QMainWindow):
 
     def _handle_photo_selection_changed(self, selected: list[PhotoModel]) -> None:
         """Handle when the selected photo changes."""
-        # TODO: Support multiple selection
+        # TODO: Support multiple selection?
         self.model.current_photo = selected[0] if selected else None
 
     def _handle_current_project_changed(self, project: ProjectModel | None) -> None:
