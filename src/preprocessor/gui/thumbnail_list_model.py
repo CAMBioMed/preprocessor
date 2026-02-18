@@ -1,4 +1,5 @@
-from typing import Sequence, Optional, Any
+from typing import Any
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from PySide6.QtCore import Signal, QObject
@@ -7,13 +8,13 @@ from PySide6.QtCore import Signal, QObject
 @dataclass
 class ThumbnailItem:
     path: str
-    result: Optional[Any] = None  # QuadratDetectionResult | None (use Any to avoid tight coupling)
+    result: Any | None = None  # QuadratDetectionResult | None (use Any to avoid tight coupling)
 
 
 class ThumbnailListModel(QObject):
     on_changed: Signal = Signal()
 
-    _items: list[ThumbnailItem] = []
+    _items: list[ThumbnailItem]
     on_image_paths_changed: Signal = Signal()
 
     @property
@@ -37,17 +38,17 @@ class ThumbnailListModel(QObject):
         self.on_image_paths_changed.emit()
         self.on_changed.emit()
 
-    def __init__(self, image_paths: Sequence[str] | None = None, parent: QObject | None = None):
+    def __init__(self, image_paths: Sequence[str] | None = None, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._items = [ThumbnailItem(path=p, result=None) for p in (image_paths or [])]
 
-    def get_result_for_path(self, path: str) -> Optional[Any]:
+    def get_result_for_path(self, path: str) -> Any | None:  # noqa: ANN401
         for item in self._items:
             if item.path == path:
                 return item.result
         return None
 
-    def set_result_for_path(self, path: str, result: Any) -> None:
+    def set_result_for_path(self, path: str, result: Any) -> None:  # noqa: ANN401
         for item in self._items:
             if item.path == path:
                 item.result = result

@@ -62,7 +62,6 @@ class ApplicationModel(QObject):
     def main_window_state(self, state: QByteArray) -> None:
         self._main_window_state = state
 
-
     def write_settings(self) -> None:
         """Write window settings to persistent storage."""
         self.settings.setValue("geometry", self._main_window_geometry)

@@ -1,8 +1,8 @@
-from pathlib import Path
 import math
 
 from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
-from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen, QEnterEvent, QPainterPath, QPolygonF, QColor
+from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
+from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
 from PySide6.QtWidgets import QWidget
 
 from preprocessor.model.photo_model import PhotoModel
@@ -60,8 +60,8 @@ class PhotoEditorWidget(QWidget):
         if self._pixmap is None or self._pixmap.width() == 0 or self._pixmap.height() == 0:
             return 1.0, QPoint(0, 0), QSize(self.width(), self.height())
         ratio = min(self.width() / self._pixmap.width(), self.height() / self._pixmap.height())
-        scaled_w = int(round(self._pixmap.width() * ratio))
-        scaled_h = int(round(self._pixmap.height() * ratio))
+        scaled_w = round(self._pixmap.width() * ratio)
+        scaled_h = round(self._pixmap.height() * ratio)
         # keep top-left at (0,0) (same behavior as the painter)
         offset = QPoint(0, 0)
         return ratio, offset, QSize(scaled_w, scaled_h)
@@ -69,7 +69,7 @@ class PhotoEditorWidget(QWidget):
     def _image_to_widget_point(self, x: float, y: float) -> QPoint:
         """Map a point from image (model) coordinates to widget coordinates."""
         ratio, offset, _ = self._current_pixmap_info()
-        return QPoint(int(round(x * ratio + offset.x())), int(round(y * ratio + offset.y())))
+        return QPoint(round(x * ratio + offset.x()), round(y * ratio + offset.y()))
 
     def _widget_to_image_point(self, pt: QPoint) -> tuple[float, float]:
         """Map a QPoint in widget coordinates back to image (model) coordinates."""
@@ -112,7 +112,7 @@ class PhotoEditorWidget(QWidget):
 
         # Draw the photo pixmap, scaled to fit the widget
         if self._pixmap is not None:
-            ratio, offset, size = self._current_pixmap_info()
+            _ratio, offset, size = self._current_pixmap_info()
             scaled_pixmap = self._pixmap.scaled(size, Qt.AspectRatioMode.KeepAspectRatio)
             pixmap_rect = QRect(offset, size)
             painter.drawPixmap(pixmap_rect, scaled_pixmap)
@@ -135,13 +135,13 @@ class PhotoEditorWidget(QWidget):
         # Draw the quadrat outline (if any) on top of the shading
         if qcorners is not None and len(qcorners) >= 2:
             painter.setPen(QPen(Qt.GlobalColor.green, 2, Qt.PenStyle.SolidLine))
-            for a, b in zip(qcorners, qcorners[1:] + [qcorners[0]]):
+            for a, b in zip(qcorners, [*qcorners[1:], qcorners[0]], strict=False):
                 painter.drawLine(a, b)
 
         # Draw handles for each corner (so they are visible and draggable)
         pts = qcorners or []
         if pts:
-            for i, p in enumerate(pts):
+            for _i, p in enumerate(pts):
                 # outer border
                 painter.setPen(QPen(Qt.GlobalColor.white, 2))
                 painter.setBrush(Qt.BrushStyle.NoBrush)
@@ -154,12 +154,14 @@ class PhotoEditorWidget(QWidget):
 
         # Draw a crosshair centered at the mouse position (drawn last so it's visible)
         if self._mouse_position is not None:
+            # fmt: off
             length = 10                             # Arm length, in pixels
             gap = 5                                 # Gap size, in pixels
             width = 2                               # Line width, in pixels
             border = 1                              # Border width, in pixels
             border_color = Qt.GlobalColor.white     # Border color
             line_color = Qt.GlobalColor.red         # Line color
+            # fmt: on
             x = self._mouse_position.x()
             y = self._mouse_position.y()
 
@@ -265,7 +267,7 @@ class PhotoEditorWidget(QWidget):
             self._edit_points = None
         self.unsetCursor()
         self._mouse_position = None
-        self._drag_index = None     # Stop dragging (if any)
+        self._drag_index = None  # Stop dragging (if any)
         self.update()
         super().leaveEvent(event)
 

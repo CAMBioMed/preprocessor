@@ -1,11 +1,10 @@
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon, QPixmap
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QListWidget, QListWidgetItem, QDialog
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QDialog
 from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.export_dialog import ExportDialog
-from preprocessor.gui.image_editor import QImageEditor
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
@@ -60,19 +59,19 @@ class MainWindow2(QMainWindow):
         # Disconnect previous project
         old_project = self._bound_project
         if old_project is not None:
-            old_project.on_file_path_changed.disconnect(self._handle_project_file_path_changed)
+            old_project.on_file_changed.disconnect(self._handle_project_file_changed)
             old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
             old_project.photos.on_changed.disconnect(self._handle_photos_changed)
 
         self._bound_project = project
         # Connect new project
         if project is not None:
-            project.on_file_path_changed.connect(self._handle_project_file_path_changed)
+            project.on_file_changed.connect(self._handle_project_file_changed)
             project.on_dirty_changed.connect(self._handle_dirty_changed)
             project.photos.on_changed.connect(self._handle_photos_changed)
 
-    def _handle_project_file_path_changed(self, _path: Path | None) -> None:
-        """Called when the project's file_path changes."""
+    def _handle_project_file_changed(self, _path: Path | None) -> None:
+        """Handle when the project's file changes."""
         self._update_window_title()
 
     def _update_window_title(self) -> None:
@@ -82,11 +81,8 @@ class MainWindow2(QMainWindow):
         if proj is None:
             self.setWindowTitle(base_title)
             return
-        fp = proj.file_path
-        if fp:
-            name = Path(fp).name
-        else:
-            name = "Untitled Project"
+        fp = proj.file
+        name = Path(fp).name if fp else "Untitled Project"
         photo_count = len(proj.photos)
         dirty_marker = "*" if proj.dirty else ""
         self.setWindowTitle(f"{base_title} — {name} ({photo_count} photos){dirty_marker}")
@@ -172,7 +168,7 @@ class MainWindow2(QMainWindow):
             self._handle_close_project_action()
         new_project = ProjectModel()
         self.model.current_project = new_project
-        self.model.current_project.file_path = Path(path)
+        self.model.current_project.file = Path(path)
         self._bind_project_signals(new_project)
         try:
             new_project.load_from_file(path)
@@ -190,10 +186,10 @@ class MainWindow2(QMainWindow):
     def _handle_save_project_action(self) -> None:
         if self.model.current_project is None:
             return
-        if self.model.current_project.file_path is None:
+        if self.model.current_project.file is None:
             self._handle_save_project_as_action()
             return
-        self.model.current_project.save_to_file(self.model.current_project.file_path)
+        self.model.current_project.save_to_file(self.model.current_project.file)
 
     def _handle_save_project_as_action(self) -> None:
         if self.model.current_project is None:
@@ -202,7 +198,7 @@ class MainWindow2(QMainWindow):
         if not path:
             return
         self.model.current_project.save_to_file(path)
-        self.model.current_project.file_path = Path(path)
+        self.model.current_project.file = Path(path)
 
     def _handle_close_project_action(self) -> None:
         if self.model.current_project is not None and self.model.current_project.dirty:
@@ -248,18 +244,18 @@ class MainWindow2(QMainWindow):
             self.model.current_project.photos.remove(photo)
 
     def _handle_dirty_changed(self) -> None:
-        """Called when the current project's dirty state changes."""
+        """Handle when the current project's dirty state changes."""
         self._update_window_title()
 
-    def _handle_photos_changed(self, added: list[PhotoModel], removed: list[PhotoModel]) -> None:
-        """Called when the current project's photos change."""
+    def _handle_photos_changed(self) -> None:
+        """Handle when the current project's photos change."""
         if self.model.current_project is None:
             return
         self._update_window_title()
         self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
 
     def _handle_photo_selection_changed(self, selected: list[PhotoModel]) -> None:
-        """Called when the selected photo changes."""
+        """Handle when the selected photo changes."""
         if not selected:
             self.central_widget.show_photo(None)
             return

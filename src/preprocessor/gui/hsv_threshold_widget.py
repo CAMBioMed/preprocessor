@@ -7,7 +7,7 @@ from preprocessor.gui.ui_hsv_threshold import Ui_HSVThreshold
 
 
 class HSVThresholdWidget(QWidget):
-    def __init__(self, parent: QWidget | None=None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
 
         self.ui = Ui_HSVThreshold()

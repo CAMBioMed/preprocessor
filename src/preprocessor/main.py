@@ -12,7 +12,8 @@ from ._version import __version__  # type: ignore
 from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (
-    QApplication, QMessageBox,
+    QApplication,
+    QMessageBox,
 )
 
 import logging
@@ -73,12 +74,12 @@ def main() -> None:
 def main_gui() -> None:
     gui()
 
-def _excepthook(cls: type[BaseException], exception: BaseException, traceback_obj: TracebackType | None) -> None:
-    """Handle uncaught exceptions including Qt errors"""
 
+def _excepthook(cls: type[BaseException], exception: BaseException, traceback_obj: TracebackType | None) -> None:
+    """Handle uncaught exceptions including Qt errors."""
     # Build the error message string
     error_msg = f"{cls.__name__}: {exception}\n\n"
-    error_msg += ''.join(traceback.format_tb(traceback_obj))
+    error_msg += "".join(traceback.format_tb(traceback_obj))
 
     logger = logging.getLogger("preprocessor")
     logger.exception("Fatal error: %s", error_msg)
@@ -105,7 +106,9 @@ def sigint_handler(*_args: Any) -> None:
     sys.stderr.write("\r")
     QApplication.quit()
 
+
 signal_timer: QTimer
+
 
 def _setup_sigint_handler(interval: int = 200) -> None:
     """Process any pending SIGINT signals."""
@@ -119,6 +122,7 @@ def _setup_sigint_handler(interval: int = 200) -> None:
     signal_timer = QTimer()
     signal_timer.start(interval)
     signal_timer.timeout.connect(lambda: None)  # Let the interpreter run each time.
+
 
 if __name__ == "__main__":
     main()

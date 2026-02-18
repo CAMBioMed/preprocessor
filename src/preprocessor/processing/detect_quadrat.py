@@ -67,7 +67,6 @@ def detect_quadrat(
     if params.find_contour.enabled:
         debug_img = _find_contours(img, debug_img, params.find_contour)
 
-
     return QuadratDetectionResult(original_img, img, original_img, debug_img, scale, corners)
 
 

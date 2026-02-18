@@ -1,197 +1,172 @@
-from PySide6.QtCore import QObject, Signal
+from pathlib import Path
+from typing import Any, cast
+
+from PySide6.QtCore import Signal
 from cv2.typing import Point2f
+from pydantic import BaseModel, field_validator
+
+from preprocessor.model.camera_model import CameraMatrix
+from preprocessor.model.qmodel import QModel
 
 
-class PhotoModel(QObject):
-    """
-    The model for a single photo in the project.
+class PhotoData(BaseModel):
+    """The data for a single photo in the project, used for serialization."""
 
-    This includes photo-specific settings.
-    """
+    original_filename: Path | None = None
+    """The original path to the photo file, if set."""
+    quadrat_corners: list[Point2f] = []
+    """The corners of the quadrat in the photo, if set."""
+    red_shift: tuple[float, float] | None = None
+    """The red channel shift in (x, y) directions to correct chromatic aberration."""
+    blue_shift: tuple[float, float] | None = None
+    """The blue channel shift in (x, y) directions to correct chromatic aberration."""
+    camera_matrix: CameraMatrix | None = None
+    """3x3 camera matrix or None."""
+    distortion_coefficients: tuple[Point2f, ...] | None = None
+    """Sequence of distortion coefficients as Point2f or None."""
 
-    on_changed: Signal = Signal()
+    @classmethod
+    @field_validator("original_filename", mode="before")
+    def _validate_original_filename(cls: type["PhotoData"], v: Any) -> Path | None:  # noqa: ANN401
+        if v is None:
+            return None
+        if isinstance(v, Path):
+            return v
+        # Coerce strings; raise helpful error for other types
+        try:
+            s = str(v)
+        except Exception as exc:
+            msg = "original_filename must be a path-like string or None"
+            raise ValueError(msg) from exc
+        s = s.strip()
+        return Path(s) if s != "" else None
 
-    def __init__(self) -> None:
-        super().__init__()
+    @classmethod
+    @field_validator("quadrat_corners", mode="before")
+    def _validate_quadrat_corners(cls: type["PhotoData"], v: Any) -> list[Point2f]:  # noqa: ANN401
+        if v is None:
+            return []
+        try:
+            corners = [(float(pt[0]), float(pt[1])) for pt in v]
+        except Exception as exc:
+            msg = "quadrat_corners must be an iterable of up to 4 [x,y] pairs or None"
+            raise ValueError(msg) from exc
+        if len(corners) >= 4:
+            msg = "quadrat_corners must contain up to 4 points"
+            raise ValueError(msg)
+        return corners
 
-    _original_filename: str = ""
+    @classmethod
+    @field_validator("red_shift", mode="before")
+    def _validate_red_shift(cls: type["PhotoData"], v: Any) -> tuple[float, float] | None:  # noqa: ANN401
+        if v is None:
+            return None
+        try:
+            return float(v[0]), float(v[1])
+        except Exception as exc:
+            msg = "red_shift must be a pair of numbers or None"
+            raise ValueError(msg) from exc
+
+    @classmethod
+    @field_validator("blue_shift", mode="before")
+    def _validate_blue_shift(cls: type["PhotoData"], v: Any) -> tuple[float, float] | None:  # noqa: ANN401
+        if v is None:
+            return None
+        try:
+            return float(v[0]), float(v[1])
+        except Exception as exc:
+            msg = "blue_shift must be a pair of numbers or None"
+            raise ValueError(msg) from exc
+
+    @classmethod
+    @field_validator("camera_matrix", mode="before")
+    def _validate_camera_matrix(cls: type["PhotoData"], v: Any) -> CameraMatrix | None:  # noqa: ANN401
+        if v is None:
+            return None
+        try:
+            rows = [tuple(float(x) for x in row) for row in v]
+        except Exception as exc:
+            msg = "camera_matrix must be a 3x3 numeric structure or None"
+            raise ValueError(msg) from exc
+        if len(rows) != 3 or any(len(r) != 3 for r in rows):
+            msg = "camera_matrix must be a 3x3 numeric structure"
+            raise ValueError(msg)
+        return cast(CameraMatrix, (rows[0], rows[1], rows[2]))
+
+    @classmethod
+    @field_validator("distortion_coefficients", mode="before")
+    def _validate_distortion(cls: type["PhotoData"], v: Any) -> tuple[Point2f, ...] | None:  # noqa: ANN401
+        if v is None:
+            return None
+        try:
+            pts = tuple((float(p[0]), float(p[1])) for p in v)
+        except Exception as exc:
+            msg = "distortion_coefficients must be a sequence of [x,y] pairs or None"
+            raise ValueError(msg) from exc
+        return pts
+
+
+class PhotoModel(QModel[PhotoData]):
     on_original_filename_changed: Signal = Signal()
+    on_quadrat_corners_changed: Signal = Signal()
+    on_red_shift_changed: Signal = Signal()
+    on_blue_shift_changed: Signal = Signal()
+    on_camera_matrix_changed: Signal = Signal()
+    on_distortion_coefficients_changed: Signal = Signal()
+
+    def __init__(self, data: PhotoData | dict[str, Any] | None = None) -> None:
+        super().__init__(model_cls=PhotoData, data=data)
 
     @property
-    def original_filename(self) -> str:
+    def original_filename(self) -> Path | None:
         """The original filename of the photo."""
-        return self._original_filename
+        return self._data.original_filename
 
     @original_filename.setter
     def original_filename(self, value: str) -> None:
-        if self._original_filename != value:
-            self._original_filename = value
-            self.on_original_filename_changed.emit()
-            self.on_changed.emit()
-
-    _quadrat_corners: tuple[Point2f, Point2f, Point2f, Point2f] | None = None
-    on_quadrat_corners_changed: Signal = Signal()
+        self._set_field("original_filename", value)
 
     @property
-    def quadrat_corners(self) -> tuple[Point2f, Point2f, Point2f, Point2f] | None:
+    def quadrat_corners(self) -> list[Point2f] | None:
         """The corners of the quadrat in the photo, if set."""
-        return self._quadrat_corners
+        return self._data.quadrat_corners
 
     @quadrat_corners.setter
-    def quadrat_corners(self, value: tuple[Point2f, Point2f, Point2f, Point2f] | None) -> None:
-        if self._quadrat_corners != value:
-            self._quadrat_corners = value
-            self.on_quadrat_corners_changed.emit()
-            self.on_changed.emit()
-
-    _red_shift: tuple[float, float] | None = None
-    on_red_shift_changed: Signal = Signal()
+    def quadrat_corners(self, value: list[Point2f] | None) -> None:
+        self._set_field("quadrat_corners", value)
 
     @property
     def red_shift(self) -> tuple[float, float] | None:
         """The red channel shift in (x, y) directions to correct chromatic aberration."""
-        return self._red_shift
+        return self._data.red_shift
 
     @red_shift.setter
     def red_shift(self, value: tuple[float, float] | None) -> None:
-        if self._red_shift != value:
-            self._red_shift = value
-            self.on_red_shift_changed.emit()
-            self.on_changed.emit()
-
-    _blue_shift: tuple[float, float] | None = None
-    on_blue_shift_changed: Signal = Signal()
+        self._set_field("red_shift", value)
 
     @property
     def blue_shift(self) -> tuple[float, float] | None:
         """The blue channel shift in (x, y) directions to correct chromatic aberration."""
-        return self._blue_shift
+        return self._data.blue_shift
 
     @blue_shift.setter
     def blue_shift(self, value: tuple[float, float] | None) -> None:
-        if self._blue_shift != value:
-            self._blue_shift = value
-            self.on_blue_shift_changed.emit()
-            self.on_changed.emit()
-
-    _camera_matrix: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None = None
-    on_camera_matrix_changed: Signal = Signal()
+        self._set_field("blue_shift", value)
 
     @property
-    def camera_matrix(self) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
+    def camera_matrix(self) -> CameraMatrix | None:
         """3x3 camera matrix or None."""
-        return self._camera_matrix
+        return self._data.camera_matrix
 
     @camera_matrix.setter
-    def camera_matrix(self, value: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None) -> None:
-        if self._camera_matrix != value:
-            self._camera_matrix = value
-            self.on_camera_matrix_changed.emit()
-            self.on_changed.emit()
-
-    _distortion_coefficients: tuple[Point2f, ...] | None = None
-    on_distortion_coefficients_changed: Signal = Signal()
+    def camera_matrix(self, value: CameraMatrix | None) -> None:
+        self._set_field("camera_matrix", value)
 
     @property
     def distortion_coefficients(self) -> tuple[Point2f, ...] | None:
         """Sequence of distortion coefficients as Point2f or None."""
-        return self._distortion_coefficients
+        return self._data.distortion_coefficients
 
     @distortion_coefficients.setter
     def distortion_coefficients(self, value: tuple[Point2f, ...] | None) -> None:
-        if self._distortion_coefficients != value:
-            self._distortion_coefficients = value
-            self.on_distortion_coefficients_changed.emit()
-            self.on_changed.emit()
-
-    def serialize(self) -> dict:
-        """
-        Serialize this PhotoModel into basic Python types suitable for JSON.
-        """
-        qc = [[float(x), float(y)] for (x, y) in self.quadrat_corners] if self.quadrat_corners is not None else None
-        rs = [float(self._red_shift[0]), float(self._red_shift[1])] if self._red_shift is not None else None
-        bs = [float(self._blue_shift[0]), float(self._blue_shift[1])] if self._blue_shift is not None else None
-        cm = [[float(v) for v in row] for row in self._camera_matrix] if self._camera_matrix is not None else None
-        dc = [[float(x), float(y)] for (x, y) in self._distortion_coefficients] if self._distortion_coefficients is not None else None
-        return {
-            "original_filename": self._original_filename,
-            "quadrat_corners": qc,
-            "red_shift": rs,
-            "blue_shift": bs,
-            "camera_matrix": cm,
-            "distortion_coefficients": dc,
-        }
-
-    def deserialize(self, data: dict) -> None:
-        """
-        Deserialize state from a dict produced by serialize.
-        Uses the setters so signals are emitted only on change.
-        If a key doesn't occur in the data, it is not set.
-        """
-        if "original_filename" in data:
-            of = data.get("original_filename", "")
-            if of is not None:
-                if not isinstance(of, str):
-                    raise ValueError("original_filename must be a string or None")
-                self.original_filename = of
-            else:
-                # treat None as clearing to empty string
-                self.original_filename = ""
-
-        if "quadrat_corners" in data:
-            qcs = data.get("quadrat_corners", None)
-            if qcs is not None:
-                # Expecting iterable of 4 [x, y] pairs
-                qc = tuple((float(pt[0]), float(pt[1])) for pt in qcs)  # type: ignore[arg-type]
-                if len(qc) != 4:
-                    raise ValueError("quadrat_corners must contain 4 points")
-                self.quadrat_corners = qc
-            else:
-                self.quadrat_corners = None
-
-        if "red_shift" in data:
-            r = data.get("red_shift", None)
-            if r is not None:
-                try:
-                    rs = (float(r[0]), float(r[1]))  # type: ignore[arg-type]
-                except Exception:
-                    raise ValueError("red_shift must be a pair of numbers or None")
-                self.red_shift = rs
-            else:
-                self.red_shift = None
-
-        if "blue_shift" in data:
-            b = data.get("blue_shift", None)
-            if b is not None:
-                try:
-                    bs = (float(b[0]), float(b[1]))  # type: ignore[arg-type]
-                except Exception:
-                    raise ValueError("blue_shift must be a pair of numbers or None")
-                self.blue_shift = bs
-            else:
-                self.blue_shift = None
-
-        if "camera_matrix" in data:
-            cm_raw = data.get("camera_matrix", None)
-            if cm_raw is not None:
-                try:
-                    cm_rows = [tuple(float(v) for v in row) for row in cm_raw]  # type: ignore[arg-type]
-                except Exception:
-                    raise ValueError("camera_matrix must be a 3x3 numeric structure or None")
-                if len(cm_rows) != 3 or any(len(r) != 3 for r in cm_rows):
-                    raise ValueError("camera_matrix must be 3x3")
-                self.camera_matrix = (cm_rows[0], cm_rows[1], cm_rows[2])  # type: ignore[arg-type]
-            else:
-                self.camera_matrix = None
-
-        if "distortion_coefficients" in data:
-            d_raw = data.get("distortion_coefficients", None)
-            if d_raw is not None:
-                try:
-                    dc = tuple((float(pt[0]), float(pt[1])) for pt in d_raw)  # type: ignore[arg-type]
-                except Exception:
-                    raise ValueError("distortion_coefficients must be a sequence of [x,y] pairs or None")
-                self.distortion_coefficients = dc
-            else:
-                self.distortion_coefficients = None
-
+        self._set_field("distortion_coefficients", value)
