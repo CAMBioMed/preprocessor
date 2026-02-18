@@ -1,6 +1,7 @@
 # See: https://gist.github.com/Virtlink/b713707ede3f74bee2d902cf18f8d110
 
-SHELL         := /usr/bin/bash
+SHELL         := /bin/bash
+#SHELL         := /usr/bin/bash
 .SHELLFLAGS   := -eu -o pipefail -c
 .DEFAULT_GOAL := help
 .ONESHELL:
