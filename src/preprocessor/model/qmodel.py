@@ -121,18 +121,17 @@ class QModel[M: BaseModel](QObject):
 
         Emits per-field and on_changed signals only if the validated model differs from the previous one.
         """
-        old = self._data.model_dump()
+        if field not in self._data.model_fields:
+            raise ValueError(f"{field!r} is not a valid field in this model's data")
 
-        merged = {**old, field: value}
-        try:
-            new_model = self._model_cls.model_validate(merged)  # type: ignore[arg-type]
-        except ValidationError as exc:
-            raise ValueError(str(exc)) from exc
+        # Get the previous model and a dict that includes all pydantic-declared fields
+        old_model = self._data
 
-        new = new_model.model_dump()
-        if new != old:
+        new_model = old_model.model_copy(update={field: value})
+
+        if new_model != old_model:
             self._data = new_model
-            if new.get(field) != old.get(field):
+            if getattr(new_model, field) != getattr(old_model, field):
                 self._emit_field_signal(field)
             self._set_dirty(True)
             with contextlib.suppress(Exception):

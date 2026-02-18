@@ -196,6 +196,7 @@ class ProjectModel(QModel[ProjectData]):
         data = self.serialize(is_root = True)
         with p.open("w", encoding="utf-8") as fh:
             json.dump(data, fh, indent=2)
+        self.file = Path(path)
         self.mark_clean()
 
     def load_from_file(self, path: str | Path) -> None:
@@ -209,4 +210,5 @@ class ProjectModel(QModel[ProjectData]):
         with p.open("r", encoding="utf-8") as fh:
             data = json.load(fh)
         self.deserialize(data, is_root = True)
+        self.file = Path(path)
         self.mark_clean()
