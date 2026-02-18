@@ -31,7 +31,6 @@
     <addaction name="menuFile_OpenProject"/>
     <addaction name="menuFile_SaveProject"/>
     <addaction name="menuFile_SaveProjectAs"/>
-    <addaction name="menuFile_CloseProject"/>
     <addaction name="separator"/>
     <addaction name="menuFile_ExportAll"/>
     <addaction name="separator"/>

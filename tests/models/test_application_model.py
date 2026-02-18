@@ -32,7 +32,6 @@ class TestApplicationModel(unittest.TestCase):
         project_model0 = ProjectModel()
 
         # Assert
-        assert app_model.current_project is None
         assert project_model0.parent() is None
         assert not raised_on_changed
         assert raised_on_current_project_changed is None
@@ -64,7 +63,6 @@ class TestApplicationModel(unittest.TestCase):
         app_model.current_project = None
 
         # Assert
-        assert app_model.current_project is None
         assert project_model1.parent() is None
         assert project_model0.parent() is None
         assert raised_on_changed

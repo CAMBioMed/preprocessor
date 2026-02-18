@@ -7,13 +7,15 @@ import signal
 import click
 import PySide6
 
+from preprocessor.gui.launch_dialog import LaunchDialog
 from preprocessor.gui.main_window import MainWindow
+from preprocessor.model.application_model import ApplicationModel
 from ._version import __version__  # type: ignore
 from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (
     QApplication,
-    QMessageBox,
+    QMessageBox, QWidget, QFileDialog, QDialog,
 )
 
 import logging
@@ -51,14 +53,29 @@ def gui() -> None:
         app = QApplication(sys.argv)
         app.setApplicationName("CAMBioMed Preprocessor")
         app.setApplicationVersion(__version__)
-        window = MainWindow()
-        window.show()
+
+        # Setup application model
+        model = ApplicationModel()
+        model.read_settings()
+
         _setup_sigint_handler()
-        exit_code = app.exec()
-        sys.exit(exit_code)
+
+        # Show launch dialog
+        if LaunchDialog(model).exec() == QDialog.DialogCode.Accepted:
+            window = MainWindow(model)
+            window.show()
+            exit_code = app.exec()
+            sys.exit(exit_code)
+        else:
+            sys.exit(1)
     except Exception as e:
         logging.getLogger("preprocessor").exception("Unhandled exception in main_gui: %s", e)
 
+
+def _show_main_window(model: ApplicationModel) -> None:
+    window = MainWindow(model)
+    window.show()
+    _setup_sigint_handler()
 
 def setup_logging() -> None:
     logging.basicConfig(level=logging.DEBUG)
