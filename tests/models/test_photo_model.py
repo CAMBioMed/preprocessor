@@ -49,10 +49,10 @@ class TestPhotoModel(unittest.TestCase):
         assert not raised_changed
 
         # Act: clear the value
-        photo.quadrat_corners = None
+        photo.quadrat_corners = []
 
         # Assert: property cleared and signals fired
-        assert photo.quadrat_corners is None
+        assert photo.quadrat_corners == []
         assert raised_quadrat_corners_changed
         assert raised_changed
 
@@ -97,10 +97,10 @@ class TestPhotoModel(unittest.TestCase):
         assert s == {
             "original_filename": "img_001.jpg",
             "quadrat_corners": [(0.1, 0.2), (1.1, 0.2), (1.1, 1.2), (0.1, 1.2)],
-            "red_shift": [0.3, -0.2],
-            "blue_shift": [0.0, 0.5],
+            "red_shift": (0.3, -0.2),
+            "blue_shift": (0.0, 0.5),
             "camera_matrix": ((1000.0, 0.0, 512.0), (0.0, 1000.0, 384.0), (0.0, 0.0, 1.0)),
-            "distortion_coefficients": [(0.01, -0.02), (0.0, 0.0)],
+            "distortion_coefficients": ((0.01, -0.02), (0.0, 0.0)),
         }
 
         # Arrange: Deserialize into a fresh model and verify signals and value
@@ -192,7 +192,7 @@ class TestPhotoModel(unittest.TestCase):
         new_photo.deserialize(
             {
                 "original_filename": None,
-                "quadrat_corners": None,
+                "quadrat_corners": [],
                 "red_shift": None,
                 "blue_shift": None,
                 "camera_matrix": None,
@@ -201,8 +201,8 @@ class TestPhotoModel(unittest.TestCase):
         )
 
         # Assert
-        assert new_photo.original_filename == ""
-        assert new_photo.quadrat_corners is None
+        assert new_photo.original_filename is None
+        assert new_photo.quadrat_corners == []
         assert new_photo.camera_matrix is None
         assert new_photo.distortion_coefficients is None
         assert raised_original

@@ -16,8 +16,10 @@ def _to_basic(obj: Any) -> Any:  # noqa: ANN401
         return obj
     if isinstance(obj, Path):
         return str(obj)
-    if isinstance(obj, (list, tuple)):
+    if isinstance(obj, list):
         return [_to_basic(x) for x in obj]
+    if isinstance(obj, tuple):
+        return tuple([_to_basic(x) for x in obj])
     if isinstance(obj, dict):
         return {k: _to_basic(v) for k, v in obj.items()}
     return str(obj)  # Fallback
@@ -50,17 +52,29 @@ class QModel[M: BaseModel](QObject):
         super().__init__()
         self._model_cls = model_cls
         self._model_version = int(getattr(model_cls, "SERIAL_VERSION", 1))
+        self._set_data(data)
+
+    def _set_data(self, data: M | dict[str, Any] | None) -> None:
         if data is None:
             # No initial data provided; create a default instance of the model
-            self._data = model_cls()  # type: ignore[assignment]
+            self._data = self._model_cls()  # type: ignore[assignment]
         elif isinstance(data, BaseModel):
             # Assume it's already validated and of the correct type; assign directly
             self._data = data  # type: ignore[assignment]
         else:
             # Let pydantic validate and parse
-            self._data = model_cls.model_validate(data)  # type: ignore[assignment]
+            self._data = self._model_cls.model_validate(data)  # type: ignore[assignment]
 
         self._dirty = False
+
+    def _populate_lists_from_data(self) -> None:
+        """
+        Populate any QListModel children from the current data.
+
+        This is called after deserialization to ensure that the interactive list models reflect the current data.
+        """
+        # This method is meant to be overridden by subclasses that have QListModel children.
+        pass
 
     @property
     def dirty(self) -> bool:
@@ -159,14 +173,15 @@ class QModel[M: BaseModel](QObject):
         merged = {**old}
         merged.update(incoming)
         try:
-            new_model = self._model_cls.model_validate(merged)  # type: ignore[arg-type]
+            new_data = self._model_cls.model_validate(merged)  # type: ignore[arg-type]
         except ValidationError as exc:
             raise ValueError(str(exc)) from exc
 
         # Update the data and emit signals for any fields that changed
-        new = new_model.model_dump()
+        new = new_data.model_dump()
         if new != old:
-            self._data = new_model
+            self._set_data(new_data)
+            self._populate_lists_from_data()
             for key in incoming:
                 if new.get(key) != old.get(key):
                     self._emit_field_signal(key)
