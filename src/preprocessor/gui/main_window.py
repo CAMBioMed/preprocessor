@@ -85,7 +85,10 @@ class MainWindow(QMainWindow):
         name = Path(fp).name if fp else "Untitled Project"
         photo_count = len(proj.photos)
         dirty_marker = "*" if proj.dirty else ""
-        self.setWindowTitle(f"{base_title} — {name} ({photo_count} photos){dirty_marker}")
+        project_title = f"{name} ({photo_count} photos){dirty_marker}"
+        photo_title = f"{Path(self.model.current_photo.original_filename).name}"\
+            if self.model.current_photo and self.model.current_photo.original_filename else "<none>"
+        self.setWindowTitle(f"{base_title} — {project_title} {photo_title}")
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
@@ -154,12 +157,13 @@ class MainWindow(QMainWindow):
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_selection_changed.connect(self._handle_photo_selection_changed)
 
+        # Model
+        self.model.on_current_project_changed.connect(self._handle_current_project_changed)
+        self.model.on_current_photo_changed.connect(self._handle_current_photo_changed)
+
     def _handle_new_project_action(self) -> None:
         new_project = ProjectModel()
         self.model.current_project = new_project
-        self._bind_project_signals(new_project)
-        self._update_project_actions()
-        self._update_window_title()
 
     def _handle_open_project_action(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, "Open Project", "", "Project Files (*.pbproj);;All Files (*)")
@@ -170,9 +174,7 @@ class MainWindow(QMainWindow):
             #  Thus cancel
             self._handle_close_project_action()
         new_project = ProjectModel()
-        self.model.current_project = new_project
-        self.model.current_project.file = Path(path)
-        self._bind_project_signals(new_project)
+        new_project.file = Path(path)
         try:
             new_project.load_from_file(path)
         except ValueError as exc:
@@ -183,8 +185,7 @@ class MainWindow(QMainWindow):
                 f"Failed to open project file:\n{path}\n\n{exc}",
             )
             return
-        self._update_project_actions()
-        self._update_window_title()
+        self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:
         if self.model.current_project is None:
@@ -216,9 +217,6 @@ class MainWindow(QMainWindow):
             elif result == QMessageBox.StandardButton.Cancel:
                 return
         self.model.current_project = None
-        self._bind_project_signals(None)
-        self._update_project_actions()
-        self._update_window_title()
 
     def _handle_export_all_action(self) -> None:
         if self.model.current_project is None:
@@ -230,7 +228,6 @@ class MainWindow(QMainWindow):
     def _handle_detect_quadrat_action(self) -> None:
         if self.model.current_project is None:
             return
-        #if self.model.cu
         # TODO: Detect quadrat
         pass
 
@@ -266,10 +263,19 @@ class MainWindow(QMainWindow):
 
     def _handle_photo_selection_changed(self, selected: list[PhotoModel]) -> None:
         """Handle when the selected photo changes."""
-        if not selected:
-            self.central_widget.show_photo(None)
-            return
-        self.central_widget.show_photo(selected[0])
+        # TODO: Support multiple selection
+        self.model.current_photo = selected[0] if selected else None
+
+    def _handle_current_project_changed(self, project: ProjectModel | None) -> None:
+        """Handle when the current project changes."""
+        self._bind_project_signals(project)
+        self._update_project_actions()
+        self._update_window_title()
+
+    def _handle_current_photo_changed(self, photo: PhotoModel | None) -> None:
+        """Handle when the current photo changes."""
+        self.central_widget.show_photo(photo)
+        self._update_window_title()
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.write_settings()
