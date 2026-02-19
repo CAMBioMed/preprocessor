@@ -22,7 +22,7 @@ class ApplicationModel(QObject):
         super().__init__()
         self.settings = QSettings()
 
-    _current_project: ProjectModel = ProjectModel(ProjectData(file = Path("empty")))  # placeholder empty project model
+    _current_project: ProjectModel = ProjectModel(ProjectData(file=Path("empty")))  # placeholder empty project model
     on_current_project_changed: Signal = Signal(object)  # https://stackoverflow.com/a/57810835/146622
 
     @property
@@ -39,7 +39,6 @@ class ApplicationModel(QObject):
             project.setParent(self)
             self.on_current_project_changed.emit(project)
             self.on_changed.emit()
-
 
     _current_photo: PhotoModel | None = None
     on_current_photo_changed: Signal = Signal(object)  # https://stackoverflow.com/a/57810835/146622

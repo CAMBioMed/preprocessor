@@ -7,8 +7,12 @@ from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.export_dialog import ExportDialog
-from preprocessor.gui.launch_dialog import new_project_dialog, open_project_dialog, save_project_dialog, \
-    save_project_as_dialog
+from preprocessor.gui.launch_dialog import (
+    new_project_dialog,
+    open_project_dialog,
+    save_project_dialog,
+    save_project_as_dialog,
+)
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
@@ -93,8 +97,11 @@ class MainWindow(QMainWindow):
         photo_count = len(proj.photos)
         dirty_marker = "*" if proj.dirty else ""
         project_title = f"{name} ({photo_count} photos){dirty_marker}"
-        photo_title = f"{Path(self.model.current_photo.original_filename).name}"\
-            if self.model.current_photo and self.model.current_photo.original_filename else "<none>"
+        photo_title = (
+            f"{Path(self.model.current_photo.original_filename).name}"
+            if self.model.current_photo and self.model.current_photo.original_filename
+            else "<none>"
+        )
         self.setWindowTitle(f"{base_title} — {project_title} {photo_title}")
 
     def _update_thumbnails(self) -> None:

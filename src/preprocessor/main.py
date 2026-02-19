@@ -15,7 +15,8 @@ from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (
     QApplication,
-    QMessageBox, QDialog,
+    QMessageBox,
+    QDialog,
 )
 
 import logging
@@ -76,6 +77,7 @@ def _show_main_window(model: ApplicationModel) -> None:
     window = MainWindow(model)
     window.show()
     _setup_sigint_handler()
+
 
 def setup_logging() -> None:
     logging.basicConfig(level=logging.DEBUG)

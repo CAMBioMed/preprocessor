@@ -6,6 +6,7 @@ import contextlib
 
 M = TypeVar("M", bound=BaseModel)
 
+
 class QModel[M: BaseModel](QObject):
     """
     Reusable base class that holds a Pydantic model instance and provides
@@ -116,4 +117,3 @@ class QModel[M: BaseModel](QObject):
                 self._emit_field_signal(field)
             with contextlib.suppress(Exception):
                 self.on_changed.emit()
-

@@ -56,7 +56,6 @@ class PhotoData(BaseModel):
         return cast(CameraMatrix, (rows[0], rows[1], rows[2]))
 
 
-
 class PhotoModel(QModel[PhotoData]):
     on_original_filename_changed: Signal = Signal()
     on_quadrat_corners_changed: Signal = Signal()

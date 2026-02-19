@@ -9,6 +9,7 @@ from preprocessor.model.project_model import ProjectModel
 
 logger = logging.getLogger(__name__)
 
+
 class LaunchDialog(QDialog):
     ui: Ui_LaunchDialog
     model: ApplicationModel
@@ -34,7 +35,6 @@ class LaunchDialog(QDialog):
         self.model.current_project = new_project
         self.accept()
 
-
     def _handle_open_project_action(self) -> None:
         new_project = open_project_dialog(self, None)
         if new_project is None:
@@ -42,7 +42,6 @@ class LaunchDialog(QDialog):
             return
         self.model.current_project = new_project
         self.accept()
-
 
     def _handle_open_selected_project_action(self) -> None:
         # TODO: Implement
@@ -60,12 +59,14 @@ def new_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pro
     If `old_project` is not None and there are unsaved changes, the user will be prompted to save
     before creating a new project; if they choose to cancel, this function will return None.
     """
+    # fmt: off
     path, _ = QFileDialog.getSaveFileName(
         parent,
         "New Project",
         "",
         "Project Files (*.pbproj);;All Files (*)"
     )
+    # fmt: on
     if not path:
         return None
     if not save_if_dirty_dialog(parent, old_project):
@@ -82,12 +83,14 @@ def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pr
     If `old_project` is not None and there are unsaved changes, the user will be prompted to save
     before opening a new project; if they choose to cancel, this function will return None.
     """
+    # fmt: off
     path, _ = QFileDialog.getOpenFileName(
         parent,
         "Open Project",
         "",
         "Project Files (*.pbproj);;All Files (*)"
     )
+    # fmt: on
     if not path:
         return None
     if not save_if_dirty_dialog(parent, old_project):
@@ -103,6 +106,7 @@ def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pr
         )
         return None
     return new_project
+
 
 def save_project_dialog(parent: QWidget, project: ProjectModel, path: Path) -> bool:
     """
@@ -124,12 +128,14 @@ def save_project_dialog(parent: QWidget, project: ProjectModel, path: Path) -> b
 
 def save_project_as_dialog(parent: QWidget, project: ProjectModel) -> bool:
     """Show a file dialog to save the given project, and return True if successful, False if canceled or failed."""
+    # fmt: off
     path, _ = QFileDialog.getSaveFileName(
         parent,
         "Save Project",
         str(project.file) if project.file else "",
         "Project Files (*.pbproj);;All Files (*)"
     )
+    # fmt: on
     if not path:
         return False
     save_project_dialog(parent, project, Path(path))

@@ -58,4 +58,3 @@ class TestApplicationModel(unittest.TestCase):
         assert project_model0.parent() is None
         assert raised_on_changed
         assert raised_on_current_project_changed == project_model1
-

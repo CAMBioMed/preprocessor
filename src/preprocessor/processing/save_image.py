@@ -60,4 +60,3 @@ def _save_jpeg_image(path: Path, img: MatLike, quality: int, is_rgb: bool = Fals
     else:
         logger.debug(f"Saved JPEG image (quality={quality}): {path}")
     return bool(ok)
-

@@ -19,7 +19,7 @@ import pytest
 class TestProjectModel(unittest.TestCase):
     def test_photos(self) -> None:
         # Arrange
-        project_model = ProjectModel(file = Path("test.pbproj"))
+        project_model = ProjectModel(file=Path("test.pbproj"))
 
         # Assert initial state
         assert isinstance(project_model.photos, QListModel)
@@ -44,7 +44,7 @@ class TestProjectModel(unittest.TestCase):
 
     def test_serialize_deserialize_photos(self) -> None:
         # Arrange
-        project = ProjectModel(file = Path("test1.pbproj"))
+        project = ProjectModel(file=Path("test1.pbproj"))
         p = PhotoModel()
         p.original_filename = Path("picA.jpg")
         p.red_shift = (1.0, 2.0)
@@ -69,17 +69,19 @@ class TestProjectModel(unittest.TestCase):
         assert new_project1.photos[0].red_shift == (1.0, 2.0)
 
         # Act: clear photos via deserialize with None (include version)
+        # fmt: off
         new_project2 = ProjectModel.read_from_json(Path("test.pbproj"), json.dumps({
             "model_version": ProjectData.SERIAL_VERSION,
             "photos": [],
         }))
+        # fmt: on
 
         # Assert: photos cleared and on_changed emitted
         assert len(new_project2.photos) == 0
 
     def test_save_and_load_file(self) -> None:
         # Arrange: create project with one photo
-        project = ProjectModel(file = Path("test.pbproj"))
+        project = ProjectModel(file=Path("test.pbproj"))
         p = PhotoModel()
         p.original_filename = Path("fileX.jpg")
         p.red_shift = (3.0, 4.0)
@@ -123,7 +125,7 @@ class TestProjectModel(unittest.TestCase):
 
     def test_dirty_flag(self) -> None:
         # Arrange
-        project = ProjectModel(file = Path("test.pbproj"))
+        project = ProjectModel(file=Path("test.pbproj"))
 
         # Initial state: clean
         assert not project.dirty
