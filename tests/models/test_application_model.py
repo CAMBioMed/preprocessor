@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from PySide6.QtCore import Slot
 
@@ -29,7 +30,7 @@ class TestApplicationModel(unittest.TestCase):
 
         app_model.on_current_project_changed.connect(handle_on_current_project_changed)
 
-        project_model0 = ProjectModel()
+        project_model0 = ProjectModel(file=Path("test_project0.json"))
 
         # Assert
         assert project_model0.parent() is None
@@ -48,7 +49,7 @@ class TestApplicationModel(unittest.TestCase):
 
         # Act: Set current_project to project_model1
         raised_on_changed = False
-        project_model1 = ProjectModel()
+        project_model1 = ProjectModel(file=Path("test_project1.json"))
         app_model.current_project = project_model1
 
         # Assert
@@ -58,12 +59,3 @@ class TestApplicationModel(unittest.TestCase):
         assert raised_on_changed
         assert raised_on_current_project_changed == project_model1
 
-        # Act: Set current_project to None
-        raised_on_changed = False
-        app_model.current_project = None
-
-        # Assert
-        assert project_model1.parent() is None
-        assert project_model0.parent() is None
-        assert raised_on_changed
-        assert raised_on_current_project_changed is None

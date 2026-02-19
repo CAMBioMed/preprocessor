@@ -32,69 +32,29 @@ class ProjectData(BaseModel):
     cameras: list[CameraData] = []
     """The list of cameras in the project."""
 
+    @field_validator("model_version", mode="after")
     @classmethod
-    @field_validator("model_version", mode="before")
-    def _validate_model_version(cls: type["ProjectData"], v: Any) -> int:  # noqa: ANN401
-        if v is None:
-            return cls.SERIAL_VERSION
-        try:
-            iv = int(v)
-        except Exception as exc:
-            msg = "model_version must be an integer"
-            raise ValueError(msg) from exc
-        if iv < 1:
-            msg = "model_version must be a positive integer"
+    def _validate_model_version(cls: type["ProjectData"], v: int) -> int:  # noqa: ANN401
+        if v != cls.SERIAL_VERSION:
+            msg = f"Unsupported model_version {v}; expected {cls.SERIAL_VERSION}"
             raise ValueError(msg)
-        if iv != cls.SERIAL_VERSION:
-            msg = f"Unsupported model_version {iv}; expected {cls.SERIAL_VERSION}"
-            raise ValueError(msg)
-        return iv
+        return v
 
+    @field_validator("target_width", mode="after")
     @classmethod
-    @field_validator("export_path", mode="before")
-    def _validate_export_path(cls: type["ProjectData"], v: Any) -> Path | None:  # noqa: ANN401
-        if v is None:
-            return None
-        if isinstance(v, Path):
-            return v
-        # Coerce strings; raise helpful error for other types
-        try:
-            s = str(v)
-        except Exception as exc:
-            msg = "export_path must be a path-like string or None"
-            raise ValueError(msg) from exc
-        s = s.strip()
-        return Path(s) if s != "" else None
-
-    @classmethod
-    @field_validator("target_width", mode="before")
-    def _validate_target_width(cls: type["ProjectData"], v: Any) -> int | None:  # noqa: ANN401
-        if v is None:
-            return None
-        try:
-            iv = int(v)
-        except Exception as exc:
-            msg = "target_width must be an integer or None"
-            raise ValueError(msg) from exc
-        if iv >= 1:
+    def _validate_target_width(cls: type["ProjectData"], v: int | None) -> int | None:  # noqa: ANN401
+        if v is not None and v < 1:
             msg = "target_width must be non-negative and non-zero"
             raise ValueError(msg)
-        return iv
+        return v
 
+    @field_validator("target_height", mode="after")
     @classmethod
-    @field_validator("target_height", mode="before")
-    def _validate_target_height(cls: type["ProjectData"], v: Any) -> int | None:  # noqa: ANN401
-        if v is None:
-            return None
-        try:
-            iv = int(v)
-        except Exception as exc:
-            msg = "target_height must be an integer or None"
-            raise ValueError(msg) from exc
-        if iv >= 1:
+    def _validate_target_height(cls: type["ProjectData"], v: int | None) -> int | None:  # noqa: ANN401
+        if v is not None and v < 1:
             msg = "target_height must be non-negative and non-zero"
             raise ValueError(msg)
-        return iv
+        return v
 
 
 class ProjectModel(QModel[ProjectData]):

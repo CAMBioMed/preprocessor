@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Any, cast, ClassVar
 
 from PySide6.QtCore import Signal
-from cv2.typing import Point2f
 from pydantic import BaseModel, field_validator, Field, ValidationError
 
+from preprocessor.model import Point2
 from preprocessor.model.qmodel import QModel
 
 # fmt: off
@@ -28,46 +28,20 @@ class CameraData(BaseModel):
     """The name of the camera."""
     camera_matrix: CameraMatrix | None = None
     """A 3x3 camera matrix as a tuple of 3 tuples; or None if not set."""
-    distortion_coefficients: tuple[Point2f, ...] | None = None
+    distortion_coefficients: tuple[Point2, ...] | None = None
     """A sequence of distortion coefficients; or None if not set."""
 
+    @field_validator("model_version", mode="after")
     @classmethod
-    @field_validator("model_version", mode="before")
-    def _validate_model_version(cls: type["CameraData"], v: Any) -> int:  # noqa: ANN401
-        if v is None:
-            return cls.SERIAL_VERSION
-        try:
-            iv = int(v)
-        except Exception as exc:
-            msg = "model_version must be an integer"
-            raise ValueError(msg) from exc
-        if iv < 1:
-            msg = "model_version must be a positive integer"
+    def _validate_model_version(cls: type["CameraData"], v: int) -> int:  # noqa: ANN401
+        if v != cls.SERIAL_VERSION:
+            msg = f"Unsupported model_version {v}; expected {cls.SERIAL_VERSION}"
             raise ValueError(msg)
-        if iv != cls.SERIAL_VERSION:
-            msg = f"Unsupported model_version {iv}; expected {cls.SERIAL_VERSION}"
-            raise ValueError(msg)
-        return iv
+        return v
 
+    @field_validator("camera_matrix", mode="after")
     @classmethod
-    @field_validator("file", mode="before")
-    def _validate_file(cls: type["CameraData"], v: Any) -> Path | None:  # noqa: ANN401
-        if v is None:
-            return None
-        if isinstance(v, Path):
-            return v
-        # Coerce strings; raise helpful error for other types
-        try:
-            s = str(v)
-        except Exception as exc:
-            msg = "file must be a path-like string or None"
-            raise ValueError(msg) from exc
-        s = s.strip()
-        return Path(s) if s != "" else None
-
-    @classmethod
-    @field_validator("camera_matrix", mode="before")
-    def _validate_camera_matrix(cls: type["CameraData"], v: Any) -> CameraMatrix | None:  # noqa: ANN401
+    def _validate_camera_matrix(cls: type["CameraData"], v: CameraMatrix | None) -> CameraMatrix | None:  # noqa: ANN401
         if v is None:
             return None
         try:
@@ -79,18 +53,6 @@ class CameraData(BaseModel):
             msg = "camera_matrix must be a 3x3 numeric structure"
             raise ValueError(msg)
         return cast(CameraMatrix, (rows[0], rows[1], rows[2]))
-
-    @classmethod
-    @field_validator("distortion_coefficients", mode="before")
-    def _validate_distortion(cls: type["CameraData"], v: Any) -> tuple[Point2f, ...] | None:  # noqa: ANN401
-        if v is None:
-            return None
-        try:
-            pts = tuple((float(p[0]), float(p[1])) for p in v)
-        except Exception as exc:
-            msg = "distortion_coefficients must be a sequence of [x,y] pairs or None"
-            raise ValueError(msg) from exc
-        return pts
 
 
 class CameraModel(QModel[CameraData]):
@@ -140,12 +102,12 @@ class CameraModel(QModel[CameraData]):
         self._set_field("camera_matrix", value)
 
     @property
-    def distortion_coefficients(self) -> tuple[Point2f, ...] | None:
-        """Sequence of distortion coefficients as Point2f or None."""
+    def distortion_coefficients(self) -> tuple[Point2, ...] | None:
+        """Sequence of distortion coefficients as Point2 or None."""
         return self._data.distortion_coefficients
 
     @distortion_coefficients.setter
-    def distortion_coefficients(self, value: tuple[Point2f, ...] | None) -> None:
+    def distortion_coefficients(self, value: tuple[Point2, ...] | None) -> None:
         self._set_field("distortion_coefficients", value)
 
     def write_to_file(self, path: str | Path) -> None:

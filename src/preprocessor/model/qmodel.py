@@ -103,7 +103,7 @@ class QModel[M: BaseModel](QObject):
 
         Emits per-field and on_changed signals only if the validated model differs from the previous one.
         """
-        if field not in self._data.model_fields:
+        if field not in self._model_cls.model_fields:
             raise ValueError(f"{field!r} is not a valid field in this model's data")
 
         # We mutate the existing model, such that all references to it get the updated data
@@ -112,9 +112,9 @@ class QModel[M: BaseModel](QObject):
         new_data = self._data
 
         if new_data != old_data:
+            self._set_dirty(True)
             if getattr(new_data, field) != getattr(old_data, field):
                 self._emit_field_signal(field)
-            self._set_dirty(True)
             with contextlib.suppress(Exception):
                 self.on_changed.emit()
 
