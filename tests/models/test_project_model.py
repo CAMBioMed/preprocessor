@@ -172,7 +172,7 @@ class TestProjectModel(unittest.TestCase):
 
         # Act: mark clean again and modify another child property
         project.mark_clean()
-        p.quadrat_corners = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
+        p.quadrat_corners = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
         assert project.dirty
 
         # Act: mark_dirty explicitly

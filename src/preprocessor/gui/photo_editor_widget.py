@@ -93,7 +93,7 @@ class PhotoEditorWidget(QWidget):
         return [self._image_to_widget_point(x, y) for x, y in self._photo.quadrat_corners]
 
     def _write_widget_points(self, pts: list[QPoint] | None) -> None:
-        """Write a list of QPoint (or None) back into the PhotoModel as tuple of floats (image coords) or None.
+        """Write a list of QPoint (or None) back into the PhotoModel as list of floats (image coords) or None.
         Converts the widget coordinates (mouse positions) into image coordinates using the current scale.
         """
         if self._photo is None:
@@ -105,7 +105,7 @@ class PhotoEditorWidget(QWidget):
             if len(pts) >= 3:
                 pts = self._order_points_by_angle(pts)
             img_pts = [self._widget_to_image_point(p) for p in pts]
-            self._photo.quadrat_corners = tuple((float(x), float(y)) for x, y in img_pts)  # type: ignore[assignment]
+            self._photo.quadrat_corners = [(float(x), float(y)) for x, y in img_pts]
 
     def paintEvent(self, _event: QPaintEvent) -> None:
         painter = QPainter(self)
