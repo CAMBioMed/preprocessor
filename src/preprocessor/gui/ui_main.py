@@ -97,7 +97,6 @@ class Ui_Main(object):
         self.menuFile.addAction(self.menuFile_OpenProject)
         self.menuFile.addAction(self.menuFile_SaveProject)
         self.menuFile.addAction(self.menuFile_SaveProjectAs)
-        self.menuFile.addAction(self.menuFile_CloseProject)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.menuFile_ExportAll)
         self.menuFile.addSeparator()

@@ -1,3 +1,6 @@
+import contextlib
+import warnings
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
 from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QDialog
@@ -59,9 +62,12 @@ class MainWindow(QMainWindow):
         # Disconnect previous project
         old_project = self._bound_project
         if old_project is not None:
-            old_project.on_file_changed.disconnect(self._handle_project_file_changed)
-            old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
-            old_project.photos.on_changed.disconnect(self._handle_photos_changed)
+            with warnings.catch_warnings():
+                # Raises a RuntimeWarning when the old project was never connected (i.e. the initial empty project)
+                warnings.filterwarnings("ignore", category=RuntimeWarning)
+                old_project.on_file_changed.disconnect(self._handle_project_file_changed)
+                old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
+                old_project.photos.on_changed.disconnect(self._handle_photos_changed)
 
         self._bound_project = project
         # Connect new project
