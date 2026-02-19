@@ -6,6 +6,7 @@ from pydantic import BaseModel, field_validator, ValidationError
 
 from preprocessor.model import Point2
 from preprocessor.model.qmodel import QModel
+from preprocessor.utils import update_basepath
 
 # fmt: off
 CameraMatrix = tuple[
@@ -109,6 +110,9 @@ class CameraModel(QModel[CameraData]):
     @distortion_coefficients.setter
     def distortion_coefficients(self, value: tuple[Point2, ...] | None) -> None:
         self._set_field("distortion_coefficients", value)
+
+    def update_paths_relative_to(self, old_basepath: Path, new_basepath: Path) -> None:
+        self.file = update_basepath(old_basepath, new_basepath, self.file)
 
     def write_to_file(self, path: str | Path) -> None:
         """

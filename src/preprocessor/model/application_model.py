@@ -4,7 +4,7 @@ from typing import cast
 from PySide6.QtCore import QObject, Signal, QSettings, QByteArray
 
 from preprocessor.model.photo_model import PhotoModel
-from preprocessor.model.project_model import ProjectModel, ProjectData
+from preprocessor.model.project_model import ProjectModel
 
 
 class ApplicationModel(QObject):
@@ -22,7 +22,7 @@ class ApplicationModel(QObject):
         super().__init__()
         self.settings = QSettings()
 
-    _current_project: ProjectModel = ProjectModel(ProjectData(file=Path("empty")))  # placeholder empty project model
+    _current_project: ProjectModel = ProjectModel(file=Path("empty"))  # placeholder empty project model
     on_current_project_changed: Signal = Signal(object)  # https://stackoverflow.com/a/57810835/146622
 
     @property

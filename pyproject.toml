@@ -175,6 +175,8 @@ ignore = [
   "D107",
   # missing-blank-line-after-summary
   "D205",
+  # non-imperative-mood
+  "D401",
   # For now:
   # logging-f-string
   "G004",

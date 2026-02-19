@@ -1,11 +1,10 @@
-from pathlib import Path
-
 from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem
 
 from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
 from preprocessor.gui.utils import icon_from_resource
+from preprocessor.model.project_model import ProjectModel
 from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel
 
@@ -66,7 +65,7 @@ class ThumbnailDockWidget(QDockWidget):
         ]
         self.on_selection_changed.emit(selected_photos)
 
-    def update_thumbnails(self, photos: QListModel[PhotoModel]) -> None:
+    def update_thumbnails(self, photos: QListModel[PhotoModel], project: ProjectModel) -> None:
         """Update the thumbnails to match the given list of photos."""
         thumbnail_list: QListWidget = self.ui.thumbnailListWidget
 
@@ -86,10 +85,7 @@ class ThumbnailDockWidget(QDockWidget):
                 item = thumbnail_list.item(i)
                 item_photo = item.data(Qt.ItemDataRole.UserRole)
                 # Compare by identity first, then by basename of original filename
-                if item_photo is photo:
-                    found_index = i
-                    break
-                if photo.original_filename and item.text() == Path(photo.original_filename).name:
+                if item_photo is photo or item.text() == photo.name:
                     found_index = i
                     break
             if found_index is not None:
@@ -104,18 +100,18 @@ class ThumbnailDockWidget(QDockWidget):
                 insert_index = thumbnail_list.count()
 
             # Show basename as text; if there's an image file, load it as a thumbnail icon
-            display_text = Path(photo.original_filename).name if photo.original_filename else ""
+            display_text = photo.name
             item = QListWidgetItem(display_text)
 
-            if photo.original_filename:
-                pix = QPixmap(str(photo.original_filename))
-                if not pix.isNull():
-                    thumb = pix.scaled(
-                        QSize(120, 120),
-                        Qt.AspectRatioMode.KeepAspectRatio,
-                        Qt.TransformationMode.SmoothTransformation,
-                    )
-                    item.setIcon(QIcon(thumb))
+            original_path = project.get_absolute_path(photo.original_filename)
+            pix = QPixmap(str(original_path))
+            if not pix.isNull():
+                thumb = pix.scaled(
+                    QSize(120, 120),
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+                item.setIcon(QIcon(thumb))
 
             item.setData(Qt.ItemDataRole.UserRole, photo)
             # Insert at the position matching the project's photo index

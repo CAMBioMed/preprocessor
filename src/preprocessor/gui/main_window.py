@@ -97,16 +97,12 @@ class MainWindow(QMainWindow):
         photo_count = len(proj.photos)
         dirty_marker = "*" if proj.dirty else ""
         project_title = f"{name} ({photo_count} photos){dirty_marker}"
-        photo_title = (
-            f"{Path(self.model.current_photo.original_filename).name}"
-            if self.model.current_photo and self.model.current_photo.original_filename
-            else "<none>"
-        )
+        photo_title = f"{self.model.current_photo.name}" if self.model.current_photo else "<none>"
         self.setWindowTitle(f"{base_title} — {project_title} {photo_title}")
 
     def _update_thumbnails(self) -> None:
         if self.model.current_project is not None:
-            self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
+            self.thumbnail_dock.update_thumbnails(self.model.current_project.photos, self.model.current_project)
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
@@ -203,12 +199,13 @@ class MainWindow(QMainWindow):
         if self.model.current_photo is None:
             return
 
-        img = load_image(str(self.model.current_photo.original_filename))
+        original_path = self.model.current_project.get_absolute_path(self.model.current_photo.original_filename)
+        img = load_image(str(original_path))
         if img is None:
             QMessageBox.critical(
                 self,
                 "Load Image Failed",
-                f"Failed to load image:\n{self.model.current_photo.original_filename}",
+                f"Failed to load image:\n{original_path}",
             )
             return
 
@@ -233,9 +230,7 @@ class MainWindow(QMainWindow):
             return
         project = self.model.current_project
         for path in paths:
-            model = PhotoModel()
-            model.original_filename = path
-            project.photos.append(model)
+            project.append_photo_model(Path(path))
 
     def _handle_remove_photos_action(self, selected: list[PhotoModel]) -> None:
         assert self.model.current_project is not None
@@ -265,7 +260,7 @@ class MainWindow(QMainWindow):
 
     def _handle_current_photo_changed(self, photo: PhotoModel | None) -> None:
         """Handle when the current photo changes."""
-        self.central_widget.show_photo(photo)
+        self.central_widget.show_photo(photo, self.model.current_project)
         self._update_window_title()
 
     def closeEvent(self, event: QCloseEvent) -> None:
