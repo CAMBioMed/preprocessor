@@ -124,13 +124,12 @@ class QModel[M: BaseModel](QObject):
         if field not in self._data.model_fields:
             raise ValueError(f"{field!r} is not a valid field in this model's data")
 
-        # Get the previous model and a dict that includes all pydantic-declared fields
-        old_model = self._data
-
-        new_model = old_model.model_copy(update={field: value})
+        # We mutate the existing model, such that all references to it get the updated data
+        old_model = self._data.model_copy()
+        setattr(self._data, field, value)
+        new_model = self._data
 
         if new_model != old_model:
-            self._data = new_model
             if getattr(new_model, field) != getattr(old_model, field):
                 self._emit_field_signal(field)
             self._set_dirty(True)
