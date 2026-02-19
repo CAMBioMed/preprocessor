@@ -19,7 +19,7 @@ class ProjectData(BaseModel):
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
 
-    file: Path | None = Field(default=None, exclude=True)
+    file: Path = Field(exclude=True)
     """The file path of the project file, or None if not saved yet. This is not serialized/deserialized."""
     export_path: Path | None = None
     """The file path where the photos will be exported to, or None if not set."""
@@ -31,22 +31,6 @@ class ProjectData(BaseModel):
     """The list of photos in the project."""
     cameras: list[CameraData] = []
     """The list of cameras in the project."""
-
-    @classmethod
-    @field_validator("file", mode="before")
-    def _validate_file(cls: type["ProjectData"], v: Any) -> Path | None:  # noqa: ANN401
-        if v is None:
-            return None
-        if isinstance(v, Path):
-            return v
-        # Coerce strings; raise helpful error for other types
-        try:
-            s = str(v)
-        except Exception as exc:
-            msg = "file must be a path-like string or None"
-            raise ValueError(msg) from exc
-        s = s.strip()
-        return Path(s) if s != "" else None
 
     @classmethod
     @field_validator("export_path", mode="before")
@@ -104,7 +88,7 @@ class ProjectModel(QModel[ProjectData]):
     _photos: QListModel[PhotoModel]
     _cameras: QListModel[CameraModel]
 
-    def __init__(self, data: ProjectData | dict[str, Any] | None = None) -> None:
+    def __init__(self, data: ProjectData) -> None:
         super().__init__(model_cls=ProjectData, data=data)
 
         # Create QListModel containers for interactive use
@@ -122,16 +106,16 @@ class ProjectModel(QModel[ProjectData]):
         self._populate_lists_from_data()
 
     @property
-    def file(self) -> Path | None:
+    def file(self) -> Path:
         """
-        The file path where the project is saved, or None if not saved yet.
+        The file path where the project is or will be saved.
 
         This property is not serialized/deserialized.
         """
         return self._data.file
 
     @file.setter
-    def file(self, path: Path | None) -> None:
+    def file(self, path: Path) -> None:
         self._set_field("file", path)
 
     @property

@@ -19,7 +19,7 @@ import pytest
 class TestProjectModel(unittest.TestCase):
     def test_photos(self) -> None:
         # Arrange
-        project_model = ProjectModel()
+        project_model = ProjectModel(ProjectData(file = Path("test.pbproj")))
 
         # Assert initial state
         assert isinstance(project_model.photos, QListModel)
@@ -44,7 +44,7 @@ class TestProjectModel(unittest.TestCase):
 
     def test_serialize_deserialize_photos(self) -> None:
         # Arrange
-        project = ProjectModel()
+        project = ProjectModel(ProjectData(file = Path("test1.pbproj")))
         p = PhotoModel()
         p.original_filename = "picA.jpg"
         p.red_shift = (1.0, 2.0)
@@ -63,7 +63,7 @@ class TestProjectModel(unittest.TestCase):
         assert s["photos"][0]["red_shift"] == (1.0, 2.0)
 
         # Arrange a fresh project to deserialize into and watch for on_changed
-        new_project = ProjectModel()
+        new_project = ProjectModel(ProjectData(file = Path("test2.pbproj")))
         changed = False
 
         def handle_changed() -> None:
@@ -96,7 +96,7 @@ class TestProjectModel(unittest.TestCase):
 
     def test_save_and_load_file(self) -> None:
         # Arrange: create project with one photo
-        project = ProjectModel()
+        project = ProjectModel(ProjectData(file = Path("test.pbproj")))
         p = PhotoModel()
         p.original_filename = "fileX.jpg"
         p.red_shift = (3.0, 4.0)
@@ -115,7 +115,7 @@ class TestProjectModel(unittest.TestCase):
                 data = json.load(fh)
 
             # Arrange: fresh project to load into and watch for on_changed
-            new_project = ProjectModel()
+            new_project = ProjectModel(ProjectData(file = path))
             changed = False
 
             def handle_changed() -> None:
@@ -136,14 +136,14 @@ class TestProjectModel(unittest.TestCase):
             assert changed
 
     def test_load_missing_file_raises(self) -> None:
-        project = ProjectModel()
+        project = ProjectModel(ProjectData(file = Path("test.pbproj")))
         missing = Path("/nonexistent/path/does_not_exist.json")
         with pytest.raises(FileNotFoundError):
             project.load_from_file(missing)
 
     def test_deserialize_version_mismatch_raises(self) -> None:
         # Arrange
-        project = ProjectModel()
+        project = ProjectModel(ProjectData(file = Path("test.pbproj")))
         bad = {"model_version": ProjectData.SERIAL_VERSION + 1, "photos": []}
 
         # Act / Assert
@@ -152,7 +152,7 @@ class TestProjectModel(unittest.TestCase):
 
     def test_dirty_flag(self) -> None:
         # Arrange
-        project = ProjectModel()
+        project = ProjectModel(ProjectData(file = Path("test.pbproj")))
 
         # Initial state: clean
         assert not project.dirty

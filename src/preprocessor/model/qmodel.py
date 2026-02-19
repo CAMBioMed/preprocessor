@@ -47,7 +47,7 @@ class QModel[M: BaseModel](QObject):
     def __init__(
         self,
         model_cls: type[M],
-        data: M | dict[str, Any] | None = None,
+        data: M,
     ) -> None:
         super().__init__()
         self._model_cls = model_cls

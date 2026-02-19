@@ -8,6 +8,8 @@ from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.export_dialog import ExportDialog
+from preprocessor.gui.launch_dialog import new_project_dialog, open_project_dialog, save_project_dialog, \
+    save_project_as_dialog
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
@@ -15,7 +17,7 @@ from preprocessor.gui.ui_main import Ui_Main
 from preprocessor.gui.utils import icon_from_resource
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
-from preprocessor.model.project_model import ProjectModel
+from preprocessor.model.project_model import ProjectModel, ProjectData
 from preprocessor.processing.detect_quadrat import detect_quadrat
 from preprocessor.processing.load_image import load_image
 from preprocessor.processing.params import defaultParams
@@ -31,7 +33,7 @@ class MainWindow(QMainWindow):
     """The dock widget showing image thumbnails."""
     central_widget: PhotoEditorWidget
     """The central widget showing the image."""
-    _bound_project: ProjectModel = ProjectModel()
+    _bound_project: ProjectModel | None = None
 
     def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -171,55 +173,20 @@ class MainWindow(QMainWindow):
         self.model.on_current_photo_changed.connect(self._handle_current_photo_changed)
 
     def _handle_new_project_action(self) -> None:
-        new_project = ProjectModel()
-        self.model.current_project = new_project
+        new_project = new_project_dialog(self, self.model.current_project)
+        if new_project is not None:
+            self.model.current_project = new_project
 
     def _handle_open_project_action(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, "Open Project", "", "Project Files (*.pbproj);;All Files (*)")
-        if not path:
-            return
-        if self.model.current_project is not None:
-            # TODO: On unsaved changes, maybe the user doesn't want to open another project
-            #  Thus cancel
-            self._maybe_save_unsaved_changes()
-        new_project = ProjectModel()
-        try:
-            new_project.load_from_file(path)
-        except ValueError as exc:
-            # Likely a serialization version mismatch or corrupt file — inform the user
-            QMessageBox.critical(
-                self,
-                "Open Project Failed",
-                f"Failed to open project file:\n{path}\n\n{exc}",
-            )
-            return
-        self.model.current_project = new_project
+        new_project = open_project_dialog(self, self.model.current_project)
+        if new_project is not None:
+            self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:
-        if self.model.current_project.file is None:
-            self._handle_save_project_as_action()
-            return
-        self.model.current_project.save_to_file(self.model.current_project.file)
+        save_project_dialog(self, self.model.current_project, self.model.current_project.file)
 
     def _handle_save_project_as_action(self) -> None:
-        path, _ = QFileDialog.getSaveFileName(self, "Save Project As", "", "Project Files (*.pbproj);;All Files (*)")
-        if not path:
-            return
-        self.model.current_project.save_to_file(path)
-
-    def _maybe_save_unsaved_changes(self) -> None:
-        if not self.model.current_project.dirty:
-            return
-        result = QMessageBox.question(
-            self,
-            "Unsaved Changes",
-            "The current project has unsaved changes. Do you want to save them before closing?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
-        )
-        if result == QMessageBox.StandardButton.Yes:
-            self._handle_save_project_action()
-        elif result == QMessageBox.StandardButton.Cancel:
-            return
+        save_project_as_dialog(self, self.model.current_project)
 
     def _handle_export_all_action(self) -> None:
         dialog = ExportDialog(self.model.current_project, self)
