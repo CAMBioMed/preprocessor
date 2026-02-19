@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 from preprocessor.model.project_model import ProjectModel, ProjectData
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.model.photo_model import PhotoModel, PhotoData
 from preprocessor.model.qlistmodel import QListModel
 import pytest
 
@@ -26,7 +26,11 @@ class TestProjectModel(unittest.TestCase):
         assert project_model.photos.parent() == project_model
 
         # Act: add a photo
-        photo0 = PhotoModel()
+        photo0 = PhotoModel(
+            PhotoData(
+                original_filename=Path("photo0.jpg"),
+            )
+        )
         assert photo0.parent() is None
 
         project_model.photos.append(photo0)
@@ -45,9 +49,12 @@ class TestProjectModel(unittest.TestCase):
     def test_serialize_deserialize_photos(self) -> None:
         # Arrange
         project = ProjectModel(file=Path("test1.pbproj"))
-        p = PhotoModel()
-        p.original_filename = Path("picA.jpg")
-        p.red_shift = (1.0, 2.0)
+        p = PhotoModel(
+            PhotoData(
+                original_filename=Path("picA.jpg"),
+                red_shift=(1.0, 2.0),
+            )
+        )
         project.photos.append(p)
 
         # Act: serialize
@@ -80,16 +87,18 @@ class TestProjectModel(unittest.TestCase):
         assert len(new_project2.photos) == 0
 
     def test_save_and_load_file(self) -> None:
-        # Arrange: create project with one photo
-        project = ProjectModel(file=Path("test.pbproj"))
-        p = PhotoModel()
-        p.original_filename = Path("fileX.jpg")
-        p.red_shift = (3.0, 4.0)
-        project.photos.append(p)
-
         # Use a temporary directory and file path
         with tempfile.TemporaryDirectory() as td:
-            path = Path(td) / "project.json"
+            # Arrange: create project with one photo
+            path = Path(td) / "test.pbproj"
+            project = ProjectModel(file=path)
+            p = PhotoModel(
+                PhotoData(
+                    original_filename=Path("fileX.jpg"),
+                    red_shift=(3.0, 4.0),
+                )
+            )
+            project.photos.append(p)
 
             # Act: save to file
             project.write_to_file(path)
@@ -131,7 +140,11 @@ class TestProjectModel(unittest.TestCase):
         assert not project.dirty
 
         # Act: append a photo -> project becomes dirty
-        p = PhotoModel()
+        p = PhotoModel(
+            PhotoData(
+                original_filename=Path("original.jpg"),
+            )
+        )
         project.photos.append(p)
         assert project.dirty
 
@@ -140,7 +153,7 @@ class TestProjectModel(unittest.TestCase):
         assert not project.dirty
 
         # Act: change a child photo property -> project becomes dirty
-        p.original_filename = "changed.jpg"
+        p.original_filename = Path("changed.jpg")
         assert project.dirty
 
         # Act: mark clean again and modify another child property

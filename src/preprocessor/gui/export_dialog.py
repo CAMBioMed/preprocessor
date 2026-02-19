@@ -220,16 +220,17 @@ class _ExportWorker(QObject):
 
             try:
                 # Prepare names/paths
-                output_name = Path(photo.original_filename).name if photo.original_filename else f"photo_{idx}.png"
+                output_name = photo.name
                 output_path = self.project.export_path / output_name
                 self.status.emit(f"Exporting {idx}/{total}: {output_name}")
 
                 # Load image
-                img = load_image(str(photo.original_filename))
+                original_path = self.project.get_absolute_path(photo.original_filename)
+                img = load_image(str(original_path))
                 if img is None:
                     self.message.emit(
                         "warning",
-                        f"Failed to load image: {photo.original_filename or output_name}",
+                        f"Failed to load image: {original_path}",
                     )
                     # continue to next photo but still report progress
                     self.progress.emit(idx, total)

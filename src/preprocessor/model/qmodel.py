@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import TypeVar, Any
 
 from PySide6.QtCore import QObject, Signal
@@ -56,6 +57,16 @@ class QModel[M: BaseModel](QObject):
         This is called after deserialization to ensure that the interactive list models reflect the current data.
         """
         # This method is meant to be overridden by subclasses that have QListModel children.
+
+    def update_paths_relative_to(self, old_basepath: Path, new_basepath: Path) -> None:
+        """
+        Update any file paths in the model that are relative to a base path that has changed.
+
+        This is called after deserialization if the base path has changed,
+        to ensure that any relative paths in the model are updated accordingly.
+        """
+        # This method is meant to be overridden by subclasses
+        # that have file paths that need to be updated when the base path changes.
 
     @property
     def dirty(self) -> bool:

@@ -6,6 +6,7 @@ from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
 from PySide6.QtWidgets import QWidget
 
 from preprocessor.model.photo_model import PhotoModel
+from preprocessor.model.project_model import ProjectModel
 
 
 class PhotoEditorWidget(QWidget):
@@ -38,9 +39,10 @@ class PhotoEditorWidget(QWidget):
 
         self.setMouseTracking(True)
 
-    def show_photo(self, photo: PhotoModel | None) -> None:
+    def show_photo(self, photo: PhotoModel | None, project: ProjectModel) -> None:
         if photo is not None:
-            self._pixmap = QPixmap(str(photo.original_filename))
+            original_path = project.get_absolute_path(photo.original_filename)
+            self._pixmap = QPixmap(str(original_path))
             self._photo = photo
         else:
             self._pixmap = None

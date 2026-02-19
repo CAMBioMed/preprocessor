@@ -4,13 +4,17 @@ from pathlib import Path
 from PySide6.QtCore import Slot
 from pytestqt.qtbot import QtBot
 
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.model.photo_model import PhotoModel, PhotoData
 
 
 class TestPhotoModel:
     def test_quadrat_corners(self) -> None:
         # Arrange
-        photo = PhotoModel()
+        photo = PhotoModel(
+            PhotoData(
+                original_filename=Path("img_001.jpg"),
+            )
+        )
 
         raised_quadrat_corners_changed = False
         raised_changed = False
@@ -61,10 +65,14 @@ class TestPhotoModel:
 
     def test_serialize_deserialize(self) -> None:
         # Arrange
-        photo0 = PhotoModel()
+        photo0 = PhotoModel(
+            PhotoData(
+                original_filename=Path("img_001.jpg"),
+            )
+        )
 
         # Assert: defaults set
-        assert photo0.original_filename is None
+        assert photo0.original_filename == Path("img_001.jpg")
         assert photo0.quadrat_corners == []
         assert photo0.red_shift is None
         assert photo0.blue_shift is None
@@ -72,8 +80,8 @@ class TestPhotoModel:
         assert photo0.distortion_coefficients is None
 
         # Act: Serialize and deserialize
-        json_str0 = photo0.write_to_json()
-        photo1 = PhotoModel.read_from_json(json_str0)
+        json_str0: str = photo0._data.model_dump_json()
+        photo1: PhotoModel = PhotoModel(PhotoData.model_validate_json(json_str0))
 
         # Assert: values read
         assert photo1.original_filename == photo0.original_filename
@@ -107,8 +115,8 @@ class TestPhotoModel:
         assert photo1.distortion_coefficients == distortion
 
         # Act: Serialize and deserialize
-        json_str1 = photo1.write_to_json()
-        photo2 = PhotoModel.read_from_json(json_str1)
+        json_str1: str = photo1._data.model_dump_json()
+        photo2: PhotoModel = PhotoModel(PhotoData.model_validate_json(json_str1))
 
         # Assert: verify values read
         assert photo2.original_filename == Path("img_001.jpg")
@@ -121,7 +129,11 @@ class TestPhotoModel:
     @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_signals(self, qtbot: QtBot) -> None:
         # Arrange: Create a fresh model and verify signals and value
-        photo1 = PhotoModel()
+        photo1 = PhotoModel(
+            PhotoData(
+                original_filename=Path("tmp"),
+            )
+        )
 
         with qtbot.waitSignal(photo1.on_original_filename_changed, raising=True):
             photo1.original_filename = Path("img_001.jpg")

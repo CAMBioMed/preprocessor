@@ -2,17 +2,18 @@ from pathlib import Path
 from typing import Any, cast
 
 from PySide6.QtCore import Signal
-from pydantic import BaseModel, field_validator, ValidationError
+from pydantic import BaseModel, field_validator
 
 from preprocessor.model import Point2
 from preprocessor.model.camera_model import CameraMatrix
 from preprocessor.model.qmodel import QModel
+from preprocessor.utils import update_basepath
 
 
 class PhotoData(BaseModel):
     """The data for a single photo in the project, used for serialization."""
 
-    original_filename: Path | None = None
+    original_filename: Path
     """The original path to the photo file, if set."""
     quadrat_corners: list[Point2] = []
     """The corners of the quadrat in the photo, if set."""
@@ -68,13 +69,18 @@ class PhotoModel(QModel[PhotoData]):
         super().__init__(model_cls=PhotoData, data=data)
 
     @property
-    def original_filename(self) -> Path | None:
+    def original_filename(self) -> Path:
         """The original filename of the photo."""
         return self._data.original_filename
 
     @original_filename.setter
-    def original_filename(self, value: Path | None) -> None:
+    def original_filename(self, value: Path) -> None:
         self._set_field("original_filename", value)
+
+    @property
+    def name(self) -> str:
+        """The filename of the photo, derived from the original path."""
+        return self.original_filename.name
 
     @property
     def quadrat_corners(self) -> list[Point2] | None:
@@ -121,43 +127,5 @@ class PhotoModel(QModel[PhotoData]):
     def distortion_coefficients(self, value: tuple[Point2, ...] | None) -> None:
         self._set_field("distortion_coefficients", value)
 
-    def write_to_file(self, path: str | Path) -> None:
-        """
-        Write the serialized project JSON to the given file path.
-        Parent directories will be created if necessary.
-        """
-        p = Path(path)
-        if p.parent:
-            p.parent.mkdir(parents=True, exist_ok=True)
-        json_str = self.write_to_json()
-        with p.open("w", encoding="utf-8") as fh:
-            fh.write(json_str)
-        self.file = Path(path)
-        self.mark_clean()
-
-    def write_to_json(self) -> str:
-        """Return a JSON string representation of the model."""
-        return self._data.model_dump_json()
-
-    @classmethod
-    def read_from_file(cls: type["PhotoModel"], path: str | Path) -> "PhotoModel":
-        """
-        Load project JSON from the given file path and apply via deserialize().
-        Raises FileNotFoundError if the path does not exist.
-        """
-        p = Path(path)
-        if not p.exists():
-            raise FileNotFoundError(str(p))
-        with p.open("r", encoding="utf-8") as fh:
-            json_str = fh.read()
-        return cls.read_from_json(json_str)
-
-    @classmethod
-    def read_from_json(cls: type["PhotoModel"], json_str: str) -> "PhotoModel":
-        """Load model data from a JSON string."""
-        try:
-            new_data = PhotoData.model_validate_json(json_str)  # type: ignore[arg-type]
-        except ValidationError as exc:
-            raise ValueError(str(exc)) from exc
-
-        return PhotoModel(data=new_data)
+    def update_paths_relative_to(self, old_basepath: Path, new_basepath: Path) -> None:
+        self.original_filename = update_basepath(old_basepath, new_basepath, self.original_filename)

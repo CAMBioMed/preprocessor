@@ -11,6 +11,8 @@ from typing import ClassVar, Any
 from preprocessor.model.qmodel import QModel
 import contextlib
 
+from preprocessor.utils import update_basepath
+
 
 class ProjectData(BaseModel):
     """The data for a project, including project-specific settings."""
@@ -97,7 +99,9 @@ class ProjectModel(QModel[ProjectData]):
     @file.setter
     def file(self, path: Path) -> None:
         if self._file != path:
+            old_path = self._file
             self._file = path
+            self.update_paths_relative_to(old_basepath=old_path.parent, new_basepath=path.parent)
             self.on_file_changed.emit(path)
 
     @property
@@ -151,6 +155,12 @@ class ProjectModel(QModel[ProjectData]):
         with contextlib.suppress(Exception):
             self.on_changed.emit()
 
+    def update_paths_relative_to(self, old_basepath: Path, new_basepath: Path) -> None:
+        for photo in self._photos:
+            photo.update_paths_relative_to(old_basepath, new_basepath)
+        for camera in self._cameras:
+            camera.update_paths_relative_to(old_basepath, new_basepath)
+
     def write_to_file(self, path: str | Path) -> None:
         """
         Write the serialized project JSON to the given file path.
@@ -159,15 +169,17 @@ class ProjectModel(QModel[ProjectData]):
         p = Path(path)
         if p.parent:
             p.parent.mkdir(parents=True, exist_ok=True)
+        # First we update the `file` attribute, so that all other paths in the project are updated accordingly
+        self.file = Path(path)
+        # Only then do we write out the changes
         json_str = self.write_to_json()
         with p.open("w", encoding="utf-8") as fh:
             fh.write(json_str)
-        self.file = Path(path)
         self.mark_clean()
 
     def write_to_json(self) -> str:
         """Return a JSON string representation of the model."""
-        return self._data.model_dump_json()
+        return self._data.model_dump_json(indent=2)
 
     @classmethod
     def read_from_file(cls: type["ProjectModel"], path: str | Path) -> "ProjectModel":
@@ -191,3 +203,14 @@ class ProjectModel(QModel[ProjectData]):
             raise ValueError(str(exc)) from exc
 
         return ProjectModel(file=Path(path), data=new_data)
+
+    def get_absolute_path(self, path: Path) -> Path:
+        """Get the absolute file path of the photo, resolved from original_filename relative to the given basepath."""
+        return (self.file.parent / path).resolve()
+
+    def append_photo_model(self, path: Path) -> PhotoModel:
+        """Helper function to create a new PhotoModel with the given path and add it to the project."""
+        relative_path = update_basepath(None, self.file.parent, path)
+        photo = PhotoModel(PhotoData(original_filename=relative_path))
+        self.photos.append(photo)
+        return photo

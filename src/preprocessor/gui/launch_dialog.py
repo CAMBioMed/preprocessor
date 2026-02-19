@@ -30,7 +30,6 @@ class LaunchDialog(QDialog):
     def _handle_new_project_action(self) -> None:
         new_project = new_project_dialog(self, None)
         if new_project is None:
-            self.reject()
             return
         self.model.current_project = new_project
         self.accept()
@@ -38,7 +37,6 @@ class LaunchDialog(QDialog):
     def _handle_open_project_action(self) -> None:
         new_project = open_project_dialog(self, None)
         if new_project is None:
-            self.reject()
             return
         self.model.current_project = new_project
         self.accept()
