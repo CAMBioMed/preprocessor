@@ -1,8 +1,7 @@
-from pathlib import Path
-from typing import TypeVar, Any, Self
+from typing import TypeVar, Any
 
 from PySide6.QtCore import QObject, Signal
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 import contextlib
 
 M = TypeVar("M", bound=BaseModel)
@@ -56,7 +55,6 @@ class QModel[M: BaseModel](QObject):
         This is called after deserialization to ensure that the interactive list models reflect the current data.
         """
         # This method is meant to be overridden by subclasses that have QListModel children.
-        pass
 
     @property
     def dirty(self) -> bool:
@@ -104,7 +102,8 @@ class QModel[M: BaseModel](QObject):
         Emits per-field and on_changed signals only if the validated model differs from the previous one.
         """
         if field not in self._model_cls.model_fields:
-            raise ValueError(f"{field!r} is not a valid field in this model's data")
+            msg = f"{field!r} is not a valid field in this model's data"
+            raise ValueError(msg)
 
         # We mutate the existing model, such that all references to it get the updated data
         old_data = self._data.model_copy()

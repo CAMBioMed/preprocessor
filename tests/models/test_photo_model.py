@@ -1,11 +1,10 @@
 import pytest
-import unittest
 from pathlib import Path
 
 from PySide6.QtCore import Slot
 from pytestqt.qtbot import QtBot
 
-from preprocessor.model.photo_model import PhotoModel, PhotoData
+from preprocessor.model.photo_model import PhotoModel
 
 
 class TestPhotoModel:

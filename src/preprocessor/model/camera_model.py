@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, cast, ClassVar
 
 from PySide6.QtCore import Signal
-from pydantic import BaseModel, field_validator, Field, ValidationError
+from pydantic import BaseModel, field_validator, ValidationError
 
 from preprocessor.model import Point2
 from preprocessor.model.qmodel import QModel
@@ -33,7 +33,7 @@ class CameraData(BaseModel):
 
     @field_validator("model_version", mode="after")
     @classmethod
-    def _validate_model_version(cls: type["CameraData"], v: int) -> int:  # noqa: ANN401
+    def _validate_model_version(cls: type["CameraData"], v: int) -> int:
         if v != cls.SERIAL_VERSION:
             msg = f"Unsupported model_version {v}; expected {cls.SERIAL_VERSION}"
             raise ValueError(msg)
@@ -41,7 +41,7 @@ class CameraData(BaseModel):
 
     @field_validator("camera_matrix", mode="after")
     @classmethod
-    def _validate_camera_matrix(cls: type["CameraData"], v: CameraMatrix | None) -> CameraMatrix | None:  # noqa: ANN401
+    def _validate_camera_matrix(cls: type["CameraData"], v: CameraMatrix | None) -> CameraMatrix | None:
         if v is None:
             return None
         try:

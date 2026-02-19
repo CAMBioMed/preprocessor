@@ -95,7 +95,7 @@ class TestProjectModel(unittest.TestCase):
             # Assert file exists and JSON matches serialize()
             assert path.exists()
             with path.open("r", encoding="utf-8") as fh:
-                data = json.load(fh)
+                json.load(fh)
 
             # Act: load from file
             new_project2 = ProjectModel.read_from_file(path)

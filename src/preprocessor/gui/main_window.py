@@ -1,4 +1,3 @@
-import contextlib
 import warnings
 
 from PySide6.QtCore import Qt
@@ -17,7 +16,7 @@ from preprocessor.gui.ui_main import Ui_Main
 from preprocessor.gui.utils import icon_from_resource
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
-from preprocessor.model.project_model import ProjectModel, ProjectData
+from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.detect_quadrat import detect_quadrat
 from preprocessor.processing.load_image import load_image
 from preprocessor.processing.params import defaultParams

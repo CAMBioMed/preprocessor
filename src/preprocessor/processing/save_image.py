@@ -4,7 +4,6 @@ from pathlib import Path
 import cv2
 from cv2.typing import MatLike
 
-from preprocessor.processing.detect_quadrat import QuadratDetectionResult
 
 logger = logging.getLogger(__name__)
 

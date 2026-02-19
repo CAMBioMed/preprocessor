@@ -1,13 +1,12 @@
 from PySide6.QtCore import Signal
-from pydantic import BaseModel, Field, field_validator, ValidationError
+from pydantic import BaseModel, field_validator, ValidationError
 
 from preprocessor.model.camera_model import CameraModel, CameraData
 from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel, PhotoData
 
-import json
 from pathlib import Path
-from typing import ClassVar, Any, Self
+from typing import ClassVar, Any
 
 from preprocessor.model.qmodel import QModel
 import contextlib
@@ -34,7 +33,7 @@ class ProjectData(BaseModel):
 
     @field_validator("model_version", mode="after")
     @classmethod
-    def _validate_model_version(cls: type["ProjectData"], v: int) -> int:  # noqa: ANN401
+    def _validate_model_version(cls: type["ProjectData"], v: int) -> int:
         if v != cls.SERIAL_VERSION:
             msg = f"Unsupported model_version {v}; expected {cls.SERIAL_VERSION}"
             raise ValueError(msg)
@@ -42,7 +41,7 @@ class ProjectData(BaseModel):
 
     @field_validator("target_width", mode="after")
     @classmethod
-    def _validate_target_width(cls: type["ProjectData"], v: int | None) -> int | None:  # noqa: ANN401
+    def _validate_target_width(cls: type["ProjectData"], v: int | None) -> int | None:
         if v is not None and v < 1:
             msg = "target_width must be non-negative and non-zero"
             raise ValueError(msg)
@@ -50,7 +49,7 @@ class ProjectData(BaseModel):
 
     @field_validator("target_height", mode="after")
     @classmethod
-    def _validate_target_height(cls: type["ProjectData"], v: int | None) -> int | None:  # noqa: ANN401
+    def _validate_target_height(cls: type["ProjectData"], v: int | None) -> int | None:
         if v is not None and v < 1:
             msg = "target_height must be non-negative and non-zero"
             raise ValueError(msg)

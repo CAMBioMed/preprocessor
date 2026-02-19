@@ -1,12 +1,11 @@
 import logging
 from pathlib import Path
 
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox
 
 from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
 from preprocessor.model.application_model import ApplicationModel
-from preprocessor.model.project_model import ProjectModel, ProjectData
+from preprocessor.model.project_model import ProjectModel
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +106,8 @@ def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pr
 
 def save_project_dialog(parent: QWidget, project: ProjectModel, path: Path) -> bool:
     """
-    Save the given project, prompting for a file path if it doesn't have one yet; return True if successful, False if canceled or failed.
+    Save the given project, prompting for a file path if it doesn't have one yet;
+    return True if successful, False if canceled or failed.
     """
     try:
         project.write_to_file(path)
@@ -123,9 +123,7 @@ def save_project_dialog(parent: QWidget, project: ProjectModel, path: Path) -> b
 
 
 def save_project_as_dialog(parent: QWidget, project: ProjectModel) -> bool:
-    """
-    Show a file dialog to save the given project, and return True if successful, False if canceled or failed.
-    """
+    """Show a file dialog to save the given project, and return True if successful, False if canceled or failed."""
     path, _ = QFileDialog.getSaveFileName(
         parent,
         "Save Project",
@@ -157,7 +155,4 @@ def save_if_dirty_dialog(parent: QWidget, project: ProjectModel | None) -> bool:
     clicked_button = msg_box.clickedButton()
     if clicked_button == save_button:
         return save_project_dialog(parent, project, project.file)
-    elif clicked_button == discard_button:
-        return True
-    else:  # cancel
-        return False
+    return clicked_button == discard_button

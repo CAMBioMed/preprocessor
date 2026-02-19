@@ -15,7 +15,7 @@ from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (
     QApplication,
-    QMessageBox, QWidget, QFileDialog, QDialog,
+    QMessageBox, QDialog,
 )
 
 import logging

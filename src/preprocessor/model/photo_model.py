@@ -27,7 +27,7 @@ class PhotoData(BaseModel):
 
     @field_validator("quadrat_corners", mode="after")
     @classmethod
-    def _validate_quadrat_corners(cls: type["PhotoData"], v: list[Point2]) -> list[Point2]:  # noqa: ANN401
+    def _validate_quadrat_corners(cls: type["PhotoData"], v: list[Point2]) -> list[Point2]:
         if v is None:
             return []
         try:
@@ -42,7 +42,7 @@ class PhotoData(BaseModel):
 
     @field_validator("camera_matrix", mode="after")
     @classmethod
-    def _validate_camera_matrix(cls: type["PhotoData"], v: CameraMatrix | None) -> CameraMatrix | None:  # noqa: ANN401
+    def _validate_camera_matrix(cls: type["PhotoData"], v: CameraMatrix | None) -> CameraMatrix | None:
         if v is None:
             return None
         try:
