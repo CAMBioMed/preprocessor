@@ -76,7 +76,7 @@ class Ui_LaunchDialog(object):
     # setupUi
 
     def retranslateUi(self, LaunchDialog):
-        LaunchDialog.setWindowTitle(QCoreApplication.translate("LaunchDialog", u"Select Project...", None))
+        LaunchDialog.setWindowTitle(QCoreApplication.translate("LaunchDialog", u"CAMBioMed Preprocessor", None))
         self.grpRecent.setTitle(QCoreApplication.translate("LaunchDialog", u"Recent Projects", None))
         self.btnNewProject.setText(QCoreApplication.translate("LaunchDialog", u"New Project...", None))
         self.btnBrowse.setText(QCoreApplication.translate("LaunchDialog", u"Browse Project...", None))
