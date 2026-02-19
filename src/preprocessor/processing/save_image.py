@@ -4,8 +4,6 @@ from pathlib import Path
 import cv2
 from cv2.typing import MatLike
 
-from preprocessor.processing.detect_quadrat import QuadratDetectionResult
-from preprocessor.processing.json import serialize_photo_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -28,36 +26,6 @@ def save_image(path: Path, img: MatLike | None, quality: int = 95, is_rgb: bool 
         return False
 
     ok = _save_jpeg_image(path, img, quality=q, is_rgb=is_rgb)
-    return ok
-
-
-def save_image_and_metadata(path: str, result: QuadratDetectionResult, quality: int = 95, is_rgb: bool = False) -> bool:
-    """
-    Save image data to the given path as JPEG,
-    and saves a JSON file alongside it with the same name
-    containing the parameters.
-    - `quality` : JPEG quality, 0-100 (higher = better)
-    - `is_rgb` : Whether the input is RGB (instead of BGR)
-    Returns True on success.
-    """
-    # Clamp quality
-    q = max(0, min(100, int(quality)))
-
-    # Save JPEG image
-    img: MatLike | None = result.final
-    if img is None:
-        logger.error("No image data to save")
-        return False
-
-    ok = _save_jpeg_image(Path(path), img, quality=q, is_rgb=is_rgb)
-    if not ok:
-        return False
-
-    # Save JSON file with parameters
-    json_path = f"{path}.json"
-    json_data = serialize_photo_metadata(result, q)
-    ok = _write_json_file(json_path, json_data)
-
     return ok
 
 
@@ -92,16 +60,3 @@ def _save_jpeg_image(path: Path, img: MatLike, quality: int, is_rgb: bool = Fals
     else:
         logger.debug(f"Saved JPEG image (quality={quality}): {path}")
     return bool(ok)
-
-
-def _write_json_file(path: str, data: dict) -> bool:
-    import json  # noqa: PLC0415
-
-    try:
-        with open(path, "w") as f:
-            json.dump(data, f, indent=4)
-        logger.debug(f"Saved JSON file: {path}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to save JSON file: {path}, error: {e}")
-        return False

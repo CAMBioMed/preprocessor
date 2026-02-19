@@ -21,6 +21,7 @@ dependencies = [
   "pillow>=12.0.0",
   "pydantic>=2.12.5",
   "pyside6>=6.10.1",
+  "pytest-qt>=4.5.0",
   "qimage2ndarray>=1.10.0",
   "scikit-learn>=1.7.2",
 ]
@@ -206,10 +207,11 @@ section_whitelines = 1
 [tool.pyside6-project]
 files = [
     "src/preprocessor/__main__.py",
+    "src/preprocessor/gui/export_dialog.ui",
     "src/preprocessor/gui/hsv_threshold.ui",
+    "src/preprocessor/gui/launch_dialog.ui",
     "src/preprocessor/gui/main.ui",
     "src/preprocessor/gui/properties_dock.ui",
-    "src/preprocessor/gui/export_dialog.ui",
 ]
 
 # Publishing

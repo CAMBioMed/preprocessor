@@ -1,3 +1,5 @@
+import warnings
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
 from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QDialog
@@ -5,6 +7,12 @@ from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.export_dialog import ExportDialog
+from preprocessor.gui.launch_dialog import (
+    new_project_dialog,
+    open_project_dialog,
+    save_project_dialog,
+    save_project_as_dialog,
+)
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
@@ -15,7 +23,7 @@ from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.detect_quadrat import detect_quadrat
 from preprocessor.processing.load_image import load_image
-from preprocessor.processing.params import QuadratDetectionParams, defaultParams
+from preprocessor.processing.params import defaultParams
 
 
 class MainWindow(QMainWindow):
@@ -28,8 +36,9 @@ class MainWindow(QMainWindow):
     """The dock widget showing image thumbnails."""
     central_widget: PhotoEditorWidget
     """The central widget showing the image."""
+    _bound_project: ProjectModel | None = None
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.ui = Ui_Main()
         self.ui.setupUi(self)
@@ -38,33 +47,32 @@ class MainWindow(QMainWindow):
         self._create_thumbnail_dock()
         self._create_photo_editor()
 
-        self.model = ApplicationModel()
+        self.model = model
         self._connect_signals()
 
         self.read_settings()
-        self._update_project_actions()
-        self._bound_project: ProjectModel | None = None
-        self._bind_project_signals(self.model.current_project)
-        self._update_window_title()
+        self._handle_current_project_changed(self.model.current_project)
 
     def _update_project_actions(self) -> None:
         """Enable or disable file actions depending on whether a project is open."""
         has_project = self.model.current_project is not None
         self.ui.menuFile_SaveProject.setEnabled(has_project)
         self.ui.menuFile_SaveProjectAs.setEnabled(has_project)
-        self.ui.menuFile_CloseProject.setEnabled(has_project)
         self.ui.menuFile_ExportAll.setEnabled(has_project)
         self.thumbnail_dock.ui.addPhotoAction.setEnabled(has_project)
         self.thumbnail_dock.ui.removePhotoAction.setEnabled(has_project)
 
-    def _bind_project_signals(self, project: ProjectModel | None) -> None:
+    def _bind_project_signals(self, project: ProjectModel) -> None:
         """Connect/disconnect signals for the currently bound project."""
         # Disconnect previous project
         old_project = self._bound_project
         if old_project is not None:
-            old_project.on_file_changed.disconnect(self._handle_project_file_changed)
-            old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
-            old_project.photos.on_changed.disconnect(self._handle_photos_changed)
+            with warnings.catch_warnings():
+                # Raises a RuntimeWarning when the old project was never connected (i.e. the initial empty project)
+                warnings.filterwarnings("ignore", category=RuntimeWarning)
+                old_project.on_file_changed.disconnect(self._handle_project_file_changed)
+                old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
+                old_project.photos.on_changed.disconnect(self._handle_photos_changed)
 
         self._bound_project = project
         # Connect new project
@@ -89,9 +97,16 @@ class MainWindow(QMainWindow):
         photo_count = len(proj.photos)
         dirty_marker = "*" if proj.dirty else ""
         project_title = f"{name} ({photo_count} photos){dirty_marker}"
-        photo_title = f"{Path(self.model.current_photo.original_filename).name}"\
-            if self.model.current_photo and self.model.current_photo.original_filename else "<none>"
+        photo_title = (
+            f"{Path(self.model.current_photo.original_filename).name}"
+            if self.model.current_photo and self.model.current_photo.original_filename
+            else "<none>"
+        )
         self.setWindowTitle(f"{base_title} — {project_title} {photo_title}")
+
+    def _update_thumbnails(self) -> None:
+        if self.model.current_project is not None:
+            self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
@@ -145,7 +160,6 @@ class MainWindow(QMainWindow):
         self.ui.menuFile_OpenProject.triggered.connect(self._handle_open_project_action)
         self.ui.menuFile_SaveProject.triggered.connect(self._handle_save_project_action)
         self.ui.menuFile_SaveProjectAs.triggered.connect(self._handle_save_project_as_action)
-        self.ui.menuFile_CloseProject.triggered.connect(self._handle_close_project_action)
         self.ui.menuFile_ExportAll.triggered.connect(self._handle_export_all_action)
         self.ui.menuFile_Exit.triggered.connect(self.close)
 
@@ -165,73 +179,29 @@ class MainWindow(QMainWindow):
         self.model.on_current_photo_changed.connect(self._handle_current_photo_changed)
 
     def _handle_new_project_action(self) -> None:
-        new_project = ProjectModel()
-        self.model.current_project = new_project
+        new_project = new_project_dialog(self, self.model.current_project)
+        if new_project is not None:
+            self.model.current_project = new_project
 
     def _handle_open_project_action(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, "Open Project", "", "Project Files (*.pbproj);;All Files (*)")
-        if not path:
-            return
-        if self.model.current_project is not None:
-            # TODO: On unsaved changes, maybe the user doesn't want to open another project
-            #  Thus cancel
-            self._handle_close_project_action()
-        new_project = ProjectModel()
-        new_project.file = Path(path)
-        try:
-            new_project.load_from_file(path)
-        except ValueError as exc:
-            # Likely a serialization version mismatch or corrupt file — inform the user
-            QMessageBox.critical(
-                self,
-                "Open Project Failed",
-                f"Failed to open project file:\n{path}\n\n{exc}",
-            )
-            return
-        self.model.current_project = new_project
+        new_project = open_project_dialog(self, self.model.current_project)
+        if new_project is not None:
+            self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:
-        if self.model.current_project is None:
-            return
-        if self.model.current_project.file is None:
-            self._handle_save_project_as_action()
-            return
-        self.model.current_project.save_to_file(self.model.current_project.file)
+        save_project_dialog(self, self.model.current_project, self.model.current_project.file)
 
     def _handle_save_project_as_action(self) -> None:
-        if self.model.current_project is None:
-            return
-        path, _ = QFileDialog.getSaveFileName(self, "Save Project As", "", "Project Files (*.pbproj);;All Files (*)")
-        if not path:
-            return
-        self.model.current_project.save_to_file(path)
-        self.model.current_project.file = Path(path)
-
-    def _handle_close_project_action(self) -> None:
-        if self.model.current_project is not None and self.model.current_project.dirty:
-            result = QMessageBox.question(
-                self,
-                "Unsaved Changes",
-                "The current project has unsaved changes. Do you want to save them before closing?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
-            )
-            if result == QMessageBox.StandardButton.Yes:
-                self._handle_save_project_action()
-            elif result == QMessageBox.StandardButton.Cancel:
-                return
-        self.model.current_project = None
+        save_project_as_dialog(self, self.model.current_project)
 
     def _handle_export_all_action(self) -> None:
-        if self.model.current_project is None:
-            return
         dialog = ExportDialog(self.model.current_project, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             pass
 
     def _handle_detect_quadrat_action(self) -> None:
-        if self.model.current_project is None or self.model.current_photo is None:
+        if self.model.current_photo is None:
             return
-        # TODO: Detect quadrat
 
         img = load_image(str(self.model.current_photo.original_filename))
         if img is None:
@@ -278,21 +248,20 @@ class MainWindow(QMainWindow):
 
     def _handle_photos_changed(self) -> None:
         """Handle when the current project's photos change."""
-        if self.model.current_project is None:
-            return
         self._update_window_title()
-        self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
+        self._update_thumbnails()
 
     def _handle_photo_selection_changed(self, selected: list[PhotoModel]) -> None:
         """Handle when the selected photo changes."""
         # TODO: Support multiple selection?
         self.model.current_photo = selected[0] if selected else None
 
-    def _handle_current_project_changed(self, project: ProjectModel | None) -> None:
+    def _handle_current_project_changed(self, project: ProjectModel) -> None:
         """Handle when the current project changes."""
         self._bind_project_signals(project)
         self._update_project_actions()
         self._update_window_title()
+        self._update_thumbnails()
 
     def _handle_current_photo_changed(self, photo: PhotoModel | None) -> None:
         """Handle when the current photo changes."""
@@ -312,6 +281,5 @@ class MainWindow(QMainWindow):
 
     def read_settings(self) -> None:
         """Read window settings from persistent storage."""
-        self.model.read_settings()
         self.restoreGeometry(self.model.main_window_geometry)
         self.restoreState(self.model.main_window_state)

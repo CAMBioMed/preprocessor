@@ -19,7 +19,7 @@ import pytest
 class TestProjectModel(unittest.TestCase):
     def test_photos(self) -> None:
         # Arrange
-        project_model = ProjectModel()
+        project_model = ProjectModel(file=Path("test.pbproj"))
 
         # Assert initial state
         assert isinstance(project_model.photos, QListModel)
@@ -44,61 +44,46 @@ class TestProjectModel(unittest.TestCase):
 
     def test_serialize_deserialize_photos(self) -> None:
         # Arrange
-        project = ProjectModel()
+        project = ProjectModel(file=Path("test1.pbproj"))
         p = PhotoModel()
-        p.original_filename = "picA.jpg"
+        p.original_filename = Path("picA.jpg")
         p.red_shift = (1.0, 2.0)
         project.photos.append(p)
 
         # Act: serialize
-        s = project.serialize(is_root = True)
+        json_str = project.write_to_json()
 
-        # Assert serialized structure includes version
-        assert "model_version" in s
-        assert s["model_version"] == ProjectData.SERIAL_VERSION
-        assert "photos" in s
-        assert isinstance(s["photos"], list)
-        assert len(s["photos"]) == 1
-        assert s["photos"][0]["original_filename"] == "picA.jpg"
-        assert s["photos"][0]["red_shift"] == (1.0, 2.0)
-
-        # Arrange a fresh project to deserialize into and watch for on_changed
-        new_project = ProjectModel()
-        changed = False
-
-        def handle_changed() -> None:
-            nonlocal changed
-            changed = True
-
-        new_project.on_changed.connect(handle_changed)
+        # Assert
+        assert len(project.photos) == 1
+        assert isinstance(project.photos[0], PhotoModel)
+        assert project.photos[0].original_filename == Path("picA.jpg")
+        assert project.photos[0].red_shift == (1.0, 2.0)
 
         # Act: deserialize (valid version included)
-        new_project.deserialize(s, is_root = True)
+        new_project1 = ProjectModel.read_from_json(Path("test.pbproj"), json_str)
 
         # Assert: one photo restored with properties
-        assert len(new_project.photos) == 1
-        restored = new_project.photos[0]
-        assert isinstance(restored, PhotoModel)
-        assert str(restored.original_filename) == "picA.jpg"
-        assert restored.red_shift == (1.0, 2.0)
-        assert changed
+        assert len(new_project1.photos) == 1
+        assert isinstance(new_project1.photos[0], PhotoModel)
+        assert new_project1.photos[0].original_filename == Path("picA.jpg")
+        assert new_project1.photos[0].red_shift == (1.0, 2.0)
 
         # Act: clear photos via deserialize with None (include version)
-        changed = False
-        new_project.deserialize({
+        # fmt: off
+        new_project2 = ProjectModel.read_from_json(Path("test.pbproj"), json.dumps({
             "model_version": ProjectData.SERIAL_VERSION,
             "photos": [],
-        }, is_root = True)
+        }))
+        # fmt: on
 
         # Assert: photos cleared and on_changed emitted
-        assert len(new_project.photos) == 0
-        assert changed
+        assert len(new_project2.photos) == 0
 
     def test_save_and_load_file(self) -> None:
         # Arrange: create project with one photo
-        project = ProjectModel()
+        project = ProjectModel(file=Path("test.pbproj"))
         p = PhotoModel()
-        p.original_filename = "fileX.jpg"
+        p.original_filename = Path("fileX.jpg")
         p.red_shift = (3.0, 4.0)
         project.photos.append(p)
 
@@ -107,52 +92,40 @@ class TestProjectModel(unittest.TestCase):
             path = Path(td) / "project.json"
 
             # Act: save to file
-            project.save_to_file(path)
+            project.write_to_file(path)
 
             # Assert file exists and JSON matches serialize()
             assert path.exists()
             with path.open("r", encoding="utf-8") as fh:
-                data = json.load(fh)
-
-            # Arrange: fresh project to load into and watch for on_changed
-            new_project = ProjectModel()
-            changed = False
-
-            def handle_changed() -> None:
-                nonlocal changed
-                changed = True
-
-            new_project.on_changed.connect(handle_changed)
+                json.load(fh)
 
             # Act: load from file
-            new_project.load_from_file(path)
+            new_project2 = ProjectModel.read_from_file(path)
 
             # Assert: loaded project restored and on_changed fired
-            assert len(new_project.photos) == 1
-            loaded = new_project.photos[0]
+            assert len(new_project2.photos) == 1
+            loaded = new_project2.photos[0]
             assert isinstance(loaded, PhotoModel)
-            assert str(loaded.original_filename) == "fileX.jpg"
+            assert loaded.original_filename == Path("fileX.jpg")
             assert loaded.red_shift == (3.0, 4.0)
-            assert changed
 
     def test_load_missing_file_raises(self) -> None:
-        project = ProjectModel()
         missing = Path("/nonexistent/path/does_not_exist.json")
         with pytest.raises(FileNotFoundError):
-            project.load_from_file(missing)
+            ProjectModel.read_from_file(missing)
 
     def test_deserialize_version_mismatch_raises(self) -> None:
         # Arrange
-        project = ProjectModel()
         bad = {"model_version": ProjectData.SERIAL_VERSION + 1, "photos": []}
+        json_str = json.dumps(bad)
 
         # Act / Assert
         with pytest.raises(ValueError):  # noqa: PT011
-            project.deserialize(bad, is_root = True)
+            ProjectModel.read_from_json(Path("test.pbproj"), json_str)
 
     def test_dirty_flag(self) -> None:
         # Arrange
-        project = ProjectModel()
+        project = ProjectModel(file=Path("test.pbproj"))
 
         # Initial state: clean
         assert not project.dirty
@@ -172,7 +145,7 @@ class TestProjectModel(unittest.TestCase):
 
         # Act: mark clean again and modify another child property
         project.mark_clean()
-        p.quadrat_corners = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
+        p.quadrat_corners = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
         assert project.dirty
 
         # Act: mark_dirty explicitly

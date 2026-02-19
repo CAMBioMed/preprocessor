@@ -204,20 +204,15 @@ class QListModel[E: QModel](QObject):
             # wire/unwire child change handlers
             if child_changed_callback is not None:
                 for a in added:
-                    try:
+                    with contextlib.suppress(Exception):
                         a.on_changed.connect(child_changed_callback)  # type: ignore[attr-defined]
                         a.on_dirty_changed.connect(self._handle_child_dirty_changed)
-                    except Exception:
-                        pass
                 for r in removed:
-                    try:
+                    with contextlib.suppress(Exception):
                         r.on_changed.disconnect(child_changed_callback)  # type: ignore[attr-defined]
                         r.on_dirty_changed.disconnect(self._handle_child_dirty_changed)
-                    except Exception:
-                        pass
 
-            payload = [item._data.model_dump() for item in self._items] if len(self._items) > 0 else []
-            # validate & update owner model (marks owner dirty if changed)
+            payload = [item._data for item in self._items] if len(self._items) > 0 else []
             owner._set_field(field_name, payload)
 
         # connect handler

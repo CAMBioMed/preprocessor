@@ -1,11 +1,10 @@
 from PySide6.QtCore import Signal
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator, ValidationError
 
 from preprocessor.model.camera_model import CameraModel, CameraData
 from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel, PhotoData
 
-import json
 from pathlib import Path
 from typing import ClassVar, Any
 
@@ -19,8 +18,8 @@ class ProjectData(BaseModel):
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
 
-    file: Path | None = Field(default=None, exclude=True)
-    """The file path of the project file, or None if not saved yet. This is not serialized/deserialized."""
+    model_version: int = SERIAL_VERSION
+    """The version of the data model, used for compatibility checks during deserialization."""
     export_path: Path | None = None
     """The file path where the photos will be exported to, or None if not set."""
     target_width: int | None = None
@@ -32,67 +31,29 @@ class ProjectData(BaseModel):
     cameras: list[CameraData] = []
     """The list of cameras in the project."""
 
+    @field_validator("model_version", mode="after")
     @classmethod
-    @field_validator("file", mode="before")
-    def _validate_file(cls: type["ProjectData"], v: Any) -> Path | None:  # noqa: ANN401
-        if v is None:
-            return None
-        if isinstance(v, Path):
-            return v
-        # Coerce strings; raise helpful error for other types
-        try:
-            s = str(v)
-        except Exception as exc:
-            msg = "file must be a path-like string or None"
-            raise ValueError(msg) from exc
-        s = s.strip()
-        return Path(s) if s != "" else None
+    def _validate_model_version(cls: type["ProjectData"], v: int) -> int:
+        if v != cls.SERIAL_VERSION:
+            msg = f"Unsupported model_version {v}; expected {cls.SERIAL_VERSION}"
+            raise ValueError(msg)
+        return v
 
+    @field_validator("target_width", mode="after")
     @classmethod
-    @field_validator("export_path", mode="before")
-    def _validate_export_path(cls: type["ProjectData"], v: Any) -> Path | None:  # noqa: ANN401
-        if v is None:
-            return None
-        if isinstance(v, Path):
-            return v
-        # Coerce strings; raise helpful error for other types
-        try:
-            s = str(v)
-        except Exception as exc:
-            msg = "export_path must be a path-like string or None"
-            raise ValueError(msg) from exc
-        s = s.strip()
-        return Path(s) if s != "" else None
-
-    @classmethod
-    @field_validator("target_width", mode="before")
-    def _validate_target_width(cls: type["ProjectData"], v: Any) -> int | None:  # noqa: ANN401
-        if v is None:
-            return None
-        try:
-            iv = int(v)
-        except Exception as exc:
-            msg = "target_width must be an integer or None"
-            raise ValueError(msg) from exc
-        if iv >= 1:
+    def _validate_target_width(cls: type["ProjectData"], v: int | None) -> int | None:
+        if v is not None and v < 1:
             msg = "target_width must be non-negative and non-zero"
             raise ValueError(msg)
-        return iv
+        return v
 
+    @field_validator("target_height", mode="after")
     @classmethod
-    @field_validator("target_height", mode="before")
-    def _validate_target_height(cls: type["ProjectData"], v: Any) -> int | None:  # noqa: ANN401
-        if v is None:
-            return None
-        try:
-            iv = int(v)
-        except Exception as exc:
-            msg = "target_height must be an integer or None"
-            raise ValueError(msg) from exc
-        if iv >= 1:
+    def _validate_target_height(cls: type["ProjectData"], v: int | None) -> int | None:
+        if v is not None and v < 1:
             msg = "target_height must be non-negative and non-zero"
             raise ValueError(msg)
-        return iv
+        return v
 
 
 class ProjectModel(QModel[ProjectData]):
@@ -101,11 +62,14 @@ class ProjectModel(QModel[ProjectData]):
     on_target_width_changed: Signal = Signal(object)
     on_target_height_changed: Signal = Signal(object)
 
+    _file: Path
     _photos: QListModel[PhotoModel]
     _cameras: QListModel[CameraModel]
 
-    def __init__(self, data: ProjectData | dict[str, Any] | None = None) -> None:
+    def __init__(self, file: Path, data: ProjectData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=ProjectData, data=data)
+
+        self._file = file
 
         # Create QListModel containers for interactive use
         self._photos = QListModel[PhotoModel](parent=self)
@@ -122,17 +86,19 @@ class ProjectModel(QModel[ProjectData]):
         self._populate_lists_from_data()
 
     @property
-    def file(self) -> Path | None:
+    def file(self) -> Path:
         """
-        The file path where the project is saved, or None if not saved yet.
+        The file path where the project is or will be saved.
 
         This property is not serialized/deserialized.
         """
-        return self._data.file
+        return self._file
 
     @file.setter
-    def file(self, path: Path | None) -> None:
-        self._set_field("file", path)
+    def file(self, path: Path) -> None:
+        if self._file != path:
+            self._file = path
+            self.on_file_changed.emit(path)
 
     @property
     def export_path(self) -> Path | None:
@@ -185,7 +151,7 @@ class ProjectModel(QModel[ProjectData]):
         with contextlib.suppress(Exception):
             self.on_changed.emit()
 
-    def save_to_file(self, path: str | Path) -> None:
+    def write_to_file(self, path: str | Path) -> None:
         """
         Write the serialized project JSON to the given file path.
         Parent directories will be created if necessary.
@@ -193,12 +159,18 @@ class ProjectModel(QModel[ProjectData]):
         p = Path(path)
         if p.parent:
             p.parent.mkdir(parents=True, exist_ok=True)
-        data = self.serialize(is_root = True)
+        json_str = self.write_to_json()
         with p.open("w", encoding="utf-8") as fh:
-            json.dump(data, fh, indent=2)
+            fh.write(json_str)
+        self.file = Path(path)
         self.mark_clean()
 
-    def load_from_file(self, path: str | Path) -> None:
+    def write_to_json(self) -> str:
+        """Return a JSON string representation of the model."""
+        return self._data.model_dump_json()
+
+    @classmethod
+    def read_from_file(cls: type["ProjectModel"], path: str | Path) -> "ProjectModel":
         """
         Load project JSON from the given file path and apply via deserialize().
         Raises FileNotFoundError if the path does not exist.
@@ -207,6 +179,15 @@ class ProjectModel(QModel[ProjectData]):
         if not p.exists():
             raise FileNotFoundError(str(p))
         with p.open("r", encoding="utf-8") as fh:
-            data = json.load(fh)
-        self.deserialize(data, is_root = True)
-        self.mark_clean()
+            json_str = fh.read()
+        return cls.read_from_json(path, json_str)
+
+    @classmethod
+    def read_from_json(cls: type["ProjectModel"], path: str | Path, json_str: str) -> "ProjectModel":
+        """Load model data from a JSON string."""
+        try:
+            new_data = ProjectData.model_validate_json(json_str)  # type: ignore[arg-type]
+        except ValidationError as exc:
+            raise ValueError(str(exc)) from exc
+
+        return ProjectModel(file=Path(path), data=new_data)
