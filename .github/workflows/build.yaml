@@ -24,7 +24,7 @@ jobs:
 
       # For pytest-qt:
       # https://pytest-qt.readthedocs.io/en/latest/troubleshooting.html#github-actions-azure-pipelines-travis-ci-and-gitlab-ci-cd
-      - name: "Setup packages on ${{ matrix.os }}"
+      - name: "Setup packages for Qt tests"
         run: |
           sudo apt install \
             libxkbcommon-x11-0 \
