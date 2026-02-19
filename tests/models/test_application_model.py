@@ -1,13 +1,18 @@
-import unittest
 from pathlib import Path
 
+import pytest
 from PySide6.QtCore import Slot
+from PySide6.QtWidgets import QApplication
 
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.project_model import ProjectModel
 
+# Ensure a Qt application context exists for QObject usage in tests. Rely on pytest-qt's qapp.
+@pytest.fixture(autouse=True)
+def _ensure_qapp(qapp: QApplication) -> QApplication:
+    return qapp
 
-class TestApplicationModel(unittest.TestCase):
+class TestApplicationModel:
     def test_current_project(self) -> None:
         # Arrange
         app_model = ApplicationModel()

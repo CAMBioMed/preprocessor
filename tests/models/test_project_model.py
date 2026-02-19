@@ -1,10 +1,18 @@
-import unittest
 
-# ensure a Qt app context for QObject usage in tests if not present
-from PySide6.QtCore import QCoreApplication
+# ensure a Qt app context for QObject usage in tests: rely on pytest-qt's qapp
+import pytest
+from PySide6.QtWidgets import QApplication
 
-if QCoreApplication.instance() is None:
-    QCoreApplication([])
+
+@pytest.fixture(autouse=True)
+def _ensure_qapp(qapp: QApplication) -> QApplication:
+    """Autouse fixture to ensure a QApplication exists for all tests in this file.
+
+    Using the `qapp` fixture from pytest-qt ensures the application is created and
+    torn down correctly by the plugin and avoids creating a QApplication at import-time,
+    which can cause conflicts or crashes when pytest-qt also tries to manage one.
+    """
+    return qapp
 
 import json
 import tempfile
@@ -13,10 +21,9 @@ from pathlib import Path
 from preprocessor.model.project_model import ProjectModel, ProjectData
 from preprocessor.model.photo_model import PhotoModel, PhotoData
 from preprocessor.model.qlistmodel import QListModel
-import pytest
 
 
-class TestProjectModel(unittest.TestCase):
+class TestProjectModel:
     def test_photos(self) -> None:
         # Arrange
         project_model = ProjectModel(file=Path("test.pbproj"))
