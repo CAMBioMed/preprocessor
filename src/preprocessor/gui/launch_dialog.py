@@ -33,7 +33,6 @@ class LaunchDialog(QDialog):
             "Project Files (*.pbproj);;All Files (*)"
         )
         if not path:
-            self.reject()
             return
         project = ProjectModel()
         project.file = Path(path)
@@ -49,7 +48,6 @@ class LaunchDialog(QDialog):
             "Project Files (*.pbproj);;All Files (*)"
         )
         if not path:
-            self.reject()
             return
 
         project = ProjectModel()
