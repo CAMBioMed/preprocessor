@@ -1,29 +1,11 @@
 from pathlib import Path
-from typing import TypeVar, Any
+from typing import TypeVar, Any, Self
 
 from PySide6.QtCore import QObject, Signal
 from pydantic import BaseModel, ValidationError
 import contextlib
 
 M = TypeVar("M", bound=BaseModel)
-
-
-def _to_basic(obj: Any) -> Any:  # noqa: ANN401
-    """Convert nested tuples/lists/Paths/primitives to JSON-friendly basic Python types (lists, numbers, strings)."""
-    if obj is None:
-        return None
-    if isinstance(obj, (str, int, float, bool)):
-        return obj
-    if isinstance(obj, Path):
-        return str(obj)
-    if isinstance(obj, list):
-        return [_to_basic(x) for x in obj]
-    if isinstance(obj, tuple):
-        return tuple([_to_basic(x) for x in obj])
-    if isinstance(obj, dict):
-        return {k: _to_basic(v) for k, v in obj.items()}
-    return str(obj)  # Fallback
-
 
 class QModel[M: BaseModel](QObject):
     """
@@ -47,7 +29,7 @@ class QModel[M: BaseModel](QObject):
     def __init__(
         self,
         model_cls: type[M],
-        data: M,
+        data: M | dict[str, Any] | None,
     ) -> None:
         super().__init__()
         self._model_cls = model_cls
@@ -125,64 +107,14 @@ class QModel[M: BaseModel](QObject):
             raise ValueError(f"{field!r} is not a valid field in this model's data")
 
         # We mutate the existing model, such that all references to it get the updated data
-        old_model = self._data.model_copy()
+        old_data = self._data.model_copy()
         setattr(self._data, field, value)
-        new_model = self._data
+        new_data = self._data
 
-        if new_model != old_model:
-            if getattr(new_model, field) != getattr(old_model, field):
+        if new_data != old_data:
+            if getattr(new_data, field) != getattr(old_data, field):
                 self._emit_field_signal(field)
             self._set_dirty(True)
             with contextlib.suppress(Exception):
                 self.on_changed.emit()
 
-    def serialize(self, is_root: bool = False) -> dict[str, Any]:
-        """Return a JSON-friendly dict (Paths -> str, tuples -> lists)."""
-        d = self._data.model_dump()
-        out = {k: _to_basic(v) for k, v in d.items()}
-        if is_root:
-            out["model_version"] = int(self._model_version)
-        return out
-
-    def deserialize(self, data: dict[str, Any], is_root: bool = False) -> None:
-        """
-        Merge `data` into the current model and validate; only keys present in `data` are considered
-        for emitting per-field signals. Emits on_changed if anything changed.
-        """
-        old = self._data.model_dump()
-        incoming = dict(data)  # shallow copy
-
-        if is_root:
-            # Ensure the model version matches
-            if "model_version" not in incoming:
-                msg = f"Missing 'model_version' field in serialized data; expected version {self._model_version}"
-                raise ValueError(msg)
-            try:
-                incoming_model_version = int(incoming["model_version"])
-            except Exception as exc:
-                msg = f"Invalid 'model_version' value: {incoming.get('model_version')!r}"
-                raise ValueError(msg) from exc
-            if incoming_model_version != self._model_version:
-                msg = f"Version mismatch: expected {self._model_version}, got {incoming_model_version}"
-                raise ValueError(msg)
-            incoming.pop("model_version", None)
-
-        # Update the model
-        merged = {**old}
-        merged.update(incoming)
-        try:
-            new_data = self._model_cls.model_validate(merged)  # type: ignore[arg-type]
-        except ValidationError as exc:
-            raise ValueError(str(exc)) from exc
-
-        # Update the data and emit signals for any fields that changed
-        new = new_data.model_dump()
-        if new != old:
-            self._set_data(new_data)
-            self._populate_lists_from_data()
-            for key in incoming:
-                if new.get(key) != old.get(key):
-                    self._emit_field_signal(key)
-            self._set_dirty(True)
-            with contextlib.suppress(Exception):
-                self.on_changed.emit()

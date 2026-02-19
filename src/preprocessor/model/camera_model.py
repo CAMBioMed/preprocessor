@@ -3,7 +3,7 @@ from typing import Any, cast, ClassVar
 
 from PySide6.QtCore import Signal
 from cv2.typing import Point2f
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ValidationError
 
 from preprocessor.model.qmodel import QModel
 
@@ -22,14 +22,32 @@ class CameraData(BaseModel):
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
 
-    file: Path | None = Field(default=None, exclude=True)
-    """The file path of the camera calibration file, or None if not set. This is not serialized/deserialized."""
+    model_version: int = SERIAL_VERSION
+    """The version of the data model, used for compatibility checks during deserialization."""
     name: str = ""
     """The name of the camera."""
     camera_matrix: CameraMatrix | None = None
     """A 3x3 camera matrix as a tuple of 3 tuples; or None if not set."""
     distortion_coefficients: tuple[Point2f, ...] | None = None
     """A sequence of distortion coefficients; or None if not set."""
+
+    @classmethod
+    @field_validator("model_version", mode="before")
+    def _validate_model_version(cls: type["CameraData"], v: Any) -> int:  # noqa: ANN401
+        if v is None:
+            return cls.SERIAL_VERSION
+        try:
+            iv = int(v)
+        except Exception as exc:
+            msg = "model_version must be an integer"
+            raise ValueError(msg) from exc
+        if iv < 1:
+            msg = "model_version must be a positive integer"
+            raise ValueError(msg)
+        if iv != cls.SERIAL_VERSION:
+            msg = f"Unsupported model_version {iv}; expected {cls.SERIAL_VERSION}"
+            raise ValueError(msg)
+        return iv
 
     @classmethod
     @field_validator("file", mode="before")
@@ -81,8 +99,12 @@ class CameraModel(QModel[CameraData]):
     on_camera_matrix_changed: Signal = Signal()
     on_distortion_coefficients_changed: Signal = Signal()
 
-    def __init__(self, data: CameraData | dict[str, Any] | None = None) -> None:
+    _file: Path | None
+
+    def __init__(self, file: Path | None, data: CameraData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=CameraData, data=data)
+
+        self._file = file
 
     @property
     def file(self) -> Path | None:
@@ -91,11 +113,13 @@ class CameraModel(QModel[CameraData]):
 
         This property is not serialized/deserialized.
         """
-        return self._data.file
+        return self.file
 
     @file.setter
     def file(self, value: Path | None) -> None:
-        self._set_field("file", value)
+        if self._file != value:
+            self._file = value
+            self.on_file_changed.emit(value)
 
     @property
     def name(self) -> str:
@@ -123,3 +147,44 @@ class CameraModel(QModel[CameraData]):
     @distortion_coefficients.setter
     def distortion_coefficients(self, value: tuple[Point2f, ...] | None) -> None:
         self._set_field("distortion_coefficients", value)
+
+    def write_to_file(self, path: str | Path) -> None:
+        """
+        Write the serialized project JSON to the given file path.
+        Parent directories will be created if necessary.
+        """
+        p = Path(path)
+        if p.parent:
+            p.parent.mkdir(parents=True, exist_ok=True)
+        json_str = self.write_to_json()
+        with p.open("w", encoding="utf-8") as fh:
+            fh.write(json_str)
+        self.file = Path(path)
+        self.mark_clean()
+
+    def write_to_json(self) -> str:
+        """Return a JSON string representation of the model."""
+        return self._data.model_dump_json()
+
+    @classmethod
+    def read_from_file(cls: type["CameraModel"], path: str | Path) -> "CameraModel":
+        """
+        Load project JSON from the given file path and apply via deserialize().
+        Raises FileNotFoundError if the path does not exist.
+        """
+        p = Path(path)
+        if not p.exists():
+            raise FileNotFoundError(str(p))
+        with p.open("r", encoding="utf-8") as fh:
+            json_str = fh.read()
+        return cls.read_from_json(path, json_str)
+
+    @classmethod
+    def read_from_json(cls: type["CameraModel"], path: str | Path, json_str: str) -> "CameraModel":
+        """Load model data from a JSON string."""
+        try:
+            new_data = CameraData.model_validate_json(json_str)  # type: ignore[arg-type]
+        except ValidationError as exc:
+            raise ValueError(str(exc)) from exc
+
+        return CameraModel(file=Path(path), data=new_data)

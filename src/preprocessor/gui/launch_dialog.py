@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from PySide6.QtCore import Signal
@@ -7,6 +8,7 @@ from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.project_model import ProjectModel, ProjectData
 
+logger = logging.getLogger(__name__)
 
 class LaunchDialog(QDialog):
     ui: Ui_LaunchDialog
@@ -69,7 +71,7 @@ def new_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pro
         return None
     if not save_if_dirty_dialog(parent, old_project):
         return None
-    new_project = ProjectModel(ProjectData(file=Path(path)))
+    new_project = ProjectModel(file=Path(path))
     return new_project
 
 
@@ -91,11 +93,10 @@ def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pr
         return None
     if not save_if_dirty_dialog(parent, old_project):
         return None
-    new_project = ProjectModel(ProjectData(file=Path(path)))
     try:
-        new_project.load_from_file(path)
+        new_project = ProjectModel.read_from_file(path)
     except ValueError as exc:
-        # Likely a serialization version mismatch or corrupt file — inform the user
+        logger.exception("Failed to open project file %s: %s", path, exc)
         QMessageBox.critical(
             parent,
             "Open Project Failed",
@@ -109,8 +110,9 @@ def save_project_dialog(parent: QWidget, project: ProjectModel, path: Path) -> b
     Save the given project, prompting for a file path if it doesn't have one yet; return True if successful, False if canceled or failed.
     """
     try:
-        project.save_to_file(path)
+        project.write_to_file(path)
     except Exception as exc:
+        logger.exception("Failed to save project file %s: %s", path, exc)
         QMessageBox.critical(
             parent,
             "Save Project Failed",
@@ -148,8 +150,8 @@ def save_if_dirty_dialog(parent: QWidget, project: ProjectModel | None) -> bool:
     msg_box.setWindowTitle("Unsaved Changes")
     msg_box.setText("The current project has unsaved changes. Do you want to save before proceeding?")
     save_button = msg_box.addButton("Save", QMessageBox.ButtonRole.AcceptRole)
-    discard_button = msg_box.addButton("Don't Save", QMessageBox.ButtonRole.DestructiveRole)
-    cancel_button = msg_box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+    discard_button = msg_box.addButton("Discard", QMessageBox.ButtonRole.DestructiveRole)
+    msg_box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
     msg_box.exec()
 
     clicked_button = msg_box.clickedButton()
