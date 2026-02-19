@@ -11,6 +11,10 @@ MAKEFLAGS += --no-print-directory
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --warn-undefined-variables
 
+# Allow passing extra args to underlying commands, e.g.:
+#   make lint ARGS="--fix"
+ARGS ?=
+
 # Colors and formatting
 NC     := $(shell printf "\033[0m")
 BOLD   := $(shell printf "\033[1m")
@@ -68,35 +72,35 @@ build: build-ui check               ## Build the project
 .PHONY: test
 test:                             	## Test the project
 	echo "${INFO} Testing..."
-	uv run pytest -q
+	uv run pytest -q $(ARGS)
 	echo "${OK} Tested"
 
 .PHONY: test-coverage
 test-coverage:                      ## Test the project with coverage
 	echo "${INFO} Testing with coverage..."
-	uv run pytest -q --cov
+	uv run pytest -q $(ARGS) --cov
 	echo "${OK} Tested with coverage"
 
 .PHONY: typecheck
 typecheck:                          ## Type check the project
 	echo "${INFO} Type checking (mypy)..."
-	uv run mypy src tests
+	uv run mypy $(ARGS) src tests
 	echo "${OK} Checked types"
 
 .PHONY: lint
 lint:                               ## Lint the project
 	echo "${INFO} Linting (ruff)..."
-	uv run ruff check .
+	uv run ruff check $(ARGS) .
 	echo "${OK} Linted"
-
-.PHONY: check
-check: test typecheck lint          ## Check and lint the project
 
 .PHONY: format
 format:                             ## Format the code files
 	echo "${INFO} Formatting (ruff)..."
-	uv run ruff format .
+	uv run ruff format $(ARGS) .
 	echo "${OK} Formatted"
+
+.PHONY: check
+check: test typecheck lint          ## Check and lint the project
 
 ### =============================================================================
 ##@ Dependencies
