@@ -277,6 +277,7 @@ class MainWindow(QMainWindow):
         self._update_project_actions()
         self._update_window_title()
         self._update_thumbnails()
+        self._handle_current_photo_changed(self.model.current_photo)
 
     def _handle_current_photo_changed(self, photo: PhotoModel | None) -> None:
         """Handle when the current photo changes."""

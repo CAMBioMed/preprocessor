@@ -46,24 +46,6 @@ class Ui_EditorDock(object):
 
         self.gridLayout_2.addItem(self.verticalSpacer, 4, 0, 1, 1)
 
-        self.grpCropping = QGroupBox(self.scrollAreaWidgetContents)
-        self.grpCropping.setObjectName(u"grpCropping")
-        self.formLayout = QFormLayout(self.grpCropping)
-        self.formLayout.setObjectName(u"formLayout")
-        self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
-        self.lblCropping_QuadratAutodetect = QLabel(self.grpCropping)
-        self.lblCropping_QuadratAutodetect.setObjectName(u"lblCropping_QuadratAutodetect")
-
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblCropping_QuadratAutodetect)
-
-        self.btnCropping_QuadratAutodetect = QPushButton(self.grpCropping)
-        self.btnCropping_QuadratAutodetect.setObjectName(u"btnCropping_QuadratAutodetect")
-
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.btnCropping_QuadratAutodetect)
-
-
-        self.gridLayout_2.addWidget(self.grpCropping, 1, 0, 1, 1)
-
         self.grpLensCorrection = QGroupBox(self.scrollAreaWidgetContents)
         self.grpLensCorrection.setObjectName(u"grpLensCorrection")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
@@ -81,14 +63,32 @@ class Ui_EditorDock(object):
 
         self.sldLensCorrection_Distortion = QSlider(self.grpLensCorrection)
         self.sldLensCorrection_Distortion.setObjectName(u"sldLensCorrection_Distortion")
-        self.sldLensCorrection_Distortion.setMinimum(-50)
-        self.sldLensCorrection_Distortion.setMaximum(50)
+        self.sldLensCorrection_Distortion.setMinimum(-100)
+        self.sldLensCorrection_Distortion.setMaximum(100)
         self.sldLensCorrection_Distortion.setOrientation(Qt.Orientation.Horizontal)
 
         self.formLayout_2.setWidget(0, QFormLayout.ItemRole.FieldRole, self.sldLensCorrection_Distortion)
 
 
         self.gridLayout_2.addWidget(self.grpLensCorrection, 2, 0, 1, 1)
+
+        self.grpCropping = QGroupBox(self.scrollAreaWidgetContents)
+        self.grpCropping.setObjectName(u"grpCropping")
+        self.formLayout = QFormLayout(self.grpCropping)
+        self.formLayout.setObjectName(u"formLayout")
+        self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        self.lblCropping_QuadratAutodetect = QLabel(self.grpCropping)
+        self.lblCropping_QuadratAutodetect.setObjectName(u"lblCropping_QuadratAutodetect")
+
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblCropping_QuadratAutodetect)
+
+        self.btnCropping_QuadratAutodetect = QPushButton(self.grpCropping)
+        self.btnCropping_QuadratAutodetect.setObjectName(u"btnCropping_QuadratAutodetect")
+
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.btnCropping_QuadratAutodetect)
+
+
+        self.gridLayout_2.addWidget(self.grpCropping, 3, 0, 1, 1)
 
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -103,10 +103,10 @@ class Ui_EditorDock(object):
 
     def retranslateUi(self, EditorDock):
         EditorDock.setWindowTitle(QCoreApplication.translate("EditorDock", u"Edit", None))
+        self.grpLensCorrection.setTitle(QCoreApplication.translate("EditorDock", u"Lens correction", None))
+        self.lblLensCorrection_Distortion.setText(QCoreApplication.translate("EditorDock", u"Distortion:", None))
         self.grpCropping.setTitle(QCoreApplication.translate("EditorDock", u"Cropping", None))
         self.lblCropping_QuadratAutodetect.setText(QCoreApplication.translate("EditorDock", u"Quadrat:", None))
         self.btnCropping_QuadratAutodetect.setText(QCoreApplication.translate("EditorDock", u"Autodetect", None))
-        self.grpLensCorrection.setTitle(QCoreApplication.translate("EditorDock", u"Lens correction", None))
-        self.lblLensCorrection_Distortion.setText(QCoreApplication.translate("EditorDock", u"Distortion:", None))
     # retranslateUi
 

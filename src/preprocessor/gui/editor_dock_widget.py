@@ -30,8 +30,9 @@ class EditorDockWidget(QDockWidget):
         self.ui.btnCropping_QuadratAutodetect.setEnabled(enabled)
         self.ui.sldLensCorrection_Distortion.setEnabled(enabled)
 
-        distortion = photo.distortion_coefficients[0] if photo and photo.distortion_coefficients else 0
-        self.ui.sldLensCorrection_Distortion.setValue(distortion)
+        distortion = photo.distortion_coefficients[0] if photo and photo.distortion_coefficients else 0.0
+        value = int(distortion * 100.0)  # Slider is scaled by 100 for better precision
+        self.ui.sldLensCorrection_Distortion.setValue(value)
 
     def _handle_distortion_changed(self, value: float) -> None:
         """Handle changes to the distortion slider and update the photo model."""
@@ -39,5 +40,6 @@ class EditorDockWidget(QDockWidget):
             return
         # Update the distortion coefficient k1 in the photo model (k1, k2, p1, p2, k3, ...)
         current_distortion = self.current_photo.distortion_coefficients or [0.0, 0.0, 0.0, 0.0, 0.0]
-        new_distortion = [float(value)] + current_distortion[1:]  # Update k1, keep the rest unchanged
+        k1 = float(value) / 100.0  # Slider is scaled by 100 for better precision
+        new_distortion = [k1] + current_distortion[1:]  # Update k1, keep the rest unchanged
         self.current_photo.distortion_coefficients = new_distortion

@@ -61,32 +61,6 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0">
-         <widget class="QGroupBox" name="grpCropping">
-          <property name="title">
-           <string>Cropping</string>
-          </property>
-          <layout class="QFormLayout" name="formLayout">
-           <property name="fieldGrowthPolicy">
-            <enum>QFormLayout::FieldGrowthPolicy::AllNonFixedFieldsGrow</enum>
-           </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="lblCropping_QuadratAutodetect">
-             <property name="text">
-              <string>Quadrat:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QPushButton" name="btnCropping_QuadratAutodetect">
-             <property name="text">
-              <string>Autodetect</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
         <item row="2" column="0">
          <widget class="QGroupBox" name="grpLensCorrection">
           <property name="sizePolicy">
@@ -112,13 +86,39 @@
            <item row="0" column="1">
             <widget class="QSlider" name="sldLensCorrection_Distortion">
              <property name="minimum">
-              <number>-50</number>
+              <number>-100</number>
              </property>
              <property name="maximum">
-              <number>50</number>
+              <number>100</number>
              </property>
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QGroupBox" name="grpCropping">
+          <property name="title">
+           <string>Cropping</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::FieldGrowthPolicy::AllNonFixedFieldsGrow</enum>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="lblCropping_QuadratAutodetect">
+             <property name="text">
+              <string>Quadrat:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="btnCropping_QuadratAutodetect">
+             <property name="text">
+              <string>Autodetect</string>
              </property>
             </widget>
            </item>
