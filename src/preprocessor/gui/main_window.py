@@ -218,8 +218,15 @@ class MainWindow(QMainWindow):
         if self.model.current_photo is None:
             return
 
-        original_path = self.model.current_project.get_absolute_path(self.model.current_photo.original_filename)
-        img = load_image(str(original_path))
+        # Prefer using the undistorted image currently shown in the editor (if available)
+        img = None
+        try:
+            img = self.central_widget.get_processing_image()
+        except Exception:
+            img = None
+        if img is None:
+            original_path = self.model.current_project.get_absolute_path(self.model.current_photo.original_filename)
+            img = load_image(str(original_path))
         if img is None:
             QMessageBox.critical(
                 self,

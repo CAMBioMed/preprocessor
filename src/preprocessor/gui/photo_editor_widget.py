@@ -191,6 +191,16 @@ class PhotoEditorWidget(QWidget):
             self._undistorted_cv_img = None
             self.update()
 
+    def get_processing_image(self) -> MatLike | None:
+        """Return a cv2 image to use for processing (undistorted if available).
+
+        Returns the undistorted image if we've successfully computed it, otherwise
+        returns the original cv image if available, otherwise None.
+        """
+        if self._undistorted_cv_img is not None:
+            return self._undistorted_cv_img
+        return self._original_cv_img
+
     def _current_pixmap_info(self) -> tuple[float, QPoint, QSize]:
         """
         Return (ratio, top_left_offset, scaled_size) for the currently-loaded pixmap
