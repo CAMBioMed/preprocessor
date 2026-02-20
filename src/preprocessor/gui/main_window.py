@@ -174,6 +174,10 @@ class MainWindow(QMainWindow):
         # Edit menu
         self.ui.menuEdit_DetectQuadrat.triggered.connect(self._handle_detect_quadrat_action)
 
+        # Window menu
+        self.ui.menuWindow_ShowThumbnailsPanel.triggered.connect(lambda: self.thumbnail_dock.setVisible(True))
+        self.ui.menuWindow_ShowEditorPanel.triggered.connect(lambda: self.editor_dock.setVisible(True))
+
         # Help menu
         self.ui.menuHelp_About.triggered.connect(self._handle_help_about_action)
 
