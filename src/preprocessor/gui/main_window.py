@@ -181,7 +181,10 @@ class MainWindow(QMainWindow):
         # Help menu
         self.ui.menuHelp_About.triggered.connect(self._handle_help_about_action)
 
-        # When a thumbnail is selected, either show stored result or schedule processing
+        # Editor dock
+        self.editor_dock.on_autodetect_quadrat_clicked.connect(self._handle_detect_quadrat_action)
+
+        # Thumbnail dock
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_selection_changed.connect(self._handle_photo_selection_changed)
