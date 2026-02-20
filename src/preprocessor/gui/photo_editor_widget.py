@@ -1,4 +1,6 @@
+import contextlib
 import math
+from collections.abc import Callable
 
 from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
@@ -8,6 +10,9 @@ from cv2.typing import MatLike
 
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
+from preprocessor.processing.undistort import undistort_photo
+from preprocessor.processing.load_image import load_image
+from preprocessor.gui.worker import Worker, start_worker
 
 
 class PhotoEditorWidget(QWidget):
@@ -31,6 +36,8 @@ class PhotoEditorWidget(QWidget):
     """Last undistorted cv image (cached)."""
     _photo_signals_connected: bool
     """Whether we've connected model signals for the current photo."""
+    _current_project: ProjectModel | None
+    _current_undistort_worker: Worker | None
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
@@ -50,6 +57,8 @@ class PhotoEditorWidget(QWidget):
         self._photo_signals_connected = False
 
         self.setMouseTracking(True)
+        self._current_project = None
+        self._current_undistort_worker = None
 
     def show_photo(self, photo: PhotoModel | None, project: ProjectModel) -> None:
         if photo is not None:
@@ -73,16 +82,11 @@ class PhotoEditorWidget(QWidget):
                 pass
 
             self._photo = photo
+            self._current_project = project
 
-            # Try to load the CV image lazily (used for undistortion)
+            # Try to load the CV image lazily (used for undistortion) using the project's loader
             try:
-                import cv2
-
-                cv_img = cv2.imread(str(original_path))
-                if cv_img is not None:
-                    self._original_cv_img = cv_img
-                else:
-                    self._original_cv_img = None
+                self._original_cv_img = load_image(str(original_path))
             except Exception:
                 self._original_cv_img = None
 
@@ -97,7 +101,7 @@ class PhotoEditorWidget(QWidget):
                 # If connecting fails, ignore silently (signals may be different in tests)
                 self._photo_signals_connected = False
 
-            # Immediately apply undistortion if possible
+            # Immediately apply undistortion if possible (async)
             self._apply_undistort_and_update()
         else:
             # Disconnect any previous signals and clear state
@@ -154,42 +158,44 @@ class PhotoEditorWidget(QWidget):
             self.update()
             return
 
-        # Call undistort() from the processing module
+        # Start asynchronous undistortion for the current photo (non-blocking)
         try:
-            from preprocessor.processing.fix_lens_distortion import undistort
-            import numpy as np
-            from PySide6.QtGui import QImage
-
-            und = undistort(self._original_cv_img, cam, list(dist))
-            if und is None:
-                raise RuntimeError("undistort returned None")
-
-            # Convert BGR (cv2) to RGB for QImage
-            import cv2
-
-            if und.ndim == 3 and und.shape[2] == 3:
-                rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
-                h, w, ch = rgb.shape
-                bytes_per_line = ch * w
-                qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
-            elif und.ndim == 3 and und.shape[2] == 4:
-                rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
-                h, w, ch = rgba.shape
-                bytes_per_line = ch * w
-                qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
-            else:
-                # grayscale
-                gray = und.copy()
-                h, w = gray.shape
-                qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
-
-            self._pixmap = QPixmap.fromImage(qimg)
-            self._undistorted_cv_img = und
-            self.update()
+            # Start async undistort; fallback to sync if starting fails
+            self._start_undistort_for_current()
         except Exception:
-            # On any failure, fall back to original pixmap
-            self._undistorted_cv_img = None
-            self.update()
+            # Fall back to synchronous undistortion if async start fails
+            try:
+                from preprocessor.processing.fix_lens_distortion import undistort
+                from PySide6.QtGui import QImage
+
+                und = undistort(self._original_cv_img, cam, list(dist))
+                if und is None:
+                    raise RuntimeError("undistort returned None")
+
+                # und is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
+                import cv2
+
+                if und.ndim == 3 and und.shape[2] == 3:
+                    rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
+                    h, w, ch = rgb.shape
+                    bytes_per_line = ch * w
+                    qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
+                elif und.ndim == 3 and und.shape[2] == 4:
+                    rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
+                    h, w, ch = rgba.shape
+                    bytes_per_line = ch * w
+                    qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
+                else:
+                    gray = und.copy()
+                    h, w = gray.shape
+                    qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
+
+                self._pixmap = QPixmap.fromImage(qimg)
+                self._undistorted_cv_img = und
+                self.update()
+            except Exception:
+                self._undistorted_cv_img = None
+                self.update()
 
     def get_processing_image(self) -> MatLike | None:
         """Return a cv2 image to use for processing (undistorted if available).
@@ -431,3 +437,82 @@ class PhotoEditorWidget(QWidget):
         cx = sum(p.x() for p in pts) / len(pts)
         cy = sum(p.y() for p in pts) / len(pts)
         return sorted(pts, key=lambda p: math.atan2(p.y() - cy, p.x() - cx))
+
+    def undistort_photo_async(self, photo: PhotoModel, project: ProjectModel, result_callback: Callable[[object], None] | None = None) -> None:
+        """Start an asynchronous undistortion for the specified photo/project.
+
+        The result_callback (if provided) will be called with one argument: the undistorted cv image (or None on failure).
+        This method can be used to batch undistort photos that are not currently displayed.
+        """
+        # Create a worker to run the undistort in background
+        worker = Worker(undistort_photo, photo, project)
+
+        def _on_result(result: object) -> None:
+            if result_callback is not None:
+                with contextlib.suppress(Exception):
+                    result_callback(result)
+
+        def _on_error(err: tuple) -> None:
+            # Pass None to callback on error
+            if result_callback is not None:
+                with contextlib.suppress(Exception):
+                    result_callback(None)
+
+        worker.signals.result.connect(_on_result)
+        worker.signals.error.connect(_on_error)
+        start_worker(worker)
+
+    def _start_undistort_for_current(self) -> None:
+        """Internal: start async undistort for the currently shown photo and update the widget when done."""
+        if self._photo is None or self._current_project is None:
+            return
+
+        # If a previous worker is running, we won't cancel it here; just start another
+        worker = Worker(undistort_photo, self._photo, self._current_project)
+        self._current_undistort_worker = worker
+
+        def _on_result(result: MatLike | None) -> None:
+            try:
+                if result is None:
+                    self._undistorted_cv_img = None
+                else:
+                    self._undistorted_cv_img = result
+                    # update pixmap from result on the main thread
+                    try:
+                        from PySide6.QtGui import QImage
+
+                        und = result
+                        # Result is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
+                        import cv2
+
+                        if und.ndim == 3 and und.shape[2] == 3:
+                            rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
+                            h, w, ch = rgb.shape
+                            bytes_per_line = ch * w
+                            qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
+                        elif und.ndim == 3 and und.shape[2] == 4:
+                            rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
+                            h, w, ch = rgba.shape
+                            bytes_per_line = ch * w
+                            qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
+                        else:
+                            gray = und.copy()
+                            h, w = gray.shape
+                            qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
+                        self._pixmap = QPixmap.fromImage(qimg)
+                    except Exception:
+                        # if conversion fails, leave pixmap as-is
+                        pass
+            finally:
+                # Clear worker ref and repaint
+                self._current_undistort_worker = None
+                self.update()
+
+        def _on_error(err: tuple) -> None:
+            self._undistorted_cv_img = None
+            self._current_undistort_worker = None
+            self.update()
+
+        worker.signals.result.connect(_on_result)
+        worker.signals.error.connect(_on_error)
+        start_worker(worker)

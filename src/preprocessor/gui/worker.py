@@ -32,6 +32,15 @@ class WorkerManager:
         self.threadpool.start(worker)
 
 
+# Provide a default global worker manager instance for convenience
+default_worker_manager = WorkerManager()
+
+
+def start_worker(worker: QRunnable) -> None:
+    """Convenience wrapper to start a worker on the global manager."""
+    default_worker_manager.start(worker)
+
+
 class WorkerSignals(QObject):
     """Defines the signals available from a running worker thread."""
 
