@@ -3,7 +3,7 @@ from cv2.typing import MatLike
 from preprocessor.model import Matrix3x3
 
 
-def apply_distortion(
+def undistort(
     img: MatLike,
     camera_matrix: Matrix3x3,
     dist_coeffs: list[float],

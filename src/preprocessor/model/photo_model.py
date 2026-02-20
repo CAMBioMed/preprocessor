@@ -36,7 +36,7 @@ class PhotoData(BaseModel):
     @field_validator("distortion_coefficients", mode="after")
     @classmethod
     def _validate_distortion_coefficients(cls: type["PhotoData"], v: list[float]) -> list[float]:
-        if len(v) != 4 and len(v) != 5 and len(v) != 8 and len(v) != 12 and len(v) != 14:
+        if len(v) not in (4, 5, 8, 12, 14):
             msg = "distortion_coefficients must be a tuple of 4, 5, 8, 12, or 14 floats"
             raise ValueError(msg)
         return v
@@ -52,6 +52,22 @@ class PhotoModel(QModel[PhotoData]):
 
     def __init__(self, data: PhotoData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=PhotoData, data=data)
+
+    @classmethod
+    def from_file(cls, fullpath: Path, basepath: Path | None) -> "PhotoModel":
+        """Create a PhotoModel from a photo file, extracting its dimensions."""
+        from PIL import Image
+
+        relative_path = update_basepath(None, basepath, fullpath)
+        with Image.open(fullpath) as img:
+            width, height = img.size
+
+        data = PhotoData(
+            original_filename=relative_path,
+            width=width,
+            height=height,
+        )
+        return cls(data=data)
 
     @property
     def original_filename(self) -> Path:

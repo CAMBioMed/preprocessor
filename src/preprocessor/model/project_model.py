@@ -210,13 +210,7 @@ class ProjectModel(QModel[ProjectData]):
 
     def append_photo_model(self, path: Path) -> PhotoModel:
         """Helper function to create a new PhotoModel with the given path and add it to the project."""
-        relative_path = update_basepath(None, self.file.parent, path)
-        h, w = self._get_image_dimensions(path)
-        photo = PhotoModel(PhotoData(
-            original_filename=relative_path,
-            width=w,
-            height=h,
-        ))
+        photo = PhotoModel.from_file(path, self.file.parent)
         self.photos.append(photo)
         return photo
 

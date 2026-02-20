@@ -36,6 +36,8 @@ class TestProjectModel:
         photo0 = PhotoModel(
             PhotoData(
                 original_filename=Path("photo0.jpg"),
+                width=1024,
+                height=768,
             )
         )
         assert photo0.parent() is None
@@ -59,6 +61,8 @@ class TestProjectModel:
         p = PhotoModel(
             PhotoData(
                 original_filename=Path("picA.jpg"),
+                width=1024,
+                height=768,
                 red_shift=(1.0, 2.0),
             )
         )
@@ -102,6 +106,8 @@ class TestProjectModel:
             p = PhotoModel(
                 PhotoData(
                     original_filename=Path("fileX.jpg"),
+                width=1024,
+                height=768,
                     red_shift=(3.0, 4.0),
                 )
             )
@@ -150,6 +156,8 @@ class TestProjectModel:
         p = PhotoModel(
             PhotoData(
                 original_filename=Path("original.jpg"),
+                width=1024,
+                height=768,
             )
         )
         project.photos.append(p)

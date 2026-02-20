@@ -13,6 +13,8 @@ class TestPhotoModel:
         photo = PhotoModel(
             PhotoData(
                 original_filename=Path("img_001.jpg"),
+                width=1024,
+                height=768,
             )
         )
 
@@ -68,6 +70,8 @@ class TestPhotoModel:
         photo0 = PhotoModel(
             PhotoData(
                 original_filename=Path("img_001.jpg"),
+                width=1024,
+                height=768,
             )
         )
 
@@ -76,8 +80,6 @@ class TestPhotoModel:
         assert photo0.quadrat_corners == []
         assert photo0.red_shift is None
         assert photo0.blue_shift is None
-        assert photo0.camera_matrix is None
-        assert photo0.distortion_coefficients is None
 
         # Act: Serialize and deserialize
         json_str0: str = photo0._data.model_dump_json()
@@ -98,7 +100,7 @@ class TestPhotoModel:
             (0.0, 1000.0, 384.0),
             (0.0, 0.0, 1.0),
         )
-        distortion = ((0.01, -0.02), (0.0, 0.0))
+        distortion = [0.01, -0.02, 0.0, 0.0]
         photo1.original_filename = Path("img_001.jpg")
         photo1.quadrat_corners = corners
         photo1.red_shift = (0.3, -0.2)
@@ -132,6 +134,8 @@ class TestPhotoModel:
         photo1 = PhotoModel(
             PhotoData(
                 original_filename=Path("tmp"),
+                width=1024,
+                height=768,
             )
         )
 
@@ -155,7 +159,7 @@ class TestPhotoModel:
             )
 
         with qtbot.waitSignal(photo1.on_distortion_coefficients_changed, raising=True):
-            photo1.distortion_coefficients = ((0.01, -0.02), (0.0, 0.0))
+            photo1.distortion_coefficients = [0.01, -0.02, 0.0, 0.0]
 
         with qtbot.waitSignal(photo1.on_changed, raising=True):
             # Any change
