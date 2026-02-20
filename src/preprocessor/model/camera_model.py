@@ -4,17 +4,9 @@ from typing import Any, cast, ClassVar
 from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, ValidationError
 
-from preprocessor.model import Point2
+from preprocessor.model import Point2, Matrix3x3
 from preprocessor.model.qmodel import QModel
 from preprocessor.utils import update_basepath
-
-# fmt: off
-CameraMatrix = tuple[
-    tuple[float, float, float],
-    tuple[float, float, float],
-    tuple[float, float, float]
-]
-# fmt: on
 
 
 class CameraData(BaseModel):
@@ -27,9 +19,9 @@ class CameraData(BaseModel):
     """The version of the data model, used for compatibility checks during deserialization."""
     name: str = ""
     """The name of the camera."""
-    camera_matrix: CameraMatrix | None = None
+    camera_matrix: Matrix3x3 | None = None
     """A 3x3 camera matrix as a tuple of 3 tuples; or None if not set."""
-    distortion_coefficients: tuple[Point2, ...] | None = None
+    distortion_coefficients: list[float] = [0, 0, 0, 0, 0]
     """A sequence of distortion coefficients; or None if not set."""
 
     @field_validator("model_version", mode="after")
@@ -40,20 +32,13 @@ class CameraData(BaseModel):
             raise ValueError(msg)
         return v
 
-    @field_validator("camera_matrix", mode="after")
+    @field_validator("distortion_coefficients", mode="after")
     @classmethod
-    def _validate_camera_matrix(cls: type["CameraData"], v: CameraMatrix | None) -> CameraMatrix | None:
-        if v is None:
-            return None
-        try:
-            rows = [tuple(float(x) for x in row) for row in v]
-        except Exception as exc:
-            msg = "camera_matrix must be a 3x3 numeric structure or None"
-            raise ValueError(msg) from exc
-        if len(rows) != 3 or any(len(r) != 3 for r in rows):
-            msg = "camera_matrix must be a 3x3 numeric structure"
+    def _validate_distortion_coefficients(cls: type["CameraData"], v: list[float]) -> list[float]:
+        if len(v) != 4 and len(v) != 5 and len(v) != 8 and len(v) != 12 and len(v) != 14:
+            msg = "distortion_coefficients must be a tuple of 4, 5, 8, 12, or 14 floats"
             raise ValueError(msg)
-        return cast(CameraMatrix, (rows[0], rows[1], rows[2]))
+        return v
 
 
 class CameraModel(QModel[CameraData]):
@@ -94,25 +79,25 @@ class CameraModel(QModel[CameraData]):
         self._set_field("name", value)
 
     @property
-    def camera_matrix(self) -> CameraMatrix | None:
+    def camera_matrix(self) -> Matrix3x3 | None:
         """3x3 camera matrix or None."""
         return self._data.camera_matrix
 
     @camera_matrix.setter
-    def camera_matrix(self, value: CameraMatrix | None) -> None:
+    def camera_matrix(self, value: Matrix3x3 | None) -> None:
         self._set_field("camera_matrix", value)
 
     @property
-    def distortion_coefficients(self) -> tuple[Point2, ...] | None:
-        """Sequence of distortion coefficients as Point2 or None."""
+    def distortion_coefficients(self) -> list[float]:
+        """Sequence of distortion coefficients as floats or None."""
         return self._data.distortion_coefficients
 
     @distortion_coefficients.setter
-    def distortion_coefficients(self, value: tuple[Point2, ...] | None) -> None:
+    def distortion_coefficients(self, value: list[float]) -> None:
         self._set_field("distortion_coefficients", value)
 
     def update_paths_relative_to(self, old_basepath: Path, new_basepath: Path) -> None:
-        self.file = update_basepath(old_basepath, new_basepath, self.file)
+        self.file = update_basepath(old_basepath, new_basepath, self.file) if self.file is not None else None
 
     def write_to_file(self, path: str | Path) -> None:
         """

@@ -239,6 +239,7 @@ class MainWindow(QMainWindow):
         # Trigger updating the opened editor
         self._handle_current_photo_changed(self.model.current_photo)
 
+
     def _handle_help_about_action(self) -> None:
         show_about_dialog(self)
 
@@ -280,6 +281,7 @@ class MainWindow(QMainWindow):
     def _handle_current_photo_changed(self, photo: PhotoModel | None) -> None:
         """Handle when the current photo changes."""
         self.central_widget.show_photo(photo, self.model.current_project)
+        self.editor_dock.update_with_photo(photo)
         self._update_window_title()
 
     def closeEvent(self, event: QCloseEvent) -> None:
