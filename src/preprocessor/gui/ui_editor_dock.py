@@ -50,6 +50,7 @@ class Ui_EditorDock(object):
         self.grpCropping.setObjectName(u"grpCropping")
         self.formLayout = QFormLayout(self.grpCropping)
         self.formLayout.setObjectName(u"formLayout")
+        self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         self.lblCropping_QuadratAutodetect = QLabel(self.grpCropping)
         self.lblCropping_QuadratAutodetect.setObjectName(u"lblCropping_QuadratAutodetect")
 
@@ -72,6 +73,7 @@ class Ui_EditorDock(object):
         self.grpLensCorrection.setSizePolicy(sizePolicy1)
         self.formLayout_2 = QFormLayout(self.grpLensCorrection)
         self.formLayout_2.setObjectName(u"formLayout_2")
+        self.formLayout_2.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         self.lblLensCorrection_Distortion = QLabel(self.grpLensCorrection)
         self.lblLensCorrection_Distortion.setObjectName(u"lblLensCorrection_Distortion")
 
