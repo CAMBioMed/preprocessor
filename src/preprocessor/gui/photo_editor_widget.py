@@ -4,6 +4,7 @@ from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
 from PySide6.QtWidgets import QWidget
+from cv2.typing import MatLike
 
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
@@ -24,6 +25,12 @@ class PhotoEditorWidget(QWidget):
     """Visual radius for handles (in widget pixels)."""
     _edit_points: list[QPoint] | None
     """Working copy of points in widget coordinates while the user is editing."""
+    _original_cv_img: MatLike | None
+    """The original image loaded as an OpenCV/numpy array (if available)."""
+    _undistorted_cv_img: MatLike | None
+    """Last undistorted cv image (cached)."""
+    _photo_signals_connected: bool
+    """Whether we've connected model signals for the current photo."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
@@ -37,21 +44,152 @@ class PhotoEditorWidget(QWidget):
         # working copy used during editing (widget coordinates). None when not editing.
         self._edit_points = None
 
+        # CV images (numpy arrays) used for undistortion
+        self._original_cv_img = None
+        self._undistorted_cv_img = None
+        self._photo_signals_connected = False
+
         self.setMouseTracking(True)
 
     def show_photo(self, photo: PhotoModel | None, project: ProjectModel) -> None:
         if photo is not None:
             original_path = project.get_absolute_path(photo.original_filename)
+            # Load a QPixmap for fast rendering and also attempt to load a cv image
             self._pixmap = QPixmap(str(original_path))
+            # Disconnect signals from previous photo (if any)
+            try:
+                if self._photo_signals_connected and self._photo is not None:
+                    try:
+                        self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
+                    except Exception:
+                        pass
+                    try:
+                        self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
+                    except Exception:
+                        pass
+                    self._photo_signals_connected = False
+            except Exception:
+                # ignore disconnect errors
+                pass
+
             self._photo = photo
+
+            # Try to load the CV image lazily (used for undistortion)
+            try:
+                import cv2
+
+                cv_img = cv2.imread(str(original_path))
+                if cv_img is not None:
+                    self._original_cv_img = cv_img
+                else:
+                    self._original_cv_img = None
+            except Exception:
+                self._original_cv_img = None
+
+            # Connect signals from the model so we can react when camera or distortion change
+            # First disconnect any previous connections
+            try:
+                # Connect to the new photo signals
+                self._photo.on_camera_matrix_changed.connect(self._on_camera_or_distortion_changed)
+                self._photo.on_distortion_coefficients_changed.connect(self._on_camera_or_distortion_changed)
+                self._photo_signals_connected = True
+            except Exception:
+                # If connecting fails, ignore silently (signals may be different in tests)
+                self._photo_signals_connected = False
+
+            # Immediately apply undistortion if possible
+            self._apply_undistort_and_update()
         else:
+            # Disconnect any previous signals and clear state
+            try:
+                if self._photo_signals_connected and self._photo is not None:
+                    try:
+                        self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
+                    except Exception:
+                        pass
+                    try:
+                        self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
             self._pixmap = None
             self._photo = None
+            # Clear any stored cv images & signal flags
+            self._original_cv_img = None
+            self._undistorted_cv_img = None
+            self._photo_signals_connected = False
         # Stop any active dragging when switching photos
         self._drag_index = None
         # discard any unfinished edit when switching photos
         self._edit_points = None
         self.update()
+
+    def _on_camera_or_distortion_changed(self, *args: object, **kwargs: object) -> None:
+        """Handler called when the photo camera matrix or distortion coefficients change.
+        Applies undistortion to the currently displayed image and updates the pixmap.
+        """
+        self._apply_undistort_and_update()
+
+    def _apply_undistort_and_update(self) -> None:
+        """Apply undistort() to the loaded CV image and update the displayed QPixmap.
+        Falls back to the original QPixmap if undistortion isn't possible.
+        """
+        if self._photo is None:
+            return
+
+        # Need an original CV image and camera/distortion parameters
+        if self._original_cv_img is None:
+            # Nothing to do; keep existing pixmap
+            self.update()
+            return
+
+        cam = getattr(self._photo, "camera_matrix", None)
+        dist = getattr(self._photo, "distortion_coefficients", None)
+
+        if cam is None or dist is None:
+            # No parameters: show original
+            self._undistorted_cv_img = None
+            # ensure pixmap matches original file (no-op if same)
+            self.update()
+            return
+
+        # Call undistort() from the processing module
+        try:
+            from preprocessor.processing.fix_lens_distortion import undistort
+            import numpy as np
+            from PySide6.QtGui import QImage
+
+            und = undistort(self._original_cv_img, cam, list(dist))
+            if und is None:
+                raise RuntimeError("undistort returned None")
+
+            # Convert BGR (cv2) to RGB for QImage
+            import cv2
+
+            if und.ndim == 3 and und.shape[2] == 3:
+                rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
+                h, w, ch = rgb.shape
+                bytes_per_line = ch * w
+                qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
+            elif und.ndim == 3 and und.shape[2] == 4:
+                rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
+                h, w, ch = rgba.shape
+                bytes_per_line = ch * w
+                qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
+            else:
+                # grayscale
+                gray = und.copy()
+                h, w = gray.shape
+                qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
+
+            self._pixmap = QPixmap.fromImage(qimg)
+            self._undistorted_cv_img = und
+            self.update()
+        except Exception:
+            # On any failure, fall back to original pixmap
+            self._undistorted_cv_img = None
+            self.update()
 
     def _current_pixmap_info(self) -> tuple[float, QPoint, QSize]:
         """

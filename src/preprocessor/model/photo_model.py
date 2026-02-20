@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, Field
