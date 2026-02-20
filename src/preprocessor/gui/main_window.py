@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QD
 from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.editor_dock_widget import EditorDockWidget
 from preprocessor.gui.export_dialog import ExportDialog
 from preprocessor.gui.launch_dialog import (
     new_project_dialog,
@@ -34,6 +35,8 @@ class MainWindow(QMainWindow):
     """The dock widget showing properties."""
     thumbnail_dock: ThumbnailDockWidget
     """The dock widget showing image thumbnails."""
+    editor_dock: EditorDockWidget
+    """The dock widget with edit controls."""
     central_widget: PhotoEditorWidget
     """The central widget showing the image."""
     _bound_project: ProjectModel | None = None
@@ -45,6 +48,7 @@ class MainWindow(QMainWindow):
         self._setup_icons()
         self._setup_keyboard_shortcuts()
         self._create_thumbnail_dock()
+        self._create_editor_dock()
         self._create_photo_editor()
 
         self.model = model
@@ -144,6 +148,14 @@ class MainWindow(QMainWindow):
         )
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.thumbnail_dock)
 
+    def _create_editor_dock(self) -> None:
+        """Create the editor dock widget."""
+        self.editor_dock = EditorDockWidget(self)
+        self.editor_dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
+        )
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.editor_dock)
+
     def _create_photo_editor(self) -> None:
         """Create the central photo editor widget."""
         self.central_widget = PhotoEditorWidget(self)
@@ -212,7 +224,7 @@ class MainWindow(QMainWindow):
         params = defaultParams
 
         result = detect_quadrat(img, params)
-        if result.corners is None:
+        if result is None or result.corners is None:
             # No corners detected
             return
 
