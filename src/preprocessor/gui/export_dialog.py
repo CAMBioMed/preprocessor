@@ -16,6 +16,7 @@ from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.fix_perspective import fix_perspective
 from preprocessor.processing.load_image import load_image
 from preprocessor.processing.save_image import save_image
+from preprocessor.processing.undistort import undistort_photo
 
 
 class ExportDialog(QDialog):
@@ -224,10 +225,20 @@ class _ExportWorker(QObject):
                 output_path = self.project.export_path / output_name
                 self.status.emit(f"Exporting {idx}/{total}: {output_name}")
 
-                # Load image
-                original_path = self.project.get_absolute_path(photo.original_filename)
-                img = load_image(str(original_path))
+                # Prefer undistorted image when available; fall back to loading original
+                img = None
+                try:
+                    img = undistort_photo(photo, self.project)
+                except Exception:
+                    img = None
+
                 if img is None:
+                    original_path = self.project.get_absolute_path(photo.original_filename)
+                    img = load_image(str(original_path))
+
+                if img is None:
+                    # Couldn't load image (either undistort failed & load failed)
+                    original_path = self.project.get_absolute_path(photo.original_filename)
                     self.message.emit(
                         "warning",
                         f"Failed to load image: {original_path}",
