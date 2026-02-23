@@ -16,6 +16,7 @@ from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.fix_perspective import fix_perspective
 from preprocessor.processing.load_image import load_image
 from preprocessor.processing.save_image import save_image
+from preprocessor.processing.undistort import undistort_photo
 
 
 class ExportDialog(QDialog):
@@ -224,10 +225,29 @@ class _ExportWorker(QObject):
                 output_path = self.project.export_path / output_name
                 self.status.emit(f"Exporting {idx}/{total}: {output_name}")
 
-                # Load image
-                original_path = self.project.get_absolute_path(photo.original_filename)
-                img = load_image(str(original_path))
+                # Prefer undistorted image when available. If undistort was canceled, stop export
+                img = None
+                try:
+                    # Provide a stop_checker callable so undistort_photo can cancel early
+                    img = undistort_photo(
+                        photo, self.project, progress_callback=None, stop_checker=lambda: self._stop_requested
+                    )
+                except Exception:
+                    img = None
+
+                # If undistort returned None and a cancellation was requested, stop export immediately
+                if img is None and self._stop_requested:
+                    self.status.emit("Export canceled.")
+                    break
+
+                # Otherwise fall back to loading the original image
                 if img is None:
+                    original_path = self.project.get_absolute_path(photo.original_filename)
+                    img = load_image(str(original_path))
+
+                if img is None:
+                    # Couldn't load image (either undistort failed & load failed)
+                    original_path = self.project.get_absolute_path(photo.original_filename)
                     self.message.emit(
                         "warning",
                         f"Failed to load image: {original_path}",
@@ -235,6 +255,11 @@ class _ExportWorker(QObject):
                     # continue to next photo but still report progress
                     self.progress.emit(idx, total)
                     continue
+
+                # Check cancellation again before heavy processing
+                if self._stop_requested:
+                    self.status.emit("Export canceled.")
+                    break
 
                 # Ensure quadrat corners are set
                 if not photo.quadrat_corners:

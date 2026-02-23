@@ -10,7 +10,7 @@ class PropertiesDockWidget(QDockWidget):
     model: PropertiesDockModel
 
     def __init__(self, parent: QWidget | None = None) -> None:
-        QDockWidget.__init__(self, parent)
+        super().__init__(parent)
         self.ui = Ui_PropertiesDock()
         self.ui.setupUi(self)
 

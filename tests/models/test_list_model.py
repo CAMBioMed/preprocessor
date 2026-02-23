@@ -1,6 +1,5 @@
 from typing import Any
 
-from PySide6.QtCore import QCoreApplication
 import pytest
 from PySide6.QtWidgets import QApplication
 
@@ -9,6 +8,7 @@ from pydantic import BaseModel
 from preprocessor.model.qlistmodel import QListModel
 
 from preprocessor.model.qmodel import QModel
+
 
 # Ensure a Qt application context exists for QObject usage in tests. Rely on pytest-qt's qapp.
 @pytest.fixture(autouse=True)
@@ -36,12 +36,12 @@ class Item(QModel[ItemData]):
         return f"Item({self.name})"
 
 
-@pytest.fixture()
+@pytest.fixture
 def model() -> QListModel[Item]:
     return QListModel[Item]()
 
-class TestQListModel:
 
+class TestQListModel:
     def test_append_and_len_and_parent(self, model: QListModel[Item]) -> None:
         # Arrange
         it = Item(ItemData(name="a"))

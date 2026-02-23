@@ -57,10 +57,18 @@
     </property>
     <addaction name="menuEdit_DetectQuadrat"/>
    </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <addaction name="menuWindow_ShowThumbnailsPanel"/>
+    <addaction name="menuWindow_ShowEditorPanel"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuWindow"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -198,6 +206,16 @@
   <action name="menuEdit_DetectQuadrat">
    <property name="text">
     <string>Detect &amp;quadrat</string>
+   </property>
+  </action>
+  <action name="menuWindow_ShowThumbnailsPanel">
+   <property name="text">
+    <string>Thumbnails panel</string>
+   </property>
+  </action>
+  <action name="menuWindow_ShowEditorPanel">
+   <property name="text">
+    <string>Editor panel</string>
    </property>
   </action>
  </widget>

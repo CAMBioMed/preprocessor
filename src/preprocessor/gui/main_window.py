@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QD
 from pathlib import Path
 
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.editor_dock_widget import EditorDockWidget
 from preprocessor.gui.export_dialog import ExportDialog
 from preprocessor.gui.launch_dialog import (
     new_project_dialog,
@@ -34,6 +35,8 @@ class MainWindow(QMainWindow):
     """The dock widget showing properties."""
     thumbnail_dock: ThumbnailDockWidget
     """The dock widget showing image thumbnails."""
+    editor_dock: EditorDockWidget
+    """The dock widget with edit controls."""
     central_widget: PhotoEditorWidget
     """The central widget showing the image."""
     _bound_project: ProjectModel | None = None
@@ -45,6 +48,7 @@ class MainWindow(QMainWindow):
         self._setup_icons()
         self._setup_keyboard_shortcuts()
         self._create_thumbnail_dock()
+        self._create_editor_dock()
         self._create_photo_editor()
 
         self.model = model
@@ -144,6 +148,12 @@ class MainWindow(QMainWindow):
         )
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.thumbnail_dock)
 
+    def _create_editor_dock(self) -> None:
+        """Create the editor dock widget."""
+        self.editor_dock = EditorDockWidget(self)
+        self.editor_dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.editor_dock)
+
     def _create_photo_editor(self) -> None:
         """Create the central photo editor widget."""
         self.central_widget = PhotoEditorWidget(self)
@@ -162,10 +172,17 @@ class MainWindow(QMainWindow):
         # Edit menu
         self.ui.menuEdit_DetectQuadrat.triggered.connect(self._handle_detect_quadrat_action)
 
+        # Window menu
+        self.ui.menuWindow_ShowThumbnailsPanel.triggered.connect(lambda: self.thumbnail_dock.setVisible(True))
+        self.ui.menuWindow_ShowEditorPanel.triggered.connect(lambda: self.editor_dock.setVisible(True))
+
         # Help menu
         self.ui.menuHelp_About.triggered.connect(self._handle_help_about_action)
 
-        # When a thumbnail is selected, either show stored result or schedule processing
+        # Editor dock
+        self.editor_dock.on_autodetect_quadrat_clicked.connect(self._handle_detect_quadrat_action)
+
+        # Thumbnail dock
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_selection_changed.connect(self._handle_photo_selection_changed)
@@ -199,8 +216,15 @@ class MainWindow(QMainWindow):
         if self.model.current_photo is None:
             return
 
-        original_path = self.model.current_project.get_absolute_path(self.model.current_photo.original_filename)
-        img = load_image(str(original_path))
+        # Prefer using the undistorted image currently shown in the editor (if available)
+        img = None
+        try:
+            img = self.central_widget.get_processing_image()
+        except Exception:
+            img = None
+        if img is None:
+            original_path = self.model.current_project.get_absolute_path(self.model.current_photo.original_filename)
+            img = load_image(str(original_path))
         if img is None:
             QMessageBox.critical(
                 self,
@@ -212,7 +236,7 @@ class MainWindow(QMainWindow):
         params = defaultParams
 
         result = detect_quadrat(img, params)
-        if result.corners is None:
+        if result is None or result.corners is None:
             # No corners detected
             return
 
@@ -257,10 +281,12 @@ class MainWindow(QMainWindow):
         self._update_project_actions()
         self._update_window_title()
         self._update_thumbnails()
+        self._handle_current_photo_changed(self.model.current_photo)
 
     def _handle_current_photo_changed(self, photo: PhotoModel | None) -> None:
         """Handle when the current photo changes."""
         self.central_widget.show_photo(photo, self.model.current_project)
+        self.editor_dock.update_with_photo(photo)
         self._update_window_title()
 
     def closeEvent(self, event: QCloseEvent) -> None:

@@ -1,12 +1,18 @@
+import contextlib
 import math
+from collections.abc import Callable
 
 from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
 from PySide6.QtWidgets import QWidget
+from cv2.typing import MatLike
 
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
+from preprocessor.processing.undistort import undistort_photo
+from preprocessor.processing.load_image import load_image
+from preprocessor.gui.worker import Worker, start_worker
 
 
 class PhotoEditorWidget(QWidget):
@@ -24,6 +30,14 @@ class PhotoEditorWidget(QWidget):
     """Visual radius for handles (in widget pixels)."""
     _edit_points: list[QPoint] | None
     """Working copy of points in widget coordinates while the user is editing."""
+    _original_cv_img: MatLike | None
+    """The original image loaded as an OpenCV/numpy array (if available)."""
+    _undistorted_cv_img: MatLike | None
+    """Last undistorted cv image (cached)."""
+    _photo_signals_connected: bool
+    """Whether we've connected model signals for the current photo."""
+    _current_project: ProjectModel | None
+    _current_undistort_worker: Worker | None
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
@@ -37,21 +51,154 @@ class PhotoEditorWidget(QWidget):
         # working copy used during editing (widget coordinates). None when not editing.
         self._edit_points = None
 
+        # CV images (numpy arrays) used for undistortion
+        self._original_cv_img = None
+        self._undistorted_cv_img = None
+        self._photo_signals_connected = False
+
         self.setMouseTracking(True)
+        self._current_project = None
+        self._current_undistort_worker = None
 
     def show_photo(self, photo: PhotoModel | None, project: ProjectModel) -> None:
         if photo is not None:
             original_path = project.get_absolute_path(photo.original_filename)
+            # Load a QPixmap for fast rendering and also attempt to load a cv image
             self._pixmap = QPixmap(str(original_path))
+            # Disconnect signals from previous photo (if any)
+            try:
+                if self._photo_signals_connected and self._photo is not None:
+                    with contextlib.suppress(Exception):
+                        self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
+                    with contextlib.suppress(Exception):
+                        self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
+                    self._photo_signals_connected = False
+            except Exception:
+                # ignore disconnect errors
+                pass
+
             self._photo = photo
+            self._current_project = project
+
+            # Try to load the CV image lazily (used for undistortion) using the project's loader
+            try:
+                self._original_cv_img = load_image(str(original_path))
+            except Exception:
+                self._original_cv_img = None
+
+            # Connect signals from the model so we can react when camera or distortion change
+            # First disconnect any previous connections
+            try:
+                # Connect to the new photo signals
+                self._photo.on_camera_matrix_changed.connect(self._on_camera_or_distortion_changed)
+                self._photo.on_distortion_coefficients_changed.connect(self._on_camera_or_distortion_changed)
+                self._photo_signals_connected = True
+            except Exception:
+                # If connecting fails, ignore silently (signals may be different in tests)
+                self._photo_signals_connected = False
+
+            # Immediately apply undistortion if possible (async)
+            self._apply_undistort_and_update()
         else:
+            # Disconnect any previous signals and clear state
+            try:
+                if self._photo_signals_connected and self._photo is not None:
+                    with contextlib.suppress(Exception):
+                        self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
+                    with contextlib.suppress(Exception):
+                        self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
+            except Exception:
+                pass
             self._pixmap = None
             self._photo = None
+            # Clear any stored cv images & signal flags
+            self._original_cv_img = None
+            self._undistorted_cv_img = None
+            self._photo_signals_connected = False
         # Stop any active dragging when switching photos
         self._drag_index = None
         # discard any unfinished edit when switching photos
         self._edit_points = None
         self.update()
+
+    def _on_camera_or_distortion_changed(self) -> None:
+        """Handler called when the photo camera matrix or distortion coefficients change.
+        Applies undistortion to the currently displayed image and updates the pixmap.
+        """
+        self._apply_undistort_and_update()
+
+    def _apply_undistort_and_update(self) -> None:
+        """Apply undistort() to the loaded CV image and update the displayed QPixmap.
+        Falls back to the original QPixmap if undistortion isn't possible.
+        """
+        if self._photo is None:
+            return
+
+        # Need an original CV image and camera/distortion parameters
+        if self._original_cv_img is None:
+            # Nothing to do; keep existing pixmap
+            self.update()
+            return
+
+        cam = getattr(self._photo, "camera_matrix", None)
+        dist = getattr(self._photo, "distortion_coefficients", None)
+
+        if cam is None or dist is None:
+            # No parameters: show original
+            self._undistorted_cv_img = None
+            # ensure pixmap matches original file (no-op if same)
+            self.update()
+            return
+
+        # Start asynchronous undistortion for the current photo (non-blocking)
+        try:
+            # Start async undistort; fallback to sync if starting fails
+            self._start_undistort_for_current()
+        except Exception:
+            # Fall back to synchronous undistortion if async start fails
+            try:
+                from preprocessor.processing.fix_lens_distortion import undistort
+                from PySide6.QtGui import QImage
+
+                und = undistort(self._original_cv_img, cam, list(dist))
+                if und is None:
+                    msg = "undistort returned None"
+                    raise RuntimeError(msg)
+
+                # und is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
+                import cv2
+
+                if und.ndim == 3 and und.shape[2] == 3:
+                    rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
+                    h, w, ch = rgb.shape
+                    bytes_per_line = ch * w
+                    qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
+                elif und.ndim == 3 and und.shape[2] == 4:
+                    rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
+                    h, w, ch = rgba.shape
+                    bytes_per_line = ch * w
+                    qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
+                else:
+                    gray = und.copy()
+                    h, w = gray.shape
+                    qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
+
+                self._pixmap = QPixmap.fromImage(qimg)
+                self._undistorted_cv_img = und
+                self.update()
+            except Exception:
+                self._undistorted_cv_img = None
+                self.update()
+
+    def get_processing_image(self) -> MatLike | None:
+        """Return a cv2 image to use for processing (undistorted if available).
+
+        Returns the undistorted image if we've successfully computed it, otherwise
+        returns the original cv image if available, otherwise None.
+        """
+        if self._undistorted_cv_img is not None:
+            return self._undistorted_cv_img
+        return self._original_cv_img
 
     def _current_pixmap_info(self) -> tuple[float, QPoint, QSize]:
         """
@@ -283,3 +430,85 @@ class PhotoEditorWidget(QWidget):
         cx = sum(p.x() for p in pts) / len(pts)
         cy = sum(p.y() for p in pts) / len(pts)
         return sorted(pts, key=lambda p: math.atan2(p.y() - cy, p.x() - cx))
+
+    def undistort_photo_async(
+        self, photo: PhotoModel, project: ProjectModel, result_callback: Callable[[object], None] | None = None
+    ) -> None:
+        """Start an asynchronous undistortion for the specified photo/project.
+
+        The result_callback (if provided) will be called with one argument:
+        the undistorted cv image (or None on failure).
+        This method can be used to batch undistort photos that are not currently displayed.
+        """
+        # Create a worker to run the undistort in background
+        worker = Worker(undistort_photo, photo, project)
+
+        def _on_result(result: object) -> None:
+            if result_callback is not None:
+                with contextlib.suppress(Exception):
+                    result_callback(result)
+
+        def _on_error() -> None:
+            # Pass None to callback on error
+            if result_callback is not None:
+                with contextlib.suppress(Exception):
+                    result_callback(None)
+
+        worker.signals.result.connect(_on_result)
+        worker.signals.error.connect(_on_error)
+        start_worker(worker)
+
+    def _start_undistort_for_current(self) -> None:
+        """Internal: start async undistort for the currently shown photo and update the widget when done."""
+        if self._photo is None or self._current_project is None:
+            return
+
+        # If a previous worker is running, we won't cancel it here; just start another
+        worker = Worker(undistort_photo, self._photo, self._current_project)
+        self._current_undistort_worker = worker
+
+        def _on_result(result: MatLike | None) -> None:
+            try:
+                if result is None:
+                    self._undistorted_cv_img = None
+                else:
+                    self._undistorted_cv_img = result
+                    # update pixmap from result on the main thread
+                    try:
+                        from PySide6.QtGui import QImage
+
+                        und = result
+                        # Result is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
+                        import cv2
+
+                        if und.ndim == 3 and und.shape[2] == 3:
+                            rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
+                            h, w, ch = rgb.shape
+                            bytes_per_line = ch * w
+                            qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
+                        elif und.ndim == 3 and und.shape[2] == 4:
+                            rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
+                            h, w, ch = rgba.shape
+                            bytes_per_line = ch * w
+                            qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
+                        else:
+                            gray = und.copy()
+                            h, w = gray.shape
+                            qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
+                        self._pixmap = QPixmap.fromImage(qimg)
+                    except Exception:
+                        # if conversion fails, leave pixmap as-is
+                        pass
+            finally:
+                # Clear worker ref and repaint
+                self._current_undistort_worker = None
+                self.update()
+
+        def _on_error() -> None:
+            self._undistorted_cv_img = None
+            self._current_undistort_worker = None
+            self.update()
+
+        worker.signals.result.connect(_on_result)
+        worker.signals.error.connect(_on_error)
+        start_worker(worker)

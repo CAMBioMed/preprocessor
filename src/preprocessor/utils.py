@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def update_basepath(old_basepath: Path | None, new_basepath: Path, path: Path) -> Path:
+def update_basepath(old_basepath: Path | None, new_basepath: Path | None, path: Path) -> Path:
     """
     Update a single file path that is relative to a base path that has changed.
 
@@ -13,6 +13,9 @@ def update_basepath(old_basepath: Path | None, new_basepath: Path, path: Path) -
         # If the old base path is not known, we can't reliably update the relative path, so we return it unchanged.
         return path
     old_full_path = path if old_basepath is None else (old_basepath / path).resolve()
+    if new_basepath is None:
+        # If the new base path is not known, we can't reliably update the relative path, so we return the absolute path.
+        return old_full_path
     try:
         # We don't walk up. If this fails, we'll just use the absolute path
         return old_full_path.relative_to(new_basepath)

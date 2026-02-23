@@ -84,7 +84,7 @@ class QModel[M: BaseModel](QObject):
         self._dirty = value
         if not value:
             # Propagate clean state to children
-            from preprocessor.model.qlistmodel import QListModel  # noqa: PLC0415
+            from preprocessor.model.qlistmodel import QListModel
 
             for attr_name in dir(self):
                 attr = getattr(self, attr_name)
