@@ -1,5 +1,6 @@
 # Benthic Image Preprocessor
 
+[Annotation Guide](https://cambiomed-biodiversa.com/guide/)
 
 ## Everyday tasks
 - Sync dependencies: `uv sync` (`make sync`)
