@@ -1,12 +1,11 @@
 import contextlib
 import logging
-from typing import Optional, Callable
+from collections.abc import Callable
 
 from cv2.typing import MatLike
 
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
-from preprocessor.processing.fix_lens_distortion import undistort
 from preprocessor.processing.load_image import load_image
 
 logger = logging.getLogger(__name__)
@@ -15,8 +14,8 @@ logger = logging.getLogger(__name__)
 def undistort_photo(
     photo: PhotoModel,
     project: ProjectModel,
-    progress_callback: Optional[Callable[[float], None]] = None,
-    stop_checker: Optional[Callable[[], bool]] = None,
+    progress_callback: Callable[[float], None] | None = None,
+    stop_checker: Callable[[], bool] | None = None,
 ) -> MatLike | None:
     """Load the photo (from project paths) and apply undistortion using the model's params.
 
@@ -54,10 +53,22 @@ def undistort_photo(
         np_dist_coeffs = np.array(list(dist), dtype=np.float32)
 
         # Compute optimal new camera matrix (same as fix_lens_distortion.undistort)
-        new_camera_matrix, _ = cv2.getOptimalNewCameraMatrix(np_camera_matrix, np_dist_coeffs, (w, h), 1)
+        new_camera_matrix, _ = cv2.getOptimalNewCameraMatrix(
+            np_camera_matrix,
+            np_dist_coeffs,
+            (w, h),
+            1,
+        )
 
         # Build remap matrices
-        map1, map2 = cv2.initUndistortRectifyMap(np_camera_matrix, np_dist_coeffs, None, new_camera_matrix, (w, h), cv2.CV_32FC1)
+        map1, map2 = cv2.initUndistortRectifyMap(
+            np_camera_matrix,
+            np_dist_coeffs,
+            None,
+            new_camera_matrix,
+            (w, h),
+            cv2.CV_32FC1,
+        )
 
         # Prepare destination image
         dst = np.empty_like(img)

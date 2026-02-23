@@ -11,8 +11,6 @@ from typing import ClassVar, Any
 from preprocessor.model.qmodel import QModel
 import contextlib
 
-from preprocessor.utils import update_basepath
-
 
 class ProjectData(BaseModel):
     """The data for a project, including project-specific settings."""

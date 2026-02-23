@@ -41,5 +41,5 @@ class EditorDockWidget(QDockWidget):
         # Update the distortion coefficient k1 in the photo model (k1, k2, p1, p2, k3, ...)
         current_distortion = self.current_photo.distortion_coefficients or [0.0, 0.0, 0.0, 0.0, 0.0]
         k1 = float(value) / 100.0  # Slider is scaled by 100 for better precision
-        new_distortion = [k1] + current_distortion[1:]  # Update k1, keep the rest unchanged
+        new_distortion = [k1, *current_distortion[1:]]  # Update k1, keep the rest unchanged
         self.current_photo.distortion_coefficients = new_distortion

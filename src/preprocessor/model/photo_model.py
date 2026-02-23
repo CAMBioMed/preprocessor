@@ -20,11 +20,13 @@ class PhotoData(BaseModel):
     """The height of the photo in pixels."""
     quadrat_corners: list[Point2] = []
     """The up to 4 corners of the quadrat in the photo."""
-    camera_matrix: Matrix3x3 = Field(default_factory=lambda d: (
-        (float(d["width"]), 0, float(d["width"]) / 2),
-        (0, float(d["width"]), float(d["height"]) / 2),
-        (0, 0, 1)
-    ))
+    camera_matrix: Matrix3x3 = Field(
+        default_factory=lambda d: (
+            (float(d["width"]), 0, float(d["width"]) / 2),
+            (0, float(d["width"]), float(d["height"]) / 2),
+            (0, 0, 1),
+        )
+    )
     """3x3 camera matrix or None."""
     distortion_coefficients: list[float] = [0, 0, 0, 0, 0]
     """Tuple of 4, 5, 8, 12, or 14 distortion coefficients."""

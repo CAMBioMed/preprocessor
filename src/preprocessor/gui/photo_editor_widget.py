@@ -68,14 +68,10 @@ class PhotoEditorWidget(QWidget):
             # Disconnect signals from previous photo (if any)
             try:
                 if self._photo_signals_connected and self._photo is not None:
-                    try:
+                    with contextlib.suppress(Exception):
                         self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
-                    except Exception:
-                        pass
-                    try:
+                    with contextlib.suppress(Exception):
                         self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
-                    except Exception:
-                        pass
                     self._photo_signals_connected = False
             except Exception:
                 # ignore disconnect errors
@@ -107,14 +103,10 @@ class PhotoEditorWidget(QWidget):
             # Disconnect any previous signals and clear state
             try:
                 if self._photo_signals_connected and self._photo is not None:
-                    try:
+                    with contextlib.suppress(Exception):
                         self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
-                    except Exception:
-                        pass
-                    try:
+                    with contextlib.suppress(Exception):
                         self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
-                    except Exception:
-                        pass
             except Exception:
                 pass
             self._pixmap = None
@@ -129,7 +121,7 @@ class PhotoEditorWidget(QWidget):
         self._edit_points = None
         self.update()
 
-    def _on_camera_or_distortion_changed(self, *args: object, **kwargs: object) -> None:
+    def _on_camera_or_distortion_changed(self) -> None:
         """Handler called when the photo camera matrix or distortion coefficients change.
         Applies undistortion to the currently displayed image and updates the pixmap.
         """
@@ -170,7 +162,8 @@ class PhotoEditorWidget(QWidget):
 
                 und = undistort(self._original_cv_img, cam, list(dist))
                 if und is None:
-                    raise RuntimeError("undistort returned None")
+                    msg = "undistort returned None"
+                    raise RuntimeError(msg)
 
                 # und is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
                 import cv2
@@ -438,10 +431,13 @@ class PhotoEditorWidget(QWidget):
         cy = sum(p.y() for p in pts) / len(pts)
         return sorted(pts, key=lambda p: math.atan2(p.y() - cy, p.x() - cx))
 
-    def undistort_photo_async(self, photo: PhotoModel, project: ProjectModel, result_callback: Callable[[object], None] | None = None) -> None:
+    def undistort_photo_async(
+        self, photo: PhotoModel, project: ProjectModel, result_callback: Callable[[object], None] | None = None
+    ) -> None:
         """Start an asynchronous undistortion for the specified photo/project.
 
-        The result_callback (if provided) will be called with one argument: the undistorted cv image (or None on failure).
+        The result_callback (if provided) will be called with one argument:
+        the undistorted cv image (or None on failure).
         This method can be used to batch undistort photos that are not currently displayed.
         """
         # Create a worker to run the undistort in background
@@ -452,7 +448,7 @@ class PhotoEditorWidget(QWidget):
                 with contextlib.suppress(Exception):
                     result_callback(result)
 
-        def _on_error(err: tuple) -> None:
+        def _on_error() -> None:
             # Pass None to callback on error
             if result_callback is not None:
                 with contextlib.suppress(Exception):
@@ -508,7 +504,7 @@ class PhotoEditorWidget(QWidget):
                 self._current_undistort_worker = None
                 self.update()
 
-        def _on_error(err: tuple) -> None:
+        def _on_error() -> None:
             self._undistorted_cv_img = None
             self._current_undistort_worker = None
             self.update()

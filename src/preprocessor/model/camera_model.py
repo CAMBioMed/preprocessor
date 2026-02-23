@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import Any, cast, ClassVar
+from typing import Any, ClassVar
 
 from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, ValidationError
 
-from preprocessor.model import Point2, Matrix3x3
+from preprocessor.model import Matrix3x3
 from preprocessor.model.qmodel import QModel
 from preprocessor.utils import update_basepath
 

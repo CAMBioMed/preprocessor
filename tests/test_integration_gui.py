@@ -6,8 +6,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFileDialog
 
 
-def test_integration_new_project_add_images_save_and_quit(qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
-    """Integration test: New Project -> add images -> save -> quit
+def test_integration_new_project_add_images_save_and_quit(
+    qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Integration test: New Project -> add images -> save -> quit.
 
     This test simulates the user clicking New Project in the launch dialog (we monkeypatch
     the file dialogs to avoid UI popups), then opens the main window, adds two images from
@@ -25,7 +27,7 @@ def test_integration_new_project_add_images_save_and_quit(qtbot: QtBot, tmp_path
     monkeypatch.setattr(
         QFileDialog,
         "getSaveFileName",
-        lambda parent, title, directory, filter: (str(project_file), "Project Files (*.pbproj)")
+        lambda parent, title, directory, filter: (str(project_file), "Project Files (*.pbproj)"),
     )
 
     # Create the application model and show the launch dialog
@@ -63,7 +65,7 @@ def test_integration_new_project_add_images_save_and_quit(qtbot: QtBot, tmp_path
     monkeypatch.setattr(
         QFileDialog,
         "getOpenFileNames",
-        lambda parent, title, directory, filter: ([str(img1), str(img2)], "Photos (*.jpg;*.jpeg)")
+        lambda parent, title, directory, filter: ([str(img1), str(img2)], "Photos (*.jpg;*.jpeg)"),
     )
 
     # Trigger the Add Photos action on the thumbnail dock

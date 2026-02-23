@@ -1,4 +1,3 @@
-
 # ensure a Qt app context for QObject usage in tests: rely on pytest-qt's qapp
 import pytest
 from PySide6.QtWidgets import QApplication
@@ -13,6 +12,7 @@ def _ensure_qapp(qapp: QApplication) -> QApplication:
     which can cause conflicts or crashes when pytest-qt also tries to manage one.
     """
     return qapp
+
 
 import json
 import tempfile
@@ -106,8 +106,8 @@ class TestProjectModel:
             p = PhotoModel(
                 PhotoData(
                     original_filename=Path("fileX.jpg"),
-                width=1024,
-                height=768,
+                    width=1024,
+                    height=768,
                     red_shift=(3.0, 4.0),
                 )
             )

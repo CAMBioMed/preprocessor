@@ -151,9 +151,7 @@ class MainWindow(QMainWindow):
     def _create_editor_dock(self) -> None:
         """Create the editor dock widget."""
         self.editor_dock = EditorDockWidget(self)
-        self.editor_dock.setAllowedAreas(
-            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
-        )
+        self.editor_dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.editor_dock)
 
     def _create_photo_editor(self) -> None:
@@ -245,7 +243,6 @@ class MainWindow(QMainWindow):
         self.model.current_photo.quadrat_corners = result.corners
         # Trigger updating the opened editor
         self._handle_current_photo_changed(self.model.current_photo)
-
 
     def _handle_help_about_action(self) -> None:
         show_about_dialog(self)
