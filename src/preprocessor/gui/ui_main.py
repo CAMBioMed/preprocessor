@@ -130,7 +130,6 @@ class Ui_Main(object):
     # setupUi
 
     def retranslateUi(self, Main):
-        Main.setWindowTitle(QCoreApplication.translate("Main", u"CAMBioMed Preprocessor", None))
         self.menuFile_OpenProject.setText(QCoreApplication.translate("Main", u"&Open Project...", None))
 #if QT_CONFIG(statustip)
         self.menuFile_OpenProject.setStatusTip(QCoreApplication.translate("Main", u"Open an existing project.", None))
@@ -173,5 +172,6 @@ class Ui_Main(object):
         self.menuEdit.setTitle(QCoreApplication.translate("Main", u"&Edit", None))
         self.menuWindow.setTitle(QCoreApplication.translate("Main", u"&Window", None))
         self.toolBar.setWindowTitle(QCoreApplication.translate("Main", u"toolBar", None))
+        pass
     # retranslateUi
 

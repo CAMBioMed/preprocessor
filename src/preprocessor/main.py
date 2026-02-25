@@ -4,13 +4,12 @@ from types import TracebackType
 from typing import Any
 import signal
 
-import click
 import PySide6
 
+from preprocessor import app_version, app_organisation, app_domain, app_name, app_formal_name
 from preprocessor.gui.launch_dialog import LaunchDialog
 from preprocessor.gui.main_window import MainWindow
 from preprocessor.model.application_model import ApplicationModel
-from ._version import __version__  # type: ignore
 from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (
@@ -22,23 +21,7 @@ from PySide6.QtWidgets import (
 import logging
 
 
-@click.group()
-def cli() -> None:
-    pass
-
-
-@cli.command()
-def version() -> None:
-    click.echo(f"CAMBioMed Preprocessor {__version__}")
-    # use getattr to avoid mypy errors when stubs don't expose __version__
-    pyside_ver = getattr(PySide6, "__version__", "unknown")
-    qtcore_ver = getattr(getattr(PySide6, "QtCore", None), "__version__", "unknown")
-    click.echo(f"  PySide6: {pyside_ver}")
-    click.echo(f"  PySide6 QtCore: {qtcore_ver}")
-
-
-@cli.command()
-def gui() -> None:
+def main_gui() -> None:
     """Show the main application window."""
     try:
         setup_logging()
@@ -47,13 +30,13 @@ def gui() -> None:
         # Disable allocation limit
         QtGui.QImageReader.setAllocationLimit(0)
 
-        QCoreApplication.setOrganizationName("CAMBioMed")
-        QCoreApplication.setOrganizationDomain("cambiomed-biodiversa.com")
-        QCoreApplication.setApplicationName("Preprocessor")
+        QCoreApplication.setOrganizationName(app_organisation)
+        QCoreApplication.setOrganizationDomain(app_domain)
+        QCoreApplication.setApplicationName(app_name)
 
         app = QApplication(sys.argv)
-        app.setApplicationName("CAMBioMed Preprocessor")
-        app.setApplicationVersion(__version__)
+        app.setApplicationName(app_formal_name)
+        app.setApplicationVersion(app_version)
 
         # Setup application model
         model = ApplicationModel()
@@ -71,6 +54,7 @@ def gui() -> None:
             sys.exit(1)
     except Exception as e:
         logging.getLogger("preprocessor").exception("Unhandled exception in main_gui: %s", e)
+        raise
 
 
 def _show_main_window(model: ApplicationModel) -> None:
@@ -87,11 +71,18 @@ def setup_logging() -> None:
 
 def main() -> None:
     setup_logging()
-    cli()
 
+    logger = logging.getLogger(__name__)
 
-def main_gui() -> None:
-    gui()
+    pyside_version = getattr(PySide6, "__version__", "unknown")
+    qtcore_version = getattr(getattr(PySide6, "QtCore", None), "__version__", "unknown")
+
+    logger.info(f"Starting {app_formal_name} {app_version}...")
+    logger.info("Python: %s", sys.version)
+    logger.info("PySide6: %s", pyside_version)
+    logger.info("QtCore: %s", qtcore_version)
+
+    main_gui()
 
 
 def _excepthook(cls: type[BaseException], exception: BaseException, traceback_obj: TracebackType | None) -> None:
@@ -106,7 +97,7 @@ def _excepthook(cls: type[BaseException], exception: BaseException, traceback_ob
     # If Qt is initialized, show a message box
     if QApplication.instance() is not None:
         msg_box = QMessageBox()
-        msg_box.setWindowTitle("CAMBioMed Preprocessor Fatal Error")
+        msg_box.setWindowTitle(f"{app_formal_name} Fatal Error")
         msg_box.setIcon(QMessageBox.Icon.Critical)
         msg_box.setText("We're sorry, an unexpected fatal error occurred.")
         msg_box.setDetailedText(error_msg)

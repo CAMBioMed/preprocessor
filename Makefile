@@ -118,6 +118,48 @@ upgrade:                            ## Upgrade locked dependencies
 	echo "${OK} Dependencies upgraded"
 
 ### =============================================================================
+##@ Application
+### =============================================================================
+.PHONY: app-update
+app-update:                          ## Update the app to match the current project state
+	echo "${INFO} Updating app..."
+	uv tool run briefcase update --update-requirements --update-resources $(ARGS)
+	echo "${OK} App updated"
+
+.PHONY: app-build
+app-build:                          ## Build the updated app
+	echo "${INFO} Building app..."
+	uv tool run briefcase build --test --no-input --no-update $(ARGS)
+	echo "${OK} App built"
+
+.PHONY: app-test
+app-test:                          ## Test the built app
+	echo "${INFO} Testing app..."
+	uv tool run briefcase run --test --no-input --no-update $(ARGS)
+	echo "${OK} App tested"
+
+.PHONY: app-run
+app-run:                            ## Run the built app
+	echo "${INFO} Running app..."
+	uv tool run briefcase run $(ARGS)
+	echo "${OK} App ran"
+
+.PHONY: app-package
+app-package:                        ## Package the built app
+	echo "${INFO} Packaging app..."
+	uv tool run briefcase package --adhoc-sign $(ARGS)
+	echo "${OK} App packaged"
+
+.PHONY: app-clean
+app-clean:                          ## Clean the app artifacts
+	echo "${INFO} Cleaning app artifacts..."
+	-rm -r .briefcase/ 2> /dev/null
+	-rm -r build/ 2> /dev/null
+	-rm -r logs/ 2> /dev/null
+	-find . -type d -name "*.dist-info" -exec rm -r {} +
+	echo "${OK} App artifacts cleaned"
+
+### =============================================================================
 ##@ Meta
 ### =============================================================================
 .PHONY: version

@@ -54,8 +54,8 @@ def test_integration_new_project_add_images_save_and_quit(
     qtbot.waitExposed(main_win)
 
     # Prepare example images from the repository
-    repo_root = Path(__file__).resolve().parent.parent
-    photos_dir = (repo_root / "tests" / "photos").resolve()
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    photos_dir = (repo_root / "tests" / "preprocessor" / "photos").resolve()
     img1 = (photos_dir / "IMG_1054.JPG").resolve()
     img2 = (photos_dir / "IMG_1069.JPG").resolve()
     assert img1.exists(), f"Example image not found: {img1}"

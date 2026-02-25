@@ -1,5 +1,5 @@
 ---
-name: "Application"
+name: "Build"
 
 on:  # yamllint disable-line rule:truthy
   push:
@@ -9,6 +9,24 @@ on:  # yamllint disable-line rule:truthy
     branches:
       - main
 
+# Ensure only one active CI run per PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Force color output in logs, even when running non-interactively
+  FORCE_COLOR: "1"
+  # Fixing GitHub CI error:
+  #     Could not load the Qt platform plugin "xcb" in "" even though it was found. Fatal Python error: Aborted
+  # https://github.com/therecipe/qt/issues/775#issuecomment-456899597
+  DISPLAY: 0.0
+  QT_QPA_PLATFORM: offscreen
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
     name: "Build"
@@ -17,12 +35,6 @@ jobs:
       matrix:
         python-version:
           - "3.12"
-    env:
-      # Fixing GitHub CI error:
-      #     Could not load the Qt platform plugin "xcb" in "" even though it was found. Fatal Python error: Aborted
-      # https://github.com/therecipe/qt/issues/775#issuecomment-456899597
-      DISPLAY: 0.0
-      QT_QPA_PLATFORM: offscreen
     steps:
       - name: "Checkout"
         uses: actions/checkout@v6

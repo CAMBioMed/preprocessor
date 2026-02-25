@@ -3,6 +3,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox
 
+from preprocessor import app_formal_name
 from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.project_model import ProjectModel
@@ -19,6 +20,7 @@ class LaunchDialog(QDialog):
         self.model = model
         self.ui = Ui_LaunchDialog()
         self.ui.setupUi(self)
+        self.setWindowTitle(app_formal_name)
         self._connect_signals()
 
     def _connect_signals(self) -> None:

@@ -1,0 +1,129 @@
+---
+name: "Package"
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Ensure only one active CI run per PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Force color output in logs, even when running non-interactively
+  FORCE_COLOR: "1"
+
+defaults:
+  run:
+    shell: bash
+
+# Based on: https://briefcase.beeware.org/en/stable/how-to/building/ci/
+jobs:
+  package:
+    name: "Package and Test"
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ "Windows", "macOS", "Ubuntu-24.04", "Fedora-40" ]
+        include:
+          - target: "Windows"
+            output-format: "app"
+            runs-on: "windows-latest"
+
+          - target: "macOS"
+            output-format: "app"
+            runs-on: "macos-latest"
+
+          - target: "Ubuntu-24.04"
+            platform: "Linux"
+            output-format: "system"
+            runs-on: "ubuntu-latest"
+            pre-command: "sudo apt -y install socat"
+            briefcase-run-prefix: "xvfb-run"
+            briefcase-args: "--target ubuntu:24.04"
+
+          - target: "Fedora-40"
+            platform: "Linux"
+            output-format: "system"
+            runs-on: "ubuntu-latest"
+            pre-command: "sudo apt -y install socat"
+            briefcase-run-prefix: "xvfb-run"
+            briefcase-args: "--target fedora:40"
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Setup Environment"
+        run: |
+          ${{ matrix.pre-command }}
+
+      - name: "Install UV"
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: "Install the project"
+        run: uv sync --locked --all-extras --dev
+
+      - name: "Install Briefcase"
+        run: uv tool install briefcase
+
+      - name: "Build App"
+        run: |
+          ${{ matrix.briefcase-build-prefix }} \
+          briefcase build \
+            ${{ matrix.platform || matrix.target }} \
+            ${{ matrix.output-format }} \
+            --test --no-input --log \
+            ${{ matrix.briefcase-args }} \
+            ${{ matrix.briefcase-build-args }}
+
+      - name: "Test App"
+        run: |
+          ${{ matrix.briefcase-run-prefix }} \
+          briefcase run \
+            ${{ matrix.platform || matrix.target }} \
+            ${{ matrix.output-format }} \
+            --test --no-input --log \
+            ${{ matrix.briefcase-args }} \
+            ${{ matrix.briefcase-run-args }}
+
+      - name: "Package App"
+        run: |
+          ${{ matrix.briefcase-package-prefix }} \
+          briefcase package \
+            ${{ matrix.platform || matrix.target }} \
+            ${{ matrix.output-format }} \
+            --update --adhoc-sign --no-input --log \
+            ${{ matrix.briefcase-args }} \
+            ${{ matrix.briefcase-package-args }}
+
+      - name: "Upload App"
+        uses: actions/upload-artifact@v6
+        with:
+          name: cambiomed-preprocessor-${{ matrix.target }}
+          path: dist
+          if-no-files-found: error
+
+      - name: "Minimize UV cache"
+        run: uv cache prune --ci
+
+      - name: "Upload Log"
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: Log-Failure-${{ matrix.target }}
+          path: logs/*

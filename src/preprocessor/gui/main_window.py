@@ -5,6 +5,7 @@ from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
 from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QDialog
 from pathlib import Path
 
+from preprocessor import app_formal_name
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
 from preprocessor.gui.export_dialog import ExportDialog
@@ -45,6 +46,7 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_Main()
         self.ui.setupUi(self)
+        self.setWindowTitle(app_formal_name)
         self._setup_icons()
         self._setup_keyboard_shortcuts()
         self._create_thumbnail_dock()

@@ -1,12 +1,12 @@
 [project]
-dynamic = ["version", "urls"]
 name = "preprocessor"
+version = "0.0.1"
 description = "Benthic image preprocessor"
 keywords = ["preprocessor"]
 license-expression = "Apache-2.0"
 license-file = "LICENSE.md"
 license-files = ["LICENSE.md"]
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
 authors = [
   {name = "Daniel A. A. Pelsmaeker", email = "developer@pelsmaeker.net"},
 ]
@@ -17,13 +17,23 @@ requires-python = ">=3.12"
 dependencies = [
   "click>=8.3.1",
   "numpy>=2.2.6",
-  "opencv-contrib-python-headless>=4.13.0.92",
+  "opencv-contrib-python-headless==4.12.0.88",  # For OpenCV version that works on MacOS
   "pillow>=12.0.0",
   "pydantic>=2.12.5",
-  "pyside6>=6.10.1",
+  "PySide6-Essentials>=6.10.1",
+#  "pyside6>=6.10.1",
   "qimage2ndarray>=1.10.0",
   "scikit-learn>=1.7.2",
 ]
+
+[project.urls]
+Homepage = "https://cambiomed-biodiversa.com/"
+#Documentation = "https://readthedocs.org"
+Repository = "https://github.com/CAMBioMed/preprocessor.git"
+Source = "https://github.com/CAMBioMed/preprocessor/"
+Issues = "https://github.com/CAMBioMed/preprocessor/issues"
+Changelog = "https://github.com/CAMBioMed/preprocessor/blob/main/CHANGELOG.md"
+
 
 # CLI launcher
 [project.scripts]
@@ -34,41 +44,43 @@ preprocessor = "preprocessor.main:main"
 preprocessor-gui = "preprocessor.main:main_gui"
 
 [dependency-groups]
+# NOTE: This list must be kept in sync with `tool.briefcase.app.preprocessor.test_requires` test dependencies.
+# Please update both lists when adding/removing dependencies, until UV is supported by Briefcase.
 dev = [
+  # Test dependencies
+  "pytest>=9.0.1",
+  "pytest-cov>=7.0.0",
+  "pytest-qt>=4.5.0",
+  # Build dependencies
   "hatch>=1.16.1",
-  "hatch-vcs>=0.5.0",
   "hatchling>=1.28.0",
+  # Development dependencies
   # For PyCharm 'Show as Image'
   "mypy>=1.19.0",
   "pillow>=12.0.0",
   "pyright>=1.1.406",
-  "pytest>=9.0.1",
-  "pytest-cov>=7.0.0",
-  "pytest-qt>=4.5.0",
   "ruff>=0.14.7",
   "yamlfix>=1.19.0",
 ]
 
+
+################
+# Build System #
+################
+
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.version]
-source = "vcs"
-
-[tool.hatch.build.hooks.vcs]
-version-file = "src/preprocessor/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = [
   "src/preprocessor",
 ]
 
-# See: https://packaging.python.org/en/latest/specifications/well-known-project-urls/#well-known-labels
-[tool.hatch.metadata.hooks.vcs.urls]
-Homepage = "https://cambiomed-biodiversa.com/"
-Source = "https://github.com/CAMBioMed/preprocessor/"
-"Source Archive" = "https://github.com/CAMBioMed/preprocessor/archive/{commit_hash}.zip"
+
+##########
+# PyTest #
+##########
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -82,6 +94,11 @@ testpaths = [
   "tests",
 ]
 
+
+############
+# Coverage #
+############
+
 [tool.coverage]
 run.source = ["preprocessor"]
 port.exclude_lines = [
@@ -90,9 +107,19 @@ port.exclude_lines = [
   'if typing.TYPE_CHECKING:',
 ]
 
+
+########
+# MyPy #
+########
+
 [tool.mypy]
 warn_return_any = true
 disallow_untyped_defs = true
+
+
+#############################
+# Ruff Linting & Formatting #
+#############################
 
 [tool.ruff]
 line-length = 120
@@ -204,6 +231,10 @@ pydocstyle.convention = "pep257"
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
+
+###########
+# YamlFix #
+###########
 [tool.yamlfix]
 line_length = 120
 sequence_style = "keep_style"
@@ -211,6 +242,10 @@ explicit_start = false
 whitelines = 1
 section_whitelines = 1
 
+
+##############
+# Qt Creator #
+##############
 [tool.pyside6-project]
 files = [
     "src/preprocessor/__main__.py",
@@ -222,20 +257,22 @@ files = [
     "src/preprocessor/gui/properties_dock.ui",
 ]
 
-# Publishing
+
+#############
+# Briefcase #
+#############
 [tool.briefcase]
 project_name = "CAMBioMed Preprocessor"
 bundle = "com.cambiomed-biodiversa"
-# Briefcase cannot derive the version from Git (yet) https://github.com/beeware/briefcase/issues/474
-version = "0.0.1"
-#url = "https://cambiomed-biodiversa.com/preprocessor"
 license.file = "LICENSE.md"
+author = "Daniel A. A. Pelsmaeker"
+author_email = "developer@pelsmaeker.net"
 
 [tool.briefcase.app.preprocessor]
 formal_name = "CAMBioMed Preprocessor"
-#description = "My first application"
-#long_description = """More details about the app should go here.
-#"""
+long_description = """Preprocessor application for benthic photos."""
+icon = "appicon/preprocessor"
+splash_background_color = "#a95e43"
 sources = [
     "src/preprocessor",
 ]
@@ -243,18 +280,103 @@ test_sources = [
     "tests",
 ]
 
+requires = [
+    # Add your cross-platform app requirements here
+]
+# NOTE: This list must be kept in sync with `dependency-groups.dev` test dependencies.
+# Please update both lists when adding/removing dependencies, until UV is supported by Briefcase.
+# See also: https://github.com/beeware/briefcase/issues/1235
+test_requires = [
+  # Test dependencies
+  "pytest>=9.0.1",
+  "pytest-cov>=7.0.0",
+  "pytest-qt>=4.5.0",
+]
+
 [tool.briefcase.app.preprocessor.macOS]
-universal_build = true
 # WORKAROUND: https://github.com/beeware/briefcase/issues/2658#issuecomment-3832236695
 min_os_version = "13.0"
+universal_build = true      # Support both x86_64/ARM64
 requires = [
     "std-nslog~=1.0.3",
+]
+
+[tool.briefcase.app.preprocessor.linux]
+requires = []
+
+[tool.briefcase.app.preprocessor.linux.system.debian]
+system_requires = []
+
+system_runtime_requires = [
+    # Derived from https://doc.qt.io/qt-6/linux-requirements.html
+    "libxext6",
+    "libxrender1",
+    "libx11-xcb1",
+    "libxkbcommon-x11-0",
+    "libxcb-image0",
+    "libxcb-cursor0",
+    "libxcb-shape0",
+    "libxcb-randr0",
+    "libxcb-xfixes0",
+    "libxcb-sync1",
+    "libxcb-icccm4",
+    "libxcb-keysyms1",
+    "libfontconfig1",
+    "libsm6",
+    "libice6",
+    "libglib2.0-0",
+    "libgl1",
+    "libegl1",
+    "libdbus-1-3",
+]
+
+[tool.briefcase.app.preprocessor.linux.system.rhel]
+system_requires = []
+
+system_runtime_requires = [
+    "qt6-qtbase-gui",
+]
+
+[tool.briefcase.app.preprocessor.linux.system.suse]
+system_requires = []
+
+system_runtime_requires = [
+    "libgthread-2_0-0",
+    "libQt6Gui6",
+]
+
+[tool.briefcase.app.preprocessor.linux.system.arch]
+system_requires = []
+
+system_runtime_requires = [
+    "qt6-base",
 ]
 
 [tool.briefcase.app.preprocessor.linux.appimage]
 manylinux = "manylinux_2_28"
 
+system_requires = [
+# ?? FIXME
+]
+
+linuxdeploy_plugins = [
+]
+
 [tool.briefcase.app.preprocessor.linux.flatpak]
-flatpak_runtime = "org.gnome.Platform"
-flatpak_runtime_version = "48"
-flatpak_sdk = "org.gnome.Sdk"
+flatpak_runtime = "org.kde.Platform"
+flatpak_runtime_version = "6.9"
+flatpak_sdk = "org.kde.Sdk"
+
+[tool.briefcase.app.preprocessor.windows]
+requires = []
+
+# Mobile deployments
+[tool.briefcase.app.preprocessor.iOS]
+supported = false
+
+[tool.briefcase.app.preprocessor.android]
+supported = false
+
+# Web deployments
+[tool.briefcase.app.preprocessor.web]
+supported = false
