@@ -68,7 +68,15 @@ class ProjectData(BaseModel):
             raise ValueError(msg)
         return v
 
-    @field_validator("metadata_group", "metadata_season", "metadata_area", "metadata_site", "metadata_depth", "metadata_transect", mode="after")
+    @field_validator(
+        "metadata_group",
+        "metadata_season",
+        "metadata_area",
+        "metadata_site",
+        "metadata_depth",
+        "metadata_transect",
+        mode="after",
+    )
     @classmethod
     def _validate_metadata_fields(cls: type["ProjectData"], v: str | None) -> str | None:
         if v is not None and not v.strip():
@@ -292,4 +300,3 @@ class ProjectModel(QModel[ProjectData]):
         photo = PhotoModel.from_file(path, self.file.parent)
         self.photos.append(photo)
         return photo
-

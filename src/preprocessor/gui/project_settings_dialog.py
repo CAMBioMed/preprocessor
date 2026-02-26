@@ -13,7 +13,7 @@ class ProjectSettingsDialog(QDialog):
         self.model = model
         self.ui = Ui_ProjectSettingsDialog()
         self.ui.setupUi(self)
-        self.setWindowTitle(f"Project Settings")
+        self.setWindowTitle("Project Settings")
         self._populate()
         self._connect_signals()
 
