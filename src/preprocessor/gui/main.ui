@@ -29,6 +29,7 @@
     <addaction name="menuFile_SaveProject"/>
     <addaction name="menuFile_SaveProjectAs"/>
     <addaction name="separator"/>
+    <addaction name="menuFile_ProjectSettings"/>
     <addaction name="menuFile_ExportAll"/>
     <addaction name="separator"/>
     <addaction name="menuFile_Exit"/>
@@ -38,15 +39,6 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="menuHelp_About"/>
-   </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>&amp;View</string>
-    </property>
-    <addaction name="menuView_ShowOriginal"/>
-    <addaction name="menuView_ShowLensCorrected"/>
-    <addaction name="menuView_ShowColorCorrected"/>
-    <addaction name="menuView_ShowPerspectiveCorrected"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -63,7 +55,6 @@
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
-   <addaction name="menuView"/>
    <addaction name="menuHelp"/>
    <addaction name="menuWindow"/>
   </widget>
@@ -79,12 +70,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="menuFile_OpenProject"/>
-   <addaction name="separator"/>
-   <addaction name="menuEdit_DetectQuadrat"/>
-   <addaction name="menuView_ShowOriginal"/>
-   <addaction name="menuView_ShowLensCorrected"/>
-   <addaction name="menuView_ShowColorCorrected"/>
-   <addaction name="menuView_ShowPerspectiveCorrected"/>
+   <addaction name="menuFile_SaveProject"/>
   </widget>
   <action name="menuFile_OpenProject">
    <property name="icon">
@@ -120,38 +106,6 @@
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::AboutRole</enum>
-   </property>
-  </action>
-  <action name="menuView_ShowOriginal">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::InsertImage"/>
-   </property>
-   <property name="text">
-    <string>Show &amp;Original</string>
-   </property>
-  </action>
-  <action name="menuView_ShowLensCorrected">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::InsertImage"/>
-   </property>
-   <property name="text">
-    <string>Show &amp;Lens Corrected</string>
-   </property>
-  </action>
-  <action name="menuView_ShowColorCorrected">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::InsertImage"/>
-   </property>
-   <property name="text">
-    <string>Show &amp;Color Corrected</string>
-   </property>
-  </action>
-  <action name="menuView_ShowPerspectiveCorrected">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::InsertImage"/>
-   </property>
-   <property name="text">
-    <string>Show &amp;Perspective Corrected</string>
    </property>
   </action>
   <action name="menuFile_NewProject">
@@ -213,6 +167,14 @@
   <action name="menuWindow_ShowEditorPanel">
    <property name="text">
     <string>Editor panel</string>
+   </property>
+  </action>
+  <action name="menuFile_ProjectSettings">
+   <property name="text">
+    <string>Project Se&amp;ttings...</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
  </widget>
