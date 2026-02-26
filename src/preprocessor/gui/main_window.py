@@ -180,7 +180,7 @@ class MainWindow(QMainWindow):
         # Thumbnail dock
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
-        self.thumbnail_dock.on_selection_changed.connect(self._handle_photo_selection_changed)
+        self.thumbnail_dock.on_item_double_clicked.connect(self._handle_photo_opened)
 
         # Model
         self.model.on_current_project_changed.connect(self._handle_current_project_changed)
@@ -269,10 +269,9 @@ class MainWindow(QMainWindow):
         self._update_window_title()
         self._update_thumbnails()
 
-    def _handle_photo_selection_changed(self, selected: list[PhotoModel]) -> None:
+    def _handle_photo_opened(self, item: PhotoModel | None) -> None:
         """Handle when the selected photo changes."""
-        # TODO: Support multiple selection?
-        self.model.current_photo = selected[0] if selected else None
+        self.model.current_photo = item
 
     def _handle_current_project_changed(self, project: ProjectModel) -> None:
         """Handle when the current project changes."""

@@ -1,7 +1,8 @@
 # Manually created
 from PySide6.QtCore import QSize, QMetaObject, Qt
 from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QToolBar, QDockWidget, QGridLayout, QListView
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QToolBar, QDockWidget, QGridLayout, QListView, \
+    QAbstractItemView
 
 
 class Ui_ThumbnailDock(object):
@@ -53,6 +54,7 @@ class Ui_ThumbnailDock(object):
         self.thumbnailListWidget.setMovement(QListView.Movement.Static)
         self.thumbnailListWidget.setResizeMode(QListWidget.ResizeMode.Adjust)
         self.thumbnailListWidget.setWrapping(False)
+        self.thumbnailListWidget.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.mainLayout.addWidget(self.thumbnailListWidget, 0, 1, 1, 1)
 
         parent.setWidget(self.dockWidgetContents)
