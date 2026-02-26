@@ -14,7 +14,8 @@ class ThumbnailDockWidget(QDockWidget):
 
     on_add_photos_action: Signal = Signal()
     on_remove_photos_action: Signal = Signal(object)
-    on_selection_changed: Signal = Signal(object)
+    on_selection_changed: Signal = Signal(object)  # Signal(list[PhotoModel])
+    on_item_double_clicked: Signal = Signal(object)  # Signal(PhotoModel | None)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QDockWidget.__init__(self, parent)
@@ -42,6 +43,7 @@ class ThumbnailDockWidget(QDockWidget):
         """Connect UI signals to internal handlers."""
         self.ui.addPhotoAction.triggered.connect(self._handle_add_photos_action)
         self.ui.removePhotoAction.triggered.connect(self._handle_remove_photos_action)
+        self.ui.thumbnailListWidget.itemDoubleClicked.connect(self._handle_item_double_clicked)
         self.ui.thumbnailListWidget.itemSelectionChanged.connect(self._handle_selection_changed)
 
     def _handle_add_photos_action(self) -> None:
@@ -64,6 +66,10 @@ class ThumbnailDockWidget(QDockWidget):
             if item.data(Qt.ItemDataRole.UserRole) is not None
         ]
         self.on_selection_changed.emit(selected_photos)
+
+    def _handle_item_double_clicked(self, item: QListWidgetItem) -> None:
+        model: PhotoModel | None = item.data(Qt.ItemDataRole.UserRole)
+        self.on_item_double_clicked.emit(model)
 
     def update_thumbnails(self, photos: QListModel[PhotoModel], project: ProjectModel) -> None:
         """Update the thumbnails to match the given list of photos."""
