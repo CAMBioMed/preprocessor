@@ -42,35 +42,35 @@ class Ui_ProjectSettingsDialog(object):
 
         self.formLayout_2.setWidget(0, QFormLayout.ItemRole.FieldRole, self.txtGroup)
 
-        self.lblSeason = QLabel(self.tabMetadata)
-        self.lblSeason.setObjectName(u"lblSeason")
-
-        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.LabelRole, self.lblSeason)
-
-        self.txtSeason = QLineEdit(self.tabMetadata)
-        self.txtSeason.setObjectName(u"txtSeason")
-
-        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.FieldRole, self.txtSeason)
-
         self.lblArea = QLabel(self.tabMetadata)
         self.lblArea.setObjectName(u"lblArea")
 
-        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblArea)
+        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.LabelRole, self.lblArea)
 
         self.txtArea = QLineEdit(self.tabMetadata)
         self.txtArea.setObjectName(u"txtArea")
 
-        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.FieldRole, self.txtArea)
+        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.FieldRole, self.txtArea)
 
         self.lblSite = QLabel(self.tabMetadata)
         self.lblSite.setObjectName(u"lblSite")
 
-        self.formLayout_2.setWidget(3, QFormLayout.ItemRole.LabelRole, self.lblSite)
+        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblSite)
 
         self.txtSite = QLineEdit(self.tabMetadata)
         self.txtSite.setObjectName(u"txtSite")
 
-        self.formLayout_2.setWidget(3, QFormLayout.ItemRole.FieldRole, self.txtSite)
+        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.FieldRole, self.txtSite)
+
+        self.lblSeason = QLabel(self.tabMetadata)
+        self.lblSeason.setObjectName(u"lblSeason")
+
+        self.formLayout_2.setWidget(3, QFormLayout.ItemRole.LabelRole, self.lblSeason)
+
+        self.txtSeason = QLineEdit(self.tabMetadata)
+        self.txtSeason.setObjectName(u"txtSeason")
+
+        self.formLayout_2.setWidget(3, QFormLayout.ItemRole.FieldRole, self.txtSeason)
 
         self.lblDepth = QLabel(self.tabMetadata)
         self.lblDepth.setObjectName(u"lblDepth")
@@ -117,9 +117,9 @@ class Ui_ProjectSettingsDialog(object):
     def retranslateUi(self, ProjectSettingsDialog):
         ProjectSettingsDialog.setWindowTitle(QCoreApplication.translate("ProjectSettingsDialog", u"Dialog", None))
         self.lblGroup.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Group:", None))
-        self.lblSeason.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Season:", None))
         self.lblArea.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Area:", None))
         self.lblSite.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Site:", None))
+        self.lblSeason.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Season:", None))
         self.lblDepth.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Depth:", None))
         self.lblTransect.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Transect:", None))
         self.tabs.setTabText(self.tabs.indexOf(self.tabMetadata), QCoreApplication.translate("ProjectSettingsDialog", u"Metadata", None))
