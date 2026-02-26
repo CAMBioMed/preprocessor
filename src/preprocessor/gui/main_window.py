@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.ui = Ui_Main()
+        self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle(app_formal_name)
         self._setup_icons()
