@@ -19,7 +19,7 @@ from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
-from preprocessor.gui.ui_main import Ui_Main
+from preprocessor.gui.ui_main_window import Ui_MainWindow
 from preprocessor.gui.utils import icon_from_resource
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
@@ -30,7 +30,7 @@ from preprocessor.processing.params import defaultParams
 
 
 class MainWindow(QMainWindow):
-    ui: Ui_Main
+    ui: Ui_MainWindow
     model: ApplicationModel
 
     properties_dock: PropertiesDockWidget

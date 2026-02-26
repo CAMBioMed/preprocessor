@@ -257,7 +257,7 @@ files = [
     "src/preprocessor/gui/export_dialog.ui",
     "src/preprocessor/gui/hsv_threshold.ui",
     "src/preprocessor/gui/launch_dialog.ui",
-    "src/preprocessor/gui/main.ui",
+    "src/preprocessor/gui/main_window.ui",
     "src/preprocessor/gui/project_settings_dialog.ui",
     "src/preprocessor/gui/properties_dock.ui",
 ]
