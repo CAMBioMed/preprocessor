@@ -115,6 +115,10 @@ port.exclude_lines = [
 [tool.mypy]
 warn_return_any = true
 disallow_untyped_defs = true
+exclude_gitignore = true
+exclude = [
+    '^ui_.*\.py$',
+]
 
 
 #############################
@@ -254,6 +258,7 @@ files = [
     "src/preprocessor/gui/hsv_threshold.ui",
     "src/preprocessor/gui/launch_dialog.ui",
     "src/preprocessor/gui/main.ui",
+    "src/preprocessor/gui/project_settings_dialog.ui",
     "src/preprocessor/gui/properties_dock.ui",
 ]
 
