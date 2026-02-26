@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 from preprocessor.gui.ui_export_dialog import Ui_ExportDialog
+from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.fix_perspective import fix_perspective
 from preprocessor.processing.load_image import load_image
@@ -221,7 +222,7 @@ class _ExportWorker(QObject):
 
             try:
                 # Prepare names/paths
-                output_name = photo.name
+                output_name = self.determine_output_name(photo, idx)
                 output_path = self.project.export_path / output_name
                 self.status.emit(f"Exporting {idx}/{total}: {output_name}")
 
@@ -316,3 +317,20 @@ class _ExportWorker(QObject):
 
     def request_stop(self) -> None:
         self._stop_requested = True
+
+    def determine_output_name(self, photo: PhotoModel, index: int) -> str:
+        # Placeholder for any logic to determine output filename based on photo metadata
+        extension = Path(photo.original_filename).suffix.lower()
+        parts = [
+            self.project.metadata_group,
+            self.project.metadata_area,
+            self.project.metadata_site,
+            # year
+            self.project.metadata_season,
+            self.project.metadata_depth,
+            self.project.metadata_transect,
+            # date
+            f"{index:04d}",
+        ]
+        newname = "_".join([x for x in parts if x])
+        return newname + extension

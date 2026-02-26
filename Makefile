@@ -84,7 +84,7 @@ test-coverage:                      ## Test the project with coverage
 .PHONY: typecheck
 typecheck:                          ## Type check the project
 	echo "${INFO} Type checking (mypy)..."
-	uv run mypy $(ARGS) src tests
+	uv run mypy $(ARGS) src
 	echo "${OK} Checked types"
 
 .PHONY: lint

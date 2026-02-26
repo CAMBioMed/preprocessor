@@ -16,6 +16,7 @@ from preprocessor.gui.launch_dialog import (
     save_project_as_dialog,
 )
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
+from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.ui_main import Ui_Main
@@ -58,15 +59,6 @@ class MainWindow(QMainWindow):
 
         self.read_settings()
         self._handle_current_project_changed(self.model.current_project)
-
-    def _update_project_actions(self) -> None:
-        """Enable or disable file actions depending on whether a project is open."""
-        has_project = self.model.current_project is not None
-        self.ui.menuFile_SaveProject.setEnabled(has_project)
-        self.ui.menuFile_SaveProjectAs.setEnabled(has_project)
-        self.ui.menuFile_ExportAll.setEnabled(has_project)
-        self.thumbnail_dock.ui.addPhotoAction.setEnabled(has_project)
-        self.thumbnail_dock.ui.removePhotoAction.setEnabled(has_project)
 
     def _bind_project_signals(self, project: ProjectModel) -> None:
         """Connect/disconnect signals for the currently bound project."""
@@ -168,6 +160,7 @@ class MainWindow(QMainWindow):
         self.ui.menuFile_OpenProject.triggered.connect(self._handle_open_project_action)
         self.ui.menuFile_SaveProject.triggered.connect(self._handle_save_project_action)
         self.ui.menuFile_SaveProjectAs.triggered.connect(self._handle_save_project_as_action)
+        self.ui.menuFile_ProjectSettings.triggered.connect(self._handle_project_settings_action)
         self.ui.menuFile_ExportAll.triggered.connect(self._handle_export_all_action)
         self.ui.menuFile_Exit.triggered.connect(self.close)
 
@@ -208,6 +201,10 @@ class MainWindow(QMainWindow):
 
     def _handle_save_project_as_action(self) -> None:
         save_project_as_dialog(self, self.model.current_project)
+
+    def _handle_project_settings_action(self) -> None:
+        dialog = ProjectSettingsDialog(self.model.current_project, self)
+        dialog.exec()
 
     def _handle_export_all_action(self) -> None:
         dialog = ExportDialog(self.model.current_project, self)
@@ -280,7 +277,6 @@ class MainWindow(QMainWindow):
     def _handle_current_project_changed(self, project: ProjectModel) -> None:
         """Handle when the current project changes."""
         self._bind_project_signals(project)
-        self._update_project_actions()
         self._update_window_title()
         self._update_thumbnails()
         self._handle_current_photo_changed(self.model.current_photo)
