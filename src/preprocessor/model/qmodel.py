@@ -104,8 +104,18 @@ class QModel[M: BaseModel](QObject):
     def _emit_field_signal(self, field_name: str) -> None:
         sig = getattr(self, f"on_{field_name}_changed", None)
         if sig is not None and hasattr(sig, "emit"):
-            with contextlib.suppress(Exception):
-                sig.emit()
+            # Prefer emitting the new value (for signals that accept an argument),
+            # but fall back to a no-argument emit if the signal doesn't accept parameters.
+            try:
+                value = getattr(self._data, field_name)
+                sig.emit(value)
+            except TypeError:
+                # signal doesn't accept argument
+                with contextlib.suppress(Exception):
+                    sig.emit()
+            except Exception:
+                # Suppress any other exceptions so signal emission doesn't break callers in tests
+                pass
 
     def _set_field(self, field: str, value: Any) -> None:  # noqa: ANN401
         """
