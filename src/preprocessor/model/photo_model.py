@@ -47,9 +47,22 @@ class PhotoData(BaseModel):
     metadata: MetadataData = MetadataData()
     """The metadata for the photo."""
 
+    @field_validator("quadrat_corners", mode="after")
+    @classmethod
+    def _validate_quadrat_corners(cls: type["PhotoData"], v: list[Point2] | None) -> list[Point2] | None:
+        if v is not None and len(v) > 4:
+            msg = "quadrat_corners must be a list of up to 4 Point2 tuples"
+            raise ValueError(msg)
+        if v is not None and len(v) == 0:
+            return None
+        return v
+
     @field_validator("distortion_coefficients", mode="after")
     @classmethod
-    def _validate_distortion_coefficients(cls: type["PhotoData"], v: list[float]) -> list[float]:
+    def _validate_distortion_coefficients(cls: type["PhotoData"], v: list[float] | None) -> list[float] | None:
+        # Accept None (not provided) as valid
+        if v is None:
+            return None
         if len(v) not in (4, 5, 8, 12, 14):
             msg = "distortion_coefficients must be a tuple of 4, 5, 8, 12, or 14 floats"
             raise ValueError(msg)
@@ -59,16 +72,16 @@ class PhotoData(BaseModel):
 class PhotoModel(QModel[PhotoData]):
 
     ## Fixed properties
-    on_original_filename_changed: Signal = Signal()
-    on_width_changed: Signal = Signal()
-    on_height_changed: Signal = Signal()
+    on_original_filename_changed: Signal = Signal(Path)
+    on_width_changed: Signal = Signal(int)
+    on_height_changed: Signal = Signal(int)
 
     ## Photo correction
-    on_quadrat_corners_changed: Signal = Signal()
-    on_red_shift_changed: Signal = Signal()
-    on_blue_shift_changed: Signal = Signal()
-    on_camera_matrix_changed: Signal = Signal()
-    on_distortion_coefficients_changed: Signal = Signal()
+    on_quadrat_corners_changed: Signal = Signal(object)
+    on_red_shift_changed: Signal = Signal(object)
+    on_blue_shift_changed: Signal = Signal(object)
+    on_camera_matrix_changed: Signal = Signal(object)
+    on_distortion_coefficients_changed: Signal = Signal(object)
 
     ## Metadata
     on_metadata_changed: Signal = Signal()

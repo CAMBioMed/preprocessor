@@ -60,7 +60,7 @@ class ProjectData(BaseModel):
 
 
 class ProjectModel(QModel[ProjectData]):
-    on_file_changed: Signal = Signal(object)
+    on_file_changed: Signal = Signal(Path)
     on_export_path_changed: Signal = Signal(object)
     on_target_width_changed: Signal = Signal(object)
     on_target_height_changed: Signal = Signal(object)
@@ -110,6 +110,7 @@ class ProjectModel(QModel[ProjectData]):
             self._file = path
             self.update_paths_relative_to(old_basepath=old_path.parent, new_basepath=path.parent)
             self.on_file_changed.emit(path)
+            self.on_changed.emit()
 
     @property
     def export_path(self) -> Path | None:
