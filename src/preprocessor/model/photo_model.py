@@ -24,18 +24,17 @@ class PhotoData(BaseModel):
     """The width of the photo in pixels."""
     height: int
     """The height of the photo in pixels."""
-    quadrat_corners: list[Point2] = []
-    """The up to 4 corners of the quadrat in the photo."""
-    camera_matrix: Matrix3x3 = Field(
-        default_factory=lambda d: (
-            (float(d["width"]), 0, float(d["width"]) / 2),
-            (0, float(d["width"]), float(d["height"]) / 2),
-            (0, 0, 1),
-        )
-    )
-    """3x3 camera matrix or None."""
-    distortion_coefficients: list[float] = [0, 0, 0, 0, 0]
-    """Tuple of 4, 5, 8, 12, or 14 distortion coefficients."""
+
+    ######################
+    ## Photo correction ##
+    ######################
+
+    quadrat_corners: list[Point2] | None = None
+    """The up to 4 corners of the quadrat in the photo, or None if not set."""
+    camera_matrix: Matrix3x3 | None = None
+    """3x3 camera matrix, or None if not set."""
+    distortion_coefficients: list[float] | None = None
+    """Tuple of 4, 5, 8, 12, or 14 distortion coefficients, or None if not set."""
     red_shift: Point2 | None = None
     """The red channel shift in (x, y) directions to correct chromatic aberration."""
     blue_shift: Point2 | None = None
@@ -58,7 +57,13 @@ class PhotoData(BaseModel):
 
 
 class PhotoModel(QModel[PhotoData]):
+
+    ## Fixed properties
     on_original_filename_changed: Signal = Signal()
+    on_width_changed: Signal = Signal()
+    on_height_changed: Signal = Signal()
+
+    ## Photo correction
     on_quadrat_corners_changed: Signal = Signal()
     on_red_shift_changed: Signal = Signal()
     on_blue_shift_changed: Signal = Signal()
@@ -146,21 +151,21 @@ class PhotoModel(QModel[PhotoData]):
         self._set_field("quadrat_corners", value)
 
     @property
-    def camera_matrix(self) -> Matrix3x3:
+    def camera_matrix(self) -> Matrix3x3 | None:
         """3x3 camera matrix or None."""
         return self._data.camera_matrix
 
     @camera_matrix.setter
-    def camera_matrix(self, value: Matrix3x3) -> None:
+    def camera_matrix(self, value: Matrix3x3 | None) -> None:
         self._set_field("camera_matrix", value)
 
     @property
-    def distortion_coefficients(self) -> list[float]:
+    def distortion_coefficients(self) -> list[float] | None:
         """Sequence of distortion coefficients as Point2 or None."""
         return self._data.distortion_coefficients
 
     @distortion_coefficients.setter
-    def distortion_coefficients(self, value: list[float]) -> None:
+    def distortion_coefficients(self, value: list[float] | None) -> None:
         self._set_field("distortion_coefficients", value)
 
     @property
