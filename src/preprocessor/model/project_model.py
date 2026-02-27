@@ -2,6 +2,7 @@ from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, ValidationError
 
 from preprocessor.model.camera_model import CameraModel, CameraData
+from preprocessor.model.metadata_model import MetadataModel, MetadataData
 from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel, PhotoData
 
@@ -30,19 +31,7 @@ class ProjectData(BaseModel):
     """The list of photos in the project."""
     cameras: list[CameraData] = []
     """The list of cameras in the project."""
-
-    metadata_group: str | None = None
-    """The group name for the project, or None if not set."""
-    metadata_area: str | None = None
-    """The area name for the project, or None if not set."""
-    metadata_site: str | None = None
-    """The site name for the project, or None if not set."""
-    metadata_season: str | None = None
-    """The season name for the project, or None if not set."""
-    metadata_depth: str | None = None
-    """The depth information for the project, or None if not set."""
-    metadata_transect: str | None = None
-    """The transect information for the project, or None if not set."""
+    default_metadata: MetadataData = MetadataData()
 
     @field_validator("model_version", mode="after")
     @classmethod
@@ -68,20 +57,6 @@ class ProjectData(BaseModel):
             raise ValueError(msg)
         return v
 
-    @field_validator(
-        "metadata_group",
-        "metadata_season",
-        "metadata_area",
-        "metadata_site",
-        "metadata_depth",
-        "metadata_transect",
-        mode="after",
-    )
-    @classmethod
-    def _validate_metadata_fields(cls: type["ProjectData"], v: str | None) -> str | None:
-        if v is not None and not v.strip():
-            return None
-        return v.strip() if v is not None else None
 
 
 class ProjectModel(QModel[ProjectData]):
@@ -89,17 +64,14 @@ class ProjectModel(QModel[ProjectData]):
     on_export_path_changed: Signal = Signal(object)
     on_target_width_changed: Signal = Signal(object)
     on_target_height_changed: Signal = Signal(object)
-
-    on_metadata_group_changed: Signal = Signal(object)
-    on_metadata_area_changed: Signal = Signal(object)
-    on_metadata_site_changed: Signal = Signal(object)
-    on_metadata_season_changed: Signal = Signal(object)
-    on_metadata_depth_changed: Signal = Signal(object)
-    on_metadata_transect_changed: Signal = Signal(object)
+    on_photos_changed: Signal = Signal()
+    on_cameras_changed: Signal = Signal()
+    on_default_metadata_changed: Signal = Signal()
 
     _file: Path
     _photos: QListModel[PhotoModel]
     _cameras: QListModel[CameraModel]
+    _default_metadata: MetadataModel
 
     def __init__(self, file: Path, data: ProjectData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=ProjectData, data=data)
@@ -109,14 +81,16 @@ class ProjectModel(QModel[ProjectData]):
         # Create QListModel containers for interactive use
         self._photos = QListModel[PhotoModel](parent=self)
         self._cameras = QListModel[CameraModel](parent=self)
+        self._default_metadata = MetadataModel(data=self._data.default_metadata)
 
         # Track which model instances we've connected to
         self._connected_photos: set[PhotoModel] = set()
         self._connected_cameras: set[CameraModel] = set()
 
         # wire photos list changes to mark dirty and (re)wire photo handlers
-        self._photos.bind_to_model(self, "photos", self._handle_child_changed)
-        self._cameras.bind_to_model(self, "cameras", self._handle_child_changed)
+        self._photos.bind_to_model(self, "photos", self._handle_photos_changed)
+        self._cameras.bind_to_model(self, "cameras", self._handle_cameras_changed)
+        self._default_metadata.on_changed.connect(self._handle_default_metadata_changed)
 
         self._populate_lists_from_data()
 
@@ -175,58 +149,9 @@ class ProjectModel(QModel[ProjectData]):
         return self._cameras
 
     @property
-    def metadata_group(self) -> str | None:
-        """The group name for the project, or None if not set."""
-        return self._data.metadata_group
-
-    @metadata_group.setter
-    def metadata_group(self, value: str | None) -> None:
-        self._set_field("metadata_group", value)
-
-    @property
-    def metadata_area(self) -> str | None:
-        """The area name for the project, or None if not set."""
-        return self._data.metadata_area
-
-    @metadata_area.setter
-    def metadata_area(self, value: str | None) -> None:
-        self._set_field("metadata_area", value)
-
-    @property
-    def metadata_site(self) -> str | None:
-        """The site name for the project, or None if not set."""
-        return self._data.metadata_site
-
-    @metadata_site.setter
-    def metadata_site(self, value: str | None) -> None:
-        self._set_field("metadata_site", value)
-
-    @property
-    def metadata_season(self) -> str | None:
-        """The season name for the project, or None if not set."""
-        return self._data.metadata_season
-
-    @metadata_season.setter
-    def metadata_season(self, value: str | None) -> None:
-        self._set_field("metadata_season", value)
-
-    @property
-    def metadata_depth(self) -> str | None:
-        """The depth information for the project, or None if not set."""
-        return self._data.metadata_depth
-
-    @metadata_depth.setter
-    def metadata_depth(self, value: str | None) -> None:
-        self._set_field("metadata_depth", value)
-
-    @property
-    def metadata_transect(self) -> str | None:
-        """The transect information for the project, or None if not set."""
-        return self._data.metadata_transect
-
-    @metadata_transect.setter
-    def metadata_transect(self, value: str | None) -> None:
-        self._set_field("metadata_transect", value)
+    def default_metadata(self) -> MetadataModel:
+        """The default metadata for the project."""
+        return self._default_metadata
 
     def _populate_lists_from_data(self) -> None:
         """
@@ -236,9 +161,27 @@ class ProjectModel(QModel[ProjectData]):
         self._photos.populate_from_data(self._data.photos, PhotoModel)
         self._cameras.populate_from_data(self._data.cameras, CameraModel)
 
-    def _handle_child_changed(self) -> None:
-        """Handle a child model reporting a change."""
+    def _handle_photos_changed(self) -> None:
+        """Handle a change in the photo models."""
         self.mark_dirty()
+        with contextlib.suppress(Exception):
+            self.on_photos_changed.emit()
+        with contextlib.suppress(Exception):
+            self.on_changed.emit()
+
+    def _handle_cameras_changed(self) -> None:
+        """Handle a change in the camera models."""
+        self.mark_dirty()
+        with contextlib.suppress(Exception):
+            self.on_cameras_changed.emit()
+        with contextlib.suppress(Exception):
+            self.on_changed.emit()
+
+    def _handle_default_metadata_changed(self) -> None:
+        """Handle a change in the default metadata."""
+        self.mark_dirty()
+        with contextlib.suppress(Exception):
+            self.on_default_metadata_changed.emit()
         with contextlib.suppress(Exception):
             self.on_changed.emit()
 
