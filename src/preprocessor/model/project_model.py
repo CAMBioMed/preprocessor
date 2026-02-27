@@ -58,7 +58,6 @@ class ProjectData(BaseModel):
         return v
 
 
-
 class ProjectModel(QModel[ProjectData]):
     on_file_changed: Signal = Signal(Path)
     on_export_path_changed: Signal = Signal(object)

@@ -70,7 +70,6 @@ class PhotoData(BaseModel):
 
 
 class PhotoModel(QModel[PhotoData]):
-
     ## Fixed properties
     on_original_filename_changed: Signal = Signal(Path)
     on_width_changed: Signal = Signal(int)

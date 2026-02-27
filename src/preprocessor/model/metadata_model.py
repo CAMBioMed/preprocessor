@@ -48,7 +48,7 @@ class MetadataData(BaseModel):
     comments: str | None = None
     """Any additional comments, or None if not set."""
 
-    @field_validator('*', mode='after')
+    @field_validator("*", mode="after")
     @classmethod
     def _validate_str_fields(cls, v: Any) -> Any:
         if v is not None and isinstance(v, str):
@@ -56,6 +56,7 @@ class MetadataData(BaseModel):
                 return None
             return v.strip()
         return v
+
 
 class MetadataModel(QModel[MetadataData]):
     on_date_changed: Signal = Signal(object)
