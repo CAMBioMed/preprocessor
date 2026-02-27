@@ -322,15 +322,15 @@ class _ExportWorker(QObject):
         # Placeholder for any logic to determine output filename based on photo metadata
         extension = Path(photo.original_filename).suffix.lower()
         parts = [
-            self.project.metadata_group,
-            self.project.metadata_area,
-            self.project.metadata_site,
+            photo.metadata.partner,
+            photo.metadata.area,
+            photo.metadata.site,
             # year
-            self.project.metadata_season,
-            self.project.metadata_depth,
-            self.project.metadata_transect,
+            photo.metadata.season,
+            photo.metadata.depth,
+            photo.metadata.transect,
             # date
-            f"{index:04d}",
+            f"{index:03d}",
         ]
         newname = "_".join([x for x in parts if x])
         return newname + extension
