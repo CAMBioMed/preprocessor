@@ -1,3 +1,4 @@
+import contextlib
 from pathlib import Path
 from typing import Any
 
@@ -5,12 +6,17 @@ from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, Field
 
 from preprocessor.model import Point2, Matrix3x3
+from preprocessor.model.metadata_model import MetadataData, MetadataModel
 from preprocessor.model.qmodel import QModel
 from preprocessor.utils import update_basepath
 
 
 class PhotoData(BaseModel):
     """The data for a single photo in the project, used for serialization."""
+
+    ######################
+    ## Fixed properties ##
+    ######################
 
     original_filename: Path
     """The path to the photo file, relative to the project."""
@@ -35,6 +41,13 @@ class PhotoData(BaseModel):
     blue_shift: Point2 | None = None
     """The blue channel shift in (x, y) directions to correct chromatic aberration."""
 
+    ##############
+    ## Metadata ##
+    ##############
+
+    metadata: MetadataData = MetadataData()
+    """The metadata for the photo."""
+
     @field_validator("distortion_coefficients", mode="after")
     @classmethod
     def _validate_distortion_coefficients(cls: type["PhotoData"], v: list[float]) -> list[float]:
@@ -52,8 +65,16 @@ class PhotoModel(QModel[PhotoData]):
     on_camera_matrix_changed: Signal = Signal()
     on_distortion_coefficients_changed: Signal = Signal()
 
+    ## Metadata
+    on_metadata_changed: Signal = Signal()
+
+    _metadata: MetadataModel
+
     def __init__(self, data: PhotoData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=PhotoData, data=data)
+
+        self._metadata = MetadataModel(data=self._data.metadata)
+        self._metadata.on_changed.connect(self._handle_metadata_changed)
 
     @classmethod
     def from_file(cls, fullpath: Path, basepath: Path | None) -> "PhotoModel":
@@ -71,6 +92,19 @@ class PhotoModel(QModel[PhotoData]):
         )
         return cls(data=data)
 
+    #############
+    ## Helpers ##
+    #############
+
+    @property
+    def name(self) -> str:
+        """The filename of the photo, derived from the original path."""
+        return self.original_filename.name
+
+    ######################
+    ## Fixed properties ##
+    ######################
+
     @property
     def original_filename(self) -> Path:
         """The original filename of the photo."""
@@ -81,9 +115,26 @@ class PhotoModel(QModel[PhotoData]):
         self._set_field("original_filename", value)
 
     @property
-    def name(self) -> str:
-        """The filename of the photo, derived from the original path."""
-        return self.original_filename.name
+    def width(self) -> int:
+        """The width of the photo in pixels."""
+        return self._data.width
+
+    @width.setter
+    def width(self, value: int) -> None:
+        self._set_field("width", value)
+
+    @property
+    def height(self) -> int:
+        """The height of the photo in pixels."""
+        return self._data.height
+
+    @height.setter
+    def height(self, value: int) -> None:
+        self._set_field("height", value)
+
+    ######################
+    ## Photo correction ##
+    ######################
 
     @property
     def quadrat_corners(self) -> list[Point2] | None:
@@ -129,6 +180,23 @@ class PhotoModel(QModel[PhotoData]):
     @blue_shift.setter
     def blue_shift(self, value: Point2 | None) -> None:
         self._set_field("blue_shift", value)
+
+    ##############
+    ## Metadata ##
+    ##############
+
+    @property
+    def metadata(self) -> MetadataModel:
+        """The metadata for the photo."""
+        return self._metadata
+
+    def _handle_metadata_changed(self) -> None:
+        """Handle a change in the metadata."""
+        self.mark_dirty()
+        with contextlib.suppress(Exception):
+            self.on_metadata_changed.emit()
+        with contextlib.suppress(Exception):
+            self.on_changed.emit()
 
     def update_paths_relative_to(self, old_basepath: Path, new_basepath: Path) -> None:
         self.original_filename = update_basepath(old_basepath, new_basepath, self.original_filename)
