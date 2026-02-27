@@ -129,13 +129,15 @@ exclude = [
 line-length = 120
 exclude = [
     "ui_*.py",
-    "tests",
 ]
 
 [tool.ruff.format]
 docstring-code-format = true
 
 [tool.ruff.lint]
+exclude = [
+    "tests",
+]
 select = [
   # flake8-2020
   "YTT",
