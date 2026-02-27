@@ -322,13 +322,13 @@ class _ExportWorker(QObject):
         # Placeholder for any logic to determine output filename based on photo metadata
         extension = Path(photo.original_filename).suffix.lower()
         parts = [
-            photo.metadata.partner,
-            photo.metadata.area,
-            photo.metadata.site,
+            photo.metadata.partner or self.project.default_metadata.partner,
+            photo.metadata.area or self.project.default_metadata.area,
+            photo.metadata.site or self.project.default_metadata.site,
             # year
-            photo.metadata.season,
-            photo.metadata.depth,
-            photo.metadata.transect,
+            photo.metadata.season or self.project.default_metadata.season,
+            photo.metadata.depth or self.project.default_metadata.depth,
+            photo.metadata.transect or self.project.default_metadata.transect,
             # date
             f"{index:03d}",
         ]
