@@ -32,15 +32,15 @@ class Ui_ProjectSettingsDialog(object):
         self.tabMetadata.setObjectName(u"tabMetadata")
         self.formLayout_2 = QFormLayout(self.tabMetadata)
         self.formLayout_2.setObjectName(u"formLayout_2")
-        self.lblGroup = QLabel(self.tabMetadata)
-        self.lblGroup.setObjectName(u"lblGroup")
+        self.lblPartner = QLabel(self.tabMetadata)
+        self.lblPartner.setObjectName(u"lblPartner")
 
-        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblGroup)
+        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblPartner)
 
-        self.txtGroup = QLineEdit(self.tabMetadata)
-        self.txtGroup.setObjectName(u"txtGroup")
+        self.txtPartner = QLineEdit(self.tabMetadata)
+        self.txtPartner.setObjectName(u"txtPartner")
 
-        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.FieldRole, self.txtGroup)
+        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.FieldRole, self.txtPartner)
 
         self.lblArea = QLabel(self.tabMetadata)
         self.lblArea.setObjectName(u"lblArea")
@@ -116,7 +116,7 @@ class Ui_ProjectSettingsDialog(object):
 
     def retranslateUi(self, ProjectSettingsDialog):
         ProjectSettingsDialog.setWindowTitle(QCoreApplication.translate("ProjectSettingsDialog", u"Dialog", None))
-        self.lblGroup.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Group:", None))
+        self.lblPartner.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Partner:", None))
         self.lblArea.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Area:", None))
         self.lblSite.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Site:", None))
         self.lblSeason.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Season:", None))

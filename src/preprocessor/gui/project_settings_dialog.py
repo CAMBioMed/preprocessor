@@ -18,20 +18,20 @@ class ProjectSettingsDialog(QDialog):
         self._connect_signals()
 
     def _populate(self) -> None:
-        self.ui.txtGroup.setText(self.model.metadata_group)
-        self.ui.txtArea.setText(self.model.metadata_area)
-        self.ui.txtSite.setText(self.model.metadata_site)
-        self.ui.txtSeason.setText(self.model.metadata_season)
-        self.ui.txtDepth.setText(self.model.metadata_depth)
-        self.ui.txtTransect.setText(self.model.metadata_transect)
+        self.ui.txtPartner.setText(self.model.default_metadata.partner)
+        self.ui.txtArea.setText(self.model.default_metadata.area)
+        self.ui.txtSite.setText(self.model.default_metadata.site)
+        self.ui.txtSeason.setText(self.model.default_metadata.season)
+        self.ui.txtDepth.setText(self.model.default_metadata.depth)
+        self.ui.txtTransect.setText(self.model.default_metadata.transect)
 
     def _connect_signals(self) -> None:
         self.ui.btnsDialog.accepted.connect(self._handle_accept)
 
     def _handle_accept(self) -> None:
-        self.model.metadata_group = self.ui.txtGroup.text()
-        self.model.metadata_area = self.ui.txtArea.text()
-        self.model.metadata_site = self.ui.txtSite.text()
-        self.model.metadata_season = self.ui.txtSeason.text()
-        self.model.metadata_depth = self.ui.txtDepth.text()
-        self.model.metadata_transect = self.ui.txtTransect.text()
+        self.model.default_metadata.partner = self.ui.txtPartner.text()
+        self.model.default_metadata.area = self.ui.txtArea.text()
+        self.model.default_metadata.site = self.ui.txtSite.text()
+        self.model.default_metadata.season = self.ui.txtSeason.text()
+        self.model.default_metadata.depth = self.ui.txtDepth.text()
+        self.model.default_metadata.transect = self.ui.txtTransect.text()
