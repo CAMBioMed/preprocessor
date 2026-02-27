@@ -8,6 +8,76 @@ from preprocessor.model.photo_model import PhotoModel, PhotoData
 
 
 class TestPhotoModel:
+    @staticmethod
+    def _assert_property_getter_setter_and_signal(
+        qtbot: QtBot,
+        model: PhotoModel,
+        prop_name: str,
+        initial_value: object,
+        new_value: object,
+        field_signal_name: str,
+    ) -> None:
+        """Helper to assert getter, setter, and per-field signal emission.
+
+        - Verifies initial getter equals initial_value.
+        - Setting the same value does not emit signals.
+        - Setting a new value emits the per-field signal and updates the property.
+        """
+        getter = lambda: getattr(model, prop_name)
+        field_signal = getattr(model, field_signal_name)
+
+        # initial
+        assert getter() == initial_value
+
+        # setting same value shouldn't emit
+        with qtbot.assertNotEmitted(model.on_changed):
+            with qtbot.assertNotEmitted(field_signal):
+                setattr(model, prop_name, initial_value)
+
+        # setting a different value emits the field signal
+        with qtbot.waitSignal(field_signal, timeout=1000):
+            setattr(model, prop_name, new_value)
+
+        assert getter() == new_value
+
+    def test_properties_getter_setter_and_signals(self, qtbot: QtBot) -> None:
+        # Arrange: base PhotoModel with defaults
+        model = PhotoModel(PhotoData(original_filename=Path("base.jpg"), width=100, height=200))
+
+        # original_filename
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "original_filename", Path("base.jpg"), Path("img_001.jpg"), "on_original_filename_changed"
+        )
+
+        # width and height
+        self._assert_property_getter_setter_and_signal(qtbot, model, "width", 100, 640, "on_width_changed")
+        self._assert_property_getter_setter_and_signal(qtbot, model, "height", 200, 480, "on_height_changed")
+
+        # quadrat_corners (None -> list)
+        corners = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "quadrat_corners", None, corners, "on_quadrat_corners_changed"
+        )
+
+        # red/blue shifts
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "red_shift", None, (0.3, -0.2), "on_red_shift_changed"
+        )
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "blue_shift", None, (0.0, 0.5), "on_blue_shift_changed"
+        )
+
+        # camera matrix and distortion coefficients
+        cam = ((1000.0, 0.0, 512.0), (0.0, 1000.0, 384.0), (0.0, 0.0, 1.0))
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "camera_matrix", None, cam, "on_camera_matrix_changed"
+        )
+
+        distortion = [0.01, -0.02, 0.0, 0.0]
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "distortion_coefficients", None, distortion, "on_distortion_coefficients_changed"
+        )
+
     def test_quadrat_corners(self) -> None:
         # Arrange
         photo = PhotoModel(
