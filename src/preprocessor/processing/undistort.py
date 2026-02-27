@@ -26,10 +26,12 @@ def undistort_photo(
     the operation will be aborted and None returned.
     """
     # Try to obtain camera/distortion parameters
-    cam = getattr(photo, "camera_matrix", None)
-    dist = getattr(photo, "distortion_coefficients", None)
-    if cam is None or dist is None:
-        return None
+    cam = photo.camera_matrix or (
+        (float(photo.width), 0, float(photo.width) / 2),
+        (0, float(photo.width), float(photo.height) / 2),
+        (0, 0, 1),
+    )
+    dist = photo.distortion_coefficients or [0.0, 0.0, 0.0, 0.0, 0.0]
 
     # Load the image from disk
     original_path = project.get_absolute_path(photo.original_filename)
