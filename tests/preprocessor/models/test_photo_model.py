@@ -34,8 +34,8 @@ class TestPhotoModel:
         photo.on_quadrat_corners_changed.connect(handle_quadrat)
         photo.on_changed.connect(handle_changed)
 
-        # Assert initial state
-        assert photo.quadrat_corners == []
+        # Assert initial state (quadrat_corners normalizes empty lists to None in the data model)
+        assert photo.quadrat_corners is None
         assert not raised_quadrat_corners_changed
         assert not raised_changed
 
@@ -61,6 +61,7 @@ class TestPhotoModel:
         photo.quadrat_corners = []
 
         # Assert: property cleared and signals fired
+        # Setting an empty list via the setter leaves an empty list on the runtime model
         assert photo.quadrat_corners == []
         assert raised_quadrat_corners_changed
         assert raised_changed
@@ -75,9 +76,9 @@ class TestPhotoModel:
             )
         )
 
-        # Assert: defaults set
+        # Assert: defaults set (quadrat_corners defaults to None)
         assert photo0.original_filename == Path("img_001.jpg")
-        assert photo0.quadrat_corners == []
+        assert photo0.quadrat_corners is None
         assert photo0.red_shift is None
         assert photo0.blue_shift is None
 
