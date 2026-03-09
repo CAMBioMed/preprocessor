@@ -37,8 +37,9 @@ class ThumbnailDockWidget(QDockWidget):
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up keyboard shortcuts for actions."""
         # Toolbar
-        self.ui.addPhotoAction.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Equal)
-        self.ui.removePhotoAction.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Backspace)
+        # Use explicit QKeySequence strings for cross-platform clarity
+        self.ui.addPhotoAction.setShortcut(QKeySequence("Ctrl+="))
+        self.ui.removePhotoAction.setShortcut(QKeySequence("Ctrl+Backspace"))
 
     def _connect_signals(self) -> None:
         """Connect UI signals to internal handlers."""
