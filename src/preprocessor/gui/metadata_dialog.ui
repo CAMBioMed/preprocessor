@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>812</width>
+    <height>897</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>786</width>
+        <height>831</height>
+       </rect>
+      </property>
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblDate">
+         <property name="text">
+          <string>Date:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <layout class="QHBoxLayout" name="lay01Date">
+         <item>
+          <widget class="QCheckBox" name="chkDate">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDateTimeEdit" name="dteDate">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblPartner">
+         <property name="text">
+          <string>Partner:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <layout class="QHBoxLayout" name="lay02Partner">
+         <item>
+          <widget class="QCheckBox" name="chkPartner">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtPartner"/>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblArea">
+         <property name="text">
+          <string>Area:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <layout class="QHBoxLayout" name="lay03Area">
+         <item>
+          <widget class="QCheckBox" name="chkArea">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtArea"/>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblSite">
+         <property name="text">
+          <string>Site:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <layout class="QHBoxLayout" name="lay04Site">
+         <item>
+          <widget class="QCheckBox" name="chkSite">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtSite"/>
+         </item>
+        </layout>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblSeason">
+         <property name="text">
+          <string>Season:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <layout class="QHBoxLayout" name="lay05Season">
+         <item>
+          <widget class="QCheckBox" name="chkSeason">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtSeason"/>
+         </item>
+        </layout>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblTransect">
+         <property name="text">
+          <string>Transect:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <layout class="QHBoxLayout" name="lay06Transect">
+         <item>
+          <widget class="QCheckBox" name="chkTransect">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtTransect"/>
+         </item>
+        </layout>
+       </item>
+       <item row="6" column="1">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="lblHeight">
+         <property name="text">
+          <string>Height:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <layout class="QHBoxLayout" name="lay07Height">
+         <item>
+          <widget class="QCheckBox" name="chkHeight">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtHeight"/>
+         </item>
+        </layout>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="lblLatitude">
+         <property name="text">
+          <string>Latitude:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <layout class="QHBoxLayout" name="lay08Latitude">
+         <item>
+          <widget class="QCheckBox" name="chkLatitude">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtLatitude"/>
+         </item>
+        </layout>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="lblLongitude">
+         <property name="text">
+          <string>Longitude:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <layout class="QHBoxLayout" name="lay09Longitude">
+         <item>
+          <widget class="QCheckBox" name="chkLongitude">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtLongitude"/>
+         </item>
+        </layout>
+       </item>
+       <item row="10" column="0">
+        <widget class="QLabel" name="lblDepth">
+         <property name="text">
+          <string>Depth:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="1">
+        <layout class="QHBoxLayout" name="lay10Depth">
+         <item>
+          <widget class="QCheckBox" name="chkDepth">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtDepth"/>
+         </item>
+        </layout>
+       </item>
+       <item row="11" column="0">
+        <widget class="QLabel" name="lblCamera">
+         <property name="text">
+          <string>Camera:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="1">
+        <layout class="QHBoxLayout" name="lay11Camera">
+         <item>
+          <widget class="QCheckBox" name="chkCamera">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtCamera"/>
+         </item>
+        </layout>
+       </item>
+       <item row="12" column="0">
+        <widget class="QLabel" name="lblPhotographer">
+         <property name="text">
+          <string>Photographer:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="1">
+        <layout class="QHBoxLayout" name="lay12Photographer">
+         <item>
+          <widget class="QCheckBox" name="chkPhotographer">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtPhotographer"/>
+         </item>
+        </layout>
+       </item>
+       <item row="13" column="0">
+        <widget class="QLabel" name="lblWaterQuality">
+         <property name="text">
+          <string>Water quality:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="1">
+        <layout class="QHBoxLayout" name="lay13WaterQuality">
+         <item>
+          <widget class="QCheckBox" name="chkWaterQuality">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtWaterQuality"/>
+         </item>
+        </layout>
+       </item>
+       <item row="14" column="0">
+        <widget class="QLabel" name="lblStrobes">
+         <property name="text">
+          <string>Strobes:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="14" column="1">
+        <layout class="QHBoxLayout" name="lay14Strobes">
+         <item>
+          <widget class="QCheckBox" name="chkStrobes">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtStrobes"/>
+         </item>
+        </layout>
+       </item>
+       <item row="15" column="0">
+        <widget class="QLabel" name="lblFraming">
+         <property name="text">
+          <string>Framing:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="15" column="1">
+        <layout class="QHBoxLayout" name="lay15Framing">
+         <item>
+          <widget class="QCheckBox" name="chkFraming">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtFraming"/>
+         </item>
+        </layout>
+       </item>
+       <item row="16" column="0">
+        <widget class="QLabel" name="lblWhiteBalanceCard">
+         <property name="text">
+          <string>White balance card:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="16" column="1">
+        <layout class="QHBoxLayout" name="lay16WhiteBalanceCard">
+         <item>
+          <widget class="QCheckBox" name="chkWhiteBalanceCard">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtWhiteBalanceCard"/>
+         </item>
+        </layout>
+       </item>
+       <item row="17" column="0">
+        <widget class="QLabel" name="lblComments">
+         <property name="text">
+          <string>Comments:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="17" column="1">
+        <layout class="QHBoxLayout" name="lay17Comments">
+         <item>
+          <widget class="QCheckBox" name="chkComments">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPlainTextEdit" name="txtComments"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>Dialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>Dialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
