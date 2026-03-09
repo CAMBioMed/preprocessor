@@ -1,6 +1,6 @@
-from PySide6.QtCore import Qt, QSize, Signal
-from PySide6.QtGui import QIcon, QPixmap
-from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem
+from PySide6.QtCore import Qt, QSize, Signal, QPoint
+from PySide6.QtGui import QIcon, QPixmap, QAction, QKeySequence
+from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem, QMenu
 
 from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
 from preprocessor.gui.utils import icon_from_resource
@@ -16,6 +16,7 @@ class ThumbnailDockWidget(QDockWidget):
     on_remove_photos_action: Signal = Signal(object)
     on_selection_changed: Signal = Signal(object)  # Signal(list[PhotoModel])
     on_item_double_clicked: Signal = Signal(object)  # Signal(PhotoModel | None)
+    on_apply_to_selected: Signal = Signal(object)  # Signal(list[PhotoModel])
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QDockWidget.__init__(self, parent)
@@ -46,6 +47,10 @@ class ThumbnailDockWidget(QDockWidget):
         self.ui.thumbnailListWidget.itemDoubleClicked.connect(self._handle_item_double_clicked)
         self.ui.thumbnailListWidget.itemSelectionChanged.connect(self._handle_selection_changed)
 
+        # Enable custom context menu on the list widget and handle right-clicks
+        self.ui.thumbnailListWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.ui.thumbnailListWidget.customContextMenuRequested.connect(self._handle_context_menu)
+
     def _handle_add_photos_action(self) -> None:
         self.on_add_photos_action.emit()
 
@@ -70,6 +75,36 @@ class ThumbnailDockWidget(QDockWidget):
     def _handle_item_double_clicked(self, item: QListWidgetItem) -> None:
         model: PhotoModel | None = item.data(Qt.ItemDataRole.UserRole)
         self.on_item_double_clicked.emit(model)
+
+    def _handle_context_menu(self, pos: QPoint) -> None:
+        """Show a context menu when the user right-clicks the thumbnail list."""
+        # Build list of selected photos
+        selected_items = self.ui.thumbnailListWidget.selectedItems()
+        selected_photos = [
+            item.data(Qt.ItemDataRole.UserRole)
+            for item in selected_items
+            if item.data(Qt.ItemDataRole.UserRole) is not None
+        ]
+
+        if not selected_photos:
+            # Nothing selected; don't show context menu
+            return
+
+        # Create menu and actions
+        menu = QMenu(self)
+        apply_action = QAction("Apply to all", self)
+        menu.addAction(apply_action)
+
+        # Connect action
+        apply_action.triggered.connect(lambda: self._handle_apply_to_selected_action(selected_photos))
+
+        # Show menu at the global position
+        global_pos = self.ui.thumbnailListWidget.mapToGlobal(pos)
+        menu.exec(global_pos)
+
+    def _handle_apply_to_selected_action(self, selected_photos: list[PhotoModel]) -> None:
+        """Emit signal to indicate user requested 'Apply to all' for the selected photos."""
+        self.on_apply_to_selected.emit(selected_photos)
 
     def update_thumbnails(self, photos: QListModel[PhotoModel], project: ProjectModel) -> None:
         """Update the thumbnails to match the given list of photos."""
