@@ -12,7 +12,7 @@ on:  # yamllint disable-line rule:truthy
 # Ensure only one active CI run per PR
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'tag' }}
 
 env:
   # Force color output in logs, even when running non-interactively
