@@ -181,6 +181,7 @@ class MainWindow(QMainWindow):
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_item_double_clicked.connect(self._handle_photo_opened)
+        self.thumbnail_dock.on_apply_to_selected.connect(self._handle_apply_to_selected_action)
 
         # Model
         self.model.on_current_project_changed.connect(self._handle_current_project_changed)
@@ -259,6 +260,16 @@ class MainWindow(QMainWindow):
         assert self.model.current_project is not None
         for photo in selected:
             self.model.current_project.photos.remove(photo)
+
+    def _handle_apply_to_selected_action(self, selected: list[PhotoModel]) -> None:
+        """Handle the 'Apply to all' context menu action. Currently a stub that notifies the user."""
+        if not selected:
+            return
+        QMessageBox.information(
+            self,
+            "Apply to all",
+            f"Apply parameters of the current photo to {len(selected)} selected photo(s). (Not implemented)",
+        )
 
     def _handle_dirty_changed(self) -> None:
         """Handle when the current project's dirty state changes."""
