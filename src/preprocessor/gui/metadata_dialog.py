@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QDialog, QWidget, QLineEdit, QCheckBox, QPlainText
 
 from preprocessor.gui.ui_metadata_dialog import Ui_MetadataDialog
 from preprocessor.gui.utils import _dt_to_qdatetime
-from preprocessor.model.metadata_model import MetadataModel
+from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.utils import to_upper_camel_case
@@ -16,7 +16,7 @@ _DIFFERENT = object()
 
 
 class MetadataDialog(QDialog):
-    current_project: ProjectModel
+    application_model: ApplicationModel
     selected_photos: list[PhotoModel]
     ui: Ui_MetadataDialog
 
@@ -41,10 +41,10 @@ class MetadataDialog(QDialog):
     ]
 
     def __init__(
-        self, current_project: ProjectModel, selected_photos: list[PhotoModel], parent: QWidget | None = None
+        self, application_model: ApplicationModel, selected_photos: list[PhotoModel], parent: QWidget | None = None
     ) -> None:
         super().__init__(parent)
-        self.current_project = current_project
+        self.application_model = application_model
         self.selected_photos = selected_photos
         self.ui = Ui_MetadataDialog()
         self.ui.setupUi(self)
@@ -60,26 +60,8 @@ class MetadataDialog(QDialog):
                 checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_datetime(fn))
             else:
                 checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_textbox(fn))
-        # self.ui.chkDate.checkStateChanged.connect(lambda: self._update_metadata_datetime("date"))
-        # self.ui.chkPartner.checkStateChanged.connect(lambda: self._update_metadata_textbox("partner"))
-        # self.ui.chkArea.checkStateChanged.connect(lambda: self._update_metadata_textbox("area"))
-        # self.ui.chkSite.checkStateChanged.connect(lambda: self._update_metadata_textbox("site"))
-        # self.ui.chkSeason.checkStateChanged.connect(lambda: self._update_metadata_textbox("season"))
-        # self.ui.chkTransect.checkStateChanged.connect(lambda: self._update_metadata_textbox("transect"))
-        # self.ui.chkHeight.checkStateChanged.connect(lambda: self._update_metadata_textbox("height"))
-        # self.ui.chkLatitude.checkStateChanged.connect(lambda: self._update_metadata_textbox("latitude"))
-        # self.ui.chkLongitude.checkStateChanged.connect(lambda: self._update_metadata_textbox("longitude"))
-        # self.ui.chkDepth.checkStateChanged.connect(lambda: self._update_metadata_textbox("depth"))
-        # self.ui.chkCamera.checkStateChanged.connect(lambda: self._update_metadata_textbox("camera"))
-        # self.ui.chkPhotographer.checkStateChanged.connect(lambda: self._update_metadata_textbox("photographer"))
-        # self.ui.chkWaterQuality.checkStateChanged.connect(lambda: self._update_metadata_textbox("water_quality"))
-        # self.ui.chkStrobes.checkStateChanged.connect(lambda: self._update_metadata_textbox("strobes"))
-        # self.ui.chkFraming.checkStateChanged.connect(lambda: self._update_metadata_textbox("framing"))
-        # self.ui.chkWhiteBalanceCard.checkStateChanged.connect(
-        #     lambda: self._update_metadata_textbox("white_balance_card")
-        # )
-        # self.ui.chkComments.checkStateChanged.connect(lambda: self._update_metadata_plaintextedit("comments"))
 
+        self.ui.btnCopyFromCurrentPhoto.clicked.connect(self._handle_copy_from_current_photo)
         self.ui.btnCancel.clicked.connect(self.reject)
         self.ui.btnApply.clicked.connect(self._apply_changes)
 
@@ -91,23 +73,14 @@ class MetadataDialog(QDialog):
                 self._initialize_metadata_datetime(field_name)
             else:
                 self._initialize_metadata_textbox(field_name)
-        # self._initialize_metadata_datetime("date")
-        # self._initialize_metadata_textbox("partner")
-        # self._initialize_metadata_textbox("area")
-        # self._initialize_metadata_textbox("site")
-        # self._initialize_metadata_textbox("season")
-        # self._initialize_metadata_textbox("transect")
-        # self._initialize_metadata_textbox("height")
-        # self._initialize_metadata_textbox("latitude")
-        # self._initialize_metadata_textbox("longitude")
-        # self._initialize_metadata_textbox("depth")
-        # self._initialize_metadata_textbox("camera")
-        # self._initialize_metadata_textbox("photographer")
-        # self._initialize_metadata_textbox("water_quality")
-        # self._initialize_metadata_textbox("strobes")
-        # self._initialize_metadata_textbox("framing")
-        # self._initialize_metadata_textbox("white_balance_card")
-        # self._initialize_metadata_plaintextedit("comments")
+        selected_photo_count = len(self.selected_photos)
+        all_photo_count = len(self.application_model.current_project.photos)
+        has_current_photo = self.application_model.current_photo is not None
+        if selected_photo_count == 1:
+            self.ui.lblSelection.setText(f"1/{all_photo_count}: {self.selected_photos[0].name}")
+        else:
+            self.ui.lblSelection.setText(f"{selected_photo_count}/{all_photo_count} photos selected")
+        self.ui.btnCopyFromCurrentPhoto.setEnabled(has_current_photo)
 
     def _initialize_metadata_textbox(self, field_name: str) -> None:
         checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
@@ -205,6 +178,27 @@ class MetadataDialog(QDialog):
             if getattr(p.metadata, attr_name, None) != first_val:
                 return _DIFFERENT
         return first_val
+
+    def _handle_copy_from_current_photo(self) -> None:
+        current_photo = self.application_model.current_photo
+        if not current_photo:
+            return
+        for field_name in self.fields:
+            checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+            checkbox.setChecked(True)
+            value = getattr(current_photo.metadata, field_name, None)
+            if field_name == "comments":
+                textbox: QPlainTextEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
+                textbox.setPlainText(str(value) if value is not None else "")
+            elif field_name == "date":
+                datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
+                if isinstance(value, datetime):
+                    datebox.setDateTime(_dt_to_qdatetime(value))
+                else:
+                    datebox.setDateTime(QDateTime())
+            else:
+                lineedit: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
+                lineedit.setText(str(value) if value is not None else "")
 
     def _apply_changes(self) -> None:
         for field_name in self.fields:
