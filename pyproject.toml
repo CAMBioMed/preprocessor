@@ -21,7 +21,7 @@ dependencies = [
   "pillow>=12.0.0",
   "pydantic>=2.12.5",
   "PySide6-Essentials>=6.10.1",
-#  "pyside6>=6.10.1",
+  #  "pyside6>=6.10.1",
   "qimage2ndarray>=1.10.0",
   "scikit-learn>=1.7.2",
 ]
