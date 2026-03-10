@@ -21,7 +21,7 @@
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents_2">
+       <widget class="QWidget" name="scrollAreaWidgetContents">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -30,380 +30,596 @@
           <height>832</height>
          </rect>
         </property>
-        <layout class="QFormLayout" name="formLayout_2">
+        <layout class="QFormLayout" name="formLayout">
          <item row="1" column="0">
-          <widget class="QLabel" name="lblDate_2">
+          <widget class="QLabel" name="lblDate">
            <property name="text">
             <string>Date:</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <layout class="QHBoxLayout" name="lay01Date_2">
+          <layout class="QHBoxLayout" name="lay01Date">
            <item>
-            <widget class="QCheckBox" name="chkDate_2">
+            <widget class="QCheckBox" name="chkDate">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDateTimeEdit" name="dteDate_2">
+            <widget class="QDateTimeEdit" name="dteDate">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="displayFormat">
+              <string>yyyy-MM-dd HH:mm</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateTimeEdit" name="dteDateCommonValue">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtDateCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
             </widget>
            </item>
           </layout>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="lblPartner_2">
+          <widget class="QLabel" name="lblPartner">
            <property name="text">
             <string>Partner:</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <layout class="QHBoxLayout" name="lay02Partner_2">
+          <layout class="QHBoxLayout" name="lay02Partner">
            <item>
-            <widget class="QCheckBox" name="chkPartner_2">
+            <widget class="QCheckBox" name="chkPartner">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtPartner_2"/>
+            <widget class="QLineEdit" name="txtPartner"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtPartnerCommonValue">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="lblArea_2">
+          <widget class="QLabel" name="lblArea">
            <property name="text">
             <string>Area:</string>
            </property>
           </widget>
          </item>
          <item row="3" column="1">
-          <layout class="QHBoxLayout" name="lay03Area_2">
+          <layout class="QHBoxLayout" name="lay03Area">
            <item>
-            <widget class="QCheckBox" name="chkArea_2">
+            <widget class="QCheckBox" name="chkArea">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtArea_2"/>
+            <widget class="QLineEdit" name="txtArea"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtAreaCommonValue">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="4" column="0">
-          <widget class="QLabel" name="lblSite_2">
+          <widget class="QLabel" name="lblSite">
            <property name="text">
             <string>Site:</string>
            </property>
           </widget>
          </item>
          <item row="4" column="1">
-          <layout class="QHBoxLayout" name="lay04Site_2">
+          <layout class="QHBoxLayout" name="lay04Site">
            <item>
-            <widget class="QCheckBox" name="chkSite_2">
+            <widget class="QCheckBox" name="chkSite">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtSite_2"/>
+            <widget class="QLineEdit" name="txtSite"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtSiteCommonValue">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="5" column="0">
-          <widget class="QLabel" name="lblSeason_2">
+          <widget class="QLabel" name="lblSeason">
            <property name="text">
             <string>Season:</string>
            </property>
           </widget>
          </item>
          <item row="5" column="1">
-          <layout class="QHBoxLayout" name="lay05Season_2">
+          <layout class="QHBoxLayout" name="lay05Season">
            <item>
-            <widget class="QCheckBox" name="chkSeason_2">
+            <widget class="QCheckBox" name="chkSeason">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtSeason_2"/>
+            <widget class="QLineEdit" name="txtSeason"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtSeasonCommonValue">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="6" column="0">
-          <widget class="QLabel" name="lblTransect_2">
+          <widget class="QLabel" name="lblTransect">
            <property name="text">
             <string>Transect:</string>
            </property>
           </widget>
          </item>
          <item row="6" column="1">
-          <layout class="QHBoxLayout" name="lay06Transect_2">
+          <layout class="QHBoxLayout" name="lay06Transect">
            <item>
-            <widget class="QCheckBox" name="chkTransect_2">
+            <widget class="QCheckBox" name="chkTransect">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtTransect_2"/>
+            <widget class="QLineEdit" name="txtTransect"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtTransectCommonValue">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="7" column="1">
-          <widget class="Line" name="line_2">
+          <widget class="Line" name="line">
            <property name="orientation">
             <enum>Qt::Orientation::Horizontal</enum>
            </property>
           </widget>
          </item>
          <item row="8" column="0">
-          <widget class="QLabel" name="lblHeight_2">
+          <widget class="QLabel" name="lblHeight">
            <property name="text">
             <string>Height:</string>
            </property>
           </widget>
          </item>
          <item row="8" column="1">
-          <layout class="QHBoxLayout" name="lay07Height_2">
+          <layout class="QHBoxLayout" name="lay07Height">
            <item>
-            <widget class="QCheckBox" name="chkHeight_2">
+            <widget class="QCheckBox" name="chkHeight">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtHeight_2"/>
+            <widget class="QLineEdit" name="txtHeight"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtHeightCommonValue">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="9" column="0">
-          <widget class="QLabel" name="lblLatitude_2">
+          <widget class="QLabel" name="lblLatitude">
            <property name="text">
             <string>Latitude:</string>
            </property>
           </widget>
          </item>
          <item row="9" column="1">
-          <layout class="QHBoxLayout" name="lay08Latitude_2">
+          <layout class="QHBoxLayout" name="lay08Latitude">
            <item>
-            <widget class="QCheckBox" name="chkLatitude_2">
+            <widget class="QCheckBox" name="chkLatitude">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtLatitude_2"/>
+            <widget class="QLineEdit" name="txtLatitude"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtLatitudeCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="10" column="0">
-          <widget class="QLabel" name="lblLongitude_2">
+          <widget class="QLabel" name="lblLongitude">
            <property name="text">
             <string>Longitude:</string>
            </property>
           </widget>
          </item>
          <item row="10" column="1">
-          <layout class="QHBoxLayout" name="lay09Longitude_2">
+          <layout class="QHBoxLayout" name="lay09Longitude">
            <item>
-            <widget class="QCheckBox" name="chkLongitude_2">
+            <widget class="QCheckBox" name="chkLongitude">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtLongitude_2"/>
+            <widget class="QLineEdit" name="txtLongitude"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtLongitudeCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="11" column="0">
-          <widget class="QLabel" name="lblDepth_2">
+          <widget class="QLabel" name="lblDepth">
            <property name="text">
             <string>Depth:</string>
            </property>
           </widget>
          </item>
          <item row="11" column="1">
-          <layout class="QHBoxLayout" name="lay10Depth_2">
+          <layout class="QHBoxLayout" name="lay10Depth">
            <item>
-            <widget class="QCheckBox" name="chkDepth_2">
+            <widget class="QCheckBox" name="chkDepth">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtDepth_2"/>
+            <widget class="QLineEdit" name="txtDepth"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtDepthCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="12" column="0">
-          <widget class="QLabel" name="lblCamera_2">
+          <widget class="QLabel" name="lblCamera">
            <property name="text">
             <string>Camera:</string>
            </property>
           </widget>
          </item>
          <item row="12" column="1">
-          <layout class="QHBoxLayout" name="lay11Camera_2">
+          <layout class="QHBoxLayout" name="lay11Camera">
            <item>
-            <widget class="QCheckBox" name="chkCamera_2">
+            <widget class="QCheckBox" name="chkCamera">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtCamera_2"/>
+            <widget class="QLineEdit" name="txtCamera"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtCameraCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="13" column="0">
-          <widget class="QLabel" name="lblPhotographer_2">
+          <widget class="QLabel" name="lblPhotographer">
            <property name="text">
             <string>Photographer:</string>
            </property>
           </widget>
          </item>
          <item row="13" column="1">
-          <layout class="QHBoxLayout" name="lay12Photographer_2">
+          <layout class="QHBoxLayout" name="lay12Photographer">
            <item>
-            <widget class="QCheckBox" name="chkPhotographer_2">
+            <widget class="QCheckBox" name="chkPhotographer">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtPhotographer_2"/>
+            <widget class="QLineEdit" name="txtPhotographer"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtPhotographerCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="14" column="0">
-          <widget class="QLabel" name="lblWaterQuality_2">
+          <widget class="QLabel" name="lblWaterQuality">
            <property name="text">
             <string>Water quality:</string>
            </property>
           </widget>
          </item>
          <item row="14" column="1">
-          <layout class="QHBoxLayout" name="lay13WaterQuality_2">
+          <layout class="QHBoxLayout" name="lay13WaterQuality">
            <item>
-            <widget class="QCheckBox" name="chkWaterQuality_2">
+            <widget class="QCheckBox" name="chkWaterQuality">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtWaterQuality_2"/>
+            <widget class="QLineEdit" name="txtWaterQuality"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtWaterQualityCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="15" column="0">
-          <widget class="QLabel" name="lblStrobes_2">
+          <widget class="QLabel" name="lblStrobes">
            <property name="text">
             <string>Strobes:</string>
            </property>
           </widget>
          </item>
          <item row="15" column="1">
-          <layout class="QHBoxLayout" name="lay14Strobes_2">
+          <layout class="QHBoxLayout" name="lay14Strobes">
            <item>
-            <widget class="QCheckBox" name="chkStrobes_2">
+            <widget class="QCheckBox" name="chkStrobes">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtStrobes_2"/>
+            <widget class="QLineEdit" name="txtStrobes"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtStrobesCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="16" column="0">
-          <widget class="QLabel" name="lblFraming_2">
+          <widget class="QLabel" name="lblFraming">
            <property name="text">
             <string>Framing:</string>
            </property>
           </widget>
          </item>
          <item row="16" column="1">
-          <layout class="QHBoxLayout" name="lay15Framing_2">
+          <layout class="QHBoxLayout" name="lay15Framing">
            <item>
-            <widget class="QCheckBox" name="chkFraming_2">
+            <widget class="QCheckBox" name="chkFraming">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtFraming_2"/>
+            <widget class="QLineEdit" name="txtFraming"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtFramingCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="17" column="0">
-          <widget class="QLabel" name="lblWhiteBalanceCard_2">
+          <widget class="QLabel" name="lblWhiteBalanceCard">
            <property name="text">
             <string>White balance card:</string>
            </property>
           </widget>
          </item>
          <item row="17" column="1">
-          <layout class="QHBoxLayout" name="lay16WhiteBalanceCard_2">
+          <layout class="QHBoxLayout" name="lay16WhiteBalanceCard">
            <item>
-            <widget class="QCheckBox" name="chkWhiteBalanceCard_2">
+            <widget class="QCheckBox" name="chkWhiteBalanceCard">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtWhiteBalanceCard_2"/>
+            <widget class="QLineEdit" name="txtWhiteBalanceCard"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtWhiteBalanceCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="18" column="0">
-          <widget class="QLabel" name="lblComments_2">
+          <widget class="QLabel" name="lblComments">
            <property name="text">
             <string>Comments:</string>
            </property>
           </widget>
          </item>
          <item row="18" column="1">
-          <layout class="QHBoxLayout" name="lay17Comments_2">
+          <layout class="QHBoxLayout" name="lay17Comments">
            <item>
-            <widget class="QCheckBox" name="chkComments_2">
+            <widget class="QCheckBox" name="chkComments">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPlainTextEdit" name="txtComments_2"/>
+            <widget class="QPlainTextEdit" name="txtComments"/>
+           </item>
+           <item>
+            <widget class="QPlainTextEdit" name="txtCommentsCommonValue">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>(various)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item row="0" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
             <widget class="QLabel" name="lblSelection">
              <property name="sizePolicy">

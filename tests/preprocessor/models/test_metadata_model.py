@@ -80,4 +80,3 @@ class TestMetadataModel:
         with qtbot.waitSignal(model.on_date_changed, timeout=1000):
             model.date = date_val
         assert model.date == date_val
-
