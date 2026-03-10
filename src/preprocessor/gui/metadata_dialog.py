@@ -9,6 +9,7 @@ from preprocessor.gui.utils import _dt_to_qdatetime
 from preprocessor.model.metadata_model import MetadataModel
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
+from preprocessor.utils import to_upper_camel_case
 
 _DIFFERENT = object()
 """Marker object to denote a metadata field has various values across selected photos"""
@@ -18,6 +19,26 @@ class MetadataDialog(QDialog):
     current_project: ProjectModel
     selected_photos: list[PhotoModel]
     ui: Ui_MetadataDialog
+
+    fields: list[str] = [
+        "date",
+        "partner",
+        "area",
+        "site",
+        "season",
+        "transect",
+        "height",
+        "latitude",
+        "longitude",
+        "depth",
+        "camera",
+        "photographer",
+        "water_quality",
+        "strobes",
+        "framing",
+        "white_balance_card",
+        "comments",
+    ]
 
     def __init__(
         self, current_project: ProjectModel, selected_photos: list[PhotoModel], parent: QWidget | None = None
@@ -31,51 +52,66 @@ class MetadataDialog(QDialog):
         self._set_initial_state()
 
     def _connect_signals(self) -> None:
-        self.ui.chkDate.checkStateChanged.connect(lambda: self._update_metadata_datetime("date"))
-        self.ui.chkPartner.checkStateChanged.connect(lambda: self._update_metadata_textbox("partner"))
-        self.ui.chkArea.checkStateChanged.connect(lambda: self._update_metadata_textbox("area"))
-        self.ui.chkSite.checkStateChanged.connect(lambda: self._update_metadata_textbox("site"))
-        self.ui.chkSeason.checkStateChanged.connect(lambda: self._update_metadata_textbox("season"))
-        self.ui.chkTransect.checkStateChanged.connect(lambda: self._update_metadata_textbox("transect"))
-        self.ui.chkHeight.checkStateChanged.connect(lambda: self._update_metadata_textbox("height"))
-        self.ui.chkLatitude.checkStateChanged.connect(lambda: self._update_metadata_textbox("latitude"))
-        self.ui.chkLongitude.checkStateChanged.connect(lambda: self._update_metadata_textbox("longitude"))
-        self.ui.chkDepth.checkStateChanged.connect(lambda: self._update_metadata_textbox("depth"))
-        self.ui.chkCamera.checkStateChanged.connect(lambda: self._update_metadata_textbox("camera"))
-        self.ui.chkPhotographer.checkStateChanged.connect(lambda: self._update_metadata_textbox("photographer"))
-        self.ui.chkWaterQuality.checkStateChanged.connect(lambda: self._update_metadata_textbox("water_quality"))
-        self.ui.chkStrobes.checkStateChanged.connect(lambda: self._update_metadata_textbox("strobes"))
-        self.ui.chkFraming.checkStateChanged.connect(lambda: self._update_metadata_textbox("framing"))
-        self.ui.chkWhiteBalanceCard.checkStateChanged.connect(
-            lambda: self._update_metadata_textbox("white_balance_card")
-        )
-        self.ui.chkComments.checkStateChanged.connect(lambda: self._update_metadata_plaintextedit("comments"))
+        for field_name in self.fields:
+            checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+            if field_name == "comments":
+                checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_plaintextedit(fn))
+            elif field_name == "date":
+                checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_datetime(fn))
+            else:
+                checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_textbox(fn))
+        # self.ui.chkDate.checkStateChanged.connect(lambda: self._update_metadata_datetime("date"))
+        # self.ui.chkPartner.checkStateChanged.connect(lambda: self._update_metadata_textbox("partner"))
+        # self.ui.chkArea.checkStateChanged.connect(lambda: self._update_metadata_textbox("area"))
+        # self.ui.chkSite.checkStateChanged.connect(lambda: self._update_metadata_textbox("site"))
+        # self.ui.chkSeason.checkStateChanged.connect(lambda: self._update_metadata_textbox("season"))
+        # self.ui.chkTransect.checkStateChanged.connect(lambda: self._update_metadata_textbox("transect"))
+        # self.ui.chkHeight.checkStateChanged.connect(lambda: self._update_metadata_textbox("height"))
+        # self.ui.chkLatitude.checkStateChanged.connect(lambda: self._update_metadata_textbox("latitude"))
+        # self.ui.chkLongitude.checkStateChanged.connect(lambda: self._update_metadata_textbox("longitude"))
+        # self.ui.chkDepth.checkStateChanged.connect(lambda: self._update_metadata_textbox("depth"))
+        # self.ui.chkCamera.checkStateChanged.connect(lambda: self._update_metadata_textbox("camera"))
+        # self.ui.chkPhotographer.checkStateChanged.connect(lambda: self._update_metadata_textbox("photographer"))
+        # self.ui.chkWaterQuality.checkStateChanged.connect(lambda: self._update_metadata_textbox("water_quality"))
+        # self.ui.chkStrobes.checkStateChanged.connect(lambda: self._update_metadata_textbox("strobes"))
+        # self.ui.chkFraming.checkStateChanged.connect(lambda: self._update_metadata_textbox("framing"))
+        # self.ui.chkWhiteBalanceCard.checkStateChanged.connect(
+        #     lambda: self._update_metadata_textbox("white_balance_card")
+        # )
+        # self.ui.chkComments.checkStateChanged.connect(lambda: self._update_metadata_plaintextedit("comments"))
 
         self.ui.btnCancel.clicked.connect(self.reject)
         self.ui.btnApply.clicked.connect(self._apply_changes)
 
     def _set_initial_state(self) -> None:
-        self._initialize_metadata_datetime("date")
-        self._initialize_metadata_textbox("partner")
-        self._initialize_metadata_textbox("area")
-        self._initialize_metadata_textbox("site")
-        self._initialize_metadata_textbox("season")
-        self._initialize_metadata_textbox("transect")
-        self._initialize_metadata_textbox("height")
-        self._initialize_metadata_textbox("latitude")
-        self._initialize_metadata_textbox("longitude")
-        self._initialize_metadata_textbox("depth")
-        self._initialize_metadata_textbox("camera")
-        self._initialize_metadata_textbox("photographer")
-        self._initialize_metadata_textbox("water_quality")
-        self._initialize_metadata_textbox("strobes")
-        self._initialize_metadata_textbox("framing")
-        self._initialize_metadata_textbox("white_balance_card")
-        self._initialize_metadata_plaintextedit("comments")
+        for field_name in self.fields:
+            if field_name == "comments":
+                self._initialize_metadata_plaintextedit(field_name)
+            elif field_name == "date":
+                self._initialize_metadata_datetime(field_name)
+            else:
+                self._initialize_metadata_textbox(field_name)
+        # self._initialize_metadata_datetime("date")
+        # self._initialize_metadata_textbox("partner")
+        # self._initialize_metadata_textbox("area")
+        # self._initialize_metadata_textbox("site")
+        # self._initialize_metadata_textbox("season")
+        # self._initialize_metadata_textbox("transect")
+        # self._initialize_metadata_textbox("height")
+        # self._initialize_metadata_textbox("latitude")
+        # self._initialize_metadata_textbox("longitude")
+        # self._initialize_metadata_textbox("depth")
+        # self._initialize_metadata_textbox("camera")
+        # self._initialize_metadata_textbox("photographer")
+        # self._initialize_metadata_textbox("water_quality")
+        # self._initialize_metadata_textbox("strobes")
+        # self._initialize_metadata_textbox("framing")
+        # self._initialize_metadata_textbox("white_balance_card")
+        # self._initialize_metadata_plaintextedit("comments")
 
     def _initialize_metadata_textbox(self, field_name: str) -> None:
-        checkbox: QCheckBox = getattr(self.ui, f"chk{field_name.capitalize()}")
-        textbox: QLineEdit = getattr(self.ui, f"txt{field_name.capitalize()}")
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        textbox: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
         common_value = self._determine_common_metadata_value(field_name)
 
         if common_value is not _DIFFERENT:
@@ -87,8 +123,8 @@ class MetadataDialog(QDialog):
         self._update_metadata_textbox(field_name)
 
     def _initialize_metadata_plaintextedit(self, field_name: str) -> None:
-        checkbox: QCheckBox = getattr(self.ui, f"chk{field_name.capitalize()}")
-        textbox: QPlainTextEdit = getattr(self.ui, f"txt{field_name.capitalize()}")
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        textbox: QPlainTextEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
         common_value = self._determine_common_metadata_value(field_name)
 
         if common_value is not _DIFFERENT:
@@ -100,8 +136,8 @@ class MetadataDialog(QDialog):
         self._update_metadata_plaintextedit(field_name)
 
     def _initialize_metadata_datetime(self, field_name: str) -> None:
-        checkbox: QCheckBox = getattr(self.ui, f"chk{field_name.capitalize()}")
-        datebox: QDateTimeEdit = getattr(self.ui, f"dte{field_name.capitalize()}")
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
         common_value = self._determine_common_metadata_value(field_name)
 
         if common_value is not _DIFFERENT:
@@ -113,9 +149,9 @@ class MetadataDialog(QDialog):
         self._update_metadata_datetime(field_name)
 
     def _update_metadata_textbox(self, field_name: str) -> None:
-        checkbox: QCheckBox = getattr(self.ui, f"chk{field_name.capitalize()}")
-        textbox: QLineEdit = getattr(self.ui, f"txt{field_name.capitalize()}")
-        common_textbox: QLineEdit = getattr(self.ui, f"txt{field_name.capitalize()}CommonValue")
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        textbox: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
+        common_textbox: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}CommonValue")
         overriding = checkbox.isChecked()
 
         common_value = self._determine_common_metadata_value(field_name)
@@ -129,9 +165,9 @@ class MetadataDialog(QDialog):
         common_textbox.setVisible(not overriding)
 
     def _update_metadata_plaintextedit(self, field_name: str) -> None:
-        checkbox: QCheckBox = getattr(self.ui, f"chk{field_name.capitalize()}")
-        textbox: QPlainTextEdit = getattr(self.ui, f"txt{field_name.capitalize()}")
-        common_textbox: QPlainTextEdit = getattr(self.ui, f"txt{field_name.capitalize()}CommonValue")
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        textbox: QPlainTextEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
+        common_textbox: QPlainTextEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}CommonValue")
         overriding = checkbox.isChecked()
 
         common_value = self._determine_common_metadata_value(field_name)
@@ -145,10 +181,10 @@ class MetadataDialog(QDialog):
         common_textbox.setVisible(not overriding)
 
     def _update_metadata_datetime(self, field_name: str) -> None:
-        checkbox: QCheckBox = getattr(self.ui, f"chk{field_name.capitalize()}")
-        datebox: QDateTimeEdit = getattr(self.ui, f"dte{field_name.capitalize()}")
-        common_datebox: QDateTimeEdit = getattr(self.ui, f"dte{field_name.capitalize()}CommonValue")
-        placeholder_textbox: QDateTimeEdit = getattr(self.ui, f"txt{field_name.capitalize()}")
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
+        common_datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}CommonValue")
+        placeholder_textbox: QDateTimeEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}CommonValue")
         overriding = checkbox.isChecked()
 
         common_value = self._determine_common_metadata_value(field_name)
@@ -171,36 +207,18 @@ class MetadataDialog(QDialog):
         return first_val
 
     def _apply_changes(self) -> None:
-        for field_name in [
-            "date",
-            "partner",
-            "area",
-            "site",
-            "season",
-            "transect",
-            "height",
-            "latitude",
-            "longitude",
-            "depth",
-            "camera",
-            "photographer",
-            "water_quality",
-            "strobes",
-            "framing",
-            "white_balance_card",
-            "comments",
-        ]:
-            checkbox: QCheckBox = getattr(self.ui, f"chk{field_name.capitalize()}")
+        for field_name in self.fields:
+            checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
             if checkbox.isChecked():
                 new_value: Any
                 if field_name == "comments":
-                    plaintextedit: QPlainTextEdit = getattr(self.ui, f"txt{field_name.capitalize()}")
+                    plaintextedit: QPlainTextEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
                     new_value = plaintextedit.toPlainText()
                 elif field_name == "date":
-                    datebox: QDateTimeEdit = getattr(self.ui, f"dte{field_name.capitalize()}")
+                    datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
                     new_value = datebox.dateTime().toPython()
                 else:
-                    textbox: QLineEdit = getattr(self.ui, f"txt{field_name.capitalize()}")
+                    textbox: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
                     new_value = textbox.text()
                 for photo in self.selected_photos:
                     setattr(photo.metadata, field_name, new_value)

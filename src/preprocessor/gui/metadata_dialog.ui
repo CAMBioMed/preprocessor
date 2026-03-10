@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>812</width>
+    <width>773</width>
     <height>860</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Set Metadata</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -26,9 +26,15 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>672</width>
+          <width>633</width>
           <height>832</height>
          </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
         <layout class="QFormLayout" name="formLayout">
          <item row="1" column="0">
@@ -65,6 +71,9 @@
              <property name="enabled">
               <bool>false</bool>
              </property>
+             <property name="displayFormat">
+              <string>yyyy-MM-dd HH:mm</string>
+             </property>
             </widget>
            </item>
            <item>
@@ -99,10 +108,23 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtPartner"/>
+            <widget class="QLineEdit" name="txtPartner">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QLineEdit" name="txtPartnerCommonValue">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
@@ -239,6 +261,12 @@
          </item>
          <item row="7" column="1">
           <widget class="Line" name="line">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>6</height>
+            </size>
+           </property>
            <property name="orientation">
             <enum>Qt::Orientation::Horizontal</enum>
            </property>
@@ -570,7 +598,7 @@
             <widget class="QLineEdit" name="txtWhiteBalanceCard"/>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtWhiteBalanceCommonValue">
+            <widget class="QLineEdit" name="txtWhiteBalanceCardCommonValue">
              <property name="enabled">
               <bool>true</bool>
              </property>

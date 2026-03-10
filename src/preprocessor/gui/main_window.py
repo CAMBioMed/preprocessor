@@ -15,6 +15,7 @@ from preprocessor.gui.launch_dialog import (
     save_project_dialog,
     save_project_as_dialog,
 )
+from preprocessor.gui.metadata_dialog import MetadataDialog
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
@@ -182,6 +183,7 @@ class MainWindow(QMainWindow):
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_item_double_clicked.connect(self._handle_photo_opened)
         self.thumbnail_dock.on_apply_to_selected.connect(self._handle_apply_to_selected_action)
+        self.thumbnail_dock.on_set_metadata_to_selected.connect(self._handle_set_metadata_action)
 
         # Model
         self.model.on_current_project_changed.connect(self._handle_current_project_changed)
@@ -262,7 +264,7 @@ class MainWindow(QMainWindow):
             self.model.current_project.photos.remove(photo)
 
     def _handle_apply_to_selected_action(self, selected: list[PhotoModel]) -> None:
-        """Handle the 'Apply to all' context menu action. Currently a stub that notifies the user."""
+        """Handle the 'Apply to all' context menu action."""
         if not selected:
             return
         QMessageBox.information(
@@ -270,6 +272,12 @@ class MainWindow(QMainWindow):
             "Apply to all",
             f"Apply parameters of the current photo to {len(selected)} selected photo(s). (Not implemented)",
         )
+
+    def _handle_set_metadata_action(self, selected: list[PhotoModel]) -> None:
+        """Handle the 'Set metadata' context menu action."""
+        dialog = MetadataDialog(self.model.current_project, selected, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            pass
 
     def _handle_dirty_changed(self) -> None:
         """Handle when the current project's dirty state changes."""
