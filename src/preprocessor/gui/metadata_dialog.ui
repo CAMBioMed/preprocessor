@@ -18,6 +18,12 @@
     <layout class="QHBoxLayout" name="layMain">
      <item>
       <widget class="QScrollArea" name="scrollArea">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
@@ -31,12 +37,39 @@
          </rect>
         </property>
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <layout class="QFormLayout" name="formLayout">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
+         </property>
+         <item row="0" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QLabel" name="lblSelection">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>0/0 photos selected</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnCopyFromCurrentPhoto">
+             <property name="text">
+              <string>Copy from current photo</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="lblDate">
            <property name="text">
@@ -258,26 +291,6 @@
             </widget>
            </item>
           </layout>
-         </item>
-         <item row="7" column="1">
-          <widget class="Line" name="line">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>6</height>
-            </size>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QLabel" name="lblHeight">
-           <property name="text">
-            <string>Height:</string>
-           </property>
-          </widget>
          </item>
          <item row="8" column="1">
           <layout class="QHBoxLayout" name="lay07Height">
@@ -629,12 +642,25 @@
             </widget>
            </item>
            <item>
-            <widget class="QPlainTextEdit" name="txtComments"/>
+            <widget class="QPlainTextEdit" name="txtComments">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPlainTextEdit" name="txtCommentsCommonValue">
              <property name="enabled">
               <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -646,29 +672,31 @@
            </item>
           </layout>
          </item>
-         <item row="0" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <widget class="QLabel" name="lblSelection">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>0/0 photos selected</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCopyFromCurrentPhoto">
-             <property name="text">
-              <string>Copy from current photo</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+         <item row="7" column="1">
+          <widget class="Line" name="line">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>6</height>
+            </size>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QLabel" name="lblHeight">
+           <property name="text">
+            <string>Height:</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

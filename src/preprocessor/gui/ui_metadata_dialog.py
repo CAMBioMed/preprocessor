@@ -31,17 +31,40 @@ class Ui_MetadataDialog(object):
         self.layMain.setObjectName(u"layMain")
         self.scrollArea = QScrollArea(MetadataDialog)
         self.scrollArea.setObjectName(u"scrollArea")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
+        self.scrollArea.setSizePolicy(sizePolicy)
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 633, 832))
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.scrollAreaWidgetContents.sizePolicy().hasHeightForWidth())
-        self.scrollAreaWidgetContents.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.scrollAreaWidgetContents.sizePolicy().hasHeightForWidth())
+        self.scrollAreaWidgetContents.setSizePolicy(sizePolicy1)
         self.formLayout = QFormLayout(self.scrollAreaWidgetContents)
         self.formLayout.setObjectName(u"formLayout")
+        self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.lblSelection = QLabel(self.scrollAreaWidgetContents)
+        self.lblSelection.setObjectName(u"lblSelection")
+        sizePolicy1.setHeightForWidth(self.lblSelection.sizePolicy().hasHeightForWidth())
+        self.lblSelection.setSizePolicy(sizePolicy1)
+
+        self.horizontalLayout.addWidget(self.lblSelection)
+
+        self.btnCopyFromCurrentPhoto = QPushButton(self.scrollAreaWidgetContents)
+        self.btnCopyFromCurrentPhoto.setObjectName(u"btnCopyFromCurrentPhoto")
+
+        self.horizontalLayout.addWidget(self.btnCopyFromCurrentPhoto)
+
+
+        self.formLayout.setLayout(0, QFormLayout.ItemRole.FieldRole, self.horizontalLayout)
+
         self.lblDate = QLabel(self.scrollAreaWidgetContents)
         self.lblDate.setObjectName(u"lblDate")
 
@@ -56,11 +79,11 @@ class Ui_MetadataDialog(object):
 
         self.dteDate = QDateTimeEdit(self.scrollAreaWidgetContents)
         self.dteDate.setObjectName(u"dteDate")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.dteDate.sizePolicy().hasHeightForWidth())
-        self.dteDate.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.dteDate.sizePolicy().hasHeightForWidth())
+        self.dteDate.setSizePolicy(sizePolicy2)
 
         self.lay01Date.addWidget(self.dteDate)
 
@@ -94,15 +117,15 @@ class Ui_MetadataDialog(object):
 
         self.txtPartner = QLineEdit(self.scrollAreaWidgetContents)
         self.txtPartner.setObjectName(u"txtPartner")
-        sizePolicy1.setHeightForWidth(self.txtPartner.sizePolicy().hasHeightForWidth())
-        self.txtPartner.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.txtPartner.sizePolicy().hasHeightForWidth())
+        self.txtPartner.setSizePolicy(sizePolicy2)
 
         self.lay02Partner.addWidget(self.txtPartner)
 
         self.txtPartnerCommonValue = QLineEdit(self.scrollAreaWidgetContents)
         self.txtPartnerCommonValue.setObjectName(u"txtPartnerCommonValue")
-        sizePolicy1.setHeightForWidth(self.txtPartnerCommonValue.sizePolicy().hasHeightForWidth())
-        self.txtPartnerCommonValue.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.txtPartnerCommonValue.sizePolicy().hasHeightForWidth())
+        self.txtPartnerCommonValue.setSizePolicy(sizePolicy2)
         self.txtPartnerCommonValue.setReadOnly(True)
 
         self.lay02Partner.addWidget(self.txtPartnerCommonValue)
@@ -213,19 +236,6 @@ class Ui_MetadataDialog(object):
 
 
         self.formLayout.setLayout(6, QFormLayout.ItemRole.FieldRole, self.lay06Transect)
-
-        self.line = QFrame(self.scrollAreaWidgetContents)
-        self.line.setObjectName(u"line")
-        self.line.setMinimumSize(QSize(0, 6))
-        self.line.setFrameShape(QFrame.Shape.HLine)
-        self.line.setFrameShadow(QFrame.Shadow.Sunken)
-
-        self.formLayout.setWidget(7, QFormLayout.ItemRole.FieldRole, self.line)
-
-        self.lblHeight = QLabel(self.scrollAreaWidgetContents)
-        self.lblHeight.setObjectName(u"lblHeight")
-
-        self.formLayout.setWidget(8, QFormLayout.ItemRole.LabelRole, self.lblHeight)
 
         self.lay07Height = QHBoxLayout()
         self.lay07Height.setObjectName(u"lay07Height")
@@ -505,12 +515,19 @@ class Ui_MetadataDialog(object):
 
         self.txtComments = QPlainTextEdit(self.scrollAreaWidgetContents)
         self.txtComments.setObjectName(u"txtComments")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.txtComments.sizePolicy().hasHeightForWidth())
+        self.txtComments.setSizePolicy(sizePolicy3)
 
         self.lay17Comments.addWidget(self.txtComments)
 
         self.txtCommentsCommonValue = QPlainTextEdit(self.scrollAreaWidgetContents)
         self.txtCommentsCommonValue.setObjectName(u"txtCommentsCommonValue")
         self.txtCommentsCommonValue.setEnabled(True)
+        sizePolicy3.setHeightForWidth(self.txtCommentsCommonValue.sizePolicy().hasHeightForWidth())
+        self.txtCommentsCommonValue.setSizePolicy(sizePolicy3)
         self.txtCommentsCommonValue.setReadOnly(True)
 
         self.lay17Comments.addWidget(self.txtCommentsCommonValue)
@@ -518,25 +535,23 @@ class Ui_MetadataDialog(object):
 
         self.formLayout.setLayout(18, QFormLayout.ItemRole.FieldRole, self.lay17Comments)
 
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.lblSelection = QLabel(self.scrollAreaWidgetContents)
-        self.lblSelection.setObjectName(u"lblSelection")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.lblSelection.sizePolicy().hasHeightForWidth())
-        self.lblSelection.setSizePolicy(sizePolicy2)
+        self.line = QFrame(self.scrollAreaWidgetContents)
+        self.line.setObjectName(u"line")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.line.sizePolicy().hasHeightForWidth())
+        self.line.setSizePolicy(sizePolicy4)
+        self.line.setMinimumSize(QSize(0, 6))
+        self.line.setFrameShape(QFrame.Shape.HLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
 
-        self.horizontalLayout.addWidget(self.lblSelection)
+        self.formLayout.setWidget(7, QFormLayout.ItemRole.FieldRole, self.line)
 
-        self.btnCopyFromCurrentPhoto = QPushButton(self.scrollAreaWidgetContents)
-        self.btnCopyFromCurrentPhoto.setObjectName(u"btnCopyFromCurrentPhoto")
+        self.lblHeight = QLabel(self.scrollAreaWidgetContents)
+        self.lblHeight.setObjectName(u"lblHeight")
 
-        self.horizontalLayout.addWidget(self.btnCopyFromCurrentPhoto)
-
-
-        self.formLayout.setLayout(0, QFormLayout.ItemRole.FieldRole, self.horizontalLayout)
+        self.formLayout.setWidget(8, QFormLayout.ItemRole.LabelRole, self.lblHeight)
 
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -573,6 +588,8 @@ class Ui_MetadataDialog(object):
 
     def retranslateUi(self, MetadataDialog):
         MetadataDialog.setWindowTitle(QCoreApplication.translate("MetadataDialog", u"Set Metadata", None))
+        self.lblSelection.setText(QCoreApplication.translate("MetadataDialog", u"0/0 photos selected", None))
+        self.btnCopyFromCurrentPhoto.setText(QCoreApplication.translate("MetadataDialog", u"Copy from current photo", None))
         self.lblDate.setText(QCoreApplication.translate("MetadataDialog", u"Date:", None))
         self.chkDate.setText("")
         self.dteDate.setDisplayFormat(QCoreApplication.translate("MetadataDialog", u"yyyy-MM-dd HH:mm", None))
@@ -593,7 +610,6 @@ class Ui_MetadataDialog(object):
         self.lblTransect.setText(QCoreApplication.translate("MetadataDialog", u"Transect:", None))
         self.chkTransect.setText("")
         self.txtTransectCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
-        self.lblHeight.setText(QCoreApplication.translate("MetadataDialog", u"Height:", None))
         self.chkHeight.setText("")
         self.txtHeightCommonValue.setText("")
         self.txtHeightCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
@@ -627,8 +643,7 @@ class Ui_MetadataDialog(object):
         self.lblComments.setText(QCoreApplication.translate("MetadataDialog", u"Comments:", None))
         self.chkComments.setText("")
         self.txtCommentsCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
-        self.lblSelection.setText(QCoreApplication.translate("MetadataDialog", u"0/0 photos selected", None))
-        self.btnCopyFromCurrentPhoto.setText(QCoreApplication.translate("MetadataDialog", u"Copy from current photo", None))
+        self.lblHeight.setText(QCoreApplication.translate("MetadataDialog", u"Height:", None))
         self.btnApply.setText(QCoreApplication.translate("MetadataDialog", u"Apply", None))
         self.btnCancel.setText(QCoreApplication.translate("MetadataDialog", u"Cancel", None))
     # retranslateUi
