@@ -11,6 +11,127 @@ from typing import ClassVar, Any
 
 from preprocessor.model.qmodel import QModel
 import contextlib
+from PIL import Image, ExifTags
+
+
+# Helper: parse GPS coordinates from EXIF GPSInfo dict
+def _parse_gps_info(gps_info: dict) -> tuple[str | None, str | None]:
+    """Return (lat_str, lon_str) if available, else (None, None)."""
+    if not gps_info:
+        return None, None
+
+    def _convert_to_degrees(value):
+        # value is a tuple of (num, den) pairs
+        try:
+            d = value[0][0] / value[0][1]
+            m = value[1][0] / value[1][1]
+            s = value[2][0] / value[2][1]
+            return d + (m / 60.0) + (s / 3600.0)
+        except Exception:
+            return None
+
+    # GPS tags use keys like 1=NS, 2=lat, 3=EW, 4=lon
+    lat = None
+    lon = None
+    try:
+        lat_ref = gps_info.get(1) or gps_info.get('GPSLatitudeRef')
+        lat_val = gps_info.get(2) or gps_info.get('GPSLatitude')
+        lon_ref = gps_info.get(3) or gps_info.get('GPSLongitudeRef')
+        lon_val = gps_info.get(4) or gps_info.get('GPSLongitude')
+        lat_deg = _convert_to_degrees(lat_val) if lat_val else None
+        lon_deg = _convert_to_degrees(lon_val) if lon_val else None
+        if lat_deg is not None and lat_ref in ('S', 's'):
+            lat_deg = -lat_deg
+        if lon_deg is not None and lon_ref in ('W', 'w'):
+            lon_deg = -lon_deg
+        if lat_deg is not None:
+            lat = f"{lat_deg:.6f}"
+        if lon_deg is not None:
+            lon = f"{lon_deg:.6f}"
+    except Exception:
+        return None, None
+
+    return lat, lon
+
+
+def _extract_exif_metadata(path: Path) -> dict:
+    """Extract common metadata from the image file using Pillow's EXIF support.
+
+    Returns a dict with keys matching MetadataModel fields (date, photographer, camera, comments, latitude, longitude).
+    """
+    result: dict[str, Any] = {}
+    try:
+        with Image.open(path) as img:
+            exif = img.getexif()
+            if not exif:
+                return result
+
+            # Build a mapping from human-readable tag name to value
+            tags = {}
+            for tag_id, value in exif.items():
+                tag = ExifTags.TAGS.get(tag_id, tag_id)
+                tags[tag] = value
+
+            # Date
+            # Common tags: DateTimeOriginal, DateTime
+            date_str = tags.get('DateTimeOriginal') or tags.get('DateTime')
+            if date_str:
+                # Date string format typically 'YYYY:MM:DD HH:MM:SS'
+                try:
+                    date_part = date_str.split(' ')[0]
+                    date_part = date_part.replace(':', '-')
+                    result['date'] = date_part  # keep as string for now; MetadataModel will accept or clean
+                except Exception:
+                    pass
+
+            # Photographer/Artist
+            photographer = tags.get('Artist') or tags.get('Copyright')
+            if photographer:
+                result['photographer'] = str(photographer)
+
+            # Camera model or make
+            model = tags.get('Model')
+            make = tags.get('Make')
+            camera = None
+            if make and model:
+                camera = f"{make} {model}"
+            elif model:
+                camera = str(model)
+            elif make:
+                camera = str(make)
+            if camera:
+                result['camera'] = camera
+
+            # Comments: ImageDescription or UserComment
+            comments = tags.get('ImageDescription') or tags.get('UserComment')
+            if comments:
+                # UserComment may be bytes
+                if isinstance(comments, bytes):
+                    try:
+                        comments = comments.decode('utf-8', errors='ignore')
+                    except Exception:
+                        comments = str(comments)
+                result['comments'] = str(comments)
+
+            # GPS: tags under 'GPSInfo' (numeric keys referencing GPSTAGS)
+            gps_info = None
+            raw_gps = tags.get('GPSInfo')
+            if raw_gps:
+                # remap numeric GPSTAGS to names for easier access
+                gps_info = {}
+                for k, v in raw_gps.items():
+                    name = ExifTags.GPSTAGS.get(k, k)
+                    gps_info[name] = v
+            lat, lon = _parse_gps_info(gps_info) if gps_info else (None, None)
+            if lat:
+                result['latitude'] = lat
+            if lon:
+                result['longitude'] = lon
+    except Exception:
+        # Don't let EXIF extraction break the caller
+        return result
+
+    return result
 
 
 class ProjectData(BaseModel):
@@ -241,5 +362,40 @@ class ProjectModel(QModel[ProjectData]):
     def append_photo_model(self, path: Path) -> PhotoModel:
         """Helper function to create a new PhotoModel with the given path and add it to the project."""
         photo = PhotoModel.from_file(path, self.file.parent)
+        # Extract metadata from the image and populate the photo.metadata fields
+        try:
+            exif_data = _extract_exif_metadata(self.get_absolute_path(photo.original_filename))
+            # Only set fields if they are not already set on the photo
+            if 'date' in exif_data and photo.metadata.date is None:
+                # convert date string to date object if possible
+                try:
+                    import datetime as _dt
+
+                    d = exif_data['date']
+                    if isinstance(d, str):
+                        # Accept YYYY-MM-DD or YYYY:MM:DD formats
+                        dclean = d.replace('/', '-').replace(':', '-')
+                        # keep only the date portion
+                        dclean = dclean.split(' ')[0]
+                        photo.metadata.date = _dt.date.fromisoformat(dclean)
+                    else:
+                        photo.metadata.date = d
+                except Exception:
+                    # Leave as None if parsing fails
+                    pass
+            if 'photographer' in exif_data and photo.metadata.photographer is None:
+                photo.metadata.photographer = exif_data['photographer']
+            if 'camera' in exif_data and photo.metadata.camera is None:
+                photo.metadata.camera = exif_data['camera']
+            if 'comments' in exif_data and photo.metadata.comments is None:
+                photo.metadata.comments = exif_data['comments']
+            if 'latitude' in exif_data and photo.metadata.latitude is None:
+                photo.metadata.latitude = exif_data['latitude']
+            if 'longitude' in exif_data and photo.metadata.longitude is None:
+                photo.metadata.longitude = exif_data['longitude']
+        except Exception:
+            # ignore metadata extraction errors
+            pass
+
         self.photos.append(photo)
         return photo
