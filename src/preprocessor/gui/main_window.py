@@ -12,7 +12,7 @@ from preprocessor.gui.export_dialog import ExportDialog
 from preprocessor.gui.launch_dialog import (
     new_project_dialog,
     open_project_dialog,
-    save_project_dialog,
+    save_project,
     save_project_as_dialog,
 )
 from preprocessor.gui.metadata_dialog import MetadataDialog
@@ -200,7 +200,7 @@ class MainWindow(QMainWindow):
             self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:
-        save_project_dialog(self, self.model.current_project, self.model.current_project.file)
+        save_project(self, self.model.current_project, self.model.current_project.file)
 
     def _handle_save_project_as_action(self) -> None:
         save_project_as_dialog(self, self.model.current_project)
