@@ -12,6 +12,7 @@ from typing import ClassVar, Any
 from preprocessor.model.qmodel import QModel
 import contextlib
 from PIL import Image, ExifTags
+import datetime
 
 
 # Helper: parse GPS coordinates from EXIF GPSInfo dict
@@ -330,6 +331,49 @@ class ProjectModel(QModel[ProjectData]):
 
     def write_to_json(self) -> str:
         """Return a JSON string representation of the model."""
+        # Ensure metadata.date fields are datetime.datetime for consistent serialization.
+        try:
+            for photo in self._data.photos:
+                md = getattr(photo, "metadata", None)
+                if md is None:
+                    continue
+                d = getattr(md, "date", None)
+                if d is None:
+                    continue
+                # If it's a date (not datetime), convert to datetime at midnight
+                if isinstance(d, datetime.date) and not isinstance(d, datetime.datetime):
+                    md.date = datetime.datetime(d.year, d.month, d.day)
+                # If it's a string, try parsing ISO date/datetime
+                elif isinstance(d, str):
+                    try:
+                        # try full ISO datetime first
+                        parsed = datetime.datetime.fromisoformat(d)
+                        md.date = parsed
+                    except Exception:
+                        try:
+                            parsed_date = datetime.date.fromisoformat(d)
+                            md.date = datetime.datetime(parsed_date.year, parsed_date.month, parsed_date.day)
+                        except Exception:
+                            # leave as-is
+                            pass
+            # Default metadata too
+            d = getattr(self._data.default_metadata, "date", None)
+            if d is not None:
+                if isinstance(d, datetime.date) and not isinstance(d, datetime.datetime):
+                    self._data.default_metadata.date = datetime.datetime(d.year, d.month, d.day)
+                elif isinstance(d, str):
+                    try:
+                        self._data.default_metadata.date = datetime.datetime.fromisoformat(d)
+                    except Exception:
+                        try:
+                            parsed_date = datetime.date.fromisoformat(d)
+                            self._data.default_metadata.date = datetime.datetime(parsed_date.year, parsed_date.month, parsed_date.day)
+                        except Exception:
+                            pass
+        except Exception:
+            # Be tolerant: if anything goes wrong, fall back to default serialization
+            pass
+
         return self._data.model_dump_json(indent=2)
 
     @classmethod
@@ -367,22 +411,15 @@ class ProjectModel(QModel[ProjectData]):
             exif_data = _extract_exif_metadata(self.get_absolute_path(photo.original_filename))
             # Only set fields if they are not already set on the photo
             if 'date' in exif_data and photo.metadata.date is None:
-                # convert date string to date object if possible
-                try:
-                    import datetime as _dt
-
-                    d = exif_data['date']
-                    if isinstance(d, str):
-                        # Accept YYYY-MM-DD or YYYY:MM:DD formats
-                        dclean = d.replace('/', '-').replace(':', '-')
-                        # keep only the date portion
-                        dclean = dclean.split(' ')[0]
-                        photo.metadata.date = _dt.date.fromisoformat(dclean)
-                    else:
-                        photo.metadata.date = d
-                except Exception:
-                    # Leave as None if parsing fails
-                    pass
+                # Keep date as a string (ISO-like) to avoid pydantic serialization warnings
+                d = exif_data['date']
+                if isinstance(d, str):
+                    dclean = d.replace('/', '-').replace(':', '-')
+                    dclean = dclean.split(' ')[0]
+                    photo.metadata.date = dclean
+                else:
+                    # Fallback: assign whatever came from EXIF (best-effort)
+                    photo.metadata.date = d
             if 'photographer' in exif_data and photo.metadata.photographer is None:
                 photo.metadata.photographer = exif_data['photographer']
             if 'camera' in exif_data and photo.metadata.camera is None:
