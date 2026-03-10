@@ -97,7 +97,6 @@ def save_project(parent: QWidget | None, project: ProjectModel, path: Path) -> b
     return True
 
 
-
 def new_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> ProjectModel | None:
     """
     Show a file dialog to create a new project file, and return the new ProjectModel if successful,

@@ -38,16 +38,16 @@ def _parse_gps_info(gps_info: dict | None) -> tuple[str | None, str | None]:
     lat: str | None = None
     lon: str | None = None
     try:
-        lat_ref: Any = gps_info.get(1) or gps_info.get('GPSLatitudeRef')
-        lat_val: Any = gps_info.get(2) or gps_info.get('GPSLatitude')
-        lon_ref: Any = gps_info.get(3) or gps_info.get('GPSLongitudeRef')
-        lon_val: Any = gps_info.get(4) or gps_info.get('GPSLongitude')
+        lat_ref: Any = gps_info.get(1) or gps_info.get("GPSLatitudeRef")
+        lat_val: Any = gps_info.get(2) or gps_info.get("GPSLatitude")
+        lon_ref: Any = gps_info.get(3) or gps_info.get("GPSLongitudeRef")
+        lon_val: Any = gps_info.get(4) or gps_info.get("GPSLongitude")
 
         lat_deg: float | None = _convert_to_degrees(lat_val) if lat_val else None
         lon_deg: float | None = _convert_to_degrees(lon_val) if lon_val else None
-        if lat_deg is not None and (isinstance(lat_ref, str) and lat_ref in ('S', 's')):
+        if lat_deg is not None and (isinstance(lat_ref, str) and lat_ref in ("S", "s")):
             lat_deg = -lat_deg
-        if lon_deg is not None and (isinstance(lon_ref, str) and lon_ref in ('W', 'w')):
+        if lon_deg is not None and (isinstance(lon_ref, str) and lon_ref in ("W", "w")):
             lon_deg = -lon_deg
         if lat_deg is not None:
             lat = f"{lat_deg:.6f}"
@@ -79,24 +79,24 @@ def _extract_exif_metadata(path: Path) -> dict:
 
             # Date
             # Common tags: DateTimeOriginal, DateTime
-            date_str: Any = tags.get('DateTimeOriginal') or tags.get('DateTime')
+            date_str: Any = tags.get("DateTimeOriginal") or tags.get("DateTime")
             if date_str:
                 # Date string format typically 'YYYY:MM:DD HH:MM:SS'
                 try:
-                    date_part: str = str(date_str).split(' ')[0]
-                    date_part = date_part.replace(':', '-')
-                    result['date'] = date_part  # keep as string for now; MetadataModel will accept or clean
+                    date_part: str = str(date_str).split(" ")[0]
+                    date_part = date_part.replace(":", "-")
+                    result["date"] = date_part  # keep as string for now; MetadataModel will accept or clean
                 except Exception:
                     pass
 
             # Photographer/Artist
-            photographer: Any = tags.get('Artist') or tags.get('Copyright')
+            photographer: Any = tags.get("Artist") or tags.get("Copyright")
             if photographer:
-                result['photographer'] = str(photographer)
+                result["photographer"] = str(photographer)
 
             # Camera model or make
-            model: Any = tags.get('Model')
-            make: Any = tags.get('Make')
+            model: Any = tags.get("Model")
+            make: Any = tags.get("Make")
             camera = None
             if make and model:
                 camera = f"{make} {model}"
@@ -105,22 +105,22 @@ def _extract_exif_metadata(path: Path) -> dict:
             elif make:
                 camera = str(make)
             if camera:
-                result['camera'] = camera
+                result["camera"] = camera
 
             # Comments: ImageDescription or UserComment
-            comments: Any = tags.get('ImageDescription') or tags.get('UserComment')
+            comments: Any = tags.get("ImageDescription") or tags.get("UserComment")
             if comments:
                 # UserComment may be bytes
                 if isinstance(comments, (bytes, bytearray)):
                     try:
-                        comments = comments.decode('utf-8', errors='ignore')
+                        comments = comments.decode("utf-8", errors="ignore")
                     except Exception:
                         comments = str(comments)
-                result['comments'] = str(comments)
+                result["comments"] = str(comments)
 
             # GPS: tags under 'GPSInfo' (numeric keys referencing GPSTAGS)
             gps_info: dict[str, Any] | None = None
-            raw_gps: Any = tags.get('GPSInfo')
+            raw_gps: Any = tags.get("GPSInfo")
             if raw_gps:
                 # remap numeric GPSTAGS to names for easier access
                 gps_info = {}
@@ -129,9 +129,9 @@ def _extract_exif_metadata(path: Path) -> dict:
                     gps_info[name] = v
             lat, lon = _parse_gps_info(gps_info) if gps_info else (None, None)
             if lat:
-                result['latitude'] = lat
+                result["latitude"] = lat
             if lon:
-                result['longitude'] = lon
+                result["longitude"] = lon
     except Exception:
         # Don't let EXIF extraction break the caller
         return result
@@ -371,7 +371,9 @@ class ProjectModel(QModel[ProjectData]):
                     except Exception:
                         try:
                             parsed_date = datetime.date.fromisoformat(d)
-                            self._data.default_metadata.date = datetime.datetime(parsed_date.year, parsed_date.month, parsed_date.day)
+                            self._data.default_metadata.date = datetime.datetime(
+                                parsed_date.year, parsed_date.month, parsed_date.day
+                            )
                         except Exception:
                             pass
         except Exception:
@@ -414,13 +416,13 @@ class ProjectModel(QModel[ProjectData]):
         try:
             exif_data = _extract_exif_metadata(self.get_absolute_path(photo.original_filename))
             # Only set fields if they are not already set on the photo
-            if 'date' in exif_data and photo.metadata.date is None:
+            if "date" in exif_data and photo.metadata.date is None:
                 # Parse EXIF date string into a datetime.date when possible
-                d = exif_data['date']
+                d = exif_data["date"]
                 if isinstance(d, str):
                     try:
-                        dclean = d.replace('/', '-').replace(':', '-')
-                        dclean = dclean.split(' ')[0]
+                        dclean = d.replace("/", "-").replace(":", "-")
+                        dclean = dclean.split(" ")[0]
                         # Convert to datetime.date
                         parsed_date = datetime.date.fromisoformat(dclean)
                         photo.metadata.date = parsed_date
@@ -436,16 +438,16 @@ class ProjectModel(QModel[ProjectData]):
                             photo.metadata.date = d
                     except Exception:
                         pass
-            if 'photographer' in exif_data and photo.metadata.photographer is None:
-                photo.metadata.photographer = exif_data['photographer']
-            if 'camera' in exif_data and photo.metadata.camera is None:
-                photo.metadata.camera = exif_data['camera']
-            if 'comments' in exif_data and photo.metadata.comments is None:
-                photo.metadata.comments = exif_data['comments']
-            if 'latitude' in exif_data and photo.metadata.latitude is None:
-                photo.metadata.latitude = exif_data['latitude']
-            if 'longitude' in exif_data and photo.metadata.longitude is None:
-                photo.metadata.longitude = exif_data['longitude']
+            if "photographer" in exif_data and photo.metadata.photographer is None:
+                photo.metadata.photographer = exif_data["photographer"]
+            if "camera" in exif_data and photo.metadata.camera is None:
+                photo.metadata.camera = exif_data["camera"]
+            if "comments" in exif_data and photo.metadata.comments is None:
+                photo.metadata.comments = exif_data["comments"]
+            if "latitude" in exif_data and photo.metadata.latitude is None:
+                photo.metadata.latitude = exif_data["latitude"]
+            if "longitude" in exif_data and photo.metadata.longitude is None:
+                photo.metadata.longitude = exif_data["longitude"]
         except Exception:
             # ignore metadata extraction errors
             pass
