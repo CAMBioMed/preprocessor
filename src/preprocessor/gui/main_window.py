@@ -275,7 +275,10 @@ class MainWindow(QMainWindow):
 
     def _handle_set_metadata_action(self, selected: list[PhotoModel]) -> None:
         """Handle the 'Set metadata' context menu action."""
-        dialog = MetadataDialog(self.model.current_project, selected, self)
+        if not selected:
+            # No photos selected
+            return
+        dialog = MetadataDialog(self.model, selected, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             pass
 
