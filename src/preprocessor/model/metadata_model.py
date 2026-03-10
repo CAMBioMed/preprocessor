@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Any, ClassVar
 
 from PySide6.QtCore import Signal
@@ -13,7 +13,7 @@ class MetadataData(BaseModel):
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
 
-    date: datetime.date | None = None
+    date: datetime | None = None
     """The date the photo was taken, or None if not set."""
     partner: str | None = None
     """The partner name for the photo, or None if not set."""
@@ -81,11 +81,11 @@ class MetadataModel(QModel[MetadataData]):
         super().__init__(model_cls=MetadataData, data=data)
 
     @property
-    def date(self) -> datetime.date | None:
+    def date(self) -> datetime | None:
         return self._data.date
 
     @date.setter
-    def date(self, value: datetime.date | None) -> None:
+    def date(self, value: datetime | None) -> None:
         self._data.date = value
         self.on_date_changed.emit(value)
 
