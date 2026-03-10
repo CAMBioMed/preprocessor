@@ -97,6 +97,9 @@
              <property name="displayFormat">
               <string>yyyy-MM-dd HH:mm</string>
              </property>
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -104,8 +107,17 @@
              <property name="enabled">
               <bool>false</bool>
              </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="displayFormat">
               <string>yyyy-MM-dd HH:mm</string>
+             </property>
+             <property name="calendarPopup">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -141,23 +153,10 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txtPartner">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
+            <widget class="QLineEdit" name="txtPartner"/>
            </item>
            <item>
             <widget class="QLineEdit" name="txtPartnerCommonValue">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
