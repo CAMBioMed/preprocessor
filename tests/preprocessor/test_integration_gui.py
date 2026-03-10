@@ -34,7 +34,7 @@ def test_integration_new_project_add_images_save_and_quit(
     model = ApplicationModel()
     model.read_settings()
 
-    launch = LaunchDialog(model)
+    launch = LaunchDialog()
     qtbot.addWidget(launch)
     launch.show()
     qtbot.waitExposed(launch)
@@ -42,10 +42,12 @@ def test_integration_new_project_add_images_save_and_quit(
     # Simulate clicking the New Project button (which will call our patched getSaveFileName)
     qtbot.mouseClick(launch.ui.btnNewProject, Qt.MouseButton.LeftButton)
 
-    # The dialog handler should have set the current project and accepted the dialog
-    assert model.current_project is not None
+    # The dialog handler should have returned the project and accepted the dialog
+    assert launch.project_model is not None
     # Ensure the project file was set to our temp path
-    assert model.current_project.file == project_file
+    assert launch.project_model.file == project_file
+
+    model.current_project = launch.project_model
 
     # Now open the main window for that model
     main_win = MainWindow(model)
