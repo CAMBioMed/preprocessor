@@ -84,12 +84,16 @@ class Ui_MetadataDialog(object):
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.dteDate.sizePolicy().hasHeightForWidth())
         self.dteDate.setSizePolicy(sizePolicy2)
+        self.dteDate.setCalendarPopup(True)
 
         self.lay01Date.addWidget(self.dteDate)
 
         self.dteDateCommonValue = QDateTimeEdit(self.scrollAreaWidgetContents)
         self.dteDateCommonValue.setObjectName(u"dteDateCommonValue")
         self.dteDateCommonValue.setEnabled(False)
+        sizePolicy2.setHeightForWidth(self.dteDateCommonValue.sizePolicy().hasHeightForWidth())
+        self.dteDateCommonValue.setSizePolicy(sizePolicy2)
+        self.dteDateCommonValue.setCalendarPopup(True)
 
         self.lay01Date.addWidget(self.dteDateCommonValue)
 
@@ -117,15 +121,11 @@ class Ui_MetadataDialog(object):
 
         self.txtPartner = QLineEdit(self.scrollAreaWidgetContents)
         self.txtPartner.setObjectName(u"txtPartner")
-        sizePolicy2.setHeightForWidth(self.txtPartner.sizePolicy().hasHeightForWidth())
-        self.txtPartner.setSizePolicy(sizePolicy2)
 
         self.lay02Partner.addWidget(self.txtPartner)
 
         self.txtPartnerCommonValue = QLineEdit(self.scrollAreaWidgetContents)
         self.txtPartnerCommonValue.setObjectName(u"txtPartnerCommonValue")
-        sizePolicy2.setHeightForWidth(self.txtPartnerCommonValue.sizePolicy().hasHeightForWidth())
-        self.txtPartnerCommonValue.setSizePolicy(sizePolicy2)
         self.txtPartnerCommonValue.setReadOnly(True)
 
         self.lay02Partner.addWidget(self.txtPartnerCommonValue)
