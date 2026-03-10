@@ -78,16 +78,19 @@ class MetadataDialog(QDialog):
         has_current_photo = self.application_model.current_photo is not None
         if selected_photo_count == 1:
             self.ui.lblSelection.setText(f"1/{all_photo_count}: {self.selected_photos[0].name}")
+            self.ui.btnCopyFromCurrentPhoto.setEnabled(
+                has_current_photo and self.selected_photos[0] != self.application_model.current_photo
+            )
         else:
             self.ui.lblSelection.setText(f"{selected_photo_count}/{all_photo_count} photos selected")
-        self.ui.btnCopyFromCurrentPhoto.setEnabled(has_current_photo)
+            self.ui.btnCopyFromCurrentPhoto.setEnabled(has_current_photo)
 
     def _initialize_metadata_textbox(self, field_name: str) -> None:
         checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
         textbox: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
         common_value = self._determine_common_metadata_value(field_name)
 
-        if common_value is not _DIFFERENT:
+        if common_value is not None and common_value is not _DIFFERENT:
             checkbox.setChecked(True)
             textbox.setText(str(common_value) if common_value is not None else "")
         else:
@@ -100,7 +103,7 @@ class MetadataDialog(QDialog):
         textbox: QPlainTextEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
         common_value = self._determine_common_metadata_value(field_name)
 
-        if common_value is not _DIFFERENT:
+        if common_value is not None and common_value is not _DIFFERENT:
             checkbox.setChecked(True)
             textbox.setPlainText(str(common_value) if common_value is not None else "")
         else:
@@ -113,7 +116,7 @@ class MetadataDialog(QDialog):
         datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
         common_value = self._determine_common_metadata_value(field_name)
 
-        if common_value is not _DIFFERENT:
+        if common_value is not None and common_value is not _DIFFERENT:
             checkbox.setChecked(True)
             datebox.setDateTime(_dt_to_qdatetime(common_value))
         else:

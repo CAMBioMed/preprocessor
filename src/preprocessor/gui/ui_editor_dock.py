@@ -299,17 +299,17 @@ class Ui_EditorDock(object):
 
         self.formLayout_3.setWidget(16, QFormLayout.ItemRole.FieldRole, self.txtMetadataWhiteBalanceCard)
 
-        self.txtComments = QPlainTextEdit(self.grpMetadata)
-        self.txtComments.setObjectName(u"txtComments")
+        self.txtMetadataComments = QPlainTextEdit(self.grpMetadata)
+        self.txtMetadataComments.setObjectName(u"txtMetadataComments")
         sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.txtComments.sizePolicy().hasHeightForWidth())
-        self.txtComments.setSizePolicy(sizePolicy3)
-        self.txtComments.setMaximumSize(QSize(16777215, 100))
-        self.txtComments.setReadOnly(True)
+        sizePolicy3.setHeightForWidth(self.txtMetadataComments.sizePolicy().hasHeightForWidth())
+        self.txtMetadataComments.setSizePolicy(sizePolicy3)
+        self.txtMetadataComments.setMaximumSize(QSize(16777215, 100))
+        self.txtMetadataComments.setReadOnly(True)
 
-        self.formLayout_3.setWidget(17, QFormLayout.ItemRole.FieldRole, self.txtComments)
+        self.formLayout_3.setWidget(17, QFormLayout.ItemRole.FieldRole, self.txtMetadataComments)
 
 
         self.gridLayout_2.addWidget(self.grpMetadata, 4, 0, 1, 1)

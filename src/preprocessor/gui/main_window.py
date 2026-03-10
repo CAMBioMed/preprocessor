@@ -177,13 +177,14 @@ class MainWindow(QMainWindow):
 
         # Editor dock
         self.editor_dock.on_autodetect_quadrat_clicked.connect(self._handle_detect_quadrat_action)
+        self.editor_dock.on_edit_metadata_clicked.connect(self._handle_edit_metadata_action)
 
         # Thumbnail dock
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_item_double_clicked.connect(self._handle_photo_opened)
         self.thumbnail_dock.on_apply_to_selected.connect(self._handle_apply_to_selected_action)
-        self.thumbnail_dock.on_set_metadata_to_selected.connect(self._handle_set_metadata_action)
+        self.thumbnail_dock.on_set_metadata_to_selected.connect(self._handle_edit_selected_metadata_action)
 
         # Model
         self.model.on_current_project_changed.connect(self._handle_current_project_changed)
@@ -273,14 +274,20 @@ class MainWindow(QMainWindow):
             f"Apply parameters of the current photo to {len(selected)} selected photo(s). (Not implemented)",
         )
 
-    def _handle_set_metadata_action(self, selected: list[PhotoModel]) -> None:
-        """Handle the 'Set metadata' context menu action."""
+    def _handle_edit_selected_metadata_action(self, selected: list[PhotoModel]) -> None:
+        """Handle the 'Edit Metadata' context menu action."""
         if not selected:
             # No photos selected
             return
         dialog = MetadataDialog(self.model, selected, self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            pass
+        dialog.exec()
+
+    def _handle_edit_metadata_action(self) -> None:
+        """Handle when the user clicks the 'Edit Metadata' button in the editor dock."""
+        if self.model.current_photo is None:
+            return
+        dialog = MetadataDialog(self.model, [self.model.current_photo], self)
+        dialog.exec()
 
     def _handle_dirty_changed(self) -> None:
         """Handle when the current project's dirty state changes."""

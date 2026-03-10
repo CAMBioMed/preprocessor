@@ -158,6 +158,9 @@
              <property name="readOnly">
               <bool>true</bool>
              </property>
+             <property name="displayFormat">
+              <string>yyyy-MM-dd HH:mm</string>
+             </property>
             </widget>
            </item>
            <item row="1" column="0">
@@ -404,7 +407,7 @@
             </widget>
            </item>
            <item row="17" column="1">
-            <widget class="QPlainTextEdit" name="txtComments">
+            <widget class="QPlainTextEdit" name="txtMetadataComments">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
                <horstretch>0</horstretch>

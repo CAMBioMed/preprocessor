@@ -58,7 +58,6 @@ def main_gui(project_path: str | None = None) -> None:
             else:
                 sys.exit(1)
 
-
         if project_model is not None:
             model.current_project = project_model
             window = MainWindow(model)

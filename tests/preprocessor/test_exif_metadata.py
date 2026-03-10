@@ -13,12 +13,12 @@ def test_extract_exif_metadata_example_images() -> None:
     md = _extract_exif_metadata(img1)
 
     # Camera is constructed from Make + Model
-    assert md.get('camera') == 'Canon Canon PowerShot G9'
+    assert md.get("camera") == "Canon Canon PowerShot G9"
     # Date should be a string in YYYY-MM-DD format
-    assert md.get('date') == '2016-05-29'
+    assert md.get("date") == "2016-05-29"
     # No GPS in these example images
-    assert md.get('latitude') is None
-    assert md.get('longitude') is None
+    assert md.get("latitude") is None
+    assert md.get("longitude") is None
 
 
 def test_append_photo_model_populates_photo_metadata(tmp_path: Path) -> None:
@@ -36,10 +36,9 @@ def test_append_photo_model_populates_photo_metadata(tmp_path: Path) -> None:
     photo = project.append_photo_model(img1)
 
     # The photo metadata should have been populated from EXIF
-    assert photo.metadata.camera == 'Canon Canon PowerShot G9'
+    assert photo.metadata.camera == "Canon Canon PowerShot G9"
     assert isinstance(photo.metadata.date, datetime.date)
     assert photo.metadata.date == datetime.date(2016, 5, 29)
     # No GPS in these example images
     assert photo.metadata.latitude is None
     assert photo.metadata.longitude is None
-

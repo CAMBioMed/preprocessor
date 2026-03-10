@@ -100,7 +100,7 @@ class ThumbnailDockWidget(QDockWidget):
         menu.addAction(apply_action)
 
         # Connect action
-        set_metadata_action = QAction("Set metadata...", self)
+        set_metadata_action = QAction("Edit Metadata...", self)
         set_metadata_action.triggered.connect(lambda: self._handle_set_metadata_to_selected_action(selected_photos))
         menu.addAction(set_metadata_action)
 
