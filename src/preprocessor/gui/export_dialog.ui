@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>597</width>
-    <height>438</height>
+    <height>637</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
         <x>0</x>
         <y>0</y>
         <width>573</width>
-        <height>122</height>
+        <height>321</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_2">
@@ -50,14 +50,14 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item row="0" column="0">
+       <item row="1" column="0">
         <widget class="QLabel" name="lblOutputDirectory">
          <property name="text">
           <string>Output directory:</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="1" column="1">
         <layout class="QHBoxLayout" name="layOutputDir">
          <item>
           <widget class="QLineEdit" name="txtOutputDir"/>
@@ -71,14 +71,14 @@
          </item>
         </layout>
        </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="lblTargetWidth">
          <property name="text">
           <string>Target width:</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <layout class="QHBoxLayout" name="layTargetWidth">
          <item>
           <widget class="QSpinBox" name="numTargetWidth">
@@ -111,7 +111,14 @@
          </item>
         </layout>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblTargetHeight">
+         <property name="text">
+          <string>Target height:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
         <layout class="QHBoxLayout" name="layTargetHeight">
          <item>
           <widget class="QSpinBox" name="numTargetHeight">
@@ -144,12 +151,50 @@
          </item>
         </layout>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="lblTargetHeight">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblFilename">
          <property name="text">
-          <string>Target height:</string>
+          <string>Filename format:</string>
          </property>
         </widget>
+       </item>
+       <item row="0" column="1">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLineEdit" name="txtFilename"/>
+         </item>
+         <item>
+          <widget class="QPlainTextEdit" name="txtFilenameFormatExplanation">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="plainText">
+            <string>Specify the filename format using these format specifiers:
+- {i}: The one-based index of the 
+- {date}: The date in the form yyyy-MM-dd
+- {name}: The name part of the filename.
+- {ext}: The extension part of the filename (without the leading dot).
+Or any of these metadata fields:
+- {partner}
+- {area}
+- {site}
+- {season}
+- {transect}
+- {height}
+- {latitude}
+- {longitude}
+- {depth}
+- {camera}
+- {photographer}
+- {water_quality}
+- {strobes}
+- {framing}
+- {white_balance_card}
+- {comments}</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
