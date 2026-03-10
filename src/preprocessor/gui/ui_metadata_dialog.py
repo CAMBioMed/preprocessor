@@ -24,7 +24,7 @@ class Ui_MetadataDialog(object):
     def setupUi(self, MetadataDialog):
         if not MetadataDialog.objectName():
             MetadataDialog.setObjectName(u"MetadataDialog")
-        MetadataDialog.resize(812, 860)
+        MetadataDialog.resize(773, 860)
         self.verticalLayout = QVBoxLayout(MetadataDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.layMain = QHBoxLayout()
@@ -34,7 +34,12 @@ class Ui_MetadataDialog(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 672, 832))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 633, 832))
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.scrollAreaWidgetContents.sizePolicy().hasHeightForWidth())
+        self.scrollAreaWidgetContents.setSizePolicy(sizePolicy)
         self.formLayout = QFormLayout(self.scrollAreaWidgetContents)
         self.formLayout.setObjectName(u"formLayout")
         self.lblDate = QLabel(self.scrollAreaWidgetContents)
@@ -51,11 +56,11 @@ class Ui_MetadataDialog(object):
 
         self.dteDate = QDateTimeEdit(self.scrollAreaWidgetContents)
         self.dteDate.setObjectName(u"dteDate")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.dteDate.sizePolicy().hasHeightForWidth())
-        self.dteDate.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.dteDate.sizePolicy().hasHeightForWidth())
+        self.dteDate.setSizePolicy(sizePolicy1)
 
         self.lay01Date.addWidget(self.dteDate)
 
@@ -89,11 +94,15 @@ class Ui_MetadataDialog(object):
 
         self.txtPartner = QLineEdit(self.scrollAreaWidgetContents)
         self.txtPartner.setObjectName(u"txtPartner")
+        sizePolicy1.setHeightForWidth(self.txtPartner.sizePolicy().hasHeightForWidth())
+        self.txtPartner.setSizePolicy(sizePolicy1)
 
         self.lay02Partner.addWidget(self.txtPartner)
 
         self.txtPartnerCommonValue = QLineEdit(self.scrollAreaWidgetContents)
         self.txtPartnerCommonValue.setObjectName(u"txtPartnerCommonValue")
+        sizePolicy1.setHeightForWidth(self.txtPartnerCommonValue.sizePolicy().hasHeightForWidth())
+        self.txtPartnerCommonValue.setSizePolicy(sizePolicy1)
         self.txtPartnerCommonValue.setReadOnly(True)
 
         self.lay02Partner.addWidget(self.txtPartnerCommonValue)
@@ -207,6 +216,7 @@ class Ui_MetadataDialog(object):
 
         self.line = QFrame(self.scrollAreaWidgetContents)
         self.line.setObjectName(u"line")
+        self.line.setMinimumSize(QSize(0, 6))
         self.line.setFrameShape(QFrame.Shape.HLine)
         self.line.setFrameShadow(QFrame.Shadow.Sunken)
 
@@ -471,12 +481,12 @@ class Ui_MetadataDialog(object):
 
         self.lay16WhiteBalanceCard.addWidget(self.txtWhiteBalanceCard)
 
-        self.txtWhiteBalanceCommonValue = QLineEdit(self.scrollAreaWidgetContents)
-        self.txtWhiteBalanceCommonValue.setObjectName(u"txtWhiteBalanceCommonValue")
-        self.txtWhiteBalanceCommonValue.setEnabled(True)
-        self.txtWhiteBalanceCommonValue.setReadOnly(True)
+        self.txtWhiteBalanceCardCommonValue = QLineEdit(self.scrollAreaWidgetContents)
+        self.txtWhiteBalanceCardCommonValue.setObjectName(u"txtWhiteBalanceCardCommonValue")
+        self.txtWhiteBalanceCardCommonValue.setEnabled(True)
+        self.txtWhiteBalanceCardCommonValue.setReadOnly(True)
 
-        self.lay16WhiteBalanceCard.addWidget(self.txtWhiteBalanceCommonValue)
+        self.lay16WhiteBalanceCard.addWidget(self.txtWhiteBalanceCardCommonValue)
 
 
         self.formLayout.setLayout(17, QFormLayout.ItemRole.FieldRole, self.lay16WhiteBalanceCard)
@@ -512,11 +522,11 @@ class Ui_MetadataDialog(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.lblSelection = QLabel(self.scrollAreaWidgetContents)
         self.lblSelection.setObjectName(u"lblSelection")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.lblSelection.sizePolicy().hasHeightForWidth())
-        self.lblSelection.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.lblSelection.sizePolicy().hasHeightForWidth())
+        self.lblSelection.setSizePolicy(sizePolicy2)
 
         self.horizontalLayout.addWidget(self.lblSelection)
 
@@ -562,10 +572,11 @@ class Ui_MetadataDialog(object):
     # setupUi
 
     def retranslateUi(self, MetadataDialog):
-        MetadataDialog.setWindowTitle(QCoreApplication.translate("MetadataDialog", u"Dialog", None))
+        MetadataDialog.setWindowTitle(QCoreApplication.translate("MetadataDialog", u"Set Metadata", None))
         self.lblDate.setText(QCoreApplication.translate("MetadataDialog", u"Date:", None))
         self.chkDate.setText("")
         self.dteDate.setDisplayFormat(QCoreApplication.translate("MetadataDialog", u"yyyy-MM-dd HH:mm", None))
+        self.dteDateCommonValue.setDisplayFormat(QCoreApplication.translate("MetadataDialog", u"yyyy-MM-dd HH:mm", None))
         self.txtDateCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblPartner.setText(QCoreApplication.translate("MetadataDialog", u"Partner:", None))
         self.chkPartner.setText("")
@@ -612,7 +623,7 @@ class Ui_MetadataDialog(object):
         self.txtFramingCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblWhiteBalanceCard.setText(QCoreApplication.translate("MetadataDialog", u"White balance card:", None))
         self.chkWhiteBalanceCard.setText("")
-        self.txtWhiteBalanceCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
+        self.txtWhiteBalanceCardCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblComments.setText(QCoreApplication.translate("MetadataDialog", u"Comments:", None))
         self.chkComments.setText("")
         self.txtCommentsCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
