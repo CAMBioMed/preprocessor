@@ -39,6 +39,8 @@ class ExportDialog(QDialog):
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.SaveAll).setText("Export All")
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Cancel).setVisible(False)
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Close).setVisible(True)
+        # Hide for now; can be re-enabled when filename formatting is implemented
+        self.ui.txtFilenameFormatExplanation.setVisible(False)
 
     def _connect_signals(self) -> None:
         self.ui.btnOutputDir.clicked.connect(self._handle_outputdir_browse_clicked)
@@ -320,16 +322,17 @@ class _ExportWorker(QObject):
 
     def determine_output_name(self, photo: PhotoModel, index: int) -> str:
         # Placeholder for any logic to determine output filename based on photo metadata
+        date = photo.metadata.date or self.project.default_metadata.date
         extension = Path(photo.original_filename).suffix.lower()
         parts = [
             photo.metadata.partner or self.project.default_metadata.partner,
             photo.metadata.area or self.project.default_metadata.area,
             photo.metadata.site or self.project.default_metadata.site,
-            # year
+            f"{date:%Y}" if date else None,  # year
             photo.metadata.season or self.project.default_metadata.season,
             photo.metadata.depth or self.project.default_metadata.depth,
             photo.metadata.transect or self.project.default_metadata.transect,
-            # date
+            f"{date:%m%d}" if date else None,  # month and day
             f"{index:03d}",
         ]
         newname = "_".join([x for x in parts if x])
