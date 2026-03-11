@@ -17,16 +17,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
     QFormLayout, QFrame, QHBoxLayout, QLabel,
-    QLineEdit, QListWidget, QListWidgetItem, QProgressBar,
-    QPushButton, QScrollArea, QSizePolicy, QSpinBox,
-    QVBoxLayout, QWidget)
+    QLineEdit, QListWidget, QListWidgetItem, QPlainTextEdit,
+    QProgressBar, QPushButton, QScrollArea, QSizePolicy,
+    QSpinBox, QVBoxLayout, QWidget)
 
 class Ui_ExportDialog(object):
     def setupUi(self, ExportDialog):
         if not ExportDialog.objectName():
             ExportDialog.setObjectName(u"ExportDialog")
         ExportDialog.setWindowModality(Qt.WindowModality.ApplicationModal)
-        ExportDialog.resize(597, 438)
+        ExportDialog.resize(597, 637)
         self.verticalLayout = QVBoxLayout(ExportDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.frmMain = QScrollArea(ExportDialog)
@@ -35,7 +35,7 @@ class Ui_ExportDialog(object):
         self.frmMain.setWidgetResizable(True)
         self.layMain = QWidget()
         self.layMain.setObjectName(u"layMain")
-        self.layMain.setGeometry(QRect(0, 0, 573, 122))
+        self.layMain.setGeometry(QRect(0, 0, 573, 327))
         self.formLayout_2 = QFormLayout(self.layMain)
         self.formLayout_2.setObjectName(u"formLayout_2")
         self.formLayout_2.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
@@ -43,7 +43,7 @@ class Ui_ExportDialog(object):
         self.lblOutputDirectory = QLabel(self.layMain)
         self.lblOutputDirectory.setObjectName(u"lblOutputDirectory")
 
-        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblOutputDirectory)
+        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.LabelRole, self.lblOutputDirectory)
 
         self.layOutputDir = QHBoxLayout()
         self.layOutputDir.setObjectName(u"layOutputDir")
@@ -58,12 +58,12 @@ class Ui_ExportDialog(object):
         self.layOutputDir.addWidget(self.btnOutputDir)
 
 
-        self.formLayout_2.setLayout(0, QFormLayout.ItemRole.FieldRole, self.layOutputDir)
+        self.formLayout_2.setLayout(1, QFormLayout.ItemRole.FieldRole, self.layOutputDir)
 
         self.lblTargetWidth = QLabel(self.layMain)
         self.lblTargetWidth.setObjectName(u"lblTargetWidth")
 
-        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.LabelRole, self.lblTargetWidth)
+        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblTargetWidth)
 
         self.layTargetWidth = QHBoxLayout()
         self.layTargetWidth.setObjectName(u"layTargetWidth")
@@ -90,7 +90,12 @@ class Ui_ExportDialog(object):
         self.layTargetWidth.addWidget(self.lblTargetWidth_Value)
 
 
-        self.formLayout_2.setLayout(1, QFormLayout.ItemRole.FieldRole, self.layTargetWidth)
+        self.formLayout_2.setLayout(2, QFormLayout.ItemRole.FieldRole, self.layTargetWidth)
+
+        self.lblTargetHeight = QLabel(self.layMain)
+        self.lblTargetHeight.setObjectName(u"lblTargetHeight")
+
+        self.formLayout_2.setWidget(3, QFormLayout.ItemRole.LabelRole, self.lblTargetHeight)
 
         self.layTargetHeight = QHBoxLayout()
         self.layTargetHeight.setObjectName(u"layTargetHeight")
@@ -111,12 +116,29 @@ class Ui_ExportDialog(object):
         self.layTargetHeight.addWidget(self.lblTargetHeight_Value)
 
 
-        self.formLayout_2.setLayout(2, QFormLayout.ItemRole.FieldRole, self.layTargetHeight)
+        self.formLayout_2.setLayout(3, QFormLayout.ItemRole.FieldRole, self.layTargetHeight)
 
-        self.lblTargetHeight = QLabel(self.layMain)
-        self.lblTargetHeight.setObjectName(u"lblTargetHeight")
+        self.lblFilename = QLabel(self.layMain)
+        self.lblFilename.setObjectName(u"lblFilename")
 
-        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblTargetHeight)
+        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblFilename)
+
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.txtFilename = QLineEdit(self.layMain)
+        self.txtFilename.setObjectName(u"txtFilename")
+        self.txtFilename.setReadOnly(True)
+
+        self.verticalLayout_2.addWidget(self.txtFilename)
+
+        self.txtFilenameFormatExplanation = QPlainTextEdit(self.layMain)
+        self.txtFilenameFormatExplanation.setObjectName(u"txtFilenameFormatExplanation")
+        self.txtFilenameFormatExplanation.setReadOnly(True)
+
+        self.verticalLayout_2.addWidget(self.txtFilenameFormatExplanation)
+
+
+        self.formLayout_2.setLayout(0, QFormLayout.ItemRole.FieldRole, self.verticalLayout_2)
 
         self.frmMain.setWidget(self.layMain)
 
@@ -205,8 +227,32 @@ class Ui_ExportDialog(object):
         self.btnOutputDir.setText(QCoreApplication.translate("ExportDialog", u"Browse", None))
         self.lblTargetWidth.setText(QCoreApplication.translate("ExportDialog", u"Target width:", None))
         self.lblTargetWidth_Value.setText(QCoreApplication.translate("ExportDialog", u"0 px", None))
-        self.lblTargetHeight_Value.setText(QCoreApplication.translate("ExportDialog", u"0 px", None))
         self.lblTargetHeight.setText(QCoreApplication.translate("ExportDialog", u"Target height:", None))
+        self.lblTargetHeight_Value.setText(QCoreApplication.translate("ExportDialog", u"0 px", None))
+        self.lblFilename.setText(QCoreApplication.translate("ExportDialog", u"Filename format:", None))
+        self.txtFilename.setText(QCoreApplication.translate("ExportDialog", u"{partner}_{area}_{site}_{date:%Y}_{season}_{depth}_{transect}_{date:%m%d}.{ext}", None))
+        self.txtFilenameFormatExplanation.setPlainText(QCoreApplication.translate("ExportDialog", u"Specify the filename format using these format specifiers:\n"
+"- {i}: The one-based index of the \n"
+"- {date}: The date in the form yyyy-MM-dd\n"
+"- {name}: The name part of the filename.\n"
+"- {ext}: The extension part of the filename (without the leading dot).\n"
+"Or any of these metadata fields:\n"
+"- {partner}\n"
+"- {area}\n"
+"- {site}\n"
+"- {season}\n"
+"- {transect}\n"
+"- {height}\n"
+"- {latitude}\n"
+"- {longitude}\n"
+"- {depth}\n"
+"- {camera}\n"
+"- {photographer}\n"
+"- {water_quality}\n"
+"- {strobes}\n"
+"- {framing}\n"
+"- {white_balance_card}\n"
+"- {comments}", None))
         self.lblProgress.setText(QCoreApplication.translate("ExportDialog", u"Progress:", None))
         self.lblProgress_Status.setText(QCoreApplication.translate("ExportDialog", u"Ready", None))
         self.lblMessages.setText(QCoreApplication.translate("ExportDialog", u"Messages:", None))

@@ -334,6 +334,7 @@ class Ui_EditorDock(object):
         self.lblLensCorrection_Distortion.setText(QCoreApplication.translate("EditorDock", u"Distortion:", None))
         self.grpMetadata.setTitle(QCoreApplication.translate("EditorDock", u"Metadata", None))
         self.lblMetadataDate.setText(QCoreApplication.translate("EditorDock", u"Date:", None))
+        self.dteMetadataDate.setDisplayFormat(QCoreApplication.translate("EditorDock", u"yyyy-MM-dd HH:mm", None))
         self.lblMetadataPartner.setText(QCoreApplication.translate("EditorDock", u"Partner:", None))
         self.lblMetadataArea.setText(QCoreApplication.translate("EditorDock", u"Area:", None))
         self.lblMetadataSite.setText(QCoreApplication.translate("EditorDock", u"Site:", None))
