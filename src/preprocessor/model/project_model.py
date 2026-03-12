@@ -1,6 +1,3 @@
-import json
-
-import exifread
 from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, ValidationError
 
@@ -14,7 +11,6 @@ from typing import ClassVar, Any
 
 from preprocessor.model.qmodel import QModel
 import contextlib
-from PIL import Image, ExifTags
 from datetime import datetime, date
 
 from preprocessor.processing.exif import extract_exif_metadata

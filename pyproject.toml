@@ -208,6 +208,8 @@ ignore = [
   "D106",
   # undocumented-public-init
   "D107",
+  # blank-line-after-function
+  "D202",
   # missing-blank-line-after-summary
   "D205",
   # non-imperative-mood
