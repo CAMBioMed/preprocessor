@@ -230,6 +230,12 @@ class MetadataDialog(QDialog):
                     datebox.setDateTime(_dt_to_qdatetime(value))
                 else:
                     datebox.setDateTime(QDateTime())
+            elif field_name in ["latitude", "longitude"]:
+                spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+                if isinstance(value, (int, float)):
+                    spinbox.setValue(value)
+                else:
+                    spinbox.setValue(0.0)
             else:
                 lineedit: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
                 lineedit.setText(str(value) if value is not None else "")
