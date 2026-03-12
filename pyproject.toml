@@ -17,14 +17,13 @@ requires-python = ">=3.12"
 dependencies = [
   "click>=8.3.1",
   "exifread>=3.5.1",
-  "numpy>=2.2.6",
+  "numpy<2.3.0",  # For NumPy version that works with OpenCV
   "opencv-contrib-python-headless==4.12.0.88",  # For OpenCV version that works on MacOS
-  "pillow>=12.0.0",
+  "pillow>=12.1.1",
   "pydantic>=2.12.5",
-  "PySide6-Essentials>=6.10.1",
-  #  "pyside6>=6.10.1",
+  "PySide6-Essentials>=6.10.2",
   "qimage2ndarray>=1.10.0",
-  "scikit-learn>=1.7.2",
+  "scikit-learn>=1.8.0",
 ]
 
 [project.urls]
