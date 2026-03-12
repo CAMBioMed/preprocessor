@@ -68,8 +68,10 @@ def split_to_words(s: str, fmt: SentenceCase | None = None) -> list[str]:
         length = len(s)
         for i, c in enumerate(s):
             # Boundary if previous char was not upper OR next char is not upper
-            if c.isupper() and current and (
-                (i > 0 and not s[i - 1].isupper()) or (i < length - 1 and not s[i + 1].isupper())
+            if (
+                c.isupper()
+                and current
+                and ((i > 0 and not s[i - 1].isupper()) or (i < length - 1 and not s[i + 1].isupper()))
             ):
                 words.append("".join(current))
                 current = []

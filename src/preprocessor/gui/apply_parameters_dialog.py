@@ -10,7 +10,9 @@ class ApplyParametersDialog(QDialog):
     selected_photos: list[PhotoModel]
     ui: Ui_ApplyParametersDialog
 
-    def __init__(self, application_model: ApplicationModel, selected_photos: list[PhotoModel], parent: QWidget | None = None) -> None:
+    def __init__(
+        self, application_model: ApplicationModel, selected_photos: list[PhotoModel], parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.application_model = application_model
         self.selected_photos = selected_photos

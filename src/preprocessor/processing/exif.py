@@ -17,16 +17,21 @@ def extract_exif_metadata(path: Path) -> dict[str, Any]:
 
     tags: dict[str, Any] = {}
     with open(path, "rb") as file_handle:
-
         # Return Exif tags
-        tags = exifread.process_file(file_handle, builtin_types = True)
+        tags = exifread.process_file(file_handle, builtin_types=True)
 
     result: dict[str, Any] = copy.deepcopy(tags)
 
     # Date
-    datetime_tag: str | None = tags.get("EXIF DateTimeOriginal") or tags.get("EXIF DateTimeDigitized") or tags.get("Image DateTime")
-    offset_tag: str | None = tags.get("EXIF OffsetTimeOriginal") or tags.get("EXIF OffsetTimeDigitized") or tags.get("EXIF OffsetTime")
-    subsec_tag: str | None = tags.get("EXIF SubSecTimeOriginal") or tags.get("EXIF SubSecTimeDigitized") or tags.get("EXIF SubSecTime")
+    datetime_tag: str | None = (
+        tags.get("EXIF DateTimeOriginal") or tags.get("EXIF DateTimeDigitized") or tags.get("Image DateTime")
+    )
+    offset_tag: str | None = (
+        tags.get("EXIF OffsetTimeOriginal") or tags.get("EXIF OffsetTimeDigitized") or tags.get("EXIF OffsetTime")
+    )
+    subsec_tag: str | None = (
+        tags.get("EXIF SubSecTimeOriginal") or tags.get("EXIF SubSecTimeDigitized") or tags.get("EXIF SubSecTime")
+    )
     if datetime_tag:
         result["DateTime"] = _parse_datetime(
             datetime_tag,
@@ -62,8 +67,8 @@ def extract_exif_metadata(path: Path) -> dict[str, Any]:
     # In degrees, minutes, seconds format, as a list of three floats
     latitude_nums: list[float] | None = tags.get("GPS GPSLatitude")
     longitude_nums: list[float] | None = tags.get("GPS GPSLongitude")
-    latitude_sign: float = 1.0 if tags.get("GPS GPSLatitudeRef") in ['N', None] else -1.0
-    longitude_sign: float = 1.0 if tags.get("GPS GPSLongitudeRef") in ['E', None] else -1.0
+    latitude_sign: float = 1.0 if tags.get("GPS GPSLatitudeRef") in ["N", None] else -1.0
+    longitude_sign: float = 1.0 if tags.get("GPS GPSLongitudeRef") in ["E", None] else -1.0
     # As a single number
     latitude = tags.get("GPS GPSLatitudeRef") and latitude_nums and _dms_to_decimal(latitude_nums, latitude_sign)
     longitude = tags.get("GPS GPSLongitudeRef") and longitude_nums and _dms_to_decimal(longitude_nums, longitude_sign)
@@ -80,6 +85,7 @@ def _dms_to_decimal(dms: list[float], sign: float) -> float:
     degrees, minutes, seconds = dms
     decimal = degrees + minutes / 60.0 + seconds / 3600.0
     return decimal * sign
+
 
 #
 # def _exif_to_map(exif: Exif) -> dict[str | int, Any]:
@@ -120,13 +126,14 @@ def _dms_to_decimal(dms: list[float], sign: float) -> float:
 #         return value.rstrip(b'\x00')
 #     return value
 
+
 def _parse_datetime(datetime_str: str | None, offset_str: str | None, subsec_str: str | None) -> datetime | None:
     """Parse EXIF date strings and return a cleaned date string."""
     if datetime_str is None:
         return None
     # Format is typically 'YYYY:MM:DD HH:MM:SS'
-    parts = datetime_str.split(' ')
-    date_str = parts[0].replace(':', '-')
+    parts = datetime_str.split(" ")
+    date_str = parts[0].replace(":", "-")
     time_str = parts[1] if len(parts) > 1 else "00:00:00"
     full_str = f"{date_str}T{time_str}.{subsec_str or '0'}{offset_str or ''}"
     return datetime.fromisoformat(full_str)

@@ -5,8 +5,6 @@ from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.exif import extract_exif_metadata
 
 
-
-
 def test_append_photo_model_populates_photo_metadata(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parent.parent.parent
     photos_dir = (repo_root / "tests" / "preprocessor" / "photos").resolve()

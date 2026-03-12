@@ -96,7 +96,9 @@ class ThumbnailDockWidget(QDockWidget):
         menu = QMenu(self)
 
         apply_parameters_action = QAction("Apply Parameters...", self)
-        apply_parameters_action.triggered.connect(lambda: self._handle_apply_parameters_to_selected_action(selected_photos))
+        apply_parameters_action.triggered.connect(
+            lambda: self._handle_apply_parameters_to_selected_action(selected_photos)
+        )
         menu.addAction(apply_parameters_action)
 
         # Connect action
