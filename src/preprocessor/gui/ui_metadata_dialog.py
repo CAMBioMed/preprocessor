@@ -16,9 +16,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDateTimeEdit, QDialog,
-    QFormLayout, QFrame, QHBoxLayout, QLabel,
-    QLineEdit, QPlainTextEdit, QPushButton, QScrollArea,
-    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
+    QDoubleSpinBox, QFormLayout, QFrame, QHBoxLayout,
+    QLabel, QLineEdit, QPlainTextEdit, QPushButton,
+    QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout,
+    QWidget)
 
 class Ui_MetadataDialog(object):
     def setupUi(self, MetadataDialog):
@@ -97,12 +98,12 @@ class Ui_MetadataDialog(object):
 
         self.lay01Date.addWidget(self.dteDateCommonValue)
 
-        self.txtDateCommonValue = QLineEdit(self.scrollAreaWidgetContents)
-        self.txtDateCommonValue.setObjectName(u"txtDateCommonValue")
-        self.txtDateCommonValue.setEnabled(True)
-        self.txtDateCommonValue.setReadOnly(True)
+        self.txtDateVarious = QLineEdit(self.scrollAreaWidgetContents)
+        self.txtDateVarious.setObjectName(u"txtDateVarious")
+        self.txtDateVarious.setEnabled(True)
+        self.txtDateVarious.setReadOnly(True)
 
-        self.lay01Date.addWidget(self.txtDateCommonValue)
+        self.lay01Date.addWidget(self.txtDateVarious)
 
 
         self.formLayout.setLayout(1, QFormLayout.ItemRole.FieldRole, self.lay01Date)
@@ -270,17 +271,33 @@ class Ui_MetadataDialog(object):
 
         self.lay08Latitude.addWidget(self.chkLatitude)
 
-        self.txtLatitude = QLineEdit(self.scrollAreaWidgetContents)
-        self.txtLatitude.setObjectName(u"txtLatitude")
+        self.numLatitude = QDoubleSpinBox(self.scrollAreaWidgetContents)
+        self.numLatitude.setObjectName(u"numLatitude")
+        sizePolicy2.setHeightForWidth(self.numLatitude.sizePolicy().hasHeightForWidth())
+        self.numLatitude.setSizePolicy(sizePolicy2)
+        self.numLatitude.setDecimals(6)
+        self.numLatitude.setMinimum(-90.000000000000000)
+        self.numLatitude.setMaximum(90.000000000000000)
 
-        self.lay08Latitude.addWidget(self.txtLatitude)
+        self.lay08Latitude.addWidget(self.numLatitude)
 
-        self.txtLatitudeCommonValue = QLineEdit(self.scrollAreaWidgetContents)
-        self.txtLatitudeCommonValue.setObjectName(u"txtLatitudeCommonValue")
-        self.txtLatitudeCommonValue.setEnabled(True)
-        self.txtLatitudeCommonValue.setReadOnly(True)
+        self.numLatitudeCommonValue = QDoubleSpinBox(self.scrollAreaWidgetContents)
+        self.numLatitudeCommonValue.setObjectName(u"numLatitudeCommonValue")
+        sizePolicy2.setHeightForWidth(self.numLatitudeCommonValue.sizePolicy().hasHeightForWidth())
+        self.numLatitudeCommonValue.setSizePolicy(sizePolicy2)
+        self.numLatitudeCommonValue.setReadOnly(True)
+        self.numLatitudeCommonValue.setDecimals(6)
+        self.numLatitudeCommonValue.setMinimum(-90.000000000000000)
+        self.numLatitudeCommonValue.setMaximum(90.000000000000000)
 
-        self.lay08Latitude.addWidget(self.txtLatitudeCommonValue)
+        self.lay08Latitude.addWidget(self.numLatitudeCommonValue)
+
+        self.txtLatitudeVarious = QLineEdit(self.scrollAreaWidgetContents)
+        self.txtLatitudeVarious.setObjectName(u"txtLatitudeVarious")
+        self.txtLatitudeVarious.setEnabled(True)
+        self.txtLatitudeVarious.setReadOnly(True)
+
+        self.lay08Latitude.addWidget(self.txtLatitudeVarious)
 
 
         self.formLayout.setLayout(9, QFormLayout.ItemRole.FieldRole, self.lay08Latitude)
@@ -297,17 +314,33 @@ class Ui_MetadataDialog(object):
 
         self.lay09Longitude.addWidget(self.chkLongitude)
 
-        self.txtLongitude = QLineEdit(self.scrollAreaWidgetContents)
-        self.txtLongitude.setObjectName(u"txtLongitude")
+        self.numLongitude = QDoubleSpinBox(self.scrollAreaWidgetContents)
+        self.numLongitude.setObjectName(u"numLongitude")
+        sizePolicy2.setHeightForWidth(self.numLongitude.sizePolicy().hasHeightForWidth())
+        self.numLongitude.setSizePolicy(sizePolicy2)
+        self.numLongitude.setDecimals(6)
+        self.numLongitude.setMinimum(-180.000000000000000)
+        self.numLongitude.setMaximum(180.000000000000000)
 
-        self.lay09Longitude.addWidget(self.txtLongitude)
+        self.lay09Longitude.addWidget(self.numLongitude)
 
-        self.txtLongitudeCommonValue = QLineEdit(self.scrollAreaWidgetContents)
-        self.txtLongitudeCommonValue.setObjectName(u"txtLongitudeCommonValue")
-        self.txtLongitudeCommonValue.setEnabled(True)
-        self.txtLongitudeCommonValue.setReadOnly(True)
+        self.numLongitudeCommonValue = QDoubleSpinBox(self.scrollAreaWidgetContents)
+        self.numLongitudeCommonValue.setObjectName(u"numLongitudeCommonValue")
+        sizePolicy2.setHeightForWidth(self.numLongitudeCommonValue.sizePolicy().hasHeightForWidth())
+        self.numLongitudeCommonValue.setSizePolicy(sizePolicy2)
+        self.numLongitudeCommonValue.setReadOnly(True)
+        self.numLongitudeCommonValue.setDecimals(6)
+        self.numLongitudeCommonValue.setMinimum(-180.000000000000000)
+        self.numLongitudeCommonValue.setMaximum(180.000000000000000)
 
-        self.lay09Longitude.addWidget(self.txtLongitudeCommonValue)
+        self.lay09Longitude.addWidget(self.numLongitudeCommonValue)
+
+        self.txtLongitudeVarious = QLineEdit(self.scrollAreaWidgetContents)
+        self.txtLongitudeVarious.setObjectName(u"txtLongitudeVarious")
+        self.txtLongitudeVarious.setEnabled(True)
+        self.txtLongitudeVarious.setReadOnly(True)
+
+        self.lay09Longitude.addWidget(self.txtLongitudeVarious)
 
 
         self.formLayout.setLayout(10, QFormLayout.ItemRole.FieldRole, self.lay09Longitude)
@@ -594,7 +627,7 @@ class Ui_MetadataDialog(object):
         self.chkDate.setText("")
         self.dteDate.setDisplayFormat(QCoreApplication.translate("MetadataDialog", u"yyyy-MM-dd HH:mm", None))
         self.dteDateCommonValue.setDisplayFormat(QCoreApplication.translate("MetadataDialog", u"yyyy-MM-dd HH:mm", None))
-        self.txtDateCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
+        self.txtDateVarious.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblPartner.setText(QCoreApplication.translate("MetadataDialog", u"Partner:", None))
         self.chkPartner.setText("")
         self.txtPartnerCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
@@ -615,10 +648,10 @@ class Ui_MetadataDialog(object):
         self.txtHeightCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblLatitude.setText(QCoreApplication.translate("MetadataDialog", u"Latitude:", None))
         self.chkLatitude.setText("")
-        self.txtLatitudeCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
+        self.txtLatitudeVarious.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblLongitude.setText(QCoreApplication.translate("MetadataDialog", u"Longitude:", None))
         self.chkLongitude.setText("")
-        self.txtLongitudeCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
+        self.txtLongitudeVarious.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblDepth.setText(QCoreApplication.translate("MetadataDialog", u"Depth:", None))
         self.chkDepth.setText("")
         self.txtDepthCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))

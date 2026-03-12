@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, ClassVar
 
 from PySide6.QtCore import QDateTime
-from PySide6.QtWidgets import QDialog, QWidget, QLineEdit, QCheckBox, QPlainTextEdit, QDateTimeEdit
+from PySide6.QtWidgets import QDialog, QWidget, QLineEdit, QCheckBox, QPlainTextEdit, QDateTimeEdit, QDoubleSpinBox
 
 from preprocessor.gui.ui_metadata_dialog import Ui_MetadataDialog
 from preprocessor.gui.utils import _dt_to_qdatetime
@@ -57,6 +57,8 @@ class MetadataDialog(QDialog):
                 checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_plaintextedit(fn))
             elif field_name == "date":
                 checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_datetime(fn))
+            elif field_name in ["latitude", "longitude"]:
+                checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_doublespinbox(fn))
             else:
                 checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_textbox(fn))
 
@@ -70,6 +72,8 @@ class MetadataDialog(QDialog):
                 self._initialize_metadata_plaintextedit(field_name)
             elif field_name == "date":
                 self._initialize_metadata_datetime(field_name)
+            elif field_name in ["latitude", "longitude"]:
+                self._initialize_metadata_doublespinbox(field_name)
             else:
                 self._initialize_metadata_textbox(field_name)
         selected_photo_count = len(self.selected_photos)
@@ -123,6 +127,20 @@ class MetadataDialog(QDialog):
             datebox.setDateTime(QDateTime())
         self._update_metadata_datetime(field_name)
 
+
+    def _initialize_metadata_doublespinbox(self, field_name: str) -> None:
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+        common_value = self._determine_common_metadata_value(field_name)
+
+        if common_value is not None and common_value is not _DIFFERENT:
+            checkbox.setChecked(True)
+            spinbox.setValue(common_value)
+        else:
+            checkbox.setChecked(False)
+            spinbox.setValue(0.0)
+        self._update_metadata_doublespinbox(field_name)
+
     def _update_metadata_textbox(self, field_name: str) -> None:
         checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
         textbox: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
@@ -159,14 +177,27 @@ class MetadataDialog(QDialog):
         checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
         datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
         common_datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}CommonValue")
-        placeholder_textbox: QDateTimeEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}CommonValue")
+        various_textbox: QDateTimeEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}Various")
         overriding = checkbox.isChecked()
 
         common_value = self._determine_common_metadata_value(field_name)
         datebox.setVisible(overriding)
         common_datebox.setVisible(not overriding and common_value is not _DIFFERENT)
-        placeholder_textbox.setVisible(not overriding and common_value is _DIFFERENT)
-        common_datebox.setDateTime(_dt_to_qdatetime(common_value))
+        various_textbox.setVisible(not overriding and common_value is _DIFFERENT)
+        common_datebox.setDateTime(_dt_to_qdatetime(common_value) if common_value is not _DIFFERENT and common_value is not None else QDateTime())
+
+    def _update_metadata_doublespinbox(self, field_name: str) -> None:
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+        common_spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}CommonValue")
+        various_textbox: QDoubleSpinBox = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}Various")
+        overriding = checkbox.isChecked()
+
+        common_value = self._determine_common_metadata_value(field_name)
+        spinbox.setVisible(overriding)
+        common_spinbox.setVisible(not overriding and common_value is not _DIFFERENT)
+        various_textbox.setVisible(not overriding and common_value is _DIFFERENT)
+        common_spinbox.setValue(common_value if common_value is not _DIFFERENT and common_value is not None else 0.0)
 
     def _determine_common_metadata_value(self, attr_name: str) -> Any | None:  # noqa: ANN401
         """
@@ -213,6 +244,9 @@ class MetadataDialog(QDialog):
                 elif field_name == "date":
                     datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
                     new_value = datebox.dateTime().toPython()
+                elif field_name in ["latitude", "longitude"]:
+                    spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+                    new_value = spinbox.value()
                 else:
                     textbox: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
                     new_value = textbox.text()
