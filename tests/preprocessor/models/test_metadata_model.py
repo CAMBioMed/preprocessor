@@ -7,26 +7,28 @@ from preprocessor.model.metadata_model import MetadataModel
 
 
 class TestMetadataModel:
+
     @staticmethod
     def _assert_property_getter_setter_and_signal(
-        qtbot: QtBot, model: MetadataModel, prop_name: str, initial_value, new_value, field_signal_name: str
+            qtbot: QtBot, model: MetadataModel, prop_name: str, initial_value: object, new_value: object, field_signal_name: str
     ) -> None:
         """Helper to assert getter, setter, and per-field signal emission for MetadataModel properties."""
 
         field_signal = getattr(model, field_signal_name)
+        on_changed_signal = model.on_changed
 
         # initial
         assert getattr(model, prop_name) == initial_value
 
-        # Setting the same value: MetadataModel setters emit the per-field signal unconditionally
-        with qtbot.waitSignal(field_signal, timeout=1000):
+        # Setting the same value: no signals should be emitted
+        with qtbot.assertNotEmitted(on_changed_signal), qtbot.assertNotEmitted(field_signal):
             setattr(model, prop_name, initial_value)
 
-        # setting a different value emits the field signal
-        with qtbot.waitSignal(field_signal, timeout=1000):
-            setattr(model, prop_name, new_value)
+        # Setting a different value: emits signals
+        with qtbot.waitSignal(on_changed_signal, timeout=1000), qtbot.waitSignal(field_signal, timeout=1000):
+                setattr(model, prop_name, new_value)
 
-        # getter updated
+        # Assert: value is updated
         assert getattr(model, prop_name) == new_value
 
     def test_properties_getter_setter_and_signals(self, qtbot: QtBot) -> None:

@@ -17,144 +17,7 @@ import contextlib
 from PIL import Image, ExifTags
 from datetime import datetime, date
 
-from preprocessor.processing.exif import extract_exif_data
-
-
-# Helper: parse GPS coordinates from EXIF GPSInfo dict
-def _parse_gps_info(gps_info: dict | None) -> tuple[str | None, str | None]:
-    """Return (lat_str, lon_str) if available, else (None, None)."""
-    if not gps_info:
-        return None, None
-
-    from collections.abc import Sequence
-
-    def _convert_to_degrees(value: Sequence[Sequence[float | int]]) -> float | None:
-        # value is expected to be an iterable of 3 rational tuples like ((num, den), ...)
-        try:
-            # support both list/tuple containers with rationals
-            d = float(value[0][0]) / float(value[0][1])
-            m = float(value[1][0]) / float(value[1][1])
-            s = float(value[2][0]) / float(value[2][1])
-            return d + (m / 60.0) + (s / 3600.0)
-        except Exception:
-            return None
-
-    # GPS tags use keys like 1=NS, 2=lat, 3=EW, 4=lon
-    lat: str | None = None
-    lon: str | None = None
-    try:
-        lat_ref: Any = gps_info.get(1) or gps_info.get("GPSLatitudeRef")
-        lat_val: Any = gps_info.get(2) or gps_info.get("GPSLatitude")
-        lon_ref: Any = gps_info.get(3) or gps_info.get("GPSLongitudeRef")
-        lon_val: Any = gps_info.get(4) or gps_info.get("GPSLongitude")
-
-        lat_deg: float | None = _convert_to_degrees(lat_val) if lat_val else None
-        lon_deg: float | None = _convert_to_degrees(lon_val) if lon_val else None
-        if lat_deg is not None and (isinstance(lat_ref, str) and lat_ref in ("S", "s")):
-            lat_deg = -lat_deg
-        if lon_deg is not None and (isinstance(lon_ref, str) and lon_ref in ("W", "w")):
-            lon_deg = -lon_deg
-        if lat_deg is not None:
-            lat = f"{lat_deg:.6f}"
-        if lon_deg is not None:
-            lon = f"{lon_deg:.6f}"
-    except Exception:
-        return None, None
-
-    return lat, lon
-
-
-def _extract_exif_metadata(path: Path) -> dict:
-    """
-    Extract common metadata from the image file using Pillow's EXIF support.
-
-    Returns a dict with keys matching MetadataModel fields (date, photographer, camera, comments, latitude, longitude).
-    """
-    result: dict[str, Any] = {}
-    # try:
-    with (Image.open(path) as img):
-        exif = img.getexif()
-        if not exif:
-            return result
-
-        # Build a mapping from human-readable tag name to value
-        IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}
-        tags: dict[str, Any] = {}
-        for tag_id, tag_raw_value in exif.items():
-            # if the tag is an IFD block, nest into it
-            if tag_id in IFD_CODE_LOOKUP:
-                ifd_tag_name = IFD_CODE_LOOKUP[tag_id]
-                ifd_data = exif.get_ifd(tag_id).items()
-                print(f"IFD '{ifd_tag_name}' (id {tag_id}):")
-                for nested_id, nested_raw_value in ifd_data:
-                    nested_tag_name = ExifTags.GPSTAGS.get(nested_id, None) or ExifTags.TAGS.get(nested_id, None) or nested_id
-                    nested_value = nested_raw_value.rstrip('\x00')
-                    tags[nested_tag_name] = nested_value
-                    print(f"  {nested_tag_name}: {nested_value}")
-            else:
-                tag_name = ExifTags.TAGS.get(tag_id, tag_id)
-                tag_value = tag_raw_value.rstrip('\x00') if isinstance(tag_raw_value, (str, bytes)) else tag_raw_value
-                tags[tag_name] = tag_value
-                print(f"{tag_name}: {tag_value}")
-
-        # Date
-        # Common tags: DateTimeOriginal, DateTime
-        date_str: Any = tags.get("DateTimeOriginal") or tags.get("DateTime")
-        if date_str:
-            # Date string format typically 'YYYY:MM:DD HH:MM:SS'
-            try:
-                date_part: str = str(date_str).split(" ")[0]
-                date_part = date_part.replace(":", "-")
-                result["date"] = date_part  # keep as string for now; MetadataModel will accept or clean
-            except Exception:
-                pass
-
-        # Photographer/Artist
-        photographer: Any = tags.get("Artist") or tags.get("Copyright")
-        if photographer:
-            result["photographer"] = str(photographer)
-
-        # Camera model or make
-        model: Any = tags.get("Model")
-        make: Any = tags.get("Make")
-        camera = None
-        if make and model:
-            camera = f"{make} {model}"
-        elif model:
-            camera = str(model)
-        elif make:
-            camera = str(make)
-        if camera:
-            result["camera"] = camera
-
-        # Comments: ImageDescription or UserComment
-        comments: Any = tags.get("ImageDescription") or tags.get("UserComment")
-        if comments:
-            # UserComment may be bytes
-            if isinstance(comments, (bytes, bytearray)):
-                try:
-                    comments = comments.decode("utf-8", errors="ignore")
-                except Exception:
-                    comments = str(comments)
-            result["comments"] = str(comments)
-
-        # GPS: tags under 'GPSInfo' (numeric keys referencing GPSTAGS)
-        gps_info: dict[str, Any] | None = None
-        raw_gps: Any = tags.get("GPSInfo")
-        if raw_gps:
-            # remap numeric GPSTAGS to names for easier access
-            gps_info = {}
-            for k, v in raw_gps.items():
-                name = ExifTags.GPSTAGS.get(k, k)
-                gps_info[name] = v
-        lat, lon = _parse_gps_info(gps_info) if gps_info else (None, None)
-        if lat:
-            result["latitude"] = lat
-        if lon:
-            result["longitude"] = lon
-
-    return result
-
+from preprocessor.processing.exif import extract_exif_metadata
 
 class ProjectData(BaseModel):
     """The data for a project, including project-specific settings."""
@@ -433,7 +296,7 @@ class ProjectModel(QModel[ProjectData]):
         file_path = self.get_absolute_path(photo.original_filename)
 
         # Get EXIF data
-        exif_data = extract_exif_data(file_path)
+        exif_data = extract_exif_metadata(file_path)
 
         photo.metadata.date = exif_data.get("DateTime")
         photo.metadata.photographer = exif_data.get("Photographer")
