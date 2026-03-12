@@ -189,7 +189,6 @@ class ExportDialog(QDialog):
 class _ExportWorker(QObject):
     """
     Background worker that exports photos one by one.
-    Emits progress and status updates; real export not implemented.
     """
 
     progress: Signal = Signal(int, int)  # processed, total

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from preprocessor import app_formal_name
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
 from preprocessor.gui.export_dialog import ExportDialog
 from preprocessor.gui.launch_dialog import (
@@ -183,7 +184,7 @@ class MainWindow(QMainWindow):
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_item_double_clicked.connect(self._handle_photo_opened)
-        self.thumbnail_dock.on_apply_to_selected.connect(self._handle_apply_to_selected_action)
+        self.thumbnail_dock.on_apply_parameters_to_selected.connect(self._handle_apply_to_selected_action)
         self.thumbnail_dock.on_set_metadata_to_selected.connect(self._handle_edit_selected_metadata_action)
 
         # Model
@@ -268,11 +269,8 @@ class MainWindow(QMainWindow):
         """Handle the 'Apply to all' context menu action."""
         if not selected:
             return
-        QMessageBox.information(
-            self,
-            "Apply to all",
-            f"Apply parameters of the current photo to {len(selected)} selected photo(s). (Not implemented)",
-        )
+        dialog = ApplyParametersDialog(self.model, selected, self)
+        dialog.exec()
 
     def _handle_edit_selected_metadata_action(self, selected: list[PhotoModel]) -> None:
         """Handle the 'Edit Metadata' context menu action."""
