@@ -86,8 +86,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @date.setter
     def date(self, value: datetime | None) -> None:
-        self._data.date = value
-        self.on_date_changed.emit(value)
+        self._set_field("date", value)
 
     @property
     def partner(self) -> str | None:
@@ -95,8 +94,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @partner.setter
     def partner(self, value: str | None) -> None:
-        self._data.partner = value
-        self.on_partner_changed.emit(value)
+        self._set_field("partner", value)
 
     @property
     def area(self) -> str | None:
@@ -104,8 +102,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @area.setter
     def area(self, value: str | None) -> None:
-        self._data.area = value
-        self.on_area_changed.emit(value)
+        self._set_field("area", value)
 
     @property
     def site(self) -> str | None:
@@ -113,8 +110,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @site.setter
     def site(self, value: str | None) -> None:
-        self._data.site = value
-        self.on_site_changed.emit(value)
+        self._set_field("site", value)
 
     @property
     def season(self) -> str | None:
@@ -122,8 +118,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @season.setter
     def season(self, value: str | None) -> None:
-        self._data.season = value
-        self.on_season_changed.emit(value)
+        self._set_field("season", value)
 
     @property
     def transect(self) -> str | None:
@@ -131,8 +126,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @transect.setter
     def transect(self, value: str | None) -> None:
-        self._data.transect = value
-        self.on_transect_changed.emit(value)
+        self._set_field("transect", value)
 
     @property
     def height(self) -> str | None:
@@ -140,8 +134,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @height.setter
     def height(self, value: str | None) -> None:
-        self._data.height = value
-        self.on_height_changed.emit(value)
+        self._set_field("height", value)
 
     @property
     def latitude(self) -> float | None:
@@ -149,8 +142,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @latitude.setter
     def latitude(self, value: float | None) -> None:
-        self._data.latitude = value
-        self.on_latitude_changed.emit(value)
+        self._set_field("latitude", value)
 
     @property
     def longitude(self) -> float | None:
@@ -158,8 +150,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @longitude.setter
     def longitude(self, value: float | None) -> None:
-        self._data.longitude = value
-        self.on_longitude_changed.emit(value)
+        self._set_field("longitude", value)
 
     @property
     def depth(self) -> str | None:
@@ -167,8 +158,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @depth.setter
     def depth(self, value: str | None) -> None:
-        self._data.depth = value
-        self.on_depth_changed.emit(value)
+        self._set_field("depth", value)
 
     @property
     def camera(self) -> str | None:
@@ -176,8 +166,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @camera.setter
     def camera(self, value: str | None) -> None:
-        self._data.camera = value
-        self.on_camera_changed.emit(value)
+        self._set_field("camera", value)
 
     @property
     def photographer(self) -> str | None:
@@ -185,8 +174,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @photographer.setter
     def photographer(self, value: str | None) -> None:
-        self._data.photographer = value
-        self.on_photographer_changed.emit(value)
+        self._set_field("photographer", value)
 
     @property
     def water_quality(self) -> str | None:
@@ -194,8 +182,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @water_quality.setter
     def water_quality(self, value: str | None) -> None:
-        self._data.water_quality = value
-        self.on_water_quality_changed.emit(value)
+        self._set_field("water_quality", value)
 
     @property
     def strobes(self) -> str | None:
@@ -203,8 +190,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @strobes.setter
     def strobes(self, value: str | None) -> None:
-        self._data.strobes = value
-        self.on_strobes_changed.emit(value)
+        self._set_field("strobes", value)
 
     @property
     def framing(self) -> str | None:
@@ -212,8 +198,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @framing.setter
     def framing(self, value: str | None) -> None:
-        self._data.framing = value
-        self.on_framing_changed.emit(value)
+        self._set_field("framing", value)
 
     @property
     def white_balance_card(self) -> str | None:
@@ -221,8 +206,7 @@ class MetadataModel(QModel[MetadataData]):
 
     @white_balance_card.setter
     def white_balance_card(self, value: str | None) -> None:
-        self._data.white_balance_card = value
-        self.on_white_balance_card_changed.emit(value)
+        self._set_field("white_balance_card", value)
 
     @property
     def comments(self) -> str | None:
@@ -230,5 +214,4 @@ class MetadataModel(QModel[MetadataData]):
 
     @comments.setter
     def comments(self, value: str | None) -> None:
-        self._data.comments = value
-        self.on_comments_changed.emit(value)
+        self._set_field("comments", value)
