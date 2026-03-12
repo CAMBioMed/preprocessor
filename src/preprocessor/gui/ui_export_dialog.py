@@ -230,7 +230,7 @@ class Ui_ExportDialog(object):
         self.lblTargetHeight.setText(QCoreApplication.translate("ExportDialog", u"Target height:", None))
         self.lblTargetHeight_Value.setText(QCoreApplication.translate("ExportDialog", u"0 px", None))
         self.lblFilename.setText(QCoreApplication.translate("ExportDialog", u"Filename format:", None))
-        self.txtFilename.setText(QCoreApplication.translate("ExportDialog", u"{partner}_{area}_{site}_{date:%Y}_{season}_{depth}_{transect}_{date:%m%d}.{ext}", None))
+        self.txtFilename.setText(QCoreApplication.translate("ExportDialog", u"{partner}_{area}_{site}_{date:%Y}_{season}_{depth}_{transect}_{date:%m%d}_{i:03d}.{ext}", None))
         self.txtFilenameFormatExplanation.setPlainText(QCoreApplication.translate("ExportDialog", u"Specify the filename format using these format specifiers:\n"
 "- {i}: The one-based index of the \n"
 "- {date}: The date in the form yyyy-MM-dd\n"
