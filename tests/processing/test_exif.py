@@ -6,6 +6,7 @@ from preprocessor.processing.exif import extract_exif_metadata
 repo_root = Path(__file__).resolve().parent.parent.parent
 photos_dir = (repo_root / "tests" / "preprocessor" / "photos").resolve()
 
+
 def test_extract_exif_metadata_1() -> None:
     img1 = (photos_dir / "IMG_1054.JPG").resolve()
     assert img1.exists(), f"Example image not found: {img1}"
@@ -16,6 +17,7 @@ def test_extract_exif_metadata_1() -> None:
     assert md.get("DateTime") == datetime(2016, 5, 29, 16, 45, 3)
     assert md.get("Latitude") is None
     assert md.get("Longitude") is None
+
 
 def test_extract_exif_metadata_2() -> None:
     img1 = (photos_dir / "gpstest.JPG").resolve()

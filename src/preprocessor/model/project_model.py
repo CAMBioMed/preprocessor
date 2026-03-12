@@ -19,6 +19,7 @@ from datetime import datetime, date
 
 from preprocessor.processing.exif import extract_exif_metadata
 
+
 class ProjectData(BaseModel):
     """The data for a project, including project-specific settings."""
 

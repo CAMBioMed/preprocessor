@@ -127,7 +127,6 @@ class MetadataDialog(QDialog):
             datebox.setDateTime(QDateTime())
         self._update_metadata_datetime(field_name)
 
-
     def _initialize_metadata_doublespinbox(self, field_name: str) -> None:
         checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
         spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
@@ -184,7 +183,11 @@ class MetadataDialog(QDialog):
         datebox.setVisible(overriding)
         common_datebox.setVisible(not overriding and common_value is not _DIFFERENT)
         various_textbox.setVisible(not overriding and common_value is _DIFFERENT)
-        common_datebox.setDateTime(_dt_to_qdatetime(common_value) if common_value is not _DIFFERENT and common_value is not None else QDateTime())
+        common_datebox.setDateTime(
+            _dt_to_qdatetime(common_value)
+            if common_value is not _DIFFERENT and common_value is not None
+            else QDateTime()
+        )
 
     def _update_metadata_doublespinbox(self, field_name: str) -> None:
         checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
