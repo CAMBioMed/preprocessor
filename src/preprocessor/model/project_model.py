@@ -21,7 +21,7 @@ def _parse_gps_info(gps_info: dict | None) -> tuple[str | None, str | None]:
     if not gps_info:
         return None, None
 
-    from typing import Sequence
+    from collections.abc import Sequence
 
     def _convert_to_degrees(value: Sequence[Sequence[float | int]]) -> float | None:
         # value is expected to be an iterable of 3 rational tuples like ((num, den), ...)
@@ -425,7 +425,7 @@ class ProjectModel(QModel[ProjectData]):
                         dclean = dclean.split(" ")[0]
                         # Convert to datetime.date
                         parsed_date = datetime.date.fromisoformat(dclean)
-                        photo.metadata.date = parsed_date
+                        photo.metadata.date = parsed_date  # type: ignore[assignment]
                     except Exception:
                         # leave as-is (do not set) if parsing fails
                         pass
@@ -433,9 +433,9 @@ class ProjectModel(QModel[ProjectData]):
                     # If the EXIF provided a date-like object, try to coerce to date
                     try:
                         if isinstance(d, datetime.datetime):
-                            photo.metadata.date = d.date()
+                            photo.metadata.date = d.date()  # type: ignore[assignment]
                         elif isinstance(d, datetime.date):
-                            photo.metadata.date = d
+                            photo.metadata.date = d  # type: ignore[assignment]
                     except Exception:
                         pass
             if "photographer" in exif_data and photo.metadata.photographer is None:

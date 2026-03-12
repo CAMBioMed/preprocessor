@@ -312,18 +312,16 @@ class TestProjectModel:
         - new_value: a different value to set
         - field_signal_name: name of the per-field signal attribute on the model (e.g. 'on_file_changed')
         """
-        # Resolve property getter and the field signal
-        getter = lambda: getattr(model, prop_name)
+
         field_signal = getattr(model, field_signal_name)
 
         # Arrange / Assert: initial state
-        assert getter() == initial_value
+        assert getattr(model, prop_name) == initial_value
         assert model.dirty is False
 
         # Act/Assert: setting the same value should not emit signals
-        with qtbot.assertNotEmitted(model.on_changed):
-            with qtbot.assertNotEmitted(field_signal):
-                setattr(model, prop_name, initial_value)
+        with qtbot.assertNotEmitted(model.on_changed), qtbot.assertNotEmitted(field_signal):
+            setattr(model, prop_name, initial_value)
 
         assert model.dirty is False
 
@@ -339,4 +337,4 @@ class TestProjectModel:
 
         # Final assert: property has been updated. Avoid checking dirty here to keep the helper
         # tolerant to properties with different semantics (serialized vs non-serialized).
-        assert getter() == new_value
+        assert getattr(model, prop_name) == new_value

@@ -25,7 +25,11 @@ import click
 
 
 def main_gui(project_path: str | None = None) -> None:
-    """Show the main application window. If project_path is provided, open that project directly and skip the launch dialog."""
+    """
+    Show the main application window.
+
+    If project_path is provided, open that project directly and skip the launch dialog.
+    """
     try:
         setup_logging()
         sys.excepthook = _excepthook

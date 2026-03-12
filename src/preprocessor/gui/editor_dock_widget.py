@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDockWidget, QWidget, QLineEdit, QLabel, QPlainTextEdit, QDateTimeEdit
 
@@ -15,7 +17,7 @@ class EditorDockWidget(QDockWidget):
 
     current_photo: PhotoModel | None = None
 
-    fields: list[str] = [
+    fields: ClassVar[list[str]] = [
         "date",
         "partner",
         "area",

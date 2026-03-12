@@ -1,10 +1,9 @@
 import datetime
-from pathlib import Path
+from typing import cast
 
-import pytest
 from pytestqt.qtbot import QtBot
 
-from preprocessor.model.metadata_model import MetadataModel, MetadataData
+from preprocessor.model.metadata_model import MetadataModel
 
 
 class TestMetadataModel:
@@ -13,11 +12,11 @@ class TestMetadataModel:
         qtbot: QtBot, model: MetadataModel, prop_name: str, initial_value, new_value, field_signal_name: str
     ) -> None:
         """Helper to assert getter, setter, and per-field signal emission for MetadataModel properties."""
-        getter = lambda: getattr(model, prop_name)
+
         field_signal = getattr(model, field_signal_name)
 
         # initial
-        assert getter() == initial_value
+        assert getattr(model, prop_name) == initial_value
 
         # Setting the same value: MetadataModel setters emit the per-field signal unconditionally
         with qtbot.waitSignal(field_signal, timeout=1000):
@@ -28,7 +27,7 @@ class TestMetadataModel:
             setattr(model, prop_name, new_value)
 
         # getter updated
-        assert getter() == new_value
+        assert getattr(model, prop_name) == new_value
 
     def test_properties_getter_setter_and_signals(self, qtbot: QtBot) -> None:
         # Arrange: empty MetadataModel
@@ -78,5 +77,5 @@ class TestMetadataModel:
         model = MetadataModel()
         date_val = datetime.date(1999, 12, 31)
         with qtbot.waitSignal(model.on_date_changed, timeout=1000):
-            model.date = date_val
+            model.date = cast(datetime.datetime, date_val)
         assert model.date == date_val

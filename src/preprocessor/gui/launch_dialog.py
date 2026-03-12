@@ -5,7 +5,6 @@ from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox, QAppli
 
 from preprocessor import app_formal_name
 from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
-from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.project_model import ProjectModel
 
 logger = logging.getLogger(__name__)
@@ -50,7 +49,7 @@ class LaunchDialog(QDialog):
         self.reject()
 
 
-def new_project(parent: QWidget | None, path: Path) -> ProjectModel | None:
+def new_project(parent: QWidget | None, path: Path) -> ProjectModel | None:  # noqa: ARG001
     return ProjectModel(file=path)
 
 
@@ -80,9 +79,7 @@ def open_project(parent: QWidget | None, path: Path) -> ProjectModel | None:
 
 
 def save_project(parent: QWidget | None, project: ProjectModel, path: Path) -> bool:
-    """
-    Save the given project; return True if successful, False if canceled or failed.
-    """
+    """Save the given project; return True if successful, False if canceled or failed."""
     try:
         project.write_to_file(path)
     except Exception as exc:

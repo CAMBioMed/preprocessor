@@ -127,7 +127,7 @@ exclude = [
 
 [tool.ruff]
 line-length = 120
-exclude = [
+extend-exclude = [
     "ui_*.py",
 ]
 
@@ -136,7 +136,7 @@ docstring-code-format = true
 
 [tool.ruff.lint]
 exclude = [
-    "tests",
+    "tests/**",
 ]
 select = [
   # flake8-2020

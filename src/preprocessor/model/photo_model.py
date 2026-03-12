@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import Signal
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator
 
 from preprocessor.model import Point2, Matrix3x3
 from preprocessor.model.metadata_model import MetadataData, MetadataModel

@@ -23,22 +23,21 @@ class TestPhotoModel:
         - Setting the same value does not emit signals.
         - Setting a new value emits the per-field signal and updates the property.
         """
-        getter = lambda: getattr(model, prop_name)
+
         field_signal = getattr(model, field_signal_name)
 
         # initial
-        assert getter() == initial_value
+        assert getattr(model, prop_name) == initial_value
 
         # setting same value shouldn't emit
-        with qtbot.assertNotEmitted(model.on_changed):
-            with qtbot.assertNotEmitted(field_signal):
-                setattr(model, prop_name, initial_value)
+        with qtbot.assertNotEmitted(model.on_changed), qtbot.assertNotEmitted(field_signal):
+            setattr(model, prop_name, initial_value)
 
         # setting a different value emits the field signal
         with qtbot.waitSignal(field_signal, timeout=1000):
             setattr(model, prop_name, new_value)
 
-        assert getter() == new_value
+        assert getattr(model, prop_name) == new_value
 
     def test_properties_getter_setter_and_signals(self, qtbot: QtBot) -> None:
         # Arrange: base PhotoModel with defaults
