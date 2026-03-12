@@ -27,9 +27,9 @@ class MetadataData(BaseModel):
     """The transect information for the photo, or None if not set."""
     height: str | None = None
     """The height information, or None if not set."""
-    latitude: str | None = None
+    latitude: float | None = None
     """The latitude information, or None if not set."""
-    longitude: str | None = None
+    longitude: float | None = None
     """The longitude information, or None if not set."""
     depth: str | None = None
     """The depth information, or None if not set."""
@@ -144,20 +144,20 @@ class MetadataModel(QModel[MetadataData]):
         self.on_height_changed.emit(value)
 
     @property
-    def latitude(self) -> str | None:
+    def latitude(self) -> float | None:
         return self._data.latitude
 
     @latitude.setter
-    def latitude(self, value: str | None) -> None:
+    def latitude(self, value: float | None) -> None:
         self._data.latitude = value
         self.on_latitude_changed.emit(value)
 
     @property
-    def longitude(self) -> str | None:
+    def longitude(self) -> float | None:
         return self._data.longitude
 
     @longitude.setter
-    def longitude(self, value: str | None) -> None:
+    def longitude(self, value: float | None) -> None:
         self._data.longitude = value
         self.on_longitude_changed.emit(value)
 

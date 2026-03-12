@@ -1,3 +1,6 @@
+import json
+
+import exifread
 from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, ValidationError
 
@@ -12,7 +15,10 @@ from typing import ClassVar, Any
 from preprocessor.model.qmodel import QModel
 import contextlib
 from PIL import Image, ExifTags
-import datetime
+from datetime import datetime, date
+
+from preprocessor.processing.exif import extract_exif_data
+from preprocessor.utils import fix_spaces
 
 
 # Helper: parse GPS coordinates from EXIF GPSInfo dict
@@ -60,81 +66,93 @@ def _parse_gps_info(gps_info: dict | None) -> tuple[str | None, str | None]:
 
 
 def _extract_exif_metadata(path: Path) -> dict:
-    """Extract common metadata from the image file using Pillow's EXIF support.
+    """
+    Extract common metadata from the image file using Pillow's EXIF support.
 
     Returns a dict with keys matching MetadataModel fields (date, photographer, camera, comments, latitude, longitude).
     """
     result: dict[str, Any] = {}
-    try:
-        with Image.open(path) as img:
-            exif = img.getexif()
-            if not exif:
-                return result
+    # try:
+    with (Image.open(path) as img):
+        exif = img.getexif()
+        if not exif:
+            return result
 
-            # Build a mapping from human-readable tag name to value
-            tags: dict[str, Any] = {}
-            for tag_id, value in exif.items():
-                tag = ExifTags.TAGS.get(tag_id, tag_id)
-                tags[tag] = value
+        # Build a mapping from human-readable tag name to value
+        IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}
+        tags: dict[str, Any] = {}
+        for tag_id, tag_raw_value in exif.items():
+            # if the tag is an IFD block, nest into it
+            if tag_id in IFD_CODE_LOOKUP:
+                ifd_tag_name = IFD_CODE_LOOKUP[tag_id]
+                ifd_data = exif.get_ifd(tag_id).items()
+                print(f"IFD '{ifd_tag_name}' (id {tag_id}):")
+                for nested_id, nested_raw_value in ifd_data:
+                    nested_tag_name = ExifTags.GPSTAGS.get(nested_id, None) or ExifTags.TAGS.get(nested_id, None) or nested_id
+                    nested_value = nested_raw_value.rstrip('\x00')
+                    tags[nested_tag_name] = nested_value
+                    print(f"  {nested_tag_name}: {nested_value}")
+            else:
+                tag_name = ExifTags.TAGS.get(tag_id, tag_id)
+                tag_value = tag_raw_value.rstrip('\x00') if isinstance(tag_raw_value, (str, bytes)) else tag_raw_value
+                tags[tag_name] = tag_value
+                print(f"{tag_name}: {tag_value}")
 
-            # Date
-            # Common tags: DateTimeOriginal, DateTime
-            date_str: Any = tags.get("DateTimeOriginal") or tags.get("DateTime")
-            if date_str:
-                # Date string format typically 'YYYY:MM:DD HH:MM:SS'
+        # Date
+        # Common tags: DateTimeOriginal, DateTime
+        date_str: Any = tags.get("DateTimeOriginal") or tags.get("DateTime")
+        if date_str:
+            # Date string format typically 'YYYY:MM:DD HH:MM:SS'
+            try:
+                date_part: str = str(date_str).split(" ")[0]
+                date_part = date_part.replace(":", "-")
+                result["date"] = date_part  # keep as string for now; MetadataModel will accept or clean
+            except Exception:
+                pass
+
+        # Photographer/Artist
+        photographer: Any = tags.get("Artist") or tags.get("Copyright")
+        if photographer:
+            result["photographer"] = str(photographer)
+
+        # Camera model or make
+        model: Any = tags.get("Model")
+        make: Any = tags.get("Make")
+        camera = None
+        if make and model:
+            camera = f"{make} {model}"
+        elif model:
+            camera = str(model)
+        elif make:
+            camera = str(make)
+        if camera:
+            result["camera"] = camera
+
+        # Comments: ImageDescription or UserComment
+        comments: Any = tags.get("ImageDescription") or tags.get("UserComment")
+        if comments:
+            # UserComment may be bytes
+            if isinstance(comments, (bytes, bytearray)):
                 try:
-                    date_part: str = str(date_str).split(" ")[0]
-                    date_part = date_part.replace(":", "-")
-                    result["date"] = date_part  # keep as string for now; MetadataModel will accept or clean
+                    comments = comments.decode("utf-8", errors="ignore")
                 except Exception:
-                    pass
+                    comments = str(comments)
+            result["comments"] = str(comments)
 
-            # Photographer/Artist
-            photographer: Any = tags.get("Artist") or tags.get("Copyright")
-            if photographer:
-                result["photographer"] = str(photographer)
-
-            # Camera model or make
-            model: Any = tags.get("Model")
-            make: Any = tags.get("Make")
-            camera = None
-            if make and model:
-                camera = f"{make} {model}"
-            elif model:
-                camera = str(model)
-            elif make:
-                camera = str(make)
-            if camera:
-                result["camera"] = camera
-
-            # Comments: ImageDescription or UserComment
-            comments: Any = tags.get("ImageDescription") or tags.get("UserComment")
-            if comments:
-                # UserComment may be bytes
-                if isinstance(comments, (bytes, bytearray)):
-                    try:
-                        comments = comments.decode("utf-8", errors="ignore")
-                    except Exception:
-                        comments = str(comments)
-                result["comments"] = str(comments)
-
-            # GPS: tags under 'GPSInfo' (numeric keys referencing GPSTAGS)
-            gps_info: dict[str, Any] | None = None
-            raw_gps: Any = tags.get("GPSInfo")
-            if raw_gps:
-                # remap numeric GPSTAGS to names for easier access
-                gps_info = {}
-                for k, v in raw_gps.items():
-                    name = ExifTags.GPSTAGS.get(k, k)
-                    gps_info[name] = v
-            lat, lon = _parse_gps_info(gps_info) if gps_info else (None, None)
-            if lat:
-                result["latitude"] = lat
-            if lon:
-                result["longitude"] = lon
-    except Exception:
-        # Don't let EXIF extraction break the caller
-        return result
+        # GPS: tags under 'GPSInfo' (numeric keys referencing GPSTAGS)
+        gps_info: dict[str, Any] | None = None
+        raw_gps: Any = tags.get("GPSInfo")
+        if raw_gps:
+            # remap numeric GPSTAGS to names for easier access
+            gps_info = {}
+            for k, v in raw_gps.items():
+                name = ExifTags.GPSTAGS.get(k, k)
+                gps_info[name] = v
+        lat, lon = _parse_gps_info(gps_info) if gps_info else (None, None)
+        if lat:
+            result["latitude"] = lat
+        if lon:
+            result["longitude"] = lon
 
     return result
 
@@ -345,33 +363,33 @@ class ProjectModel(QModel[ProjectData]):
                 if d is None:
                     continue
                 # If it's a date (not datetime), convert to datetime at midnight
-                if isinstance(d, datetime.date) and not isinstance(d, datetime.datetime):
-                    md.date = datetime.datetime(d.year, d.month, d.day)
+                if isinstance(d, date) and not isinstance(d, datetime):
+                    md.date = datetime(d.year, d.month, d.day)
                 # If it's a string, try parsing ISO date/datetime
                 elif isinstance(d, str):
                     try:
                         # try full ISO datetime first
-                        parsed = datetime.datetime.fromisoformat(d)
+                        parsed = datetime.fromisoformat(d)
                         md.date = parsed
                     except Exception:
                         try:
-                            parsed_date = datetime.date.fromisoformat(d)
-                            md.date = datetime.datetime(parsed_date.year, parsed_date.month, parsed_date.day)
+                            parsed_date = date.fromisoformat(d)
+                            md.date = datetime(parsed_date.year, parsed_date.month, parsed_date.day)
                         except Exception:
                             # leave as-is
                             pass
             # Default metadata too
             d = getattr(self._data.default_metadata, "date", None)
             if d is not None:
-                if isinstance(d, datetime.date) and not isinstance(d, datetime.datetime):
-                    self._data.default_metadata.date = datetime.datetime(d.year, d.month, d.day)
+                if isinstance(d, date) and not isinstance(d, datetime):
+                    self._data.default_metadata.date = datetime(d.year, d.month, d.day)
                 elif isinstance(d, str):
                     try:
-                        self._data.default_metadata.date = datetime.datetime.fromisoformat(d)
+                        self._data.default_metadata.date = datetime.fromisoformat(d)
                     except Exception:
                         try:
-                            parsed_date = datetime.date.fromisoformat(d)
-                            self._data.default_metadata.date = datetime.datetime(
+                            parsed_date = date.fromisoformat(d)
+                            self._data.default_metadata.date = datetime(
                                 parsed_date.year, parsed_date.month, parsed_date.day
                             )
                         except Exception:
@@ -412,45 +430,18 @@ class ProjectModel(QModel[ProjectData]):
     def append_photo_model(self, path: Path) -> PhotoModel:
         """Helper function to create a new PhotoModel with the given path and add it to the project."""
         photo = PhotoModel.from_file(path, self.file.parent)
-        # Extract metadata from the image and populate the photo.metadata fields
-        try:
-            exif_data = _extract_exif_metadata(self.get_absolute_path(photo.original_filename))
-            # Only set fields if they are not already set on the photo
-            if "date" in exif_data and photo.metadata.date is None:
-                # Parse EXIF date string into a datetime.date when possible
-                d = exif_data["date"]
-                if isinstance(d, str):
-                    try:
-                        dclean = d.replace("/", "-").replace(":", "-")
-                        dclean = dclean.split(" ")[0]
-                        # Convert to datetime.date
-                        parsed_date = datetime.date.fromisoformat(dclean)
-                        photo.metadata.date = parsed_date  # type: ignore[assignment]
-                    except Exception:
-                        # leave as-is (do not set) if parsing fails
-                        pass
-                else:
-                    # If the EXIF provided a date-like object, try to coerce to date
-                    try:
-                        if isinstance(d, datetime.datetime):
-                            photo.metadata.date = d.date()  # type: ignore[assignment]
-                        elif isinstance(d, datetime.date):
-                            photo.metadata.date = d  # type: ignore[assignment]
-                    except Exception:
-                        pass
-            if "photographer" in exif_data and photo.metadata.photographer is None:
-                photo.metadata.photographer = exif_data["photographer"]
-            if "camera" in exif_data and photo.metadata.camera is None:
-                photo.metadata.camera = exif_data["camera"]
-            if "comments" in exif_data and photo.metadata.comments is None:
-                photo.metadata.comments = exif_data["comments"]
-            if "latitude" in exif_data and photo.metadata.latitude is None:
-                photo.metadata.latitude = exif_data["latitude"]
-            if "longitude" in exif_data and photo.metadata.longitude is None:
-                photo.metadata.longitude = exif_data["longitude"]
-        except Exception:
-            # ignore metadata extraction errors
-            pass
+
+        file_path = self.get_absolute_path(photo.original_filename)
+
+        # Get EXIF data
+        exif_data = extract_exif_data(file_path)
+
+        photo.metadata.date = exif_data.get("DateTime")
+        photo.metadata.photographer = exif_data.get("Photographer")
+        photo.metadata.camera = exif_data.get("Camera")
+        photo.metadata.comments = exif_data.get("Comments")
+        photo.metadata.latitude = exif_data.get("Latitude")
+        photo.metadata.longitude = exif_data.get("Longitude")
 
         self.photos.append(photo)
         return photo
