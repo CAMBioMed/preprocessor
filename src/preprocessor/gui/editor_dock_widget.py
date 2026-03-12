@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDockWidget, QWidget, QLineEdit, QLabel, QPlainTextEdit, QDateTimeEdit
+from PySide6.QtWidgets import QDockWidget, QWidget, QLineEdit, QLabel, QPlainTextEdit, QDateTimeEdit, QDoubleSpinBox
 
 from preprocessor.gui.ui_editor_dock import Ui_EditorDock
 from preprocessor.gui.utils import _dt_to_qdatetime
@@ -75,6 +75,8 @@ class EditorDockWidget(QDockWidget):
                 self._display_metadata_plaintextedit(field_name)
             elif field_name == "date":
                 self._display_metadata_datetime(field_name)
+            elif field_name in {"latitude", "longitude"}:
+                self._display_metadata_doublespinbox(field_name)
             else:
                 self._display_metadata_textbox(field_name)
 
@@ -95,6 +97,15 @@ class EditorDockWidget(QDockWidget):
         label.setVisible(bool(value))
         datebox.setVisible(bool(value))
         datebox.setDateTime(_dt_to_qdatetime(value))
+
+    def _display_metadata_doublespinbox(self, field_name: str) -> None:
+        label: QLabel = getattr(self.ui, f"lblMetadata{to_upper_camel_case(field_name)}")
+        spinbox: QDoubleSpinBox = getattr(self.ui, f"numMetadata{to_upper_camel_case(field_name)}")
+        value = getattr(self.current_photo.metadata, field_name, None) if self.current_photo else None
+
+        label.setVisible(bool(value))
+        spinbox.setVisible(bool(value))
+        spinbox.setValue(value if value is not None else 0.0)
 
     def _display_metadata_textbox(self, field_name: str) -> None:
         label: QLabel = getattr(self.ui, f"lblMetadata{to_upper_camel_case(field_name)}")

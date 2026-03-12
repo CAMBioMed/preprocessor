@@ -18,7 +18,6 @@ from PIL import Image, ExifTags
 from datetime import datetime, date
 
 from preprocessor.processing.exif import extract_exif_data
-from preprocessor.utils import fix_spaces
 
 
 # Helper: parse GPS coordinates from EXIF GPSInfo dict

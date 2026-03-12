@@ -15,10 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDateTimeEdit, QDockWidget, QFormLayout,
-    QFrame, QGridLayout, QGroupBox, QLabel,
-    QLineEdit, QPlainTextEdit, QPushButton, QScrollArea,
-    QSizePolicy, QSlider, QSpacerItem, QWidget)
+from PySide6.QtWidgets import (QApplication, QDateTimeEdit, QDockWidget, QDoubleSpinBox,
+    QFormLayout, QFrame, QGridLayout, QGroupBox,
+    QLabel, QLineEdit, QPlainTextEdit, QPushButton,
+    QScrollArea, QSizePolicy, QSlider, QSpacerItem,
+    QWidget)
 
 class Ui_EditorDock(object):
     def setupUi(self, EditorDock):
@@ -239,24 +240,6 @@ class Ui_EditorDock(object):
 
         self.formLayout_3.setWidget(5, QFormLayout.ItemRole.FieldRole, self.txtMetadataTransect)
 
-        self.txtMetadataHeight = QLineEdit(self.grpMetadata)
-        self.txtMetadataHeight.setObjectName(u"txtMetadataHeight")
-        self.txtMetadataHeight.setReadOnly(True)
-
-        self.formLayout_3.setWidget(7, QFormLayout.ItemRole.FieldRole, self.txtMetadataHeight)
-
-        self.txtMetadataLatitude = QLineEdit(self.grpMetadata)
-        self.txtMetadataLatitude.setObjectName(u"txtMetadataLatitude")
-        self.txtMetadataLatitude.setReadOnly(True)
-
-        self.formLayout_3.setWidget(8, QFormLayout.ItemRole.FieldRole, self.txtMetadataLatitude)
-
-        self.txtMetadataLongitude = QLineEdit(self.grpMetadata)
-        self.txtMetadataLongitude.setObjectName(u"txtMetadataLongitude")
-        self.txtMetadataLongitude.setReadOnly(True)
-
-        self.formLayout_3.setWidget(9, QFormLayout.ItemRole.FieldRole, self.txtMetadataLongitude)
-
         self.txtMetadataDepth = QLineEdit(self.grpMetadata)
         self.txtMetadataDepth.setObjectName(u"txtMetadataDepth")
         self.txtMetadataDepth.setReadOnly(True)
@@ -310,6 +293,30 @@ class Ui_EditorDock(object):
         self.txtMetadataComments.setReadOnly(True)
 
         self.formLayout_3.setWidget(17, QFormLayout.ItemRole.FieldRole, self.txtMetadataComments)
+
+        self.txtMetadataHeight = QLineEdit(self.grpMetadata)
+        self.txtMetadataHeight.setObjectName(u"txtMetadataHeight")
+        self.txtMetadataHeight.setReadOnly(True)
+
+        self.formLayout_3.setWidget(7, QFormLayout.ItemRole.FieldRole, self.txtMetadataHeight)
+
+        self.numMetadataLatitude = QDoubleSpinBox(self.grpMetadata)
+        self.numMetadataLatitude.setObjectName(u"numMetadataLatitude")
+        self.numMetadataLatitude.setReadOnly(True)
+        self.numMetadataLatitude.setDecimals(6)
+        self.numMetadataLatitude.setMinimum(-90.000000000000000)
+        self.numMetadataLatitude.setMaximum(90.000000000000000)
+
+        self.formLayout_3.setWidget(8, QFormLayout.ItemRole.FieldRole, self.numMetadataLatitude)
+
+        self.numMetadataLongitude = QDoubleSpinBox(self.grpMetadata)
+        self.numMetadataLongitude.setObjectName(u"numMetadataLongitude")
+        self.numMetadataLongitude.setReadOnly(True)
+        self.numMetadataLongitude.setDecimals(6)
+        self.numMetadataLongitude.setMinimum(-180.000000000000000)
+        self.numMetadataLongitude.setMaximum(180.000000000000000)
+
+        self.formLayout_3.setWidget(9, QFormLayout.ItemRole.FieldRole, self.numMetadataLongitude)
 
 
         self.gridLayout_2.addWidget(self.grpMetadata, 4, 0, 1, 1)
