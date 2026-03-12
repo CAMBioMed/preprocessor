@@ -16,7 +16,7 @@ class ThumbnailDockWidget(QDockWidget):
     on_remove_photos_action: Signal = Signal(object)
     on_selection_changed: Signal = Signal(object)  # Signal(list[PhotoModel])
     on_item_double_clicked: Signal = Signal(object)  # Signal(PhotoModel | None)
-    on_apply_to_selected: Signal = Signal(object)  # Signal(list[PhotoModel])
+    on_apply_parameters_to_selected: Signal = Signal(object)  # Signal(list[PhotoModel])
     on_set_metadata_to_selected: Signal = Signal(object)  # Signal(list[PhotoModel])
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -95,9 +95,9 @@ class ThumbnailDockWidget(QDockWidget):
         # Create menu and actions
         menu = QMenu(self)
 
-        apply_action = QAction("Apply to all", self)
-        apply_action.triggered.connect(lambda: self._handle_apply_to_selected_action(selected_photos))
-        menu.addAction(apply_action)
+        apply_parameters_action = QAction("Apply Parameters...", self)
+        apply_parameters_action.triggered.connect(lambda: self._handle_apply_parameters_to_selected_action(selected_photos))
+        menu.addAction(apply_parameters_action)
 
         # Connect action
         set_metadata_action = QAction("Edit Metadata...", self)
@@ -108,9 +108,9 @@ class ThumbnailDockWidget(QDockWidget):
         global_pos = self.ui.thumbnailListWidget.mapToGlobal(pos)
         menu.exec(global_pos)
 
-    def _handle_apply_to_selected_action(self, selected_photos: list[PhotoModel]) -> None:
+    def _handle_apply_parameters_to_selected_action(self, selected_photos: list[PhotoModel]) -> None:
         """Emit signal to indicate user requested 'Apply to all' for the selected photos."""
-        self.on_apply_to_selected.emit(selected_photos)
+        self.on_apply_parameters_to_selected.emit(selected_photos)
 
     def _handle_set_metadata_to_selected_action(self, selected_photos: list[PhotoModel]) -> None:
         """Emit signal to indicate user requested 'Set metadata to all' for the selected photos."""

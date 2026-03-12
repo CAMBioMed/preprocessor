@@ -15,10 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
-    QDialogButtonBox, QFormLayout, QHBoxLayout, QLabel,
-    QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QDialog, QFormLayout,
+    QHBoxLayout, QLabel, QPushButton, QScrollArea,
+    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 
 class Ui_ApplyParametersDialog(object):
     def setupUi(self, ApplyParametersDialog):
@@ -45,7 +44,7 @@ class Ui_ApplyParametersDialog(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 287, 168))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 326, 168))
         self.formLayout = QFormLayout(self.scrollAreaWidgetContents)
         self.formLayout.setObjectName(u"formLayout")
         self.lblParameters = QLabel(self.scrollAreaWidgetContents)
@@ -60,17 +59,22 @@ class Ui_ApplyParametersDialog(object):
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.formLayout.setItem(3, QFormLayout.ItemRole.FieldRole, self.verticalSpacer)
+        self.formLayout.setItem(4, QFormLayout.ItemRole.FieldRole, self.verticalSpacer)
 
         self.chkLensCorrection = QCheckBox(self.scrollAreaWidgetContents)
         self.chkLensCorrection.setObjectName(u"chkLensCorrection")
 
-        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.chkLensCorrection)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.chkLensCorrection)
 
         self.chkCrop = QCheckBox(self.scrollAreaWidgetContents)
         self.chkCrop.setObjectName(u"chkCrop")
 
-        self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.chkCrop)
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.FieldRole, self.chkCrop)
+
+        self.chkCamera = QCheckBox(self.scrollAreaWidgetContents)
+        self.chkCamera.setObjectName(u"chkCamera")
+
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.chkCamera)
 
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -79,19 +83,30 @@ class Ui_ApplyParametersDialog(object):
 
         self.horizontalLayout.addLayout(self.verticalLayout)
 
-        self.btnButtons = QDialogButtonBox(ApplyParametersDialog)
-        self.btnButtons.setObjectName(u"btnButtons")
-        self.btnButtons.setMinimumSize(QSize(100, 0))
-        self.btnButtons.setOrientation(Qt.Orientation.Vertical)
-        self.btnButtons.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
-        self.btnButtons.setCenterButtons(False)
+        self.layButtons = QVBoxLayout()
+        self.layButtons.setObjectName(u"layButtons")
+        self.btnApply = QPushButton(ApplyParametersDialog)
+        self.btnApply.setObjectName(u"btnApply")
 
-        self.horizontalLayout.addWidget(self.btnButtons)
+        self.layButtons.addWidget(self.btnApply)
+
+        self.btnCancel = QPushButton(ApplyParametersDialog)
+        self.btnCancel.setObjectName(u"btnCancel")
+
+        self.layButtons.addWidget(self.btnCancel)
+
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.layButtons.addItem(self.verticalSpacer_2)
+
+
+        self.horizontalLayout.addLayout(self.layButtons)
 
 
         self.retranslateUi(ApplyParametersDialog)
-        self.btnButtons.accepted.connect(ApplyParametersDialog.accept)
-        self.btnButtons.rejected.connect(ApplyParametersDialog.reject)
+
+        self.btnApply.setDefault(True)
+
 
         QMetaObject.connectSlotsByName(ApplyParametersDialog)
     # setupUi
@@ -103,5 +118,8 @@ class Ui_ApplyParametersDialog(object):
         self.chkColorCorrection.setText(QCoreApplication.translate("ApplyParametersDialog", u"Color correction", None))
         self.chkLensCorrection.setText(QCoreApplication.translate("ApplyParametersDialog", u"Lens correction", None))
         self.chkCrop.setText(QCoreApplication.translate("ApplyParametersDialog", u"Crop", None))
+        self.chkCamera.setText(QCoreApplication.translate("ApplyParametersDialog", u"Camera", None))
+        self.btnApply.setText(QCoreApplication.translate("ApplyParametersDialog", u"Apply", None))
+        self.btnCancel.setText(QCoreApplication.translate("ApplyParametersDialog", u"Cancel", None))
     # retranslateUi
 

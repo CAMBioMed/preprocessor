@@ -216,6 +216,7 @@ class MetadataDialog(QDialog):
         current_photo = self.application_model.current_photo
         if not current_photo:
             return
+
         for field_name in self.fields:
             checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
             checkbox.setChecked(True)
