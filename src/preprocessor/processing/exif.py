@@ -6,7 +6,7 @@ from typing import Any
 import exifread
 
 
-def extract_exif_data(path: Path) -> dict[str, Any]:
+def extract_exif_metadata(path: Path) -> dict[str, Any]:
     """
     Extracts EXIF data from the given image file and returns it as a dictionary.
     The keys are human-readable tag names where possible,
