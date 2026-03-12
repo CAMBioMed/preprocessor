@@ -1,11 +1,10 @@
 import logging
 from pathlib import Path
 
-from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox, QApplication
 
 from preprocessor import app_formal_name
 from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
-from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.project_model import ProjectModel
 
 logger = logging.getLogger(__name__)
@@ -13,11 +12,10 @@ logger = logging.getLogger(__name__)
 
 class LaunchDialog(QDialog):
     ui: Ui_LaunchDialog
-    model: ApplicationModel
+    project_model: ProjectModel | None = None
 
-    def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.model = model
         self.ui = Ui_LaunchDialog()
         self.ui.setupUi(self)
         self.setWindowTitle(app_formal_name)
@@ -30,25 +28,70 @@ class LaunchDialog(QDialog):
         self.ui.btnExit.clicked.connect(self.reject)
 
     def _handle_new_project_action(self) -> None:
-        new_project = new_project_dialog(self, None)
-        if new_project is None:
+        project_model = new_project_dialog(self, None)
+        if project_model is None:
             return
-        self.model.current_project = new_project
+        self.project_model = project_model
         self.accept()
 
     def _handle_open_project_action(self) -> None:
-        new_project = open_project_dialog(self, None)
-        if new_project is None:
+        project_model = open_project_dialog(self, None)
+        if project_model is None:
             return
-        self.model.current_project = new_project
+        self.project_model = project_model
         self.accept()
 
     def _handle_open_selected_project_action(self) -> None:
         # TODO: Implement
         # project = ProjectModel(ProjectData(file = Path(path)))
-        # self.model.current_project = project
+        # self.project_model = project
         # self.accept()
         self.reject()
+
+
+def new_project(parent: QWidget | None, path: Path) -> ProjectModel | None:  # noqa: ARG001
+    return ProjectModel(file=path)
+
+
+def open_project(parent: QWidget | None, path: Path) -> ProjectModel | None:
+    """Open the given project file and return the loaded ProjectModel, or None if failed."""
+    try:
+        project_model = ProjectModel.read_from_file(path)
+    except FileNotFoundError as exc:
+        logger.exception("Project file not found: %s", path, exc_info=exc)
+        if QApplication.instance() is not None:
+            QMessageBox.critical(
+                parent,
+                "Open Project Failed",
+                f"Project file not found:\n{path}\n\n{exc}",
+            )
+        return None
+    except ValueError as exc:
+        logger.exception("Failed to open project file %s: %s", path, exc_info=exc)
+        if QApplication.instance() is not None:
+            QMessageBox.critical(
+                parent,
+                "Open Project Failed",
+                f"Project file appears invalid:\n{path}\n\n{exc}",
+            )
+        return None
+    return project_model
+
+
+def save_project(parent: QWidget | None, project: ProjectModel, path: Path) -> bool:
+    """Save the given project; return True if successful, False if canceled or failed."""
+    try:
+        project.write_to_file(path)
+    except Exception as exc:
+        logger.exception("Failed to save project file %s: %s", path, exc)
+        if QApplication.instance() is not None:
+            QMessageBox.critical(
+                parent,
+                "Save Project Failed",
+                f"Failed to save project file:\n{path}\n\n{exc}",
+            )
+        return False
+    return True
 
 
 def new_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> ProjectModel | None:
@@ -71,8 +114,7 @@ def new_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pro
         return None
     if not save_if_dirty_dialog(parent, old_project):
         return None
-    new_project = ProjectModel(file=Path(path))
-    return new_project
+    return new_project(parent, Path(path))
 
 
 def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> ProjectModel | None:
@@ -95,35 +137,7 @@ def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pr
         return None
     if not save_if_dirty_dialog(parent, old_project):
         return None
-    try:
-        new_project = ProjectModel.read_from_file(path)
-    except ValueError as exc:
-        logger.exception("Failed to open project file %s: %s", path, exc)
-        QMessageBox.critical(
-            parent,
-            "Open Project Failed",
-            f"Failed to open project file:\n{path}\n\n{exc}",
-        )
-        return None
-    return new_project
-
-
-def save_project_dialog(parent: QWidget, project: ProjectModel, path: Path) -> bool:
-    """
-    Save the given project, prompting for a file path if it doesn't have one yet;
-    return True if successful, False if canceled or failed.
-    """
-    try:
-        project.write_to_file(path)
-    except Exception as exc:
-        logger.exception("Failed to save project file %s: %s", path, exc)
-        QMessageBox.critical(
-            parent,
-            "Save Project Failed",
-            f"Failed to save project file:\n{path}\n\n{exc}",
-        )
-        return False
-    return True
+    return open_project(parent, Path(path))
 
 
 def save_project_as_dialog(parent: QWidget, project: ProjectModel) -> bool:
@@ -138,7 +152,7 @@ def save_project_as_dialog(parent: QWidget, project: ProjectModel) -> bool:
     # fmt: on
     if not path:
         return False
-    save_project_dialog(parent, project, Path(path))
+    save_project(parent, project, Path(path))
     return True
 
 
@@ -160,5 +174,5 @@ def save_if_dirty_dialog(parent: QWidget, project: ProjectModel | None) -> bool:
 
     clicked_button = msg_box.clickedButton()
     if clicked_button == save_button:
-        return save_project_dialog(parent, project, project.file)
+        return save_project(parent, project, project.file)
     return clicked_button == discard_button

@@ -7,19 +7,21 @@ from pathlib import Path
 
 from preprocessor import app_formal_name
 from preprocessor.gui.about_dialog import show_about_dialog
+from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
 from preprocessor.gui.export_dialog import ExportDialog
 from preprocessor.gui.launch_dialog import (
     new_project_dialog,
     open_project_dialog,
-    save_project_dialog,
+    save_project,
     save_project_as_dialog,
 )
+from preprocessor.gui.metadata_dialog import MetadataDialog
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
-from preprocessor.gui.ui_main import Ui_Main
+from preprocessor.gui.ui_main_window import Ui_MainWindow
 from preprocessor.gui.utils import icon_from_resource
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
@@ -30,7 +32,7 @@ from preprocessor.processing.params import defaultParams
 
 
 class MainWindow(QMainWindow):
-    ui: Ui_Main
+    ui: Ui_MainWindow
     model: ApplicationModel
 
     properties_dock: PropertiesDockWidget
@@ -45,7 +47,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.ui = Ui_Main()
+        self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle(app_formal_name)
         self._setup_icons()
@@ -176,11 +178,14 @@ class MainWindow(QMainWindow):
 
         # Editor dock
         self.editor_dock.on_autodetect_quadrat_clicked.connect(self._handle_detect_quadrat_action)
+        self.editor_dock.on_edit_metadata_clicked.connect(self._handle_edit_metadata_action)
 
         # Thumbnail dock
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
-        self.thumbnail_dock.on_selection_changed.connect(self._handle_photo_selection_changed)
+        self.thumbnail_dock.on_item_double_clicked.connect(self._handle_photo_opened)
+        self.thumbnail_dock.on_apply_parameters_to_selected.connect(self._handle_apply_to_selected_action)
+        self.thumbnail_dock.on_set_metadata_to_selected.connect(self._handle_edit_selected_metadata_action)
 
         # Model
         self.model.on_current_project_changed.connect(self._handle_current_project_changed)
@@ -197,7 +202,7 @@ class MainWindow(QMainWindow):
             self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:
-        save_project_dialog(self, self.model.current_project, self.model.current_project.file)
+        save_project(self, self.model.current_project, self.model.current_project.file)
 
     def _handle_save_project_as_action(self) -> None:
         save_project_as_dialog(self, self.model.current_project)
@@ -239,7 +244,7 @@ class MainWindow(QMainWindow):
             # No corners detected
             return
 
-        self.model.current_photo.quadrat_corners = result.corners
+        self.model.current_photo.quadrat_corners = result.corners  # type: ignore[assignment]
         # Trigger updating the opened editor
         self._handle_current_photo_changed(self.model.current_photo)
 
@@ -260,6 +265,28 @@ class MainWindow(QMainWindow):
         for photo in selected:
             self.model.current_project.photos.remove(photo)
 
+    def _handle_apply_to_selected_action(self, selected: list[PhotoModel]) -> None:
+        """Handle the 'Apply to all' context menu action."""
+        if not selected:
+            return
+        dialog = ApplyParametersDialog(self.model, selected, self)
+        dialog.exec()
+
+    def _handle_edit_selected_metadata_action(self, selected: list[PhotoModel]) -> None:
+        """Handle the 'Edit Metadata' context menu action."""
+        if not selected:
+            # No photos selected
+            return
+        dialog = MetadataDialog(self.model, selected, self)
+        dialog.exec()
+
+    def _handle_edit_metadata_action(self) -> None:
+        """Handle when the user clicks the 'Edit Metadata' button in the editor dock."""
+        if self.model.current_photo is None:
+            return
+        dialog = MetadataDialog(self.model, [self.model.current_photo], self)
+        dialog.exec()
+
     def _handle_dirty_changed(self) -> None:
         """Handle when the current project's dirty state changes."""
         self._update_window_title()
@@ -269,10 +296,9 @@ class MainWindow(QMainWindow):
         self._update_window_title()
         self._update_thumbnails()
 
-    def _handle_photo_selection_changed(self, selected: list[PhotoModel]) -> None:
+    def _handle_photo_opened(self, item: PhotoModel | None) -> None:
         """Handle when the selected photo changes."""
-        # TODO: Support multiple selection?
-        self.model.current_photo = selected[0] if selected else None
+        self.model.current_photo = item
 
     def _handle_current_project_changed(self, project: ProjectModel) -> None:
         """Handle when the current project changes."""

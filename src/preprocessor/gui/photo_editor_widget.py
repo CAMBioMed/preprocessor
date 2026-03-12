@@ -140,55 +140,8 @@ class PhotoEditorWidget(QWidget):
             self.update()
             return
 
-        cam = getattr(self._photo, "camera_matrix", None)
-        dist = getattr(self._photo, "distortion_coefficients", None)
-
-        if cam is None or dist is None:
-            # No parameters: show original
-            self._undistorted_cv_img = None
-            # ensure pixmap matches original file (no-op if same)
-            self.update()
-            return
-
         # Start asynchronous undistortion for the current photo (non-blocking)
-        try:
-            # Start async undistort; fallback to sync if starting fails
-            self._start_undistort_for_current()
-        except Exception:
-            # Fall back to synchronous undistortion if async start fails
-            try:
-                from preprocessor.processing.fix_lens_distortion import undistort
-                from PySide6.QtGui import QImage
-
-                und = undistort(self._original_cv_img, cam, list(dist))
-                if und is None:
-                    msg = "undistort returned None"
-                    raise RuntimeError(msg)
-
-                # und is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
-                import cv2
-
-                if und.ndim == 3 and und.shape[2] == 3:
-                    rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
-                    h, w, ch = rgb.shape
-                    bytes_per_line = ch * w
-                    qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
-                elif und.ndim == 3 and und.shape[2] == 4:
-                    rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
-                    h, w, ch = rgba.shape
-                    bytes_per_line = ch * w
-                    qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
-                else:
-                    gray = und.copy()
-                    h, w = gray.shape
-                    qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
-
-                self._pixmap = QPixmap.fromImage(qimg)
-                self._undistorted_cv_img = und
-                self.update()
-            except Exception:
-                self._undistorted_cv_img = None
-                self.update()
+        self._start_undistort_for_current()
 
     def get_processing_image(self) -> MatLike | None:
         """Return a cv2 image to use for processing (undistorted if available).

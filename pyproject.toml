@@ -16,14 +16,14 @@ maintainers = [
 requires-python = ">=3.12"
 dependencies = [
   "click>=8.3.1",
-  "numpy>=2.2.6",
+  "exifread>=3.5.1",
+  "numpy<2.3.0",  # For NumPy version that works with OpenCV
   "opencv-contrib-python-headless==4.12.0.88",  # For OpenCV version that works on MacOS
-  "pillow>=12.0.0",
+  "pillow>=12.1.1",
   "pydantic>=2.12.5",
-  "PySide6-Essentials>=6.10.1",
-#  "pyside6>=6.10.1",
+  "PySide6-Essentials>=6.10.2",
   "qimage2ndarray>=1.10.0",
-  "scikit-learn>=1.7.2",
+  "scikit-learn>=1.8.0",
 ]
 
 [project.urls]
@@ -127,15 +127,17 @@ exclude = [
 
 [tool.ruff]
 line-length = 120
-exclude = [
+extend-exclude = [
     "ui_*.py",
-    "tests",
 ]
 
 [tool.ruff.format]
 docstring-code-format = true
 
 [tool.ruff.lint]
+exclude = [
+    "tests/**",
+]
 select = [
   # flake8-2020
   "YTT",
@@ -205,6 +207,8 @@ ignore = [
   "D106",
   # undocumented-public-init
   "D107",
+  # blank-line-after-function
+  "D202",
   # missing-blank-line-after-summary
   "D205",
   # non-imperative-mood
@@ -253,11 +257,13 @@ section_whitelines = 1
 [tool.pyside6-project]
 files = [
     "src/preprocessor/__main__.py",
+    "src/preprocessor/gui/apply_parameters_dialog.ui",
     "src/preprocessor/gui/editor_dock.ui",
     "src/preprocessor/gui/export_dialog.ui",
     "src/preprocessor/gui/hsv_threshold.ui",
     "src/preprocessor/gui/launch_dialog.ui",
-    "src/preprocessor/gui/main.ui",
+    "src/preprocessor/gui/main_window.ui",
+    "src/preprocessor/gui/metadata_dialog.ui",
     "src/preprocessor/gui/project_settings_dialog.ui",
     "src/preprocessor/gui/properties_dock.ui",
 ]

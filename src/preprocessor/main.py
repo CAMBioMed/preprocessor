@@ -3,13 +3,15 @@ import traceback
 from types import TracebackType
 from typing import Any
 import signal
+from pathlib import Path
 
 import PySide6
 
 from preprocessor import app_version, app_organisation, app_domain, app_name, app_formal_name
-from preprocessor.gui.launch_dialog import LaunchDialog
+from preprocessor.gui.launch_dialog import LaunchDialog, open_project
 from preprocessor.gui.main_window import MainWindow
 from preprocessor.model.application_model import ApplicationModel
+from preprocessor.model.project_model import ProjectModel
 from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (
@@ -19,10 +21,15 @@ from PySide6.QtWidgets import (
 )
 
 import logging
+import click
 
 
-def main_gui() -> None:
-    """Show the main application window."""
+def main_gui(project_path: str | None = None) -> None:
+    """
+    Show the main application window.
+
+    If project_path is provided, open that project directly and skip the launch dialog.
+    """
     try:
         setup_logging()
         sys.excepthook = _excepthook
@@ -44,8 +51,19 @@ def main_gui() -> None:
 
         _setup_sigint_handler()
 
-        # Show launch dialog
-        if LaunchDialog(model).exec() == QDialog.DialogCode.Accepted:
+        # Open the existing path or show the launch dialog to create/open a project
+        project_model: ProjectModel | None = None
+        if project_path is not None:
+            project_model = open_project(None, Path(project_path))
+        else:
+            launch_dialog = LaunchDialog()
+            if launch_dialog.exec() == QDialog.DialogCode.Accepted:
+                project_model = launch_dialog.project_model
+            else:
+                sys.exit(1)
+
+        if project_model is not None:
+            model.current_project = project_model
             window = MainWindow(model)
             window.show()
             exit_code = app.exec()
@@ -69,7 +87,14 @@ def setup_logging() -> None:
     logger.info("Logging is set up.")
 
 
-def main() -> None:
+@click.command()
+@click.argument("project", required=False)
+def main(project: str | None = None) -> None:
+    """Command-line entrypoint for the preprocessor application.
+
+    If a positional PROJECT is provided, the application will open that project file
+    directly and bypass the launch dialog.
+    """
     setup_logging()
 
     logger = logging.getLogger(__name__)
@@ -82,7 +107,8 @@ def main() -> None:
     logger.info("PySide6: %s", pyside_version)
     logger.info("QtCore: %s", qtcore_version)
 
-    main_gui()
+    # Forward to the GUI starter
+    main_gui(project)
 
 
 def _excepthook(cls: type[BaseException], exception: BaseException, traceback_obj: TracebackType | None) -> None:

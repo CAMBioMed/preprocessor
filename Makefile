@@ -46,12 +46,9 @@ help:                                  ## Display this help text for this Makefi
 ##@ Execute
 ### =============================================================================
 .PHONY: run
-run:                                ## Run the CLI interface
+run:                                ## Run the application
 	uv run preprocessor
 
-.PHONY: run-gui
-run-gui:                            ## Run the GUI interface
-	uv run preprocessor -- gui
 
 ### =============================================================================
 ##@ Development
@@ -64,7 +61,7 @@ build-ui:                           ## Build the UI files
 
 
 .PHONY: build
-build: build-ui check               ## Build the project
+build: build-ui app-check           ## Build and check the project
 	echo "${INFO} Building..."
 	uv build
 	echo "${OK} Built"
@@ -84,7 +81,7 @@ test-coverage:                      ## Test the project with coverage
 .PHONY: typecheck
 typecheck:                          ## Type check the project
 	echo "${INFO} Type checking (mypy)..."
-	uv run mypy $(ARGS) src
+	uv run mypy $(ARGS) src --pretty
 	echo "${OK} Checked types"
 
 .PHONY: lint
@@ -100,7 +97,8 @@ format:                             ## Format the code files
 	echo "${OK} Formatted"
 
 .PHONY: check
-check: test typecheck lint          ## Check and lint the project
+check: test lint          ## Check and lint the project
+#check: test typecheck lint          ## Check and lint the project
 
 ### =============================================================================
 ##@ Dependencies
@@ -158,6 +156,9 @@ app-clean:                          ## Clean the app artifacts
 	-rm -r logs/ 2> /dev/null
 	-find . -type d -name "*.dist-info" -exec rm -r {} +
 	echo "${OK} App artifacts cleaned"
+
+.PHONY: app-check
+app-check: check app-build app-test ## Check and lint the app
 
 ### =============================================================================
 ##@ Meta

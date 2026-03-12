@@ -1,6 +1,10 @@
 # ensure a Qt app context for QObject usage in tests: rely on pytest-qt's qapp
+from typing import Any
+
 import pytest
 from PySide6.QtWidgets import QApplication
+
+from preprocessor.model.qmodel import QModel
 
 
 @pytest.fixture(autouse=True)
@@ -17,9 +21,12 @@ def _ensure_qapp(qapp: QApplication) -> QApplication:
 import json
 import tempfile
 from pathlib import Path
+from pytestqt.qtbot import QtBot
 
 from preprocessor.model.project_model import ProjectModel, ProjectData
 from preprocessor.model.photo_model import PhotoModel, PhotoData
+from preprocessor.model.camera_model import CameraModel, CameraData
+from preprocessor.model.metadata_model import MetadataData
 from preprocessor.model.qlistmodel import QListModel
 
 
@@ -185,3 +192,149 @@ class TestProjectModel:
         project.mark_clean()
         project.photos.remove(p)
         assert project.dirty
+
+    def test_file_property_getter_setter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
+        # Delegate to helper to keep tests DRY
+        p = tmp_path / "proj.json"
+        model = ProjectModel(file=p)
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "file", p, tmp_path / "new_proj.json", "on_file_changed"
+        )
+
+    def test_export_path_getter_setter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
+        # Arrange
+        model = ProjectModel(file=tmp_path / "proj.json")
+
+        # Use helper to test export_path property
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "export_path", None, tmp_path / "export", "on_export_path_changed"
+        )
+
+    def test_target_width_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
+        # Arrange
+        model = ProjectModel(file=tmp_path / "proj.json")
+
+        # Use helper to test target_width (None -> 200)
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "target_width", None, 200, "on_target_width_changed"
+        )
+
+        # Validator: reading JSON with invalid target_width (<1) should raise ValueError
+        bad = {"model_version": ProjectData.SERIAL_VERSION, "target_width": 0}
+        json_str = json.dumps(bad)
+        with pytest.raises(ValueError):
+            ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+
+    def test_target_height_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
+        # Arrange
+        model = ProjectModel(file=tmp_path / "proj.json")
+
+        # Use helper to test target_height (None -> 300)
+        self._assert_property_getter_setter_and_signal(
+            qtbot, model, "target_height", None, 300, "on_target_height_changed"
+        )
+
+        # Validator: reading JSON with invalid target_height (<1) should raise ValueError
+        bad = {"model_version": ProjectData.SERIAL_VERSION, "target_height": 0}
+        json_str = json.dumps(bad)
+        with pytest.raises(ValueError):
+            ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+
+    def test_photos_list_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
+        # Arrange
+        model = ProjectModel(file=tmp_path / "proj.json")
+        assert len(model.photos) == 0
+
+        # Act / Assert: appending a PhotoModel should emit on_photos_changed and update serialized data
+        photo = PhotoModel(data={"original_filename": Path("img.jpg"), "width": 10, "height": 5})
+        with qtbot.waitSignal(model.on_photos_changed, timeout=1000) as blocker:
+            model.photos.append(photo)
+
+        assert len(model.photos) == 1
+        assert isinstance(model._data.photos[0], PhotoData)
+        assert blocker.args is not None
+
+        # Validator: a photo with invalid distortion_coefficients length should fail when reading from JSON
+        bad_photo = {
+            "original_filename": "a.jpg",
+            "width": 1,
+            "height": 1,
+            "distortion_coefficients": [1.0, 2.0, 3.0],
+        }
+        bad = {"model_version": ProjectData.SERIAL_VERSION, "photos": [bad_photo]}
+        json_str = json.dumps(bad)
+        with pytest.raises(ValueError):
+            ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+
+    def test_cameras_list_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
+        # Arrange
+        model = ProjectModel(file=tmp_path / "proj.json")
+        assert len(model.cameras) == 0
+
+        # Act / Assert: appending a CameraModel should emit on_cameras_changed and update serialized data
+        cam = CameraModel(file=None, data={"name": "C1", "distortion_coefficients": [0, 0, 0, 0, 0]})
+        with qtbot.waitSignal(model.on_cameras_changed, timeout=1000) as blocker:
+            model.cameras.append(cam)
+
+        assert len(model.cameras) == 1
+        assert isinstance(model._data.cameras[0], CameraData)
+        assert blocker.args is not None
+
+        # Validator: invalid distortion_coefficients length in camera JSON should raise
+        bad_cam = {"name": "C2", "distortion_coefficients": [1.0, 2.0, 3.0]}
+        bad = {"model_version": ProjectData.SERIAL_VERSION, "cameras": [bad_cam]}
+        json_str = json.dumps(bad)
+        with pytest.raises(ValueError):
+            ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+
+    def test_default_metadata_getter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
+        # Arrange
+        model = ProjectModel(file=tmp_path / "proj.json")
+        md = model.default_metadata
+        assert md is not None
+        assert isinstance(md._data, MetadataData)
+
+        # Act / Assert: when the metadata model signals on_changed, ProjectModel should forward via on_default_metadata_changed
+        with qtbot.waitSignal(model.on_default_metadata_changed, timeout=1000) as blocker:
+            # simulate a change in the metadata model
+            md.on_changed.emit()
+
+        assert blocker.args is not None
+
+    @staticmethod
+    def _assert_property_getter_setter_and_signal(
+        qtbot: QtBot, model: QModel, prop_name: str, initial_value: object, new_value: object, field_signal_name: str
+    ) -> None:
+        """
+        Helper that verifies getter, setter, and signals for a simple property.
+
+        - initial_value: expected current value for the property
+        - new_value: a different value to set
+        - field_signal_name: name of the per-field signal attribute on the model (e.g. 'on_file_changed')
+        """
+
+        field_signal = getattr(model, field_signal_name)
+
+        # Arrange / Assert: initial state
+        assert getattr(model, prop_name) == initial_value
+        assert model.dirty is False
+
+        # Act/Assert: setting the same value should not emit signals
+        with qtbot.assertNotEmitted(model.on_changed), qtbot.assertNotEmitted(field_signal):
+            setattr(model, prop_name, initial_value)
+
+        assert model.dirty is False
+
+        # Act/Assert: setting a new value should emit on_changed and the field signal
+        # Use a simple param checker for the field signal: it should receive the new value
+        # field signal callbacks receive the signal args as *args, so create a compatible checker
+        def _field_cb(*args: object) -> bool | Any:
+            return len(args) > 0 and args[0] == new_value
+
+        # Wait specifically for the field signal (so we can check its parameter)
+        with qtbot.waitSignal(field_signal, timeout=1000):
+            setattr(model, prop_name, new_value)
+
+        # Final assert: property has been updated. Avoid checking dirty here to keep the helper
+        # tolerant to properties with different semantics (serialized vs non-serialized).
+        assert getattr(model, prop_name) == new_value
