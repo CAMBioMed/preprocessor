@@ -50,7 +50,7 @@ class MetadataData(BaseModel):
 
     @field_validator("*", mode="after")
     @classmethod
-    def _validate_str_fields(cls, v: Any) -> Any:
+    def _validate_str_fields(cls, v: Any) -> Any:  # noqa: ANN401
         if v is not None and isinstance(v, str):
             if not v.strip():
                 return None

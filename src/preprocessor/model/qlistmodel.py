@@ -164,8 +164,7 @@ class QListModel[E: QModel](QObject):
         items: list[E] = []
         for d in data_list:
             # model_cls is expected to be a QModel subclass (returns a QObject)
-            obj = model_cls(data=d)  # type: ignore[arg-type]
-            # type: ignore for runtime: obj is a QObject/QModel instance and is E-compatible
+            obj = model_cls(data=d)  # type: ignore[arg-type,call-arg]
             items.append(cast(E, obj))
         self[:] = items
 

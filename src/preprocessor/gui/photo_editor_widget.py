@@ -121,7 +121,7 @@ class PhotoEditorWidget(QWidget):
         self._edit_points = None
         self.update()
 
-    def _on_camera_or_distortion_changed(self, v: object) -> None:
+    def _on_camera_or_distortion_changed(self) -> None:
         """Handler called when the photo camera matrix or distortion coefficients change.
         Applies undistortion to the currently displayed image and updates the pixmap.
         """

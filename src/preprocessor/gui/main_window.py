@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
             # No corners detected
             return
 
-        self.model.current_photo.quadrat_corners = result.corners
+        self.model.current_photo.quadrat_corners = result.corners  # type: ignore[assignment]
         # Trigger updating the opened editor
         self._handle_current_photo_changed(self.model.current_photo)
 

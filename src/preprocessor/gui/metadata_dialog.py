@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from typing import Any, cast
+from datetime import datetime
+from typing import Any, ClassVar
 
 from PySide6.QtCore import QDateTime
 from PySide6.QtWidgets import QDialog, QWidget, QLineEdit, QCheckBox, QPlainTextEdit, QDateTimeEdit
@@ -8,7 +8,6 @@ from preprocessor.gui.ui_metadata_dialog import Ui_MetadataDialog
 from preprocessor.gui.utils import _dt_to_qdatetime
 from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
-from preprocessor.model.project_model import ProjectModel
 from preprocessor.utils import to_upper_camel_case
 
 _DIFFERENT = object()
@@ -20,7 +19,7 @@ class MetadataDialog(QDialog):
     selected_photos: list[PhotoModel]
     ui: Ui_MetadataDialog
 
-    fields: list[str] = [
+    fields: ClassVar[list[str]] = [
         "date",
         "partner",
         "area",
@@ -169,7 +168,7 @@ class MetadataDialog(QDialog):
         placeholder_textbox.setVisible(not overriding and common_value is _DIFFERENT)
         common_datebox.setDateTime(_dt_to_qdatetime(common_value))
 
-    def _determine_common_metadata_value(self, attr_name: str) -> Any | None:
+    def _determine_common_metadata_value(self, attr_name: str) -> Any | None:  # noqa: ANN401
         """
         Return the value of `attr_name` from metadata if all selected photos share the same value,
         otherwise return None. Attributes are not nested, so use getattr on metadata.

@@ -1,7 +1,6 @@
 from pathlib import Path
 from enum import Enum, auto
 import re
-from typing import List, Optional
 
 
 def update_basepath(old_basepath: Path | None, new_basepath: Path | None, path: Path) -> Path:
@@ -59,23 +58,21 @@ def format_word_as(word: str, fmt: WordCase) -> str:
     return first + rest
 
 
-def split_to_words(s: str, fmt: Optional[SentenceCase] = None) -> List[str]:
+def split_to_words(s: str, fmt: SentenceCase | None = None) -> list[str]:
     if s == "":
         return []
 
     if fmt in (SentenceCase.UPPER_CAMEL, SentenceCase.LOWER_CAMEL):
-        words: List[str] = []
-        current: List[str] = []
+        words: list[str] = []
+        current: list[str] = []
         length = len(s)
         for i, c in enumerate(s):
-            if c.isupper() and current:
-                # Boundary if previous char was not upper OR next char is not upper
-                if i > 0 and not s[i - 1].isupper():
-                    words.append("".join(current))
-                    current = []
-                elif i < length - 1 and not s[i + 1].isupper():
-                    words.append("".join(current))
-                    current = []
+            # Boundary if previous char was not upper OR next char is not upper
+            if c.isupper() and current and (
+                (i > 0 and not s[i - 1].isupper()) or (i < length - 1 and not s[i + 1].isupper())
+            ):
+                words.append("".join(current))
+                current = []
             current.append(c)
         if current:
             words.append("".join(current))
@@ -94,14 +91,14 @@ def split_to_words(s: str, fmt: Optional[SentenceCase] = None) -> List[str]:
         return [p for p in parts if p]
 
     intermediate = re.split(r"[_\-\s]+", s)
-    result: List[str] = []
+    result: list[str] = []
     for part in intermediate:
         if part:
             result.extend(split_to_words(part, SentenceCase.UPPER_CAMEL))
     return result
 
 
-def join_to_case_format(words: List[str], fmt: SentenceCase) -> str:
+def join_to_case_format(words: list[str], fmt: SentenceCase) -> str:
     if fmt is SentenceCase.UPPER_CAMEL:
         return "".join(format_word_as(w, WordCase.CAPITALIZED) for w in words)
 

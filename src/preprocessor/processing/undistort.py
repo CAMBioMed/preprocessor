@@ -66,11 +66,11 @@ def undistort_photo(
         map1, map2 = cv2.initUndistortRectifyMap(
             np_camera_matrix,
             np_dist_coeffs,
-            None,
+            None,  # None seems allowed
             new_camera_matrix,
             (w, h),
             cv2.CV_32FC1,
-        )
+        )  # type: ignore[call-overload]
 
         # Prepare destination image
         dst = np.empty_like(img)

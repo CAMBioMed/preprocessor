@@ -1,7 +1,5 @@
 from pathlib import Path
-from datetime import datetime, date
-from typing import Any, Dict, List
-
+from typing import Any
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLineEdit, QPlainTextEdit
 from pytestqt.qtbot import QtBot
@@ -11,7 +9,7 @@ from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.photo_model import PhotoModel
 
 
-def _make_photo(metadata: Dict[str, Any] | None = None) -> PhotoModel:
+def _make_photo(metadata: dict[str, Any] | None = None) -> PhotoModel:
     # Create a minimal PhotoModel with a given metadata dict
     data = {
         "original_filename": Path("IMG_TEST.JPG"),
@@ -28,7 +26,7 @@ def test_metadata_dialog_copy_from_current_and_apply(qtbot: QtBot) -> None:
     app_model: ApplicationModel = ApplicationModel()
 
     # Create a current photo with metadata
-    current_meta: Dict[str, str] = {
+    current_meta: dict[str, str] = {
         "photographer": "Alice",
         "camera": "Canon EOS 5D",
         "comments": "A sample comment",

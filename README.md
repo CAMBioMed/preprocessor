@@ -16,13 +16,12 @@ Download the latest nightly (unstable) release:
 
 ## Developer tasks
 - Sync dependencies: `uv sync` (`make sync`)
-- Run CLI: `uv run preprocessor` (`make run`)
-- Run GUI: `uv run preprocessor gui` (`make run-gui`)
+- Run: `uv run preprocessor` (`make run`)
 - Run tests: `uv run pytest -q` (`make test`)
 - Run tests with coverage: `uv run pytest -q --cov` (`make test-coverage`)
 - Determine version: `uv run hatch version` (`make version`)
-- Lint code: `uv run ruff check .` (`make lint`)
 - Format code: `uv run ruff format .` (`make format`)
+- Lint code: `uv run ruff check .` (`make lint`)
 - Build app and UI files: `uv run pyside6-project build` and `uv build` (`make build`)
 - Mypy type checking: `uv run mypy src tests` (`make typecheck`)
 - Run briefcase app with app update and updating dependencies: `uvx briefcase run -u -r` (`make app-run`)
