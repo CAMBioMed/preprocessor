@@ -163,7 +163,7 @@
          <item>
           <widget class="QLineEdit" name="txtFilename">
            <property name="text">
-            <string>{partner}_{area}_{site}_{date:%Y}_{season}_{depth}_{transect}_{date:%m%d}.{ext}</string>
+            <string>{partner}_{area}_{site}_{date:%Y}_{season}_{depth}_{transect}_{date:%m%d}_{i:03d}.{ext}</string>
            </property>
            <property name="readOnly">
             <bool>true</bool>
