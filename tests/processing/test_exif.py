@@ -20,7 +20,7 @@ def test_extract_exif_metadata_1() -> None:
 
 
 def test_extract_exif_metadata_2() -> None:
-    img1 = (photos_dir / "gpstest.JPG").resolve()
+    img1 = (photos_dir / "gpstest.jpg").resolve()
     assert img1.exists(), f"Example image not found: {img1}"
 
     md = extract_exif_metadata(img1)
