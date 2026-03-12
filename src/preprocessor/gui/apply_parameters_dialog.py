@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QDialog, QWidget, QCheckBox
+from PySide6.QtWidgets import QDialog, QWidget
 
 from preprocessor.gui.ui_apply_parameters_dialog import Ui_ApplyParametersDialog
 from preprocessor.model.application_model import ApplicationModel

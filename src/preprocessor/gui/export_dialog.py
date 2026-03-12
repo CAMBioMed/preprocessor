@@ -187,9 +187,7 @@ class ExportDialog(QDialog):
 
 
 class _ExportWorker(QObject):
-    """
-    Background worker that exports photos one by one.
-    """
+    """Background worker that exports photos one by one."""
 
     progress: Signal = Signal(int, int)  # processed, total
     status: Signal = Signal(str)
