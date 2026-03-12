@@ -616,6 +616,9 @@ class Ui_MetadataDialog(object):
 
         self.retranslateUi(MetadataDialog)
 
+        self.btnApply.setDefault(True)
+
+
         QMetaObject.connectSlotsByName(MetadataDialog)
     # setupUi
 
