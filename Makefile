@@ -68,13 +68,13 @@ build: build-ui app-check           ## Build and check the project
 .PHONY: test
 test:                             	## Test the project
 	echo "${INFO} Testing..."
-	uvx --with tox-uv tox -e 3.12 -- $(ARGS)
+	uvx --with tox-uv tox run -e 3.12 -q -- $(ARGS)
 	echo "${OK} Tested"
 
 .PHONY: test-coverage
 test-coverage:                      ## Test the project with coverage
 	echo "${INFO} Testing with coverage..."
-	uvx --with tox-uv tox -e 3.12 -- $(ARGS) --cov
+	uvx --with tox-uv tox run -e 3.12 -q -- $(ARGS) --cov
 	echo "${OK} Tested with coverage"
 
 .PHONY: typecheck
@@ -96,8 +96,14 @@ format:                             ## Format the code files
 	echo "${OK} Formatted"
 
 .PHONY: check
-check: test lint          ## Check and lint the project
-#check: test typecheck lint          ## Check and lint the project
+check: test lint          			## Check and lint the project
+
+.PHONY: clean
+clean: app-clean                    ## Clean the project artifacts
+	echo "${INFO} Cleaning project artifacts..."
+	-rm -r .tox/ 2> /dev/null
+	-rm -r .venv/ 2> /dev/null
+	echo "${OK} Project artifacts cleaned"
 
 ### =============================================================================
 ##@ Dependencies
