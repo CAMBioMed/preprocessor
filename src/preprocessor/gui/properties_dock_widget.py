@@ -220,7 +220,7 @@ class PropertiesDockWidget(QDockWidget):
 
         self.ui.comboboxFindContourMethod.currentIndexChanged.connect(on_comboboxFindContourMethod_changed)
         self.model.on_find_contour_method_changed.connect(
-            lambda method: self.ui.comboboxFindContourMethod.setCurrentText(method)
+            self.ui.comboboxFindContourMethod.setCurrentText
         )
 
         self.ui.checkboxFixPerspectiveEnabled.stateChanged.connect(
