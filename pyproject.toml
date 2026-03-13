@@ -46,21 +46,19 @@ preprocessor-gui = "preprocessor.main:main_gui"
 [dependency-groups]
 # NOTE: This list must be kept in sync with `tool.briefcase.app.preprocessor.test_requires` test dependencies.
 # Please update both lists when adding/removing dependencies, until UV is supported by Briefcase.
-dev = [
-  # Test dependencies
+# Test dependencies
+test = [
   "pytest>=9.0.2",
   "pytest-cov>=7.0.0",
   "pytest-qt>=4.5.0",
+]
+dev = [
   # Build dependencies
   "hatch>=1.16.5",
   "hatchling>=1.29.0",
   # Development dependencies
-  # For PyCharm 'Show as Image'
   "mypy>=1.19.1",
-  "pillow>=12.0.0",
   "pyright>=1.1.408",
-  "ruff>=0.15.6",
-  "yamlfix>=1.19.1",
 ]
 
 
@@ -76,6 +74,14 @@ build-backend = "hatchling.build"
 packages = [
   "src/preprocessor",
 ]
+
+
+######
+# UV #
+######
+
+[tool.uv]
+default-groups = "all"
 
 
 ##########
@@ -113,6 +119,28 @@ port.exclude_lines = [
   '\.\.\.',
   'if typing.TYPE_CHECKING:',
 ]
+
+
+#######
+# Tox #
+#######
+
+[tool.tox]
+envlist = [
+  "3.12",
+  "lint",
+]
+
+[tool.tox.env_run_base]
+description = "run the test suite with pytest"
+dependency_groups = ["test"]
+commands = [["pytest", { replace = "posargs", default = ["tests"], extend = true }]]
+
+[tool.tox.env.lint]
+description = "run linters"
+skip_install = true
+deps = ["ruff"]
+commands = [["ruff", "check", { replace = "posargs", default = ["."], extend = true }]]
 
 
 ########
@@ -301,12 +329,12 @@ test_sources = [
 requires = [
     # Add your cross-platform app requirements here
 ]
-# NOTE: This list must be kept in sync with `dependency-groups.dev` test dependencies.
+# NOTE: This list must be kept in sync with `dependency-groups.test` test dependencies.
 # Please update both lists when adding/removing dependencies, until UV is supported by Briefcase.
 # See also: https://github.com/beeware/briefcase/issues/1235
 test_requires = [
   # Test dependencies
-  "pytest>=9.0.1",
+  "pytest>=9.0.2",
   "pytest-cov>=7.0.0",
   "pytest-qt>=4.5.0",
 ]

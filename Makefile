@@ -59,7 +59,6 @@ build-ui:                           ## Build the UI files
 	uv run pyside6-project build
 	echo "${OK} Built UI files"
 
-
 .PHONY: build
 build: build-ui app-check           ## Build and check the project
 	echo "${INFO} Building..."
@@ -69,13 +68,13 @@ build: build-ui app-check           ## Build and check the project
 .PHONY: test
 test:                             	## Test the project
 	echo "${INFO} Testing..."
-	uv run pytest -q $(ARGS)
+	uvx --with tox-uv tox -e 3.12 -- $(ARGS)
 	echo "${OK} Tested"
 
 .PHONY: test-coverage
 test-coverage:                      ## Test the project with coverage
 	echo "${INFO} Testing with coverage..."
-	uv run pytest -q $(ARGS) --cov
+	uvx --with tox-uv tox -e 3.12 -- $(ARGS) --cov
 	echo "${OK} Tested with coverage"
 
 .PHONY: typecheck
@@ -87,13 +86,13 @@ typecheck:                          ## Type check the project
 .PHONY: lint
 lint:                               ## Lint the project
 	echo "${INFO} Linting (ruff)..."
-	uv run ruff check $(ARGS) .
+	uvx ruff check $(ARGS) .
 	echo "${OK} Linted"
 
 .PHONY: format
 format:                             ## Format the code files
 	echo "${INFO} Formatting (ruff)..."
-	uv run ruff format $(ARGS) .
+	uvx ruff format $(ARGS) .
 	echo "${OK} Formatted"
 
 .PHONY: check
@@ -121,31 +120,31 @@ upgrade:                            ## Upgrade locked dependencies
 .PHONY: app-update
 app-update:                          ## Update the app to match the current project state
 	echo "${INFO} Updating app..."
-	uv tool run briefcase update --update-requirements --update-resources $(ARGS)
+	uvx briefcase update --update-requirements --update-resources $(ARGS)
 	echo "${OK} App updated"
 
 .PHONY: app-build
 app-build:                          ## Build the updated app
 	echo "${INFO} Building app..."
-	uv tool run briefcase build --test --no-input --no-update $(ARGS)
+	uvx briefcase build --test --no-input --no-update $(ARGS)
 	echo "${OK} App built"
 
 .PHONY: app-test
 app-test:                          ## Test the built app
 	echo "${INFO} Testing app..."
-	uv tool run briefcase run --test --no-input --no-update $(ARGS)
+	uvx briefcase run --test --no-input --no-update $(ARGS)
 	echo "${OK} App tested"
 
 .PHONY: app-run
 app-run:                            ## Run the built app
 	echo "${INFO} Running app..."
-	uv tool run briefcase run $(ARGS)
+	uvx briefcase run $(ARGS)
 	echo "${OK} App ran"
 
 .PHONY: app-package
 app-package:                        ## Package the built app
 	echo "${INFO} Packaging app..."
-	uv tool run briefcase package --adhoc-sign $(ARGS)
+	uvx briefcase package --adhoc-sign $(ARGS)
 	echo "${OK} App packaged"
 
 .PHONY: app-clean
@@ -165,4 +164,4 @@ app-check: check app-build app-test ## Check and lint the app
 ### =============================================================================
 .PHONY: version
 version:                            ## Print the project version
-	uv run hatch version
+	uvx hatch version
