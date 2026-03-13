@@ -33,7 +33,7 @@ class TestMetadataModel:
         ("strobes", None, "Yes"),
         ("framing", None, "Tight"),
         ("white_balance_card", None, "Yes"),
-        ("comments", None, "No issues")
+        ("comments", None, "No issues"),
     ]
 
     @pytest.mark.parametrize("field_name, initial_value, new_value", fields_name_initial_new)
@@ -91,7 +91,7 @@ class TestMetadataModel:
         ("strobes", " Yes ", "Yes"),
         ("framing", " Tight ", "Tight"),
         ("white_balance_card", " Yes ", "Yes"),
-        ("comments", " No issues ", "No issues")
+        ("comments", " No issues ", "No issues"),
     ]
 
     @pytest.mark.parametrize("field_name, input_value, expected_value", fields_name_value_normalized)

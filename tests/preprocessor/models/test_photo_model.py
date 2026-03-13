@@ -5,81 +5,17 @@ from PySide6.QtCore import Slot
 from pytestqt.qtbot import QtBot
 
 from preprocessor.model.photo_model import PhotoModel, PhotoData
+from tests.preprocessor.models.qmodel_fixture import assert_has_a_property_for_each_data_field, \
+    assert_model_property_getter_setter_and_signal, assert_model_property_signals_on_mutation
 
 
 class TestPhotoModel:
+    """Unit tests for PhotoModel and PhotoData."""
+
     @staticmethod
-    def _assert_property_getter_setter_and_signal(
-        qtbot: QtBot,
-        model: PhotoModel,
-        prop_name: str,
-        initial_value: object,
-        new_value: object,
-        field_signal_name: str,
-    ) -> None:
-        """Helper to assert getter, setter, and per-field signal emission.
-
-        - Verifies initial getter equals initial_value.
-        - Setting the same value does not emit signals.
-        - Setting a new value emits the per-field signal and updates the property.
-        """
-
-        field_signal = getattr(model, field_signal_name)
-
-        # initial
-        assert getattr(model, prop_name) == initial_value
-
-        # setting same value shouldn't emit
-        with qtbot.assertNotEmitted(model.on_changed), qtbot.assertNotEmitted(field_signal):
-            setattr(model, prop_name, initial_value)
-
-        # setting a different value emits the field signal
-        with qtbot.waitSignal(field_signal, timeout=1000):
-            setattr(model, prop_name, new_value)
-
-        assert getattr(model, prop_name) == new_value
-
-    def test_properties_getter_setter_and_signals(self, qtbot: QtBot) -> None:
-        # Arrange: base PhotoModel with defaults
-        model = PhotoModel(PhotoData(original_filename=Path("base.jpg"), width=100, height=200))
-
-        # original_filename
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "original_filename", Path("base.jpg"), Path("img_001.jpg"), "on_original_filename_changed"
-        )
-
-        # width and height
-        self._assert_property_getter_setter_and_signal(qtbot, model, "width", 100, 640, "on_width_changed")
-        self._assert_property_getter_setter_and_signal(qtbot, model, "height", 200, 480, "on_height_changed")
-
-        # quadrat_corners (None -> list)
-        corners = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "quadrat_corners", None, corners, "on_quadrat_corners_changed"
-        )
-
-        # red/blue shifts
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "red_shift", None, (0.3, -0.2), "on_red_shift_changed"
-        )
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "blue_shift", None, (0.0, 0.5), "on_blue_shift_changed"
-        )
-
-        # camera matrix and distortion coefficients
-        cam = ((1000.0, 0.0, 512.0), (0.0, 1000.0, 384.0), (0.0, 0.0, 1.0))
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "camera_matrix", None, cam, "on_camera_matrix_changed"
-        )
-
-        distortion = [0.01, -0.02, 0.0, 0.0]
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "distortion_coefficients", None, distortion, "on_distortion_coefficients_changed"
-        )
-
-    def test_quadrat_corners(self) -> None:
-        # Arrange
-        photo = PhotoModel(
+    def create_test_model() -> PhotoModel:
+        """Helper to create a test PhotoModel with default values."""
+        return PhotoModel(
             PhotoData(
                 original_filename=Path("img_001.jpg"),
                 width=1024,
@@ -87,53 +23,97 @@ class TestPhotoModel:
             )
         )
 
-        raised_quadrat_corners_changed = False
-        raised_changed = False
+    def test_has_a_property_for_each_data_field(self) -> None:
+        """Model should have a property for each field in the data model."""
+        assert_has_a_property_for_each_data_field(PhotoModel, PhotoData)
 
-        @Slot()
-        def handle_quadrat() -> None:
-            nonlocal raised_quadrat_corners_changed
-            raised_quadrat_corners_changed = True
+    fields_name_initial_new = [
+        ("original_filename", Path("img_001.jpg"), Path("img_002.jpg")),
+        ("width", 1024, 2048),
+        ("height", 768, 1536),
+        ("quadrat_corners", None, [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]),
+        ("camera_matrix", None, ((1000.0, 0.0, 512.0), (0.0, 1000.0, 384.0), (0.0, 0.0, 1.0))),
+        ("distortion_coefficients", None, [0.01, -0.02, 0.0, 0.0]),
+        ("red_shift", None, (0.3, -0.2)),
+        ("blue_shift", None, (0.0, 0.5)),
+    ]
 
-        @Slot()
-        def handle_changed() -> None:
-            nonlocal raised_changed
-            raised_changed = True
+    @pytest.mark.parametrize("field_name, initial_value, new_value", fields_name_initial_new)
+    def test_properties_getter_setter_and_signals(self, qtbot: QtBot, field_name: str, initial_value: object, new_value: object) -> None:
+        """Model properties should have working getters, setters, and change signals."""
+        # Arrange: empty MetadataModel
+        model = self.create_test_model()
 
-        photo.on_quadrat_corners_changed.connect(handle_quadrat)
-        photo.on_changed.connect(handle_changed)
+        # Assert: fields signal correctly on change
+        assert_model_property_getter_setter_and_signal(qtbot, model, field_name, initial_value, new_value)
 
-        # Assert initial state (quadrat_corners normalizes empty lists to None in the data model)
-        assert photo.quadrat_corners is None
-        assert not raised_quadrat_corners_changed
-        assert not raised_changed
+    fields_name_invalid = [
+        # Invalid type
+        ("width", "not an int"),  # Invalid type
+        ("height", "not an int"),  # Invalid type
+        ("width", 1024.5),  # Invalid type
+        ("height", 768.5),  # Invalid type
+        ("quadrat_corners", "not a list"),  # Invalid type
+        ("camera_matrix", "not a matrix"),  # Invalid type
+        ("distortion_coefficients", "not a list"),  # Invalid type
+        ("red_shift", "not a tuple"),  # Invalid type
+        ("blue_shift", "not a tuple"),  # Invalid type
 
-        # Act: set quadrat corners
-        corners = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
-        photo.quadrat_corners = corners  # type: ignore[assignment]
+        # Too many values
+        ("width", -10),  # Negative width
+        ("height", -10),  # Negative height
+        ("width", 0),  # Zero width
+        ("height", 0),  # Zero height
+        ("quadrat_corners", [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0), (2.0, 2.0)]),  # Too many corners
+        ("camera_matrix", ((1000.0, 0.0, 512.0), (0.0, 1000.0, 384.0))),  # Not 3x3
+        ("distortion_coefficients", [0.01, -0.02]),  # Too few coefficients
+        ("red_shift", (0.3, -0.2, 0.1)),  # Too many values
+        ("blue_shift", (0.0, 0.5, 0.1)),  # Too many values
+    ]
 
-        # Assert: property set and both signals fired
-        assert photo.quadrat_corners == corners
-        assert raised_quadrat_corners_changed
-        assert raised_changed
+    @pytest.mark.parametrize("field_name, invalid_value", fields_name_invalid)
+    def test_properties_validation(self, field_name: str, invalid_value: object) -> None:
+        """Model properties should enforce type validation and constraints when set."""
+        model = self.create_test_model()
 
-        # Act: set same value again -> no signals
-        raised_quadrat_corners_changed = False
-        raised_changed = False
-        photo.quadrat_corners = corners
+        with pytest.raises(ValueError):
+            setattr(model, field_name, invalid_value)
 
-        # Assert: no signals fired when value unchanged
-        assert not raised_quadrat_corners_changed
-        assert not raised_changed
+    fields_name_value_normalized = [
+        # Paths are normalized
+        ("original_filename", "img_003.jpg", Path("img_003.jpg")),  # str to Path
+        # Empty lists become None
+        ("quadrat_corners", [], None),
+    ]
 
-        # Act: clear the value
-        photo.quadrat_corners = []
+    @pytest.mark.parametrize("field_name, input_value, expected_value", fields_name_value_normalized)
+    def test_properties_normalization(self, field_name: str, input_value: object, expected_value: object) -> None:
+        """Model properties should normalize (trimming, empty to None) on assignment."""
+        model = self.create_test_model()
 
-        # Assert: property cleared and signals fired
-        # Setting an empty list via the setter leaves an empty list on the runtime model
-        assert photo.quadrat_corners == []
-        assert raised_quadrat_corners_changed
-        assert raised_changed
+        # Act: set the value
+        setattr(model, field_name, input_value)
+
+        # Assert: the value is normalized as expected
+        assert getattr(model, field_name) == expected_value
+
+    def test_metadata_property_and_signal(self, qtbot: QtBot) -> None:
+        """MetadataModel should be accessible and emit on_metadata_changed when modified."""
+        model = self.create_test_model()
+
+        # Assert: metadata is accessible
+        assert model.metadata is not None
+
+        initial_partner_value = model.metadata.partner
+
+        assert_model_property_signals_on_mutation(
+            qtbot,
+            model,
+            "metadata",
+            fn_set_same=lambda m, p: setattr(m.metadata, "partner", initial_partner_value),
+            fn_set_new=lambda m, p: setattr(m.metadata, "partner", "Acme Corp"),
+        )
+
 
     def test_serialize_deserialize(self) -> None:
         # Arrange
@@ -198,39 +178,3 @@ class TestPhotoModel:
         assert photo2.camera_matrix == camera
         assert photo2.distortion_coefficients == distortion
 
-    @pytest.mark.filterwarnings("ignore::UserWarning")
-    def test_signals(self, qtbot: QtBot) -> None:
-        # Arrange: Create a fresh model and verify signals and value
-        photo1 = PhotoModel(
-            PhotoData(
-                original_filename=Path("tmp"),
-                width=1024,
-                height=768,
-            )
-        )
-
-        with qtbot.waitSignal(photo1.on_original_filename_changed, raising=True):
-            photo1.original_filename = Path("img_001.jpg")
-
-        with qtbot.waitSignal(photo1.on_quadrat_corners_changed, raising=True):
-            photo1.quadrat_corners = [(0.1, 0.2), (1.1, 0.2), (1.1, 1.2), (0.1, 1.2)]
-
-        with qtbot.waitSignal(photo1.on_red_shift_changed, raising=True):
-            photo1.red_shift = (0.3, -0.2)
-
-        with qtbot.waitSignal(photo1.on_blue_shift_changed, raising=True):
-            photo1.blue_shift = (0.0, 0.5)
-
-        with qtbot.waitSignal(photo1.on_camera_matrix_changed, raising=True):
-            photo1.camera_matrix = (
-                (1000.0, 0.0, 512.0),
-                (0.0, 1000.0, 384.0),
-                (0.0, 0.0, 1.0),
-            )
-
-        with qtbot.waitSignal(photo1.on_distortion_coefficients_changed, raising=True):
-            photo1.distortion_coefficients = [0.01, -0.02, 0.0, 0.0]
-
-        with qtbot.waitSignal(photo1.on_changed, raising=True):
-            # Any change
-            photo1.original_filename = Path("img_002.jpg")
