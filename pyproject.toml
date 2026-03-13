@@ -48,19 +48,19 @@ preprocessor-gui = "preprocessor.main:main_gui"
 # Please update both lists when adding/removing dependencies, until UV is supported by Briefcase.
 dev = [
   # Test dependencies
-  "pytest>=9.0.1",
+  "pytest>=9.0.2",
   "pytest-cov>=7.0.0",
   "pytest-qt>=4.5.0",
   # Build dependencies
-  "hatch>=1.16.1",
-  "hatchling>=1.28.0",
+  "hatch>=1.16.5",
+  "hatchling>=1.29.0",
   # Development dependencies
   # For PyCharm 'Show as Image'
-  "mypy>=1.19.0",
+  "mypy>=1.19.1",
   "pillow>=12.0.0",
-  "pyright>=1.1.406",
-  "ruff>=0.14.7",
-  "yamlfix>=1.19.0",
+  "pyright>=1.1.408",
+  "ruff>=0.15.6",
+  "yamlfix>=1.19.1",
 ]
 
 
