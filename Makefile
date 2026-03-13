@@ -132,7 +132,7 @@ app-build:                          ## Build the updated app
 .PHONY: app-test
 app-test:                          ## Test the built app
 	echo "${INFO} Testing app..."
-	uvx briefcase run --test --no-input --no-update $(ARGS)
+	uvx briefcase run --test --no-input $(ARGS)
 	echo "${OK} App tested"
 
 .PHONY: app-run
