@@ -6,6 +6,8 @@ from pytestqt.qtbot import QtBot
 from preprocessor.model.qmodel import QModel
 
 T = TypeVar("T", bound=QModel)
+
+
 def assert_model_property_signals_on_mutation(
     qtbot: QtBot,
     model: T,
@@ -15,12 +17,12 @@ def assert_model_property_signals_on_mutation(
 ) -> None:
     """Helper to assert getter, setter, and per-field signal emission for QModel properties.
 
-        :param qtbot: pytest-qt's QtBot fixture for signal assertions
-        :param model: the QModel instance to test
-        :param prop_name: the name of the property to test (e.g., "date")
-        :param fn_set_same: a function that sets the property to the same value (should not emit signals)
-        :param fn_set_new: a function that sets the property to a different value (should emit signals)
-        """
+    :param qtbot: pytest-qt's QtBot fixture for signal assertions
+    :param model: the QModel instance to test
+    :param prop_name: the name of the property to test (e.g., "date")
+    :param fn_set_same: a function that sets the property to the same value (should not emit signals)
+    :param fn_set_new: a function that sets the property to a different value (should emit signals)
+    """
 
     on_field_signal = getattr(model, f"on_{prop_name}_changed")
     on_changed_signal = model.on_changed

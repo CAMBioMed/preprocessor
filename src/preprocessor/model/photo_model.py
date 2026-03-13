@@ -51,7 +51,8 @@ class PhotoData(BaseModel, validate_assignment=True):
     @classmethod
     def _validate_dimensions(cls: type["PhotoData"], v: int) -> int:
         if v <= 0:
-            raise ValueError("width and height must be positive integers")
+            msg = "width and height must be positive integers"
+            raise ValueError(msg)
         return v
 
     @field_validator("quadrat_corners", mode="after")

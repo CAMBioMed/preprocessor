@@ -5,8 +5,10 @@ import pytest
 from pytestqt.qtbot import QtBot
 
 from preprocessor.model.metadata_model import MetadataModel, MetadataData
-from tests.preprocessor.models.qmodel_fixture import assert_model_property_getter_setter_and_signal, \
-    assert_has_a_property_for_each_data_field
+from tests.preprocessor.models.qmodel_fixture import (
+    assert_model_property_getter_setter_and_signal,
+    assert_has_a_property_for_each_data_field,
+)
 
 
 class TestMetadataModel:
@@ -37,7 +39,9 @@ class TestMetadataModel:
     ]
 
     @pytest.mark.parametrize("field_name, initial_value, new_value", fields_name_initial_new)
-    def test_properties_getter_setter_and_signals(self, qtbot: QtBot, field_name: str, initial_value: object, new_value: object) -> None:
+    def test_properties_getter_setter_and_signals(
+        self, qtbot: QtBot, field_name: str, initial_value: object, new_value: object
+    ) -> None:
         """Model properties should have working getters, setters, and change signals."""
         # Arrange: empty MetadataModel
         model = MetadataModel()

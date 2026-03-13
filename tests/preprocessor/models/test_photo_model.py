@@ -5,8 +5,11 @@ from PySide6.QtCore import Slot
 from pytestqt.qtbot import QtBot
 
 from preprocessor.model.photo_model import PhotoModel, PhotoData
-from tests.preprocessor.models.qmodel_fixture import assert_has_a_property_for_each_data_field, \
-    assert_model_property_getter_setter_and_signal, assert_model_property_signals_on_mutation
+from tests.preprocessor.models.qmodel_fixture import (
+    assert_has_a_property_for_each_data_field,
+    assert_model_property_getter_setter_and_signal,
+    assert_model_property_signals_on_mutation,
+)
 
 
 class TestPhotoModel:
@@ -39,7 +42,9 @@ class TestPhotoModel:
     ]
 
     @pytest.mark.parametrize("field_name, initial_value, new_value", fields_name_initial_new)
-    def test_properties_getter_setter_and_signals(self, qtbot: QtBot, field_name: str, initial_value: object, new_value: object) -> None:
+    def test_properties_getter_setter_and_signals(
+        self, qtbot: QtBot, field_name: str, initial_value: object, new_value: object
+    ) -> None:
         """Model properties should have working getters, setters, and change signals."""
         # Arrange: empty MetadataModel
         model = self.create_test_model()
@@ -58,7 +63,6 @@ class TestPhotoModel:
         ("distortion_coefficients", "not a list"),  # Invalid type
         ("red_shift", "not a tuple"),  # Invalid type
         ("blue_shift", "not a tuple"),  # Invalid type
-
         # Too many values
         ("width", -10),  # Negative width
         ("height", -10),  # Negative height
@@ -113,7 +117,6 @@ class TestPhotoModel:
             fn_set_same=lambda m, p: setattr(m.metadata, "partner", initial_partner_value),
             fn_set_new=lambda m, p: setattr(m.metadata, "partner", "Acme Corp"),
         )
-
 
     def test_serialize_deserialize(self) -> None:
         # Arrange
@@ -177,4 +180,3 @@ class TestPhotoModel:
         assert photo2.blue_shift == (0.0, 0.5)
         assert photo2.camera_matrix == camera
         assert photo2.distortion_coefficients == distortion
-
