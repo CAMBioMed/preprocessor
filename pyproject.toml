@@ -83,13 +83,20 @@ packages = [
 ##########
 
 [tool.pytest.ini_options]
-minversion = "6.0"
-addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
-xfail_strict = true
+strict = true
+minversion = "9.0"
+addopts = [
+  "-ra",                        # Show all outcomes except passed
+  "--showlocals",               # Show locals in tracebacks
+  "--import-mode=importlib",    # Use importlib to import test modules
+]
 filterwarnings = [
-  "error",
+  "error",  # Warnings as errors
 ]
 log_cli_level = "INFO"
+pythonpath = [
+  "src",
+]
 testpaths = [
   "tests",
 ]
