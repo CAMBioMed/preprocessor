@@ -1,13 +1,14 @@
 import os
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
 
 
 def run_tests() -> None:
-    project_path = Path(__file__).parent.parent
+    project_path = Path(__file__).parent.parent.parent
     os.chdir(project_path)
 
     # Determine any args to pass to pytest. If there aren't any,
@@ -33,4 +34,5 @@ def run_tests() -> None:
 
 
 if __name__ == "__main__":
+    print("Running preprocessor tests using pytest...")
     run_tests()

@@ -7,7 +7,7 @@ from pydantic import BaseModel, field_validator
 from preprocessor.model.qmodel import QModel
 
 
-class MetadataData(BaseModel):
+class MetadataData(BaseModel, validate_assignment=True):
     """The metadata for a single photo in the project."""
 
     # Serialization JSON version
@@ -48,13 +48,37 @@ class MetadataData(BaseModel):
     comments: str | None = None
     """Any additional comments, or None if not set."""
 
+    @field_validator("date", mode="before")
+    @classmethod
+    def _validate_date(cls: type["MetadataData"], v: Any) -> datetime | None:  # noqa: ANN401
+        if v is not None and not isinstance(v, datetime) and type(v) is not datetime:
+            msg = "date must be a datetime object, or None"
+            raise ValueError(msg)
+        return v
+
     @field_validator("*", mode="after")
     @classmethod
-    def _validate_str_fields(cls, v: Any) -> Any:  # noqa: ANN401
+    def _validate_str_fields(cls: type["MetadataData"], v: Any) -> Any:  # noqa: ANN401
         if v is not None and isinstance(v, str):
             if not v.strip():
                 return None
             return v.strip()
+        return v
+
+    @field_validator("latitude", mode="after")
+    @classmethod
+    def _validate_latitude(cls: type["MetadataData"], v: float) -> float:
+        if v is not None and (v < -90 or v > 90):
+            msg = "latitude must be between -90 and 90 degrees, or None"
+            raise ValueError(msg)
+        return v
+
+    @field_validator("longitude", mode="after")
+    @classmethod
+    def _validate_longitude(cls: type["MetadataData"], v: float) -> float:
+        if v is not None and (v < -180 or v > 180):
+            msg = "longitude must be between -180 and 180 degrees, or None"
+            raise ValueError(msg)
         return v
 
 

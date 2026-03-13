@@ -11,7 +11,7 @@ from preprocessor.model.qmodel import QModel
 from preprocessor.utils import update_basepath
 
 
-class PhotoData(BaseModel):
+class PhotoData(BaseModel, validate_assignment=True):
     """The data for a single photo in the project, used for serialization."""
 
     ######################
@@ -46,6 +46,14 @@ class PhotoData(BaseModel):
 
     metadata: MetadataData = MetadataData()
     """The metadata for the photo."""
+
+    @field_validator("width", "height", mode="after")
+    @classmethod
+    def _validate_dimensions(cls: type["PhotoData"], v: int) -> int:
+        if v <= 0:
+            msg = "width and height must be positive integers"
+            raise ValueError(msg)
+        return v
 
     @field_validator("quadrat_corners", mode="after")
     @classmethod
