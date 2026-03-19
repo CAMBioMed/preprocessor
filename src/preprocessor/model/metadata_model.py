@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, ClassVar
 
 from PySide6.QtCore import Signal
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 
 from preprocessor.model.qmodel import QModel
 
@@ -14,6 +14,8 @@ class MetadataData(BaseModel, validate_assignment=True):
     SERIAL_VERSION: ClassVar[int] = 1
 
     date: datetime | None = None
+    filename: str | None = Field(max_length=200, default=None)
+    """The filename of the photo, or None if not set."""
     """The date the photo was taken, or None if not set."""
     partner: str | None = None
     """The partner name for the photo, or None if not set."""
@@ -93,6 +95,7 @@ class MetadataData(BaseModel, validate_assignment=True):
 
 
 class MetadataModel(QModel[MetadataData]):
+    on_filename_changed: Signal = Signal(object)
     on_date_changed: Signal = Signal(object)
     on_partner_changed: Signal = Signal(object)
     on_area_changed: Signal = Signal(object)
@@ -113,6 +116,14 @@ class MetadataModel(QModel[MetadataData]):
 
     def __init__(self, data: MetadataData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=MetadataData, data=data)
+
+    @property
+    def filename(self) -> str | None:
+        return self._data.filename
+
+    @filename.setter
+    def filename(self, value: str | None) -> None:
+        self._set_field("filename", value)
 
     @property
     def date(self) -> datetime | None:
