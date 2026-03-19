@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'metadata_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,8 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDateTimeEdit, QDialog,
     QDoubleSpinBox, QFormLayout, QFrame, QHBoxLayout,
-    QLabel, QLineEdit, QPlainTextEdit, QPushButton,
-    QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout,
+    QLabel, QLineEdit, QPushButton, QScrollArea,
+    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
     QWidget)
 
 class Ui_MetadataDialog(object):
@@ -53,8 +53,11 @@ class Ui_MetadataDialog(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.lblSelection = QLabel(self.scrollAreaWidgetContents)
         self.lblSelection.setObjectName(u"lblSelection")
-        sizePolicy1.setHeightForWidth(self.lblSelection.sizePolicy().hasHeightForWidth())
-        self.lblSelection.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.lblSelection.sizePolicy().hasHeightForWidth())
+        self.lblSelection.setSizePolicy(sizePolicy2)
 
         self.horizontalLayout.addWidget(self.lblSelection)
 
@@ -66,10 +69,36 @@ class Ui_MetadataDialog(object):
 
         self.formLayout.setLayout(0, QFormLayout.ItemRole.FieldRole, self.horizontalLayout)
 
+        self.lblFilename = QLabel(self.scrollAreaWidgetContents)
+        self.lblFilename.setObjectName(u"lblFilename")
+
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.lblFilename)
+
+        self.lay00Filename = QHBoxLayout()
+        self.lay00Filename.setObjectName(u"lay00Filename")
+        self.chkFilename = QCheckBox(self.scrollAreaWidgetContents)
+        self.chkFilename.setObjectName(u"chkFilename")
+
+        self.lay00Filename.addWidget(self.chkFilename)
+
+        self.txtFilename = QLineEdit(self.scrollAreaWidgetContents)
+        self.txtFilename.setObjectName(u"txtFilename")
+
+        self.lay00Filename.addWidget(self.txtFilename)
+
+        self.txtFilenameVarious = QLineEdit(self.scrollAreaWidgetContents)
+        self.txtFilenameVarious.setObjectName(u"txtFilenameVarious")
+        self.txtFilenameVarious.setReadOnly(True)
+
+        self.lay00Filename.addWidget(self.txtFilenameVarious)
+
+
+        self.formLayout.setLayout(1, QFormLayout.ItemRole.FieldRole, self.lay00Filename)
+
         self.lblDate = QLabel(self.scrollAreaWidgetContents)
         self.lblDate.setObjectName(u"lblDate")
 
-        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.lblDate)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblDate)
 
         self.lay01Date = QHBoxLayout()
         self.lay01Date.setObjectName(u"lay01Date")
@@ -80,11 +109,11 @@ class Ui_MetadataDialog(object):
 
         self.dteDate = QDateTimeEdit(self.scrollAreaWidgetContents)
         self.dteDate.setObjectName(u"dteDate")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.dteDate.sizePolicy().hasHeightForWidth())
-        self.dteDate.setSizePolicy(sizePolicy2)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.dteDate.sizePolicy().hasHeightForWidth())
+        self.dteDate.setSizePolicy(sizePolicy3)
         self.dteDate.setCalendarPopup(True)
 
         self.lay01Date.addWidget(self.dteDate)
@@ -92,8 +121,8 @@ class Ui_MetadataDialog(object):
         self.dteDateCommonValue = QDateTimeEdit(self.scrollAreaWidgetContents)
         self.dteDateCommonValue.setObjectName(u"dteDateCommonValue")
         self.dteDateCommonValue.setEnabled(False)
-        sizePolicy2.setHeightForWidth(self.dteDateCommonValue.sizePolicy().hasHeightForWidth())
-        self.dteDateCommonValue.setSizePolicy(sizePolicy2)
+        sizePolicy3.setHeightForWidth(self.dteDateCommonValue.sizePolicy().hasHeightForWidth())
+        self.dteDateCommonValue.setSizePolicy(sizePolicy3)
         self.dteDateCommonValue.setCalendarPopup(True)
 
         self.lay01Date.addWidget(self.dteDateCommonValue)
@@ -106,12 +135,12 @@ class Ui_MetadataDialog(object):
         self.lay01Date.addWidget(self.txtDateVarious)
 
 
-        self.formLayout.setLayout(1, QFormLayout.ItemRole.FieldRole, self.lay01Date)
+        self.formLayout.setLayout(2, QFormLayout.ItemRole.FieldRole, self.lay01Date)
 
         self.lblPartner = QLabel(self.scrollAreaWidgetContents)
         self.lblPartner.setObjectName(u"lblPartner")
 
-        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblPartner)
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.lblPartner)
 
         self.lay02Partner = QHBoxLayout()
         self.lay02Partner.setObjectName(u"lay02Partner")
@@ -122,6 +151,7 @@ class Ui_MetadataDialog(object):
 
         self.txtPartner = QLineEdit(self.scrollAreaWidgetContents)
         self.txtPartner.setObjectName(u"txtPartner")
+        self.txtPartner.setMaxLength(50)
 
         self.lay02Partner.addWidget(self.txtPartner)
 
@@ -132,12 +162,12 @@ class Ui_MetadataDialog(object):
         self.lay02Partner.addWidget(self.txtPartnerCommonValue)
 
 
-        self.formLayout.setLayout(2, QFormLayout.ItemRole.FieldRole, self.lay02Partner)
+        self.formLayout.setLayout(3, QFormLayout.ItemRole.FieldRole, self.lay02Partner)
 
         self.lblArea = QLabel(self.scrollAreaWidgetContents)
         self.lblArea.setObjectName(u"lblArea")
 
-        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.lblArea)
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.LabelRole, self.lblArea)
 
         self.lay03Area = QHBoxLayout()
         self.lay03Area.setObjectName(u"lay03Area")
@@ -148,6 +178,7 @@ class Ui_MetadataDialog(object):
 
         self.txtArea = QLineEdit(self.scrollAreaWidgetContents)
         self.txtArea.setObjectName(u"txtArea")
+        self.txtArea.setMaxLength(50)
 
         self.lay03Area.addWidget(self.txtArea)
 
@@ -158,12 +189,12 @@ class Ui_MetadataDialog(object):
         self.lay03Area.addWidget(self.txtAreaCommonValue)
 
 
-        self.formLayout.setLayout(3, QFormLayout.ItemRole.FieldRole, self.lay03Area)
+        self.formLayout.setLayout(4, QFormLayout.ItemRole.FieldRole, self.lay03Area)
 
         self.lblSite = QLabel(self.scrollAreaWidgetContents)
         self.lblSite.setObjectName(u"lblSite")
 
-        self.formLayout.setWidget(4, QFormLayout.ItemRole.LabelRole, self.lblSite)
+        self.formLayout.setWidget(5, QFormLayout.ItemRole.LabelRole, self.lblSite)
 
         self.lay04Site = QHBoxLayout()
         self.lay04Site.setObjectName(u"lay04Site")
@@ -174,6 +205,7 @@ class Ui_MetadataDialog(object):
 
         self.txtSite = QLineEdit(self.scrollAreaWidgetContents)
         self.txtSite.setObjectName(u"txtSite")
+        self.txtSite.setMaxLength(50)
 
         self.lay04Site.addWidget(self.txtSite)
 
@@ -184,12 +216,12 @@ class Ui_MetadataDialog(object):
         self.lay04Site.addWidget(self.txtSiteCommonValue)
 
 
-        self.formLayout.setLayout(4, QFormLayout.ItemRole.FieldRole, self.lay04Site)
+        self.formLayout.setLayout(5, QFormLayout.ItemRole.FieldRole, self.lay04Site)
 
         self.lblSeason = QLabel(self.scrollAreaWidgetContents)
         self.lblSeason.setObjectName(u"lblSeason")
 
-        self.formLayout.setWidget(5, QFormLayout.ItemRole.LabelRole, self.lblSeason)
+        self.formLayout.setWidget(6, QFormLayout.ItemRole.LabelRole, self.lblSeason)
 
         self.lay05Season = QHBoxLayout()
         self.lay05Season.setObjectName(u"lay05Season")
@@ -200,6 +232,7 @@ class Ui_MetadataDialog(object):
 
         self.txtSeason = QLineEdit(self.scrollAreaWidgetContents)
         self.txtSeason.setObjectName(u"txtSeason")
+        self.txtSeason.setMaxLength(50)
 
         self.lay05Season.addWidget(self.txtSeason)
 
@@ -210,12 +243,12 @@ class Ui_MetadataDialog(object):
         self.lay05Season.addWidget(self.txtSeasonCommonValue)
 
 
-        self.formLayout.setLayout(5, QFormLayout.ItemRole.FieldRole, self.lay05Season)
+        self.formLayout.setLayout(6, QFormLayout.ItemRole.FieldRole, self.lay05Season)
 
         self.lblTransect = QLabel(self.scrollAreaWidgetContents)
         self.lblTransect.setObjectName(u"lblTransect")
 
-        self.formLayout.setWidget(6, QFormLayout.ItemRole.LabelRole, self.lblTransect)
+        self.formLayout.setWidget(7, QFormLayout.ItemRole.LabelRole, self.lblTransect)
 
         self.lay06Transect = QHBoxLayout()
         self.lay06Transect.setObjectName(u"lay06Transect")
@@ -226,6 +259,7 @@ class Ui_MetadataDialog(object):
 
         self.txtTransect = QLineEdit(self.scrollAreaWidgetContents)
         self.txtTransect.setObjectName(u"txtTransect")
+        self.txtTransect.setMaxLength(50)
 
         self.lay06Transect.addWidget(self.txtTransect)
 
@@ -236,7 +270,22 @@ class Ui_MetadataDialog(object):
         self.lay06Transect.addWidget(self.txtTransectCommonValue)
 
 
-        self.formLayout.setLayout(6, QFormLayout.ItemRole.FieldRole, self.lay06Transect)
+        self.formLayout.setLayout(7, QFormLayout.ItemRole.FieldRole, self.lay06Transect)
+
+        self.line = QFrame(self.scrollAreaWidgetContents)
+        self.line.setObjectName(u"line")
+        sizePolicy2.setHeightForWidth(self.line.sizePolicy().hasHeightForWidth())
+        self.line.setSizePolicy(sizePolicy2)
+        self.line.setMinimumSize(QSize(0, 6))
+        self.line.setFrameShape(QFrame.Shape.HLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.formLayout.setWidget(8, QFormLayout.ItemRole.FieldRole, self.line)
+
+        self.lblHeight = QLabel(self.scrollAreaWidgetContents)
+        self.lblHeight.setObjectName(u"lblHeight")
+
+        self.formLayout.setWidget(9, QFormLayout.ItemRole.LabelRole, self.lblHeight)
 
         self.lay07Height = QHBoxLayout()
         self.lay07Height.setObjectName(u"lay07Height")
@@ -245,24 +294,33 @@ class Ui_MetadataDialog(object):
 
         self.lay07Height.addWidget(self.chkHeight)
 
-        self.txtHeight = QLineEdit(self.scrollAreaWidgetContents)
-        self.txtHeight.setObjectName(u"txtHeight")
+        self.numHeight = QSpinBox(self.scrollAreaWidgetContents)
+        self.numHeight.setObjectName(u"numHeight")
+        sizePolicy3.setHeightForWidth(self.numHeight.sizePolicy().hasHeightForWidth())
+        self.numHeight.setSizePolicy(sizePolicy3)
 
-        self.lay07Height.addWidget(self.txtHeight)
+        self.lay07Height.addWidget(self.numHeight)
 
-        self.txtHeightCommonValue = QLineEdit(self.scrollAreaWidgetContents)
-        self.txtHeightCommonValue.setObjectName(u"txtHeightCommonValue")
-        self.txtHeightCommonValue.setReadOnly(True)
+        self.numHeightCommonValue = QSpinBox(self.scrollAreaWidgetContents)
+        self.numHeightCommonValue.setObjectName(u"numHeightCommonValue")
+        sizePolicy3.setHeightForWidth(self.numHeightCommonValue.sizePolicy().hasHeightForWidth())
+        self.numHeightCommonValue.setSizePolicy(sizePolicy3)
 
-        self.lay07Height.addWidget(self.txtHeightCommonValue)
+        self.lay07Height.addWidget(self.numHeightCommonValue)
+
+        self.txtHeightVarious = QLineEdit(self.scrollAreaWidgetContents)
+        self.txtHeightVarious.setObjectName(u"txtHeightVarious")
+        self.txtHeightVarious.setReadOnly(True)
+
+        self.lay07Height.addWidget(self.txtHeightVarious)
 
 
-        self.formLayout.setLayout(8, QFormLayout.ItemRole.FieldRole, self.lay07Height)
+        self.formLayout.setLayout(9, QFormLayout.ItemRole.FieldRole, self.lay07Height)
 
         self.lblLatitude = QLabel(self.scrollAreaWidgetContents)
         self.lblLatitude.setObjectName(u"lblLatitude")
 
-        self.formLayout.setWidget(9, QFormLayout.ItemRole.LabelRole, self.lblLatitude)
+        self.formLayout.setWidget(10, QFormLayout.ItemRole.LabelRole, self.lblLatitude)
 
         self.lay08Latitude = QHBoxLayout()
         self.lay08Latitude.setObjectName(u"lay08Latitude")
@@ -273,8 +331,8 @@ class Ui_MetadataDialog(object):
 
         self.numLatitude = QDoubleSpinBox(self.scrollAreaWidgetContents)
         self.numLatitude.setObjectName(u"numLatitude")
-        sizePolicy2.setHeightForWidth(self.numLatitude.sizePolicy().hasHeightForWidth())
-        self.numLatitude.setSizePolicy(sizePolicy2)
+        sizePolicy3.setHeightForWidth(self.numLatitude.sizePolicy().hasHeightForWidth())
+        self.numLatitude.setSizePolicy(sizePolicy3)
         self.numLatitude.setDecimals(6)
         self.numLatitude.setMinimum(-90.000000000000000)
         self.numLatitude.setMaximum(90.000000000000000)
@@ -283,8 +341,8 @@ class Ui_MetadataDialog(object):
 
         self.numLatitudeCommonValue = QDoubleSpinBox(self.scrollAreaWidgetContents)
         self.numLatitudeCommonValue.setObjectName(u"numLatitudeCommonValue")
-        sizePolicy2.setHeightForWidth(self.numLatitudeCommonValue.sizePolicy().hasHeightForWidth())
-        self.numLatitudeCommonValue.setSizePolicy(sizePolicy2)
+        sizePolicy3.setHeightForWidth(self.numLatitudeCommonValue.sizePolicy().hasHeightForWidth())
+        self.numLatitudeCommonValue.setSizePolicy(sizePolicy3)
         self.numLatitudeCommonValue.setReadOnly(True)
         self.numLatitudeCommonValue.setDecimals(6)
         self.numLatitudeCommonValue.setMinimum(-90.000000000000000)
@@ -300,12 +358,12 @@ class Ui_MetadataDialog(object):
         self.lay08Latitude.addWidget(self.txtLatitudeVarious)
 
 
-        self.formLayout.setLayout(9, QFormLayout.ItemRole.FieldRole, self.lay08Latitude)
+        self.formLayout.setLayout(10, QFormLayout.ItemRole.FieldRole, self.lay08Latitude)
 
         self.lblLongitude = QLabel(self.scrollAreaWidgetContents)
         self.lblLongitude.setObjectName(u"lblLongitude")
 
-        self.formLayout.setWidget(10, QFormLayout.ItemRole.LabelRole, self.lblLongitude)
+        self.formLayout.setWidget(11, QFormLayout.ItemRole.LabelRole, self.lblLongitude)
 
         self.lay09Longitude = QHBoxLayout()
         self.lay09Longitude.setObjectName(u"lay09Longitude")
@@ -316,8 +374,8 @@ class Ui_MetadataDialog(object):
 
         self.numLongitude = QDoubleSpinBox(self.scrollAreaWidgetContents)
         self.numLongitude.setObjectName(u"numLongitude")
-        sizePolicy2.setHeightForWidth(self.numLongitude.sizePolicy().hasHeightForWidth())
-        self.numLongitude.setSizePolicy(sizePolicy2)
+        sizePolicy3.setHeightForWidth(self.numLongitude.sizePolicy().hasHeightForWidth())
+        self.numLongitude.setSizePolicy(sizePolicy3)
         self.numLongitude.setDecimals(6)
         self.numLongitude.setMinimum(-180.000000000000000)
         self.numLongitude.setMaximum(180.000000000000000)
@@ -326,8 +384,8 @@ class Ui_MetadataDialog(object):
 
         self.numLongitudeCommonValue = QDoubleSpinBox(self.scrollAreaWidgetContents)
         self.numLongitudeCommonValue.setObjectName(u"numLongitudeCommonValue")
-        sizePolicy2.setHeightForWidth(self.numLongitudeCommonValue.sizePolicy().hasHeightForWidth())
-        self.numLongitudeCommonValue.setSizePolicy(sizePolicy2)
+        sizePolicy3.setHeightForWidth(self.numLongitudeCommonValue.sizePolicy().hasHeightForWidth())
+        self.numLongitudeCommonValue.setSizePolicy(sizePolicy3)
         self.numLongitudeCommonValue.setReadOnly(True)
         self.numLongitudeCommonValue.setDecimals(6)
         self.numLongitudeCommonValue.setMinimum(-180.000000000000000)
@@ -343,12 +401,12 @@ class Ui_MetadataDialog(object):
         self.lay09Longitude.addWidget(self.txtLongitudeVarious)
 
 
-        self.formLayout.setLayout(10, QFormLayout.ItemRole.FieldRole, self.lay09Longitude)
+        self.formLayout.setLayout(11, QFormLayout.ItemRole.FieldRole, self.lay09Longitude)
 
         self.lblDepth = QLabel(self.scrollAreaWidgetContents)
         self.lblDepth.setObjectName(u"lblDepth")
 
-        self.formLayout.setWidget(11, QFormLayout.ItemRole.LabelRole, self.lblDepth)
+        self.formLayout.setWidget(12, QFormLayout.ItemRole.LabelRole, self.lblDepth)
 
         self.lay10Depth = QHBoxLayout()
         self.lay10Depth.setObjectName(u"lay10Depth")
@@ -359,6 +417,7 @@ class Ui_MetadataDialog(object):
 
         self.txtDepth = QLineEdit(self.scrollAreaWidgetContents)
         self.txtDepth.setObjectName(u"txtDepth")
+        self.txtDepth.setMaxLength(45)
 
         self.lay10Depth.addWidget(self.txtDepth)
 
@@ -370,12 +429,12 @@ class Ui_MetadataDialog(object):
         self.lay10Depth.addWidget(self.txtDepthCommonValue)
 
 
-        self.formLayout.setLayout(11, QFormLayout.ItemRole.FieldRole, self.lay10Depth)
+        self.formLayout.setLayout(12, QFormLayout.ItemRole.FieldRole, self.lay10Depth)
 
         self.lblCamera = QLabel(self.scrollAreaWidgetContents)
         self.lblCamera.setObjectName(u"lblCamera")
 
-        self.formLayout.setWidget(12, QFormLayout.ItemRole.LabelRole, self.lblCamera)
+        self.formLayout.setWidget(13, QFormLayout.ItemRole.LabelRole, self.lblCamera)
 
         self.lay11Camera = QHBoxLayout()
         self.lay11Camera.setObjectName(u"lay11Camera")
@@ -386,6 +445,7 @@ class Ui_MetadataDialog(object):
 
         self.txtCamera = QLineEdit(self.scrollAreaWidgetContents)
         self.txtCamera.setObjectName(u"txtCamera")
+        self.txtCamera.setMaxLength(200)
 
         self.lay11Camera.addWidget(self.txtCamera)
 
@@ -397,12 +457,12 @@ class Ui_MetadataDialog(object):
         self.lay11Camera.addWidget(self.txtCameraCommonValue)
 
 
-        self.formLayout.setLayout(12, QFormLayout.ItemRole.FieldRole, self.lay11Camera)
+        self.formLayout.setLayout(13, QFormLayout.ItemRole.FieldRole, self.lay11Camera)
 
         self.lblPhotographer = QLabel(self.scrollAreaWidgetContents)
         self.lblPhotographer.setObjectName(u"lblPhotographer")
 
-        self.formLayout.setWidget(13, QFormLayout.ItemRole.LabelRole, self.lblPhotographer)
+        self.formLayout.setWidget(14, QFormLayout.ItemRole.LabelRole, self.lblPhotographer)
 
         self.lay12Photographer = QHBoxLayout()
         self.lay12Photographer.setObjectName(u"lay12Photographer")
@@ -413,6 +473,7 @@ class Ui_MetadataDialog(object):
 
         self.txtPhotographer = QLineEdit(self.scrollAreaWidgetContents)
         self.txtPhotographer.setObjectName(u"txtPhotographer")
+        self.txtPhotographer.setMaxLength(45)
 
         self.lay12Photographer.addWidget(self.txtPhotographer)
 
@@ -424,12 +485,12 @@ class Ui_MetadataDialog(object):
         self.lay12Photographer.addWidget(self.txtPhotographerCommonValue)
 
 
-        self.formLayout.setLayout(13, QFormLayout.ItemRole.FieldRole, self.lay12Photographer)
+        self.formLayout.setLayout(14, QFormLayout.ItemRole.FieldRole, self.lay12Photographer)
 
         self.lblWaterQuality = QLabel(self.scrollAreaWidgetContents)
         self.lblWaterQuality.setObjectName(u"lblWaterQuality")
 
-        self.formLayout.setWidget(14, QFormLayout.ItemRole.LabelRole, self.lblWaterQuality)
+        self.formLayout.setWidget(15, QFormLayout.ItemRole.LabelRole, self.lblWaterQuality)
 
         self.lay13WaterQuality = QHBoxLayout()
         self.lay13WaterQuality.setObjectName(u"lay13WaterQuality")
@@ -440,6 +501,7 @@ class Ui_MetadataDialog(object):
 
         self.txtWaterQuality = QLineEdit(self.scrollAreaWidgetContents)
         self.txtWaterQuality.setObjectName(u"txtWaterQuality")
+        self.txtWaterQuality.setMaxLength(45)
 
         self.lay13WaterQuality.addWidget(self.txtWaterQuality)
 
@@ -451,12 +513,12 @@ class Ui_MetadataDialog(object):
         self.lay13WaterQuality.addWidget(self.txtWaterQualityCommonValue)
 
 
-        self.formLayout.setLayout(14, QFormLayout.ItemRole.FieldRole, self.lay13WaterQuality)
+        self.formLayout.setLayout(15, QFormLayout.ItemRole.FieldRole, self.lay13WaterQuality)
 
         self.lblStrobes = QLabel(self.scrollAreaWidgetContents)
         self.lblStrobes.setObjectName(u"lblStrobes")
 
-        self.formLayout.setWidget(15, QFormLayout.ItemRole.LabelRole, self.lblStrobes)
+        self.formLayout.setWidget(16, QFormLayout.ItemRole.LabelRole, self.lblStrobes)
 
         self.lay14Strobes = QHBoxLayout()
         self.lay14Strobes.setObjectName(u"lay14Strobes")
@@ -467,6 +529,7 @@ class Ui_MetadataDialog(object):
 
         self.txtStrobes = QLineEdit(self.scrollAreaWidgetContents)
         self.txtStrobes.setObjectName(u"txtStrobes")
+        self.txtStrobes.setMaxLength(200)
 
         self.lay14Strobes.addWidget(self.txtStrobes)
 
@@ -478,12 +541,12 @@ class Ui_MetadataDialog(object):
         self.lay14Strobes.addWidget(self.txtStrobesCommonValue)
 
 
-        self.formLayout.setLayout(15, QFormLayout.ItemRole.FieldRole, self.lay14Strobes)
+        self.formLayout.setLayout(16, QFormLayout.ItemRole.FieldRole, self.lay14Strobes)
 
         self.lblFraming = QLabel(self.scrollAreaWidgetContents)
         self.lblFraming.setObjectName(u"lblFraming")
 
-        self.formLayout.setWidget(16, QFormLayout.ItemRole.LabelRole, self.lblFraming)
+        self.formLayout.setWidget(17, QFormLayout.ItemRole.LabelRole, self.lblFraming)
 
         self.lay15Framing = QHBoxLayout()
         self.lay15Framing.setObjectName(u"lay15Framing")
@@ -494,6 +557,7 @@ class Ui_MetadataDialog(object):
 
         self.txtFraming = QLineEdit(self.scrollAreaWidgetContents)
         self.txtFraming.setObjectName(u"txtFraming")
+        self.txtFraming.setMaxLength(200)
 
         self.lay15Framing.addWidget(self.txtFraming)
 
@@ -505,12 +569,12 @@ class Ui_MetadataDialog(object):
         self.lay15Framing.addWidget(self.txtFramingCommonValue)
 
 
-        self.formLayout.setLayout(16, QFormLayout.ItemRole.FieldRole, self.lay15Framing)
+        self.formLayout.setLayout(17, QFormLayout.ItemRole.FieldRole, self.lay15Framing)
 
         self.lblWhiteBalanceCard = QLabel(self.scrollAreaWidgetContents)
         self.lblWhiteBalanceCard.setObjectName(u"lblWhiteBalanceCard")
 
-        self.formLayout.setWidget(17, QFormLayout.ItemRole.LabelRole, self.lblWhiteBalanceCard)
+        self.formLayout.setWidget(18, QFormLayout.ItemRole.LabelRole, self.lblWhiteBalanceCard)
 
         self.lay16WhiteBalanceCard = QHBoxLayout()
         self.lay16WhiteBalanceCard.setObjectName(u"lay16WhiteBalanceCard")
@@ -521,6 +585,7 @@ class Ui_MetadataDialog(object):
 
         self.txtWhiteBalanceCard = QLineEdit(self.scrollAreaWidgetContents)
         self.txtWhiteBalanceCard.setObjectName(u"txtWhiteBalanceCard")
+        self.txtWhiteBalanceCard.setMaxLength(200)
 
         self.lay16WhiteBalanceCard.addWidget(self.txtWhiteBalanceCard)
 
@@ -532,12 +597,12 @@ class Ui_MetadataDialog(object):
         self.lay16WhiteBalanceCard.addWidget(self.txtWhiteBalanceCardCommonValue)
 
 
-        self.formLayout.setLayout(17, QFormLayout.ItemRole.FieldRole, self.lay16WhiteBalanceCard)
+        self.formLayout.setLayout(18, QFormLayout.ItemRole.FieldRole, self.lay16WhiteBalanceCard)
 
         self.lblComments = QLabel(self.scrollAreaWidgetContents)
         self.lblComments.setObjectName(u"lblComments")
 
-        self.formLayout.setWidget(18, QFormLayout.ItemRole.LabelRole, self.lblComments)
+        self.formLayout.setWidget(19, QFormLayout.ItemRole.LabelRole, self.lblComments)
 
         self.lay17Comments = QHBoxLayout()
         self.lay17Comments.setObjectName(u"lay17Comments")
@@ -546,45 +611,23 @@ class Ui_MetadataDialog(object):
 
         self.lay17Comments.addWidget(self.chkComments)
 
-        self.txtComments = QPlainTextEdit(self.scrollAreaWidgetContents)
+        self.txtComments = QLineEdit(self.scrollAreaWidgetContents)
         self.txtComments.setObjectName(u"txtComments")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.txtComments.sizePolicy().hasHeightForWidth())
-        self.txtComments.setSizePolicy(sizePolicy3)
 
         self.lay17Comments.addWidget(self.txtComments)
 
-        self.txtCommentsCommonValue = QPlainTextEdit(self.scrollAreaWidgetContents)
+        self.txtCommentsCommonValue = QLineEdit(self.scrollAreaWidgetContents)
         self.txtCommentsCommonValue.setObjectName(u"txtCommentsCommonValue")
-        self.txtCommentsCommonValue.setEnabled(True)
-        sizePolicy3.setHeightForWidth(self.txtCommentsCommonValue.sizePolicy().hasHeightForWidth())
-        self.txtCommentsCommonValue.setSizePolicy(sizePolicy3)
         self.txtCommentsCommonValue.setReadOnly(True)
 
         self.lay17Comments.addWidget(self.txtCommentsCommonValue)
 
 
-        self.formLayout.setLayout(18, QFormLayout.ItemRole.FieldRole, self.lay17Comments)
+        self.formLayout.setLayout(19, QFormLayout.ItemRole.FieldRole, self.lay17Comments)
 
-        self.line = QFrame(self.scrollAreaWidgetContents)
-        self.line.setObjectName(u"line")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.line.sizePolicy().hasHeightForWidth())
-        self.line.setSizePolicy(sizePolicy4)
-        self.line.setMinimumSize(QSize(0, 6))
-        self.line.setFrameShape(QFrame.Shape.HLine)
-        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.formLayout.setWidget(7, QFormLayout.ItemRole.FieldRole, self.line)
-
-        self.lblHeight = QLabel(self.scrollAreaWidgetContents)
-        self.lblHeight.setObjectName(u"lblHeight")
-
-        self.formLayout.setWidget(8, QFormLayout.ItemRole.LabelRole, self.lblHeight)
+        self.formLayout.setItem(20, QFormLayout.ItemRole.FieldRole, self.verticalSpacer_2)
 
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -626,6 +669,9 @@ class Ui_MetadataDialog(object):
         MetadataDialog.setWindowTitle(QCoreApplication.translate("MetadataDialog", u"Set Metadata", None))
         self.lblSelection.setText(QCoreApplication.translate("MetadataDialog", u"0/0 photos selected", None))
         self.btnCopyFromCurrentPhoto.setText(QCoreApplication.translate("MetadataDialog", u"Copy from current photo", None))
+        self.lblFilename.setText(QCoreApplication.translate("MetadataDialog", u"Filename:", None))
+        self.chkFilename.setText("")
+        self.txtFilenameVarious.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblDate.setText(QCoreApplication.translate("MetadataDialog", u"Date:", None))
         self.chkDate.setText("")
         self.dteDate.setDisplayFormat(QCoreApplication.translate("MetadataDialog", u"yyyy-MM-dd HH:mm", None))
@@ -646,9 +692,10 @@ class Ui_MetadataDialog(object):
         self.lblTransect.setText(QCoreApplication.translate("MetadataDialog", u"Transect:", None))
         self.chkTransect.setText("")
         self.txtTransectCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
+        self.lblHeight.setText(QCoreApplication.translate("MetadataDialog", u"Height:", None))
         self.chkHeight.setText("")
-        self.txtHeightCommonValue.setText("")
-        self.txtHeightCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
+        self.txtHeightVarious.setText("")
+        self.txtHeightVarious.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
         self.lblLatitude.setText(QCoreApplication.translate("MetadataDialog", u"Latitude:", None))
         self.chkLatitude.setText("")
         self.txtLatitudeVarious.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
@@ -679,7 +726,6 @@ class Ui_MetadataDialog(object):
         self.lblComments.setText(QCoreApplication.translate("MetadataDialog", u"Comments:", None))
         self.chkComments.setText("")
         self.txtCommentsCommonValue.setPlaceholderText(QCoreApplication.translate("MetadataDialog", u"(various)", None))
-        self.lblHeight.setText(QCoreApplication.translate("MetadataDialog", u"Height:", None))
         self.btnApply.setText(QCoreApplication.translate("MetadataDialog", u"Apply", None))
         self.btnCancel.setText(QCoreApplication.translate("MetadataDialog", u"Cancel", None))
     # retranslateUi

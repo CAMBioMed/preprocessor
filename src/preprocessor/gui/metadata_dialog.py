@@ -2,7 +2,8 @@ from datetime import datetime
 from typing import Any, ClassVar
 
 from PySide6.QtCore import QDateTime
-from PySide6.QtWidgets import QDialog, QWidget, QLineEdit, QCheckBox, QPlainTextEdit, QDateTimeEdit, QDoubleSpinBox
+from PySide6.QtWidgets import QDialog, QWidget, QLineEdit, QCheckBox, QPlainTextEdit, QDateTimeEdit, QDoubleSpinBox, \
+    QSpinBox
 
 from preprocessor.gui.ui_metadata_dialog import Ui_MetadataDialog
 from preprocessor.gui.utils import _dt_to_qdatetime
@@ -53,10 +54,10 @@ class MetadataDialog(QDialog):
     def _connect_signals(self) -> None:
         for field_name in self.fields:
             checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
-            if field_name == "comments":
-                checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_plaintextedit(fn))
-            elif field_name == "date":
+            if field_name == "date":
                 checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_datetime(fn))
+            elif field_name == "height":
+                checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_intspinbox(fn))
             elif field_name in ["latitude", "longitude"]:
                 checkbox.checkStateChanged.connect(lambda _, fn=field_name: self._update_metadata_doublespinbox(fn))
             else:
@@ -67,25 +68,56 @@ class MetadataDialog(QDialog):
         self.ui.btnApply.clicked.connect(self._apply_changes)
 
     def _set_initial_state(self) -> None:
+        selected_photo_count = len(self.selected_photos)
+        all_photo_count = len(self.application_model.current_project.photos)
+        has_current_photo = self.application_model.current_photo is not None
+
+        # Initialize 'filename' field
+        if selected_photo_count == 1:
+            self.ui.chkFilename.setVisible(True)
+            self.ui.txtFilename.setVisible(True)
+            self.ui.txtFilenameVarious.setVisible(False)
+
+            filename_value = self.selected_photos[0].metadata.filename
+
+            if filename_value is not None:
+                self.ui.chkFilename.setChecked(True)
+                self.ui.txtFilename.setText(filename_value)
+                self.ui.txtFilename.setPlaceholderText(filename_value)
+            else:
+                self.ui.chkFilename.setChecked(False)
+                self.ui.txtFilename.setText("")
+                # TODO: Show the default filename pattern as the placeholder instead of "(unspecified)"
+                self.ui.txtFilename.setPlaceholderText("(unspecified)")
+        else:
+            # Filename is not editable when multiple photos are selected
+            self.ui.chkFilename.setVisible(False)
+            self.ui.txtFilename.setVisible(False)
+            self.ui.txtFilenameVarious.setVisible(True)
+
+        # Initialize other fields
         for field_name in self.fields:
-            if field_name == "comments":
-                self._initialize_metadata_plaintextedit(field_name)
-            elif field_name == "date":
+            if field_name == "date":
                 self._initialize_metadata_datetime(field_name)
+            elif field_name == "height":
+                self._initialize_metadata_intspinbox(field_name)
             elif field_name in ["latitude", "longitude"]:
                 self._initialize_metadata_doublespinbox(field_name)
             else:
                 self._initialize_metadata_textbox(field_name)
-        selected_photo_count = len(self.selected_photos)
-        all_photo_count = len(self.application_model.current_project.photos)
-        has_current_photo = self.application_model.current_photo is not None
+
+        # Whether to show the 'Copy from Current Photo' button and its enabled state
         if selected_photo_count == 1:
             self.ui.lblSelection.setText(f"1/{all_photo_count}: {self.selected_photos[0].name}")
-            self.ui.btnCopyFromCurrentPhoto.setEnabled(
-                has_current_photo and self.selected_photos[0] != self.application_model.current_photo
-            )
+            if has_current_photo and self.selected_photos[0] != self.application_model.current_photo:
+                self.ui.btnCopyFromCurrentPhoto.setVisible(True)
+                self.ui.btnCopyFromCurrentPhoto.setEnabled(True)
+            else:
+                self.ui.btnCopyFromCurrentPhoto.setVisible(False)
+                self.ui.btnCopyFromCurrentPhoto.setEnabled(False)
         else:
             self.ui.lblSelection.setText(f"{selected_photo_count}/{all_photo_count} photos selected")
+            self.ui.btnCopyFromCurrentPhoto.setVisible(True)
             self.ui.btnCopyFromCurrentPhoto.setEnabled(has_current_photo)
 
     def _initialize_metadata_textbox(self, field_name: str) -> None:
@@ -126,6 +158,19 @@ class MetadataDialog(QDialog):
             checkbox.setChecked(False)
             datebox.setDateTime(QDateTime())
         self._update_metadata_datetime(field_name)
+
+    def _initialize_metadata_intspinbox(self, field_name: str) -> None:
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        spinbox: QSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+        common_value = self._determine_common_metadata_value(field_name)
+
+        if common_value is not None and common_value is not _DIFFERENT:
+            checkbox.setChecked(True)
+            spinbox.setValue(common_value)
+        else:
+            checkbox.setChecked(False)
+            spinbox.setValue(0)
+        self._update_metadata_intspinbox(field_name)
 
     def _initialize_metadata_doublespinbox(self, field_name: str) -> None:
         checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
@@ -189,6 +234,19 @@ class MetadataDialog(QDialog):
             else QDateTime()
         )
 
+    def _update_metadata_intspinbox(self, field_name: str) -> None:
+        checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
+        spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+        common_spinbox: QSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}CommonValue")
+        various_textbox: QSpinBox = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}Various")
+        overriding = checkbox.isChecked()
+
+        common_value = self._determine_common_metadata_value(field_name)
+        spinbox.setVisible(overriding)
+        common_spinbox.setVisible(not overriding and common_value is not _DIFFERENT)
+        various_textbox.setVisible(not overriding and common_value is _DIFFERENT)
+        common_spinbox.setValue(common_value if common_value is not _DIFFERENT and common_value is not None else 0)
+
     def _update_metadata_doublespinbox(self, field_name: str) -> None:
         checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
         spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
@@ -224,39 +282,48 @@ class MetadataDialog(QDialog):
             checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
             checkbox.setChecked(True)
             value = getattr(current_photo.metadata, field_name, None)
-            if field_name == "comments":
-                textbox: QPlainTextEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
-                textbox.setPlainText(str(value) if value is not None else "")
-            elif field_name == "date":
+            if field_name == "date":
                 datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
                 if isinstance(value, datetime):
                     datebox.setDateTime(_dt_to_qdatetime(value))
                 else:
                     datebox.setDateTime(QDateTime())
-            elif field_name in ["latitude", "longitude"]:
-                spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
-                if isinstance(value, (int, float)):
-                    spinbox.setValue(value)
+            elif field_name == "height":
+                intspinbox: QSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+                if isinstance(value, int):
+                    intspinbox.setValue(value)
                 else:
-                    spinbox.setValue(0.0)
+                    intspinbox.setValue(0)
+            elif field_name in ["latitude", "longitude"]:
+                doublespinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+                if isinstance(value, (int, float)):
+                    doublespinbox.setValue(float(value))
+                else:
+                    doublespinbox.setValue(0.0)
             else:
                 lineedit: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
                 lineedit.setText(str(value) if value is not None else "")
 
     def _apply_changes(self) -> None:
+        # Handle the filename field
+        if len(self.selected_photos) == 1 and self.ui.chkFilename.isChecked():
+            filename_value = self.ui.txtFilename.text()
+            self.selected_photos[0].metadata.filename = filename_value if filename_value else None
+
+        # Handle the other fields
         for field_name in self.fields:
             checkbox: QCheckBox = getattr(self.ui, f"chk{to_upper_camel_case(field_name)}")
             if checkbox.isChecked():
                 new_value: Any
-                if field_name == "comments":
-                    plaintextedit: QPlainTextEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
-                    new_value = plaintextedit.toPlainText()
-                elif field_name == "date":
+                if field_name == "date":
                     datebox: QDateTimeEdit = getattr(self.ui, f"dte{to_upper_camel_case(field_name)}")
                     new_value = datebox.dateTime().toPython()
+                elif field_name == "height":
+                    intspinbox: QSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+                    new_value = intspinbox.value()
                 elif field_name in ["latitude", "longitude"]:
-                    spinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
-                    new_value = spinbox.value()
+                    doublespinbox: QDoubleSpinBox = getattr(self.ui, f"num{to_upper_camel_case(field_name)}")
+                    new_value = doublespinbox.value()
                 else:
                     textbox: QLineEdit = getattr(self.ui, f"txt{to_upper_camel_case(field_name)}")
                     new_value = textbox.text()
