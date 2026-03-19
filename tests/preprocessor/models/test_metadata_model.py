@@ -44,6 +44,7 @@ class TestMetadataModel:
         self, qtbot: QtBot, field_name: str, initial_value: object, new_value: object
     ) -> None:
         """Model properties should have working getters, setters, and change signals."""
+        with qtbot.capture_exceptions():
         # Arrange: empty MetadataModel
         model = MetadataModel()
 

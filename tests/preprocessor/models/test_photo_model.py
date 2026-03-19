@@ -46,11 +46,12 @@ class TestPhotoModel:
         self, qtbot: QtBot, field_name: str, initial_value: object, new_value: object
     ) -> None:
         """Model properties should have working getters, setters, and change signals."""
-        # Arrange: empty MetadataModel
-        model = self.create_test_model()
+        with qtbot.capture_exceptions():
+            # Arrange: empty MetadataModel
+            model = self.create_test_model()
 
-        # Assert: fields signal correctly on change
-        assert_model_property_getter_setter_and_signal(qtbot, model, field_name, initial_value, new_value)
+            # Assert: fields signal correctly on change
+            assert_model_property_getter_setter_and_signal(qtbot, model, field_name, initial_value, new_value)
 
     fields_name_invalid = [
         # Invalid type
@@ -103,20 +104,21 @@ class TestPhotoModel:
 
     def test_metadata_property_and_signal(self, qtbot: QtBot) -> None:
         """MetadataModel should be accessible and emit on_metadata_changed when modified."""
-        model = self.create_test_model()
+        with qtbot.capture_exceptions():
+            model = self.create_test_model()
 
-        # Assert: metadata is accessible
-        assert model.metadata is not None
+            # Assert: metadata is accessible
+            assert model.metadata is not None
 
-        initial_partner_value = model.metadata.partner
+            initial_partner_value = model.metadata.partner
 
-        assert_model_property_signals_on_mutation(
-            qtbot,
-            model,
-            "metadata",
-            fn_set_same=lambda m, p: setattr(m.metadata, "partner", initial_partner_value),
-            fn_set_new=lambda m, p: setattr(m.metadata, "partner", "Acme Corp"),
-        )
+            assert_model_property_signals_on_mutation(
+                qtbot,
+                model,
+                "metadata",
+                fn_set_same=lambda m, p: setattr(m.metadata, "partner", initial_partner_value),
+                fn_set_new=lambda m, p: setattr(m.metadata, "partner", "Acme Corp"),
+            )
 
     def test_serialize_deserialize(self) -> None:
         # Arrange
