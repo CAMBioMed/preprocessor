@@ -126,44 +126,48 @@ def test_metadata_dialog_apply_all_checked_to_multiple_photos(qtbot: QtBot) -> N
         app_model: ApplicationModel = ApplicationModel()
 
         # No current photo needed here
-        photo1: PhotoModel = _make_photo(metadata={
-            "date": datetime.fromisoformat("2024-06-01T12:00:00"),
-            "partner": "PartnerA",
-            "area": "Area1",
-            "site": "SiteX",
-            "season": "Season2024",
-            "transect": "Transect5",
-            "height": 10,
-            "latitude": 45.0,
-            "longitude": -120.0,
-            "depth": "5m",
-            "camera": "Canon EOS 5D",
-            "photographer": "Alice",
-            "water_quality": "Clear",
-            "strobes": "On",
-            "framing": "Tight",
-            "white_balance_card": "Yes",
-            "comments": "A sample comment",
-        })
-        photo2: PhotoModel = _make_photo(metadata={
-            "date": datetime.fromisoformat("2026-01-02T01:23:45"),
-            "partner": "PartnerB",
-            "area": "Area2",
-            "site": "SiteY",
-            "season": "Season2026",
-            "transect": "Transect10",
-            "height": 20,
-            "latitude": 42.0,
-            "longitude": -110.0,
-            "depth": "10m",
-            "camera": "Canon EOS 6D",
-            "photographer": "Bob",
-            "water_quality": "Murky",
-            "strobes": "Off",
-            "framing": "Wide",
-            "white_balance_card": "No",
-            "comments": "Another comment",
-        })
+        photo1: PhotoModel = _make_photo(
+            metadata={
+                "date": datetime.fromisoformat("2024-06-01T12:00:00"),
+                "partner": "PartnerA",
+                "area": "Area1",
+                "site": "SiteX",
+                "season": "Season2024",
+                "transect": "Transect5",
+                "height": 10,
+                "latitude": 45.0,
+                "longitude": -120.0,
+                "depth": "5m",
+                "camera": "Canon EOS 5D",
+                "photographer": "Alice",
+                "water_quality": "Clear",
+                "strobes": "On",
+                "framing": "Tight",
+                "white_balance_card": "Yes",
+                "comments": "A sample comment",
+            }
+        )
+        photo2: PhotoModel = _make_photo(
+            metadata={
+                "date": datetime.fromisoformat("2026-01-02T01:23:45"),
+                "partner": "PartnerB",
+                "area": "Area2",
+                "site": "SiteY",
+                "season": "Season2026",
+                "transect": "Transect10",
+                "height": 20,
+                "latitude": 42.0,
+                "longitude": -110.0,
+                "depth": "10m",
+                "camera": "Canon EOS 6D",
+                "photographer": "Bob",
+                "water_quality": "Murky",
+                "strobes": "Off",
+                "framing": "Wide",
+                "white_balance_card": "No",
+                "comments": "Another comment",
+            }
+        )
 
         dlg: MetadataDialog = MetadataDialog(app_model, [photo1, photo2])
         qtbot.addWidget(dlg)
@@ -252,44 +256,48 @@ def test_metadata_dialog_apply_checked_to_multiple_photos_1(qtbot: QtBot) -> Non
         app_model: ApplicationModel = ApplicationModel()
 
         # No current photo needed here
-        photo1: PhotoModel = _make_photo(metadata={
-            "date": datetime.fromisoformat("2024-06-01T12:00:00"),
-            "partner": "PartnerA",
-            "area": "Area1",
-            "site": "SiteX",
-            "season": "Season2024",
-            "transect": "Transect5",
-            "height": 10,
-            "latitude": 45.0,
-            "longitude": -120.0,
-            "depth": "5m",
-            "camera": "Canon EOS 5D",
-            "photographer": "Alice",
-            "water_quality": "Clear",
-            "strobes": "On",
-            "framing": "Tight",
-            "white_balance_card": "Yes",
-            "comments": "A sample comment",
-        })
-        photo2: PhotoModel = _make_photo(metadata={
-            "date": datetime.fromisoformat("2026-01-02T01:23:45"),
-            "partner": "PartnerB",
-            "area": "Area2",
-            "site": "SiteY",
-            "season": "Season2026",
-            "transect": "Transect10",
-            "height": 20,
-            "latitude": 42.0,
-            "longitude": -110.0,
-            "depth": "10m",
-            "camera": "Canon EOS 6D",
-            "photographer": "Bob",
-            "water_quality": "Murky",
-            "strobes": "Off",
-            "framing": "Wide",
-            "white_balance_card": "No",
-            "comments": "Another comment",
-        })
+        photo1: PhotoModel = _make_photo(
+            metadata={
+                "date": datetime.fromisoformat("2024-06-01T12:00:00"),
+                "partner": "PartnerA",
+                "area": "Area1",
+                "site": "SiteX",
+                "season": "Season2024",
+                "transect": "Transect5",
+                "height": 10,
+                "latitude": 45.0,
+                "longitude": -120.0,
+                "depth": "5m",
+                "camera": "Canon EOS 5D",
+                "photographer": "Alice",
+                "water_quality": "Clear",
+                "strobes": "On",
+                "framing": "Tight",
+                "white_balance_card": "Yes",
+                "comments": "A sample comment",
+            }
+        )
+        photo2: PhotoModel = _make_photo(
+            metadata={
+                "date": datetime.fromisoformat("2026-01-02T01:23:45"),
+                "partner": "PartnerB",
+                "area": "Area2",
+                "site": "SiteY",
+                "season": "Season2026",
+                "transect": "Transect10",
+                "height": 20,
+                "latitude": 42.0,
+                "longitude": -110.0,
+                "depth": "10m",
+                "camera": "Canon EOS 6D",
+                "photographer": "Bob",
+                "water_quality": "Murky",
+                "strobes": "Off",
+                "framing": "Wide",
+                "white_balance_card": "No",
+                "comments": "Another comment",
+            }
+        )
 
         dlg: MetadataDialog = MetadataDialog(app_model, [photo1, photo2])
         qtbot.addWidget(dlg)
@@ -372,51 +380,54 @@ def test_metadata_dialog_apply_checked_to_multiple_photos_1(qtbot: QtBot) -> Non
         assert photo2.metadata.comments == "Updated comment"
 
 
-
 def test_metadata_dialog_apply_checked_to_multiple_photos_2(qtbot: QtBot) -> None:
     """Apply common metadata to multiple selected photos."""
     with qtbot.capture_exceptions():
         app_model: ApplicationModel = ApplicationModel()
 
         # No current photo needed here
-        photo1: PhotoModel = _make_photo(metadata={
-            "date": datetime.fromisoformat("2024-06-01T12:00:00"),
-            "partner": "PartnerA",
-            "area": "Area1",
-            "site": "SiteX",
-            "season": "Season2024",
-            "transect": "Transect5",
-            "height": 10,
-            "latitude": 45.0,
-            "longitude": -120.0,
-            "depth": "5m",
-            "camera": "Canon EOS 5D",
-            "photographer": "Alice",
-            "water_quality": "Clear",
-            "strobes": "On",
-            "framing": "Tight",
-            "white_balance_card": "Yes",
-            "comments": "A sample comment",
-        })
-        photo2: PhotoModel = _make_photo(metadata={
-            "date": datetime.fromisoformat("2026-01-02T01:23:45"),
-            "partner": "PartnerB",
-            "area": "Area2",
-            "site": "SiteY",
-            "season": "Season2026",
-            "transect": "Transect10",
-            "height": 20,
-            "latitude": 42.0,
-            "longitude": -110.0,
-            "depth": "10m",
-            "camera": "Canon EOS 6D",
-            "photographer": "Bob",
-            "water_quality": "Murky",
-            "strobes": "Off",
-            "framing": "Wide",
-            "white_balance_card": "No",
-            "comments": "Another comment",
-        })
+        photo1: PhotoModel = _make_photo(
+            metadata={
+                "date": datetime.fromisoformat("2024-06-01T12:00:00"),
+                "partner": "PartnerA",
+                "area": "Area1",
+                "site": "SiteX",
+                "season": "Season2024",
+                "transect": "Transect5",
+                "height": 10,
+                "latitude": 45.0,
+                "longitude": -120.0,
+                "depth": "5m",
+                "camera": "Canon EOS 5D",
+                "photographer": "Alice",
+                "water_quality": "Clear",
+                "strobes": "On",
+                "framing": "Tight",
+                "white_balance_card": "Yes",
+                "comments": "A sample comment",
+            }
+        )
+        photo2: PhotoModel = _make_photo(
+            metadata={
+                "date": datetime.fromisoformat("2026-01-02T01:23:45"),
+                "partner": "PartnerB",
+                "area": "Area2",
+                "site": "SiteY",
+                "season": "Season2026",
+                "transect": "Transect10",
+                "height": 20,
+                "latitude": 42.0,
+                "longitude": -110.0,
+                "depth": "10m",
+                "camera": "Canon EOS 6D",
+                "photographer": "Bob",
+                "water_quality": "Murky",
+                "strobes": "Off",
+                "framing": "Wide",
+                "white_balance_card": "No",
+                "comments": "Another comment",
+            }
+        )
 
         dlg: MetadataDialog = MetadataDialog(app_model, [photo1, photo2])
         qtbot.addWidget(dlg)

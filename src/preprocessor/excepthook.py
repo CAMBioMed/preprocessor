@@ -1,31 +1,21 @@
 import sys
 import traceback
 from types import TracebackType
-from typing import Any
-import signal
-from pathlib import Path
 
-import PySide6
 
-from preprocessor import app_version, app_organisation, app_domain, app_name, app_formal_name
-from preprocessor.gui.launch_dialog import LaunchDialog, open_project
-from preprocessor.gui.main_window import MainWindow
-from preprocessor.model.application_model import ApplicationModel
-from preprocessor.model.project_model import ProjectModel
-from PySide6 import QtGui
-from PySide6.QtCore import QCoreApplication, QTimer
+from preprocessor import app_formal_name
 from PySide6.QtWidgets import (
     QApplication,
     QMessageBox,
-    QDialog,
 )
 
 import logging
-import click
+
 
 def setup_excepthook() -> None:
     """Set up the global exception hook to catch uncaught exceptions and show an error message box."""
     sys.excepthook = _excepthook
+
 
 def _excepthook(cls: type[BaseException], exception: BaseException, traceback_obj: TracebackType | None) -> None:
     """Handle uncaught exceptions including Qt errors."""

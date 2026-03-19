@@ -2,8 +2,16 @@ from datetime import datetime
 from typing import Any, ClassVar
 
 from PySide6.QtCore import QDateTime
-from PySide6.QtWidgets import QDialog, QWidget, QLineEdit, QCheckBox, QPlainTextEdit, QDateTimeEdit, QDoubleSpinBox, \
-    QSpinBox
+from PySide6.QtWidgets import (
+    QDialog,
+    QWidget,
+    QLineEdit,
+    QCheckBox,
+    QPlainTextEdit,
+    QDateTimeEdit,
+    QDoubleSpinBox,
+    QSpinBox,
+)
 
 from preprocessor.gui.ui_metadata_dialog import Ui_MetadataDialog
 from preprocessor.gui.utils import _dt_to_qdatetime
