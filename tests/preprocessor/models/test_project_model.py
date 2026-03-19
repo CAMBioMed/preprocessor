@@ -194,112 +194,119 @@ class TestProjectModel:
         assert project.dirty
 
     def test_file_property_getter_setter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        # Delegate to helper to keep tests DRY
-        p = tmp_path / "proj.json"
-        model = ProjectModel(file=p)
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "file", p, tmp_path / "new_proj.json", "on_file_changed"
-        )
+        with qtbot.capture_exceptions():
+            # Delegate to helper to keep tests DRY
+            p = tmp_path / "proj.json"
+            model = ProjectModel(file=p)
+            self._assert_property_getter_setter_and_signal(
+                qtbot, model, "file", p, tmp_path / "new_proj.json", "on_file_changed"
+            )
 
     def test_export_path_getter_setter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        # Arrange
-        model = ProjectModel(file=tmp_path / "proj.json")
+        with qtbot.capture_exceptions():
+            # Arrange
+            model = ProjectModel(file=tmp_path / "proj.json")
 
-        # Use helper to test export_path property
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "export_path", None, tmp_path / "export", "on_export_path_changed"
-        )
+            # Use helper to test export_path property
+            self._assert_property_getter_setter_and_signal(
+                qtbot, model, "export_path", None, tmp_path / "export", "on_export_path_changed"
+            )
 
     def test_target_width_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        # Arrange
-        model = ProjectModel(file=tmp_path / "proj.json")
+        with qtbot.capture_exceptions():
+            # Arrange
+            model = ProjectModel(file=tmp_path / "proj.json")
 
-        # Use helper to test target_width (None -> 200)
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "target_width", None, 200, "on_target_width_changed"
-        )
+            # Use helper to test target_width (None -> 200)
+            self._assert_property_getter_setter_and_signal(
+                qtbot, model, "target_width", None, 200, "on_target_width_changed"
+            )
 
-        # Validator: reading JSON with invalid target_width (<1) should raise ValueError
-        bad = {"model_version": ProjectData.SERIAL_VERSION, "target_width": 0}
-        json_str = json.dumps(bad)
-        with pytest.raises(ValueError):
-            ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+            # Validator: reading JSON with invalid target_width (<1) should raise ValueError
+            bad = {"model_version": ProjectData.SERIAL_VERSION, "target_width": 0}
+            json_str = json.dumps(bad)
+            with pytest.raises(ValueError):
+                ProjectModel.read_from_json(tmp_path / "f.json", json_str)
 
     def test_target_height_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        # Arrange
-        model = ProjectModel(file=tmp_path / "proj.json")
+        with qtbot.capture_exceptions():
+            # Arrange
+            model = ProjectModel(file=tmp_path / "proj.json")
 
-        # Use helper to test target_height (None -> 300)
-        self._assert_property_getter_setter_and_signal(
-            qtbot, model, "target_height", None, 300, "on_target_height_changed"
-        )
+            # Use helper to test target_height (None -> 300)
+            self._assert_property_getter_setter_and_signal(
+                qtbot, model, "target_height", None, 300, "on_target_height_changed"
+            )
 
-        # Validator: reading JSON with invalid target_height (<1) should raise ValueError
-        bad = {"model_version": ProjectData.SERIAL_VERSION, "target_height": 0}
-        json_str = json.dumps(bad)
-        with pytest.raises(ValueError):
-            ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+            # Validator: reading JSON with invalid target_height (<1) should raise ValueError
+            bad = {"model_version": ProjectData.SERIAL_VERSION, "target_height": 0}
+            json_str = json.dumps(bad)
+            with pytest.raises(ValueError):
+                ProjectModel.read_from_json(tmp_path / "f.json", json_str)
 
     def test_photos_list_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        # Arrange
-        model = ProjectModel(file=tmp_path / "proj.json")
-        assert len(model.photos) == 0
+        with qtbot.capture_exceptions():
+            # Arrange
+            model = ProjectModel(file=tmp_path / "proj.json")
+            assert len(model.photos) == 0
 
-        # Act / Assert: appending a PhotoModel should emit on_photos_changed and update serialized data
-        photo = PhotoModel(data={"original_filename": Path("img.jpg"), "width": 10, "height": 5})
-        with qtbot.waitSignal(model.on_photos_changed, timeout=1000) as blocker:
-            model.photos.append(photo)
+            # Act / Assert: appending a PhotoModel should emit on_photos_changed and update serialized data
+            photo = PhotoModel(data={"original_filename": Path("img.jpg"), "width": 10, "height": 5})
+            with qtbot.waitSignal(model.on_photos_changed, timeout=1000) as blocker:
+                model.photos.append(photo)
 
-        assert len(model.photos) == 1
-        assert isinstance(model._data.photos[0], PhotoData)
-        assert blocker.args is not None
+            assert len(model.photos) == 1
+            assert isinstance(model._data.photos[0], PhotoData)
+            assert blocker.args is not None
 
-        # Validator: a photo with invalid distortion_coefficients length should fail when reading from JSON
-        bad_photo = {
-            "original_filename": "a.jpg",
-            "width": 1,
-            "height": 1,
-            "distortion_coefficients": [1.0, 2.0, 3.0],
-        }
-        bad = {"model_version": ProjectData.SERIAL_VERSION, "photos": [bad_photo]}
-        json_str = json.dumps(bad)
-        with pytest.raises(ValueError):
-            ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+            # Validator: a photo with invalid distortion_coefficients length should fail when reading from JSON
+            bad_photo = {
+                "original_filename": "a.jpg",
+                "width": 1,
+                "height": 1,
+                "distortion_coefficients": [1.0, 2.0, 3.0],
+            }
+            bad = {"model_version": ProjectData.SERIAL_VERSION, "photos": [bad_photo]}
+            json_str = json.dumps(bad)
+            with pytest.raises(ValueError):
+                ProjectModel.read_from_json(tmp_path / "f.json", json_str)
 
     def test_cameras_list_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        # Arrange
-        model = ProjectModel(file=tmp_path / "proj.json")
-        assert len(model.cameras) == 0
+        with qtbot.capture_exceptions():
+            # Arrange
+            model = ProjectModel(file=tmp_path / "proj.json")
+            assert len(model.cameras) == 0
 
-        # Act / Assert: appending a CameraModel should emit on_cameras_changed and update serialized data
-        cam = CameraModel(file=None, data={"name": "C1", "distortion_coefficients": [0, 0, 0, 0, 0]})
-        with qtbot.waitSignal(model.on_cameras_changed, timeout=1000) as blocker:
-            model.cameras.append(cam)
+            # Act / Assert: appending a CameraModel should emit on_cameras_changed and update serialized data
+            cam = CameraModel(file=None, data={"name": "C1", "distortion_coefficients": [0, 0, 0, 0, 0]})
+            with qtbot.waitSignal(model.on_cameras_changed, timeout=1000) as blocker:
+                model.cameras.append(cam)
 
-        assert len(model.cameras) == 1
-        assert isinstance(model._data.cameras[0], CameraData)
-        assert blocker.args is not None
+            assert len(model.cameras) == 1
+            assert isinstance(model._data.cameras[0], CameraData)
+            assert blocker.args is not None
 
-        # Validator: invalid distortion_coefficients length in camera JSON should raise
-        bad_cam = {"name": "C2", "distortion_coefficients": [1.0, 2.0, 3.0]}
-        bad = {"model_version": ProjectData.SERIAL_VERSION, "cameras": [bad_cam]}
-        json_str = json.dumps(bad)
-        with pytest.raises(ValueError):
-            ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+            # Validator: invalid distortion_coefficients length in camera JSON should raise
+            bad_cam = {"name": "C2", "distortion_coefficients": [1.0, 2.0, 3.0]}
+            bad = {"model_version": ProjectData.SERIAL_VERSION, "cameras": [bad_cam]}
+            json_str = json.dumps(bad)
+            with pytest.raises(ValueError):
+                ProjectModel.read_from_json(tmp_path / "f.json", json_str)
 
     def test_default_metadata_getter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        # Arrange
-        model = ProjectModel(file=tmp_path / "proj.json")
-        md = model.default_metadata
-        assert md is not None
-        assert isinstance(md._data, MetadataData)
+        with qtbot.capture_exceptions():
+            # Arrange
+            model = ProjectModel(file=tmp_path / "proj.json")
+            md = model.default_metadata
+            assert md is not None
+            assert isinstance(md._data, MetadataData)
 
-        # Act / Assert: when the metadata model signals on_changed, ProjectModel should forward via on_default_metadata_changed
-        with qtbot.waitSignal(model.on_default_metadata_changed, timeout=1000) as blocker:
-            # simulate a change in the metadata model
-            md.on_changed.emit()
+            # Act / Assert: when the metadata model signals on_changed, ProjectModel should forward via on_default_metadata_changed
+            with qtbot.waitSignal(model.on_default_metadata_changed, timeout=1000) as blocker:
+                # simulate a change in the metadata model
+                md.on_changed.emit()
 
-        assert blocker.args is not None
+            assert blocker.args is not None
 
     @staticmethod
     def _assert_property_getter_setter_and_signal(
