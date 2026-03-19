@@ -27,11 +27,11 @@ class MetadataData(BaseModel, validate_assignment=True):
     """The season name for the photo, or None if not set."""
     transect: str | None = Field(max_length=50, default=None)
     """The transect information for the photo, or None if not set."""
-    height: int | None = Field(gt=0, default=None)
+    height: int | None = Field(ge=0, default=None)
     """The number of centimeters of substrate the image covers, or None if not set."""
-    latitude: float | None = Field(gt=-90.0, lt=90.0, default=None)
+    latitude: float | None = Field(ge=-90.0, le=90.0, default=None)
     """The latitude information, or None if not set."""
-    longitude: float | None = Field(gt=-180.0, lt=180.0, default=None)
+    longitude: float | None = Field(ge=-180.0, le=180.0, default=None)
     """The longitude information, or None if not set."""
     depth: str | None = Field(max_length=45, default=None)
     """The depth information, or None if not set."""

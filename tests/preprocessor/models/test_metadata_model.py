@@ -27,8 +27,13 @@ class TestMetadataModel:
         ("season", None, "Spring"),
         ("transect", None, "Transect 1"),
         ("height", None, 10000),
+        ("height", None, 0),
         ("latitude", None, 34.0522),
+        ("latitude", None, -90.0),
+        ("latitude", None, 90.0),
         ("longitude", None, -118.2437),
+        ("longitude", None, -180.0),
+        ("longitude", None, 180.0),
         ("depth", None, "20m"),
         ("camera", None, "Canon EOS R5"),
         ("photographer", None, "Jane Doe"),
@@ -45,11 +50,11 @@ class TestMetadataModel:
     ) -> None:
         """Model properties should have working getters, setters, and change signals."""
         with qtbot.capture_exceptions():
-        # Arrange: empty MetadataModel
-        model = MetadataModel()
+            # Arrange: empty MetadataModel
+            model = MetadataModel()
 
-        # Assert: fields signal correctly on change
-        assert_model_property_getter_setter_and_signal(qtbot, model, field_name, initial_value, new_value)
+            # Assert: fields signal correctly on change
+            assert_model_property_getter_setter_and_signal(qtbot, model, field_name, initial_value, new_value)
 
     fields_name_invalid = [
         ("filename", "x" * 201),  # Must be <= 200 chars
