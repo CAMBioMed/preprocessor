@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from typing import cast
 
 import pytest
@@ -68,6 +68,7 @@ class TestMetadataModel:
 
     fields_name_value_normalized = [
         # Empty strings become None
+        ("date", "", None),
         ("partner", "", None),
         ("area", "", None),
         ("site", "", None),
@@ -82,7 +83,13 @@ class TestMetadataModel:
         ("framing", "", None),
         ("white_balance_card", "", None),
         ("comments", "", None),
+        # Parsing dates
+        ("date", "2016-05-30T15:46:24", datetime(2016, 5, 30, 15, 46, 24)),
+        ("date", "2025-09-20T16:35:48.429000+02:00", datetime(2025, 9, 20, 16, 35, 48, 429000, tzinfo=timezone(timedelta(seconds=7200)))),
+        ("date", "2025-05-04T13:17:58+01:00", datetime(2025, 5, 4, 13, 17, 58, tzinfo=timezone(timedelta(seconds=3600)))),
+        ("date", "2025-12-15T10:30:00Z", datetime(2025, 12, 15, 10, 30, 0, tzinfo=timezone.utc)),
         # Trimming whitespace
+        ("date", "  2026-03-24T14:00:00  ", datetime(2026, 3, 24, 14, 0, 0)),
         ("partner", "  Acme Corp  ", "Acme Corp"),
         ("area", "  Coral Reef  ", "Coral Reef"),
         ("site", "  Site A  ", "Site A"),

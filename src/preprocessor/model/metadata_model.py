@@ -51,7 +51,17 @@ class MetadataData(BaseModel, validate_assignment=True):
     @field_validator("date", mode="before")
     @classmethod
     def _validate_date(cls: type["MetadataData"], v: Any) -> datetime | None:  # noqa: ANN401
-        if v is not None and not isinstance(v, datetime) and type(v) is not datetime:
+        if v is None:
+            return v
+        if isinstance(v, str):
+            if not v.strip():
+                return None
+            try:
+                return datetime.fromisoformat(v.strip())
+            except ValueError:
+                msg = "date string must be in ISO format (YYYY-MM-DDTHH:MM:SS), or None"
+                raise ValueError(msg) from None
+        if not isinstance(v, datetime) and type(v) is not datetime:
             msg = "date must be a datetime object, or None"
             raise ValueError(msg)
         return v
