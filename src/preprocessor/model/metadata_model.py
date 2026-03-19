@@ -13,84 +13,50 @@ class MetadataData(BaseModel, validate_assignment=True):
     # Serialization JSON version
     SERIAL_VERSION: ClassVar[int] = 1
 
-    date: datetime | None = None
     filename: str | None = Field(max_length=200, default=None)
     """The filename of the photo, or None if not set."""
+    date: datetime | None = Field(default=None)
     """The date the photo was taken, or None if not set."""
-    partner: str | None = None
+    partner: str | None = Field(max_length=50, default=None)
     """The partner name for the photo, or None if not set."""
-    area: str | None = None
+    area: str | None = Field(max_length=50, default=None)
     """The area name for the photo, or None if not set."""
-    site: str | None = None
+    site: str | None = Field(max_length=50, default=None)
     """The site name for the photo, or None if not set."""
-    season: str | None = None
+    season: str | None = Field(max_length=50, default=None)
     """The season name for the photo, or None if not set."""
-    transect: str | None = None
+    transect: str | None = Field(max_length=50, default=None)
     """The transect information for the photo, or None if not set."""
-    height: str | None = None
-    """The height information, or None if not set."""
-    latitude: float | None = None
+    height: int | None = Field(gt=0, default=None)
+    """The number of centimeters of substrate the image covers, or None if not set."""
+    latitude: float | None = Field(gt=-90.0, lt=90.0, default=None)
     """The latitude information, or None if not set."""
-    longitude: float | None = None
+    longitude: float | None = Field(gt=-180.0, lt=180.0, default=None)
     """The longitude information, or None if not set."""
-    depth: str | None = None
+    depth: str | None = Field(max_length=45, default=None)
     """The depth information, or None if not set."""
-    camera: str | None = None
+    camera: str | None = Field(max_length=200, default=None)
     """The camera information, or None if not set."""
-    photographer: str | None = None
+    photographer: str | None = Field(max_length=45, default=None)
     """The photographer information, or None if not set."""
-    water_quality: str | None = None
+    water_quality: str | None = Field(max_length=45, default=None)
     """The water quality information, or None if not set."""
-    strobes: str | None = None
+    strobes: str | None = Field(max_length=200, default=None)
     """The strobes information, or None if not set."""
-    framing: str | None = None
+    framing: str | None = Field(max_length=200, default=None)
     """The framing information, or None if not set."""
-    white_balance_card: str | None = None
+    white_balance_card: str | None = Field(max_length=200, default=None)
     """The white balance card information, or None if not set."""
-    comments: str | None = None
+    comments: str | None = Field(max_length=1000, default=None)
     """Any additional comments, or None if not set."""
 
-    @field_validator("date", mode="before")
-    @classmethod
-    def _validate_date(cls: type["MetadataData"], v: Any) -> datetime | None:  # noqa: ANN401
-        if v is None:
-            return v
-        if isinstance(v, str):
-            if not v.strip():
-                return None
-            try:
-                return datetime.fromisoformat(v.strip())
-            except ValueError:
-                msg = "date string must be in ISO format (YYYY-MM-DDTHH:MM:SS), or None"
-                raise ValueError(msg) from None
-        if not isinstance(v, datetime) and type(v) is not datetime:
-            msg = "date must be a datetime object, or None"
-            raise ValueError(msg)
-        return v
-
-    @field_validator("*", mode="after")
+    @field_validator("*", mode="before")
     @classmethod
     def _validate_str_fields(cls: type["MetadataData"], v: Any) -> Any:  # noqa: ANN401
         if v is not None and isinstance(v, str):
             if not v.strip():
                 return None
             return v.strip()
-        return v
-
-    @field_validator("latitude", mode="after")
-    @classmethod
-    def _validate_latitude(cls: type["MetadataData"], v: float) -> float:
-        if v is not None and (v < -90 or v > 90):
-            msg = "latitude must be between -90 and 90 degrees, or None"
-            raise ValueError(msg)
-        return v
-
-    @field_validator("longitude", mode="after")
-    @classmethod
-    def _validate_longitude(cls: type["MetadataData"], v: float) -> float:
-        if v is not None and (v < -180 or v > 180):
-            msg = "longitude must be between -180 and 180 degrees, or None"
-            raise ValueError(msg)
         return v
 
 
@@ -174,11 +140,11 @@ class MetadataModel(QModel[MetadataData]):
         self._set_field("transect", value)
 
     @property
-    def height(self) -> str | None:
+    def height(self) -> int | None:
         return self._data.height
 
     @height.setter
-    def height(self, value: str | None) -> None:
+    def height(self, value: int | None) -> None:
         self._set_field("height", value)
 
     @property
