@@ -48,29 +48,10 @@ class ExportDialog(QDialog):
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(self._handle_cancel)
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self._handle_close)
 
-        # Update the displayed label when the spin boxes change
-        # fmt: off
-        self.ui.numTargetWidth.valueChanged.connect(
-            lambda v: self.ui.lblTargetWidth_Value.setText(str(int(v)) + " px")
-        )
-        self.ui.numTargetHeight.valueChanged.connect(
-            lambda v: self.ui.lblTargetHeight_Value.setText(str(int(v)) + " px")
-        )
-        # fmt: on
-
     def _set_initial_state(self) -> None:
         # Set the output directory to the last used export path, if available
         if self.current_project.export_path:
             self.ui.txtOutputDir.setText(str(self.current_project.export_path))
-
-        # Initialize target size controls from project (or use defaults)
-        default_width = getattr(self.current_project, "target_width", None) or 1024
-        default_height = getattr(self.current_project, "target_height", None) or 1024
-        self.ui.numTargetWidth.setValue(int(default_width))
-        self.ui.numTargetHeight.setValue(int(default_height))
-        # # Set the label displays to match the initial values
-        # self.ui.lblTargetWidth_Value.setText(str(int(default_width)))
-        # self.ui.lblTargetHeight_Value.setText(str(int(default_height)))
 
     def _handle_outputdir_browse_clicked(self) -> None:
         directory = QFileDialog.getExistingDirectory(self, "Output Directory")
@@ -98,8 +79,6 @@ class ExportDialog(QDialog):
 
         # Save the settings
         self.current_project.export_path = Path(export_dir)
-        self.current_project.target_width = self.ui.numTargetWidth.value()
-        self.current_project.target_height = self.ui.numTargetHeight.value()
 
         # Prepare progress UI
         self.ui.prbProgress.setValue(0)
@@ -273,19 +252,11 @@ class _ExportWorker(QObject):
                     self.progress.emit(idx, total)
                     continue
 
-                # Ensure target sizes are present
-                if self.project.target_width is None or self.project.target_height is None:
-                    self.message.emit("error", "Target width/height not set for export.")
-                    self.progress.emit(idx, total)
-                    continue
-
                 # Process perspective; guard against processing errors
                 try:
                     final_img = fix_perspective(
                         img,
                         list(photo.quadrat_corners),
-                        self.project.target_width,
-                        self.project.target_height,
                     )
                 except Exception as e:
                     self.message.emit("error", f"Processing failed for {output_name}: {e}")
