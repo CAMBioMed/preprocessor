@@ -78,12 +78,26 @@ class ApplicationModel(QObject):
     def main_window_state(self, state: QByteArray) -> None:
         self._main_window_state = state
 
+    _projects_path: Path | None = None
+
+    @property
+    def projects_path(self) -> Path | None:
+        """The path to the default directory for opening projects, or None if not set."""
+        return self._projects_path
+
+    @projects_path.setter
+    def projects_path(self, path: Path | None) -> None:
+        self._projects_path = path
+
     def write_settings(self) -> None:
         """Write window settings to persistent storage."""
         self.settings.setValue("geometry", self._main_window_geometry)
         self.settings.setValue("windowState", self._main_window_state)
+        self.settings.setValue("projectsPath", str(self._projects_path) if self._projects_path is not None else "")
 
     def read_settings(self) -> None:
         """Read window settings from persistent storage."""
         self._main_window_geometry = cast(QByteArray, self.settings.value("geometry", QByteArray()))
         self._main_window_state = cast(QByteArray, self.settings.value("windowState", QByteArray()))
+        projects_path_str = cast(str, self.settings.value("projectsPath", ""))
+        self._projects_path = Path(projects_path_str) if projects_path_str else None

@@ -192,20 +192,22 @@ class MainWindow(QMainWindow):
         self.model.on_current_photo_changed.connect(self._handle_current_photo_changed)
 
     def _handle_new_project_action(self) -> None:
-        new_project = new_project_dialog(self, self.model.current_project)
+        new_project = new_project_dialog(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
+            self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
             self.model.current_project = new_project
 
     def _handle_open_project_action(self) -> None:
-        new_project = open_project_dialog(self, self.model.current_project)
+        new_project = open_project_dialog(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
+            self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
             self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:
         save_project(self, self.model.current_project, self.model.current_project.file)
 
     def _handle_save_project_as_action(self) -> None:
-        save_project_as_dialog(self, self.model.current_project)
+        save_project_as_dialog(self, self.model.current_project, self.model.projects_path)
 
     def _handle_project_settings_action(self) -> None:
         dialog = ProjectSettingsDialog(self.model.current_project, self)

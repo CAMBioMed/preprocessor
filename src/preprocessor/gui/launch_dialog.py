@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox, QAppli
 
 from preprocessor import app_formal_name
 from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
+from preprocessor.model.application_model import ApplicationModel
 from preprocessor.model.project_model import ProjectModel
 
 logger = logging.getLogger(__name__)
@@ -12,13 +13,16 @@ logger = logging.getLogger(__name__)
 
 class LaunchDialog(QDialog):
     ui: Ui_LaunchDialog
+    application_model: ApplicationModel
     project_model: ProjectModel | None = None
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.ui = Ui_LaunchDialog()
         self.ui.setupUi(self)
         self.setWindowTitle(app_formal_name)
+
+        self.application_model = model
         self._connect_signals()
 
     def _connect_signals(self) -> None:
@@ -28,16 +32,22 @@ class LaunchDialog(QDialog):
         self.ui.btnExit.clicked.connect(self.reject)
 
     def _handle_new_project_action(self) -> None:
-        project_model = new_project_dialog(self, None)
+        project_model = new_project_dialog(self, None, self.application_model.projects_path)
         if project_model is None:
             return
+        self.application_model.projects_path = (
+            project_model.file.parent if project_model.file else self.application_model.projects_path
+        )
         self.project_model = project_model
         self.accept()
 
     def _handle_open_project_action(self) -> None:
-        project_model = open_project_dialog(self, None)
+        project_model = open_project_dialog(self, None, self.application_model.projects_path)
         if project_model is None:
             return
+        self.application_model.projects_path = (
+            project_model.file.parent if project_model.file else self.application_model.projects_path
+        )
         self.project_model = project_model
         self.accept()
 
@@ -94,7 +104,11 @@ def save_project(parent: QWidget | None, project: ProjectModel, path: Path) -> b
     return True
 
 
-def new_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> ProjectModel | None:
+def new_project_dialog(
+    parent: QWidget,
+    old_project: ProjectModel | None,
+    initial_path: Path | None,
+) -> ProjectModel | None:
     """
     Show a file dialog to create a new project file, and return the new ProjectModel if successful,
     or None if canceled or failed.
@@ -106,7 +120,7 @@ def new_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pro
     path, _ = QFileDialog.getSaveFileName(
         parent,
         "New Project",
-        "",
+        str(initial_path) if initial_path else "",
         "Project Files (*.pbproj);;All Files (*)"
     )
     # fmt: on
@@ -117,7 +131,9 @@ def new_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pro
     return new_project(parent, Path(path))
 
 
-def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> ProjectModel | None:
+def open_project_dialog(
+    parent: QWidget, old_project: ProjectModel | None, initial_path: Path | None
+) -> ProjectModel | None:
     """
     Show a file dialog to open a project file, and return the loaded ProjectModel if successful,
     or None if canceled or failed.
@@ -129,7 +145,7 @@ def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pr
     path, _ = QFileDialog.getOpenFileName(
         parent,
         "Open Project",
-        "",
+        str(initial_path) if initial_path else "",
         "Project Files (*.pbproj);;All Files (*)"
     )
     # fmt: on
@@ -140,13 +156,13 @@ def open_project_dialog(parent: QWidget, old_project: ProjectModel | None) -> Pr
     return open_project(parent, Path(path))
 
 
-def save_project_as_dialog(parent: QWidget, project: ProjectModel) -> bool:
+def save_project_as_dialog(parent: QWidget, project: ProjectModel, initial_path: Path | None) -> bool:
     """Show a file dialog to save the given project, and return True if successful, False if canceled or failed."""
     # fmt: off
     path, _ = QFileDialog.getSaveFileName(
         parent,
         "Save Project",
-        str(project.file) if project.file else "",
+        str(project.file) if project.file else str(initial_path) if initial_path else "",
         "Project Files (*.pbproj);;All Files (*)"
     )
     # fmt: on

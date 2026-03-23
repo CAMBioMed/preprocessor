@@ -35,7 +35,7 @@ def test_integration_new_project_add_images_save_and_quit(
         model = ApplicationModel()
         model.read_settings()
 
-        launch = LaunchDialog()
+        launch = LaunchDialog(model)
         qtbot.addWidget(launch)
         launch.show()
         qtbot.waitExposed(launch)

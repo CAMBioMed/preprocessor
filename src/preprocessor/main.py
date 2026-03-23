@@ -56,7 +56,7 @@ def main_gui(project_path: str | None = None) -> None:
         if project_path is not None:
             project_model = open_project(None, Path(project_path))
         else:
-            launch_dialog = LaunchDialog()
+            launch_dialog = LaunchDialog(model)
             if launch_dialog.exec() == QDialog.DialogCode.Accepted:
                 project_model = launch_dialog.project_model
             else:
