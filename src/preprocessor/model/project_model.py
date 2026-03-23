@@ -24,6 +24,8 @@ class ProjectData(BaseModel):
 
     model_version: int = SERIAL_VERSION
     """The version of the data model, used for compatibility checks during deserialization."""
+    photos_path: Path | None = None
+    """The file path from which photos were last added, or None if not set."""
     export_path: Path | None = None
     """The file path where the photos will be exported to, or None if not set."""
     target_width: int | None = None
@@ -63,6 +65,7 @@ class ProjectData(BaseModel):
 
 class ProjectModel(QModel[ProjectData]):
     on_file_changed: Signal = Signal(Path)
+    on_photos_path_changed: Signal = Signal(Path)
     on_export_path_changed: Signal = Signal(object)
     on_target_width_changed: Signal = Signal(object)
     on_target_height_changed: Signal = Signal(object)
@@ -113,6 +116,15 @@ class ProjectModel(QModel[ProjectData]):
             self.update_paths_relative_to(old_basepath=old_path.parent, new_basepath=path.parent)
             self.on_file_changed.emit(path)
             self.on_changed.emit()
+
+    @property
+    def photos_path(self) -> Path | None:
+        """The file path from which photos were last added, or None if not set."""
+        return self._data.photos_path
+
+    @photos_path.setter
+    def photos_path(self, path: Path | None) -> None:
+        self._set_field("photos_path", path)
 
     @property
     def export_path(self) -> Path | None:

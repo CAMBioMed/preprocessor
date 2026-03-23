@@ -35,7 +35,7 @@ def test_integration_new_project_add_images_save_and_quit(
         model = ApplicationModel()
         model.read_settings()
 
-        launch = LaunchDialog()
+        launch = LaunchDialog(model)
         qtbot.addWidget(launch)
         launch.show()
         qtbot.waitExposed(launch)
@@ -57,7 +57,7 @@ def test_integration_new_project_add_images_save_and_quit(
         qtbot.waitExposed(main_win)
 
         # Prepare example images from the repository
-        repo_root = Path(__file__).resolve().parent.parent.parent
+        repo_root = Path(__file__).resolve().parent.parent.parent.parent
         photos_dir = (repo_root / "tests" / "preprocessor" / "photos").resolve()
         img1 = (photos_dir / "IMG_1054.JPG").resolve()
         img2 = (photos_dir / "IMG_1069.JPG").resolve()
