@@ -1,4 +1,5 @@
 import logging
+from math import sqrt
 
 import cv2
 import numpy as np
@@ -10,25 +11,27 @@ logger = logging.getLogger(__name__)
 def fix_perspective(
     img: MatLike,
     src_pts: list[Point2f],
-    tgt_width: int,
-    tgt_height: int,
 ) -> MatLike:
     """Apply a perspective transformation to the input image.
 
-    Args:
-        img: The input image to be transformed.
-        src_pts: A list of four points defining the source quadrilateral in the input image
-            (top-left, top-right, bottom-right, bottom-left) (clockwise from the top-left).
-        tgt_width: The width of the target image, in pixels.
-        tgt_height: The height of the target image, in pixels.
+    :param img: The input image to be transformed.
+    :param src_pts: A list of four points defining the source quadrilateral in the input image
+        (top-left, top-right, bottom-right, bottom-left) (clockwise from the top-left).
+    :return: The perspective-corrected image.
     """
-    # tgt_height = math.sqrt(
-    #     (src_pts[2][0] - src_pts[1][0]) * (src_pts[2][0] - src_pts[1][0])
-    #     + (src_pts[2][1] - src_pts[1][1]) * (src_pts[2][1] - src_pts[1][1])
-    # )
-    # tgt_width = ratio * tgt_height
+
     src_pts2 = np.float32(src_pts)
     src_pts3 = src_pts2[[0, 1, 3, 2]]  # rearrange to tl, tr, bl, br
+
+    # Compute the maximum widths and heights of the target rectangle based on the source points
+    tl, tr, bl, br = src_pts3
+    w1 = sqrt((br[0] - bl[0])**2 + (br[0] - bl[0])**2)
+    w2 = sqrt((tr[0] - tl[0])**2 + (tr[0] - tl[0])**2)
+    h1 = sqrt((tr[1] - br[1])**2 + (tr[1] - br[1])**2)
+    h2 = sqrt((tl[1] - bl[1])**2 + (tl[1] - bl[1])**2)
+    tgt_width = int(max(w1, w2))
+    tgt_height = int(max(h1, h2))
+
     # fmt: off
     tgt_pts = np.float32([
         [      0.0,        0.0],  # top-left
