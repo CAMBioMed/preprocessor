@@ -1,48 +1,67 @@
 import logging
-from math import sqrt
+from collections.abc import Sequence
 
 import cv2
 import numpy as np
-from cv2.typing import MatLike, Point2f
 
 logger = logging.getLogger(__name__)
 
 
 def fix_perspective(
-    img: MatLike,
-    src_pts: list[Point2f],
-) -> MatLike:
+    img: np.ndarray,
+    src_pts: Sequence[tuple[float, float]],
+) -> np.ndarray:
     """Apply a perspective transformation to the input image.
 
-    :param img: The input image to be transformed.
-    :param src_pts: A list of four points defining the source quadrilateral in the input image
-        (top-left, top-right, bottom-right, bottom-left) (clockwise from the top-left).
-    :return: The perspective-corrected image.
+    :param img: The input image to be transformed (as a NumPy array).
+    :param src_pts: A sequence of four (x, y) points defining the source quadrilateral in the
+        input image. Points should be in the order: top-left, top-right, bottom-right, bottom-left
+        (clockwise from the top-left).
+    :return: The perspective-corrected image as a NumPy array.
     """
 
-    src_pts2 = np.float32(src_pts)
-    src_pts3 = src_pts2[[0, 1, 3, 2]]  # rearrange to tl, tr, bl, br
+    # Validate input
+    if src_pts is None:
+        logger.error("src_pts is None")
+        msg = "src_pts must be a sequence of four points"
+        raise ValueError(msg)
 
-    # Compute the maximum widths and heights of the target rectangle based on the source points
-    tl, tr, bl, br = src_pts3
-    w1 = sqrt((br[0] - bl[0])**2 + (br[0] - bl[0])**2)
-    w2 = sqrt((tr[0] - tl[0])**2 + (tr[0] - tl[0])**2)
-    h1 = sqrt((tr[1] - br[1])**2 + (tr[1] - br[1])**2)
-    h2 = sqrt((tl[1] - bl[1])**2 + (tl[1] - bl[1])**2)
-    tgt_width = int(max(w1, w2))
-    tgt_height = int(max(h1, h2))
+    pts = np.asarray(src_pts, dtype=np.float32)
+    if pts.shape != (4, 2):
+        logger.error("src_pts must be convertible to shape (4, 2); got shape %s", pts.shape)
+        msg = "src_pts must be a sequence of four (x, y) pairs"
+        raise ValueError(msg)
 
-    # fmt: off
-    tgt_pts = np.float32([
-        [      0.0,        0.0],  # top-left
-        [tgt_width,        0.0],  # top-right
-        [      0.0, tgt_height],  # bottom-left
-        [tgt_width, tgt_height],  # bottom-right
-    ])
-    # fmt: on
+    # Rearrange to tl, tr, bl, br
+    src_pts_reordered = np.ascontiguousarray(pts[[0, 1, 3, 2], :], dtype=np.float32)
+    tl, tr, bl, br = src_pts_reordered
 
-    M = cv2.getPerspectiveTransform(src_pts3, tgt_pts)
+    # Compute widths (distance between left and right points) and heights (distance between top and bottom)
+    w_bottom = float(np.linalg.norm(br - bl))
+    w_top = float(np.linalg.norm(tr - tl))
+    h_right = float(np.linalg.norm(tr - br))
+    h_left = float(np.linalg.norm(tl - bl))
 
-    dst = cv2.warpPerspective(img, M, (tgt_width, tgt_height))
+    # Compute integer target dimensions; ensure at least 1 pixel in each dim.
+    tgt_width = max(round(w_bottom), round(w_top), 1)
+    tgt_height = max(round(h_right), round(h_left), 1)
+
+    # Destination points: top-left, top-right, bottom-left, bottom-right
+    tgt_pts = np.array(
+        [
+            [0.0, 0.0],
+            [float(tgt_width), 0.0],
+            [0.0, float(tgt_height)],
+            [float(tgt_width), float(tgt_height)],
+        ],
+        dtype=np.float32,
+    )
+
+    try:
+        M = cv2.getPerspectiveTransform(src_pts_reordered, tgt_pts)
+        dst = cv2.warpPerspective(img, M, (tgt_width, tgt_height))
+    except cv2.error as exc:  # pragma: no cover - backend error path
+        logger.exception("OpenCV error while computing/wrapping perspective transform: %s", exc)
+        raise
 
     return dst
