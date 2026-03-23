@@ -208,7 +208,8 @@ class _ExportWorker(QObject):
                 # Prepare names/paths
                 output_name = self.determine_output_name(photo, idx)
                 output_path = self.project.export_path / output_name
-                self.status.emit(f"Exporting {idx}/{total}: {output_name}")
+                original_name = photo.original_filename.name
+                self.status.emit(f"Exporting {idx}/{total}: {original_name} to {output_name}")
 
                 # Prefer undistorted image when available. If undistort was canceled, stop export
                 img = None
@@ -217,7 +218,9 @@ class _ExportWorker(QObject):
                     img = undistort_photo(
                         photo, self.project, progress_callback=None, stop_checker=lambda: self._stop_requested
                     )
-                except Exception:
+                except Exception as e:
+                    self.message.emit("error", f"Lens correction failed for {original_name}: {e}")
+                    self.progress.emit(idx, total)
                     img = None
 
                 # If undistort returned None and a cancellation was requested, stop export immediately
@@ -247,34 +250,32 @@ class _ExportWorker(QObject):
                     break
 
                 # Ensure quadrat corners are set
-                if not photo.quadrat_corners:
-                    self.message.emit("warning", f"Skipping {output_name}: quadrat corners not set.")
+                if photo.quadrat_corners:
+                    # Process perspective; guard against processing errors
+                    try:
+                        final_img = fix_perspective(
+                            img,
+                            list(photo.quadrat_corners),
+                        )
+                    except Exception as e:
+                        self.message.emit("error", f"Processing failed for {original_name}: {e}")
+                        self.progress.emit(idx, total)
+                        continue
+                else:
+                    # No quadrat corners, skip perspective correction but still export the image
+                    final_img = img
+                    self.message.emit("warning", f"Quadrat corners not set for: {original_name}")
                     self.progress.emit(idx, total)
-                    continue
-
-                # Process perspective; guard against processing errors
-                try:
-                    final_img = fix_perspective(
-                        img,
-                        list(photo.quadrat_corners),
-                    )
-                except Exception as e:
-                    self.message.emit("error", f"Processing failed for {output_name}: {e}")
-                    self.progress.emit(idx, total)
-                    continue
 
                 # Save result
                 ok = save_image(output_path, final_img)
                 if not ok:
-                    self.message.emit("error", f"Failed to save image to {output_path}")
+                    self.message.emit("error", f"Failed to save {original_name} to {output_path}")
                     self.progress.emit(idx, total)
                     continue
 
-                # successful save
                 success_count += 1
-
-                # successful step; optionally send an info message
-                # self.message.emit("info", f"Exported {output_name}")
+                self.message.emit("info", f"Exported {original_name} as {output_name}")
 
             except Exception as e:
                 # Catch-all per-photo to avoid aborting the entire export
