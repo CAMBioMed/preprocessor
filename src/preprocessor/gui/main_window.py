@@ -253,12 +253,16 @@ class MainWindow(QMainWindow):
 
     def _handle_add_photos_action(self) -> None:
         assert self.model.current_project is not None
-        paths, _ = QFileDialog.getOpenFileNames(self, "Add Photo", "", "Photos (*.jpg;*.jpeg);;All Files (*)")
+        project = self.model.current_project
+        # If the path is not valid (anymore), the dialog still works and defaults to the current working directory
+        initial_path = str(project.photos_path or "")
+        paths, _ = QFileDialog.getOpenFileNames(self, "Add Photo", initial_path, "Photos (*.jpg;*.jpeg);;All Files (*)")
         if not paths:
             return
-        project = self.model.current_project
         for path in paths:
             project.append_photo_model(Path(path))
+        # Set the path as photos_path for future dialogs
+        project.photos_path = Path(paths[0]).parent
 
     def _handle_remove_photos_action(self, selected: list[PhotoModel]) -> None:
         assert self.model.current_project is not None
