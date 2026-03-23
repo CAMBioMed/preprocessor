@@ -81,8 +81,14 @@ class ExportDialog(QDialog):
     def _handle_save_all(self) -> None:
         # Export directory must be set and must exist
         export_dir = self.ui.txtOutputDir.text()
-        if not export_dir or not Path(export_dir).is_dir():
-            QMessageBox.warning(self, "Error", "Please specify an existing output directory.")
+        if not export_dir:
+            QMessageBox.warning(self, "Error", "Please specify an output directory.")
+            return
+        export_path = Path(export_dir)
+        try:
+            export_path.mkdir(parents=True, exist_ok=True)
+        except FileExistsError:
+            QMessageBox.warning(self, "Error", "The output path exists and is not a directory.")
             return
 
         # Disable UI controls while exporting
