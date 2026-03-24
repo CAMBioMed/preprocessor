@@ -275,7 +275,8 @@ class _ExportWorker(QObject):
                     continue
 
                 success_count += 1
-                self.message.emit("info", f"Exported {original_name} as {output_name}")
+                # Too verbose.
+                # self.message.emit("info", f"Exported {original_name} as {output_name}")
 
             except Exception as e:
                 # Catch-all per-photo to avoid aborting the entire export
