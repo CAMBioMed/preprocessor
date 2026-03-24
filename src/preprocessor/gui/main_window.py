@@ -110,9 +110,10 @@ class MainWindow(QMainWindow):
         self.ui.menuFile_NewProject.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew)))
         self.ui.menuFile_OpenProject.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen)))
         # prefer packaged resource icon if available
-        self.ui.menuFile_OpenProject.setIcon(icon_from_resource("icons/fugue16/folder-open-image.png"))
-        self.ui.menuFile_SaveProject.setIcon(icon_from_resource("icons/fugue16/disk-black.png"))
-        self.ui.menuFile_SaveProjectAs.setIcon(icon_from_resource("icons/fugue16/disks-black.png"))
+        self.ui.menuFile_OpenProject.setIcon(icon_from_resource("icons/fuguex2/folder-open-image.png"))
+        self.ui.menuFile_SaveProject.setIcon(icon_from_resource("icons/fuguex2/disk-black.png"))
+        self.ui.menuFile_SaveProjectAs.setIcon(icon_from_resource("icons/fuguex2/disks-black.png"))
+        self.ui.menuFile_ExportAll.setIcon(icon_from_resource("icons/fuguex2/disk--arrow.png"))
         self.ui.menuFile_Exit.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)))
 
         # Help menu
@@ -194,12 +195,14 @@ class MainWindow(QMainWindow):
     def _handle_new_project_action(self) -> None:
         new_project = new_project_dialog(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
+            self.model.current_photo = None
             self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
             self.model.current_project = new_project
 
     def _handle_open_project_action(self) -> None:
         new_project = open_project_dialog(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
+            self.model.current_photo = None
             self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
             self.model.current_project = new_project
 

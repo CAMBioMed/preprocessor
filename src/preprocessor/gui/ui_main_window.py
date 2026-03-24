@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -52,6 +52,8 @@ class Ui_MainWindow(object):
         self.menuFile_CloseProject.setObjectName(u"menuFile_CloseProject")
         self.menuFile_ExportAll = QAction(MainWindow)
         self.menuFile_ExportAll.setObjectName(u"menuFile_ExportAll")
+        icon5 = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentSend))
+        self.menuFile_ExportAll.setIcon(icon5)
         self.menuEdit_DetectQuadrat = QAction(MainWindow)
         self.menuEdit_DetectQuadrat.setObjectName(u"menuEdit_DetectQuadrat")
         self.menuWindow_ShowThumbnailsPanel = QAction(MainWindow)
@@ -102,6 +104,8 @@ class Ui_MainWindow(object):
         self.menuWindow.addAction(self.menuWindow_ShowEditorPanel)
         self.toolBar.addAction(self.menuFile_OpenProject)
         self.toolBar.addAction(self.menuFile_SaveProject)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.menuFile_ExportAll)
 
         self.retranslateUi(MainWindow)
 
@@ -146,7 +150,7 @@ class Ui_MainWindow(object):
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"&Help", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"&Edit", None))
         self.menuWindow.setTitle(QCoreApplication.translate("MainWindow", u"&Window", None))
-        self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
+        self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"Main Toolbar", None))
         pass
     # retranslateUi
 
