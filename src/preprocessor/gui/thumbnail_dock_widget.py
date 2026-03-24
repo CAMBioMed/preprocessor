@@ -32,8 +32,8 @@ class ThumbnailDockWidget(QDockWidget):
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
         # Toolbar
-        self.ui.addPhotoAction.setIcon(icon_from_resource("icons/fugue16/image--plus.png"))
-        self.ui.removePhotoAction.setIcon(icon_from_resource("icons/fugue16/image--minus.png"))
+        self.ui.addPhotoAction.setIcon(icon_from_resource("icons/fuguex2/image--plus.png"))
+        self.ui.removePhotoAction.setIcon(icon_from_resource("icons/fuguex2/image--minus.png"))
 
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up keyboard shortcuts for actions."""

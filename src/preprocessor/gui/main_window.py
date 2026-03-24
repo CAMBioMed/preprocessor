@@ -110,9 +110,10 @@ class MainWindow(QMainWindow):
         self.ui.menuFile_NewProject.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew)))
         self.ui.menuFile_OpenProject.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen)))
         # prefer packaged resource icon if available
-        self.ui.menuFile_OpenProject.setIcon(icon_from_resource("icons/fugue16/folder-open-image.png"))
-        self.ui.menuFile_SaveProject.setIcon(icon_from_resource("icons/fugue16/disk-black.png"))
-        self.ui.menuFile_SaveProjectAs.setIcon(icon_from_resource("icons/fugue16/disks-black.png"))
+        self.ui.menuFile_OpenProject.setIcon(icon_from_resource("icons/fuguex2/folder-open-image.png"))
+        self.ui.menuFile_SaveProject.setIcon(icon_from_resource("icons/fuguex2/disk-black.png"))
+        self.ui.menuFile_SaveProjectAs.setIcon(icon_from_resource("icons/fuguex2/disks-black.png"))
+        self.ui.menuFile_ExportAll.setIcon(icon_from_resource("icons/fuguex2/disk--arrow.png"))
         self.ui.menuFile_Exit.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)))
 
         # Help menu
