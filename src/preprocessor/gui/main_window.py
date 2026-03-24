@@ -195,12 +195,14 @@ class MainWindow(QMainWindow):
     def _handle_new_project_action(self) -> None:
         new_project = new_project_dialog(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
+            self.model.current_photo = None
             self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
             self.model.current_project = new_project
 
     def _handle_open_project_action(self) -> None:
         new_project = open_project_dialog(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
+            self.model.current_photo = None
             self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
             self.model.current_project = new_project
 
