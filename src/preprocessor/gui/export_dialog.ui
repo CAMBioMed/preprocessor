@@ -31,7 +31,7 @@
         <x>0</x>
         <y>0</y>
         <width>573</width>
-        <height>327</height>
+        <height>320</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_2">
@@ -50,107 +50,6 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item row="1" column="0">
-        <widget class="QLabel" name="lblOutputDirectory">
-         <property name="text">
-          <string>Output directory:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <layout class="QHBoxLayout" name="layOutputDir">
-         <item>
-          <widget class="QLineEdit" name="txtOutputDir"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btnOutputDir">
-           <property name="text">
-            <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="lblTargetWidth">
-         <property name="text">
-          <string>Target width:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <layout class="QHBoxLayout" name="layTargetWidth">
-         <item>
-          <widget class="QSpinBox" name="numTargetWidth">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>1</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimum">
-            <number>128</number>
-           </property>
-           <property name="maximum">
-            <number>10240</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lblTargetWidth_Value">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>6</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>0 px</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="lblTargetHeight">
-         <property name="text">
-          <string>Target height:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <layout class="QHBoxLayout" name="layTargetHeight">
-         <item>
-          <widget class="QSpinBox" name="numTargetHeight">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>1</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimum">
-            <number>128</number>
-           </property>
-           <property name="maximum">
-            <number>10240</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lblTargetHeight_Value">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>6</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>0 px</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="lblFilename">
          <property name="text">
@@ -203,8 +102,36 @@ Or any of these metadata fields:
          </item>
         </layout>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblOutputDirectory">
+         <property name="text">
+          <string>Output directory:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <layout class="QHBoxLayout" name="layOutputDir">
+         <item>
+          <widget class="QLineEdit" name="txtOutputDir"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnOutputDir">
+           <property name="text">
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
     </widget>
    </item>
    <item>

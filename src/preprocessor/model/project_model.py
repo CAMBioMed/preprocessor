@@ -136,24 +136,6 @@ class ProjectModel(QModel[ProjectData]):
         self._set_field("export_path", path)
 
     @property
-    def target_width(self) -> int | None:
-        """The target width for perspective correction, or None if not set."""
-        return self._data.target_width
-
-    @target_width.setter
-    def target_width(self, value: int | None) -> None:
-        self._set_field("target_width", value)
-
-    @property
-    def target_height(self) -> int | None:
-        """The target height for perspective correction, or None if not set."""
-        return self._data.target_height
-
-    @target_height.setter
-    def target_height(self, value: int | None) -> None:
-        self._set_field("target_height", value)
-
-    @property
     def photos(self) -> QListModel[PhotoModel]:
         """The list of photos in the project."""
         return self._photos

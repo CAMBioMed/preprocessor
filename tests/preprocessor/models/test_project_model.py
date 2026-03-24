@@ -212,38 +212,6 @@ class TestProjectModel:
                 qtbot, model, "export_path", None, tmp_path / "export", "on_export_path_changed"
             )
 
-    def test_target_width_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        with qtbot.capture_exceptions():
-            # Arrange
-            model = ProjectModel(file=tmp_path / "proj.json")
-
-            # Use helper to test target_width (None -> 200)
-            self._assert_property_getter_setter_and_signal(
-                qtbot, model, "target_width", None, 200, "on_target_width_changed"
-            )
-
-            # Validator: reading JSON with invalid target_width (<1) should raise ValueError
-            bad = {"model_version": ProjectData.SERIAL_VERSION, "target_width": 0}
-            json_str = json.dumps(bad)
-            with pytest.raises(ValueError):
-                ProjectModel.read_from_json(tmp_path / "f.json", json_str)
-
-    def test_target_height_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        with qtbot.capture_exceptions():
-            # Arrange
-            model = ProjectModel(file=tmp_path / "proj.json")
-
-            # Use helper to test target_height (None -> 300)
-            self._assert_property_getter_setter_and_signal(
-                qtbot, model, "target_height", None, 300, "on_target_height_changed"
-            )
-
-            # Validator: reading JSON with invalid target_height (<1) should raise ValueError
-            bad = {"model_version": ProjectData.SERIAL_VERSION, "target_height": 0}
-            json_str = json.dumps(bad)
-            with pytest.raises(ValueError):
-                ProjectModel.read_from_json(tmp_path / "f.json", json_str)
-
     def test_photos_list_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
         with qtbot.capture_exceptions():
             # Arrange
