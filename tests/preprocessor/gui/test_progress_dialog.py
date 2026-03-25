@@ -63,28 +63,8 @@ class AsyncTestJob(QJob):
         return aborted
 
 
-@pytest.fixture(autouse=True)
-def _patch_threadpool_start(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> Generator[None, Any, None]:
-    """Patch QThreadPool.start so QRunnables are scheduled via the Qt event loop
-    (QTimer.singleShot) instead of being executed immediately in a worker thread.
-
-    This makes tests deterministic and allows interacting (cancel/close) while the
-    job is running.
-    """
-
-    orig_start: Callable[..., None] = QThreadPool.start
-
-    def _start(self, runnable: QRunnable) -> None:
-        # schedule runnable.run via the event loop to allow test-side interaction
-        QTimer.singleShot(0, runnable.run)
-
-    monkeypatch.setattr(QThreadPool, "start", _start)
-    yield
-    monkeypatch.setattr(QThreadPool, "start", orig_start)
-
-
 def _make_dialog(qtbot: QtBot, jobs: Set[QJob]) -> ProgressDialog:
-    dlg = ProgressDialog("Test", jobs)
+    dlg = ProgressDialog("Test", jobs, run_in_thread=False)
     # let the event loop process the initial scheduling
     qtbot.wait(5)
     return dlg

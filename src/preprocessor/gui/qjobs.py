@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool
+from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool, QTimer
 
 
 from threading import Event
@@ -107,7 +107,7 @@ class QJobProcessor(QObject):
     on_job_progress: Signal = Signal(object, int, int)
     """Signal job progress: QJob, steps, total steps."""
 
-    def __init__(self, jobs: set[QJob], parent: QObject | None = None) -> None:
+    def __init__(self, jobs: set[QJob], parent: QObject | None = None, run_in_thread: bool = True) -> None:
         super().__init__(parent)
         self._pool = QThreadPool.globalInstance()
         self._jobs = jobs
@@ -115,6 +115,10 @@ class QJobProcessor(QObject):
         self.total = len(jobs)
         self._any_aborted = False
         self._cancel_token = CancelToken()
+        # Whether to execute jobs in background threads (True) or schedule
+        # their .run() on the Qt event loop (False). Tests can pass False
+        # to run jobs deterministically on the main thread.
+        self._run_in_thread = run_in_thread
 
         for job in jobs:
             self._connect_job_signals(job)
@@ -133,7 +137,11 @@ class QJobProcessor(QObject):
         """Start processing the jobs."""
         self.on_started.emit()
         for job in self._jobs:
-            self._pool.start(job)
+            if self._run_in_thread:
+                self._pool.start(job)
+            else:
+                # Schedule runnable.run on the Qt event loop for deterministic execution
+                QTimer.singleShot(0, job.run)
 
     def cancel(self) -> None:
         """Request cancellation of all jobs."""

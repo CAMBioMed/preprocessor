@@ -16,6 +16,7 @@ class ProgressDialog(QDialog):
         title: str,
         jobs: set[QJob],
         parent: QWidget | None = None,
+        run_in_thread: bool = True,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle(title)
@@ -25,7 +26,7 @@ class ProgressDialog(QDialog):
         self._setup_ui()
         self._connect_signals()
         # Create the processor first so initial state handlers can access its properties
-        self._processor = QJobProcessor(jobs=jobs, parent=self)
+        self._processor = QJobProcessor(jobs=jobs, parent=self, run_in_thread=run_in_thread)
         self._connect_processor()
         self._set_initial_state()
         self._add_jobs_to_ui(jobs)
