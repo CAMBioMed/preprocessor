@@ -299,6 +299,7 @@ files = [
     "src/preprocessor/gui/launch_dialog.ui",
     "src/preprocessor/gui/main_window.ui",
     "src/preprocessor/gui/metadata_dialog.ui",
+    "src/preprocessor/gui/progress_dialog.ui",
     "src/preprocessor/gui/project_settings_dialog.ui",
     "src/preprocessor/gui/properties_dock.ui",
 ]
