@@ -1,6 +1,5 @@
-from PySide6.QtCore import QThread, QTimer
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QListWidgetItem, QStyle, QTreeWidgetItem
+from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QStyle, QTreeWidgetItem
 
 from preprocessor.gui.qjobs import QJobProcessor, QJob
 from preprocessor.gui.ui_progress_dialog import Ui_ProgressDialog
@@ -17,7 +16,6 @@ class ProgressDialog(QDialog):
         title: str,
         jobs: set[QJob],
         parent: QWidget | None = None,
-        run_in_thread: bool = True,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle(title)
@@ -132,12 +130,18 @@ class ProgressDialog(QDialog):
     def _determine_icon(self, icon: QIcon | str | None) -> QIcon | None:
         if isinstance(icon, str):
             match icon:
-                case "error": return self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical)
-                case "warning": return self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)
-                case "info": return self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
-                case "file": return self.style().standardIcon(QStyle.StandardPixmap.SP_FileIcon)
-                case "dir": return self.style().standardIcon(QStyle.StandardPixmap.SP_DirIcon)
-                case _: return None
+                case "error":
+                    return self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical)
+                case "warning":
+                    return self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)
+                case "info":
+                    return self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
+                case "file":
+                    return self.style().standardIcon(QStyle.StandardPixmap.SP_FileIcon)
+                case "dir":
+                    return self.style().standardIcon(QStyle.StandardPixmap.SP_DirIcon)
+                case _:
+                    return None
         elif isinstance(icon, QIcon):
             return icon
         else:

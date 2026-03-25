@@ -1,11 +1,12 @@
 from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool
-from PySide6.QtGui import QIcon
 
 
 from threading import Event
 
+
 class CancelToken:
     """A simple cancellation token that can be shared between threads to signal when a job should be canceled."""
+
     def __init__(self) -> None:
         self._event = Event()
 
@@ -14,6 +15,7 @@ class CancelToken:
 
     def is_cancelled(self) -> bool:
         return self._event.is_set()
+
 
 class QJobSignals(QObject):
     """Defines the signals available from a running job."""
@@ -51,7 +53,7 @@ class QJob(QRunnable):
             self.signals.on_job_start.emit(self)
             aborted = self.process()
         except Exception as e:
-            self.update_status(f"Error: {str(e)}")
+            self.update_status(f"Error: {e!s}")
             aborted = True
         finally:
             self.signals.on_job_end.emit(self, aborted)
@@ -74,7 +76,6 @@ class QJob(QRunnable):
 
 
 class QJobProcessor(QObject):
-
     _pool: QThreadPool
     """The thread pool used to run the jobs."""
     _jobs: set[QJob]

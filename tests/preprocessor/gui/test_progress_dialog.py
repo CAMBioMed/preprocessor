@@ -12,6 +12,7 @@ from preprocessor.gui.progress_dialog import ProgressDialog
 from preprocessor.gui.qjobs import QJob, CancelToken
 from PySide6.QtCore import QThreadPool
 
+
 class AsyncTestJob(QJob):
     """A test job that emits signals asynchronously using QTimer so tests can interact.
 
@@ -28,6 +29,7 @@ class AsyncTestJob(QJob):
 
     def process(self) -> bool:
         aborted = False
+
         def _tick() -> None:
             if self.cancel_token is not None and self.cancel_token.is_cancelled():
                 # report aborted and finish
@@ -126,13 +128,15 @@ def test_cancel_aborts_running_job(qtbot: QtBot) -> None:
     # Click the Cancel button to request cancellation
     btn = dlg.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel)
     from PySide6.QtCore import Qt
+
     qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
     # call the dialog cancel handler (same effect as clicking)
     dlg._handle_cancel()
 
     # Wait until the job finishes and dialog shows Cancelled/Done
-    qtbot.waitUntil(lambda: dlg.ui.lblStatus.text() in ("Cancelled.", "Cancelling...", "Done.", "Canceling..."), timeout=2000)
+    qtbot.waitUntil(
+        lambda: dlg.ui.lblStatus.text() in ("Cancelled.", "Cancelling...", "Done.", "Canceling..."), timeout=2000
+    )
 
     # After cancellation the Cancel button is disabled
     assert not btn.isEnabled()
-
