@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Set
+from typing import Set, Callable, Optional, Any, Generator
 
 import pytest
 from PySide6.QtCore import QObject, Signal, QTimer
-from PySide6.QtWidgets import QDialogButtonBox, QTreeWidgetItem
+from PySide6.QtWidgets import QDialogButtonBox, QTreeWidgetItem, QAbstractButton
+from PySide6.QtCore import QRunnable
 
 from pytestqt.qtbot import QtBot
 
@@ -20,6 +21,10 @@ class AsyncTestJob(QJob):
     `request_abort()` will mark the job aborted and cause it to emit an aborted end.
     """
 
+    _steps: int
+    _interval: int
+    _idx: int
+
     def __init__(self, name: str, steps: int = 3, interval_ms: int = 30) -> None:
         super().__init__(name)
 
@@ -28,13 +33,18 @@ class AsyncTestJob(QJob):
         self._idx = 0
 
     def process(self) -> bool:
+        from PySide6.QtCore import QEventLoop
+
         aborted = False
+        loop = QEventLoop()
 
         def _tick() -> None:
+            nonlocal aborted
             if self.cancel_token is not None and self.cancel_token.is_cancelled():
                 # report aborted and finish
                 self.update_status("Aborting...")
                 aborted = True
+                loop.quit()
                 return
 
             self._idx += 1
@@ -45,14 +55,16 @@ class AsyncTestJob(QJob):
             if self._idx < self._steps:
                 QTimer.singleShot(self._interval, _tick)
             else:
-                return
+                loop.quit()
 
         QTimer.singleShot(self._interval, _tick)
+        # Block until _tick calls loop.quit() on finish or abort
+        loop.exec()
         return aborted
 
 
 @pytest.fixture(autouse=True)
-def _patch_threadpool_start(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch):
+def _patch_threadpool_start(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> Generator[None, Any, None]:
     """Patch QThreadPool.start so QRunnables are scheduled via the Qt event loop
     (QTimer.singleShot) instead of being executed immediately in a worker thread.
 
@@ -60,9 +72,9 @@ def _patch_threadpool_start(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch):
     job is running.
     """
 
-    orig_start = QThreadPool.start
+    orig_start: Callable[..., None] = QThreadPool.start
 
-    def _start(self, runnable):
+    def _start(self, runnable: QRunnable) -> None:
         # schedule runnable.run via the event loop to allow test-side interaction
         QTimer.singleShot(0, runnable.run)
 
@@ -126,9 +138,11 @@ def test_cancel_aborts_running_job(qtbot: QtBot) -> None:
     qtbot.waitUntil(lambda: dlg.ui.lblStatus.text() == "Starting..." or True, timeout=200)
 
     # Click the Cancel button to request cancellation
-    btn = dlg.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel)
+    btn: Optional[QAbstractButton] = dlg.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel)
     from PySide6.QtCore import Qt
 
+    # btn may be None in some UI setups, guard with an assertion for types
+    assert btn is not None
     qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
     # call the dialog cancel handler (same effect as clicking)
     dlg._handle_cancel()
