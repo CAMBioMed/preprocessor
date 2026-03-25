@@ -1,8 +1,8 @@
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QThread, QTimer
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QMessageBox, QListWidgetItem, QStyle, QTreeWidgetItem
+from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QListWidgetItem, QStyle, QTreeWidgetItem
 
-from preprocessor.gui.qworker import QWorker
+from preprocessor.gui.qjobs import QJobProcessor, QJob
 from preprocessor.gui.ui_progress_dialog import Ui_ProgressDialog
 
 
@@ -10,24 +10,28 @@ class ProgressDialog(QDialog):
     """A dialog that shows progress on batch processing photos."""
 
     ui: Ui_ProgressDialog
-    _worker: QWorker | None
-    _worker_thread: QThread | None
+    _processor: QJobProcessor
 
     def __init__(
         self,
-        worker: QWorker,
+        title: str,
+        jobs: set[QJob],
         parent: QWidget | None = None,
+        run_in_thread: bool = True,
     ) -> None:
         super().__init__(parent)
-        self.setWindowTitle(worker.title)
+        self.setWindowTitle(title)
         self.setModal(True)
         self.resize(300, 100)
 
         self._setup_ui()
-        self._connect_ui_signals()
+        self._connect_signals()
+        # Create the processor first so initial state handlers can access its properties
+        self._processor = QJobProcessor(jobs=jobs, parent=self)
+        self._connect_processor()
         self._set_initial_state()
-
-        self._connect_and_start_worker(worker)
+        self._add_jobs_to_ui(jobs)
+        self._processor.start()
 
     def _setup_ui(self) -> None:
         self.ui = Ui_ProgressDialog()
@@ -38,75 +42,77 @@ class ProgressDialog(QDialog):
         self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setVisible(True)
         self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).setVisible(False)
 
-    def _connect_ui_signals(self) -> None:
+    def _connect_signals(self) -> None:
         self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(self._handle_cancel)
         self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self._handle_close)
 
-    def _connect_worker_signals(self, worker: QWorker) -> None:
-        worker.on_progress.connect(self._handle_progress)
-        worker.on_finished.connect(self._handle_finished)
-        worker.on_status.connect(self._handle_status)
-        worker.on_message.connect(self._handle_message)
-        worker.on_add_item.connect(self._handle_add_item)
-        worker.on_update_item.connect(self._handle_update_item)
+    def _connect_processor(self) -> None:
+        self._processor.on_started.connect(self._handle_started)
+        self._processor.on_progress.connect(self._handle_progress)
+        self._processor.on_finished.connect(self._handle_finished)
+        self._processor.on_status.connect(self._handle_status)
+        self._processor.on_job_start.connect(self._handle_job_start)
+        self._processor.on_job_end.connect(self._handle_job_end)
+        self._processor.on_job_status.connect(self._handle_job_status)
+        self._processor.on_job_progress.connect(self._handle_job_progress)
+
+    def _add_jobs_to_ui(self, jobs: set[QJob]) -> None:
+        for job in jobs:
+            item = QTreeWidgetItem()
+            item.setText(0, job.name)
+            item.setText(1, "")
+            actual_icon = self._determine_icon("file")
+            if actual_icon is not None:
+                item.setIcon(0, actual_icon)
+            self.ui.treeItems.addTopLevelItem(item)
 
     def _set_initial_state(self) -> None:
+        self._handle_status("Ready.")
+        self._handle_progress(0, self._processor.total)
         self.ui.lstMessages.setVisible(False)  # Hide messages until we have some
         self.ui.treeItems.setVisible(False)  # Hide items until we have some
 
-    def _connect_and_start_worker(self, worker: QWorker) -> None:
-        # Build a background thread
-        thread = QThread(self)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        self._connect_worker_signals(worker)
-        thread.finished.connect(thread.deleteLater)
-        # Keep references to avoid GC
-        self._worker_thread = thread
-        self._worker = worker
-        # Let's start the work
-        thread.start()
+    def _handle_started(self) -> None:
+        self._handle_status("Starting...")
+        self.ui.lstMessages.clear()
 
     def _handle_progress(self, processed: int, total: int) -> None:
         self.ui.prbProgress.setMaximum(total)
         self.ui.prbProgress.setValue(processed)
         self.ui.lblProgress.setText(f"{processed} / {total} ({processed / total:.1%})")
 
-    def _handle_finished(self) -> None:
-        if self._worker_thread is not None:
-            self._worker_thread.quit()
+    def _handle_finished(self, aborted: bool) -> None:
+        if aborted:
+            self._handle_status("Cancelled.")
+        else:
+            self._handle_status("Done.")
+
         self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setVisible(False)
         self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).setVisible(True)
-        # Clear worker references
-        self._worker = None
-        self._worker_thread = None
 
     def _handle_status(self, status: str) -> None:
         self.ui.lblStatus.setText(status)
 
-    def _handle_message(self, text: str, icon: QIcon | str | None) -> None:
-        item = QListWidgetItem(text)
-        actual_icon = self._determine_icon(icon)
-        if actual_icon is not None:
-            item.setIcon(actual_icon)
-        self.ui.lstMessages.setVisible(True)  # Ensure the messages are visible
-        self.ui.lstMessages.addItem(item)
+    def _handle_job_start(self, job: QJob) -> None:
+        self._update_item(job, "Processing...", "info")
 
-    def _handle_add_item(self, name: str, status: str, icon: QIcon | str | None) -> None:
-        item = QTreeWidgetItem()
-        item.setText(0, name)
-        item.setText(1, status)
-        actual_icon = self._determine_icon(icon)
-        if actual_icon is not None:
-            item.setIcon(0, actual_icon)
-        self.ui.treeItems.setVisible(True)  # Ensure the items are visible
-        self.ui.treeItems.addTopLevelItem(item)
+    def _handle_job_end(self, job: QJob, aborted: bool) -> None:
+        status = "Aborted" if aborted else "Done"
+        icon = "error" if aborted else "info"
+        self._update_item(job, status, icon)
 
-    def _handle_update_item(self, name: str, status: str, icon: QIcon | str | None) -> None:
+    def _handle_job_status(self, job: QJob, status: str, icon: QIcon | str | None) -> None:
+        self._update_item(job, status, icon)
+
+    def _handle_job_progress(self, job: QJob, steps: int, total_steps: int) -> None:
+        progress_text = f"{steps} / {total_steps} ({steps / total_steps:.1%})"
+        self._update_item(job, progress_text, None)
+
+    def _update_item(self, job: QJob, status: str, icon: QIcon | str | None) -> None:
         # Find the item by name and update it
         for i in range(self.ui.treeItems.topLevelItemCount()):
             item = self.ui.treeItems.topLevelItem(i)
-            if item.text(0) == name:
+            if item.text(0) == job.name:
                 item.setText(1, status)
                 actual_icon = self._determine_icon(icon)
                 if actual_icon is not None:
@@ -114,11 +120,11 @@ class ProgressDialog(QDialog):
                 break
 
     def _handle_cancel(self) -> None:
-        if self._worker is not None:
-            abort = self._worker.handle_abort()
-            if not abort:
-                return  # User chose not to abort, so do nothing
-        self.reject()
+        self._processor.cancel()
+
+        # Disable the Cancel button to prevent repeated clicks
+        self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setEnabled(False)
+        self.ui.lblStatus.setText("Cancelling...")
 
     def _handle_close(self) -> None:
         self.accept()
