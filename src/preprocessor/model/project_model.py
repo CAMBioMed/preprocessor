@@ -75,7 +75,7 @@ class ProjectModel(QModel[ProjectData]):
     _default_metadata: MetadataModel
 
     def __init__(self, file: Path, data: ProjectData | dict[str, Any] | None = None) -> None:
-        super().__init__(model_cls=ProjectData, data=data)
+        super().__init__(model_cls=ProjectData, project_dir=file.parent, data=data)
 
         self._file = file
 
@@ -105,9 +105,8 @@ class ProjectModel(QModel[ProjectData]):
     @file.setter
     def file(self, path: Path) -> None:
         if self._file != path:
-            old_path = self._file
             self._file = path
-            self.update_paths_relative_to(old_basepath=old_path.parent, new_basepath=path.parent)
+            self.set_project_dir(path.parent)
             self.on_file_changed.emit(path)
             self.on_changed.emit()
 
@@ -162,11 +161,9 @@ class ProjectModel(QModel[ProjectData]):
         with contextlib.suppress(Exception):
             self.on_changed.emit()
 
-    def update_paths_relative_to(self, old_basepath: Path, new_basepath: Path) -> None:
+    def set_project_dir(self, project_dir: Path | None) -> None:
         for photo in self._photos:
-            photo.update_paths_relative_to(old_basepath, new_basepath)
-        for camera in self._cameras:
-            camera.update_paths_relative_to(old_basepath, new_basepath)
+            photo.set_project_dir(project_dir)
 
     def write_to_file(self, path: str | Path) -> None:
         """
@@ -260,21 +257,3 @@ class ProjectModel(QModel[ProjectData]):
         """Get the absolute file path of the photo, resolved from original_filename relative to the given basepath."""
         return (self.file.parent / path).resolve()
 
-    def append_photo_model(self, path: Path) -> PhotoModel:
-        """Helper function to create a new PhotoModel with the given path and add it to the project."""
-        photo = PhotoModel.from_file(path, self.file.parent)
-
-        file_path = self.get_absolute_path(photo.original_filename)
-
-        # Get EXIF data
-        exif_data = extract_exif_metadata(file_path)
-
-        photo.metadata.date = exif_data.get("DateTime")
-        photo.metadata.photographer = exif_data.get("Photographer")
-        photo.metadata.camera = exif_data.get("Camera")
-        photo.metadata.comments = exif_data.get("Comments")
-        photo.metadata.latitude = exif_data.get("Latitude")
-        photo.metadata.longitude = exif_data.get("Longitude")
-
-        self.photos.append(photo)
-        return photo

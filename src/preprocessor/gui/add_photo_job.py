@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Optional, Any
 
 from preprocessor.gui.qjobs import QJob
-from preprocessor.utils import update_basepath
 from preprocessor.model.photo_model import PhotoData
 
 
@@ -15,10 +14,12 @@ class AddPhotoJob(QJob):
     result: PhotoData | None = None
     """The result of this job."""
 
-    def __init__(self, filepath: str | Path, project_basepath: Path, name: Optional[str] = None) -> None:
-        name = name or Path(filepath).name
-        super().__init__(name=name)
+    def __init__(self, filepath: Path, project_basepath: Path, name: Optional[str] = None) -> None:
         self._filepath = Path(filepath)
+        if not self._filepath.is_absolute():
+            raise ValueError(f"Filepath must be absolute: {filepath}")
+        name = name or self._filepath.name
+        super().__init__(name=name)
         self._project_basepath = project_basepath
         self.result = None
 
@@ -33,17 +34,15 @@ class AddPhotoJob(QJob):
         # Compute relative path and image dimensions without creating any QObject
         from PIL import Image
 
-        relative_path = update_basepath(None, self._project_basepath, self._filepath)
         with Image.open(self._filepath) as img:
             width, height = img.size
 
         # Create PhotoData (a pydantic BaseModel) which is safe to pass across threads
-        data = PhotoData(original_filename=relative_path, width=width, height=height)
+        data = PhotoData(original_filename=self._filepath, width=width, height=height)
 
         self.assert_not_cancelled()
 
-        abs_path = (self._project_basepath / data.original_filename).resolve()
-        exif_data = extract_exif_metadata(abs_path)
+        exif_data = extract_exif_metadata(self._filepath)
 
         # Fill metadata fields on the PhotoData.model (MetadataData)
         md = data.metadata
