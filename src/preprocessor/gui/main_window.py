@@ -287,13 +287,13 @@ class MainWindow(QMainWindow):
                 if photo is not None:
                     project.photos.append(photo)
 
-        jobs: set[QJob] = set()
+        jobs: list[QJob] = []
         helper = _AppendHelper(self)
         for p in paths:
             job = AddPhotoJob(p, project.file.parent)
             # Connect the job end signal to the helper so append happens on the main thread
             job.signals.on_job_end.connect(helper.handle_job_end)
-            jobs.add(job)
+            jobs.append(job)
 
         # Show progress dialog and run jobs; dialog is modal and will block until done
         dlg = ProgressDialog("Adding Photos", jobs, parent=self, run_in_thread=True)

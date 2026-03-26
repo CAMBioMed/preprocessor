@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QFileDialog
 
 
 def test_integration_new_project_add_images_save_and_quit(
-    qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch
+    qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
 ) -> None:
     """Integration test: New Project -> add images -> save -> quit.
 
@@ -20,16 +20,6 @@ def test_integration_new_project_add_images_save_and_quit(
         from preprocessor.gui.launch_dialog import LaunchDialog
         from preprocessor.gui.main_window import MainWindow
         from preprocessor.model.application_model import ApplicationModel
-        from preprocessor.gui import main_window as main_window_mod
-        from preprocessor.gui.progress_dialog import ProgressDialog as OrigProgressDialog
-
-        # Replace ProgressDialog used by MainWindow so it auto-closes in tests
-        class TestProgressDialog(OrigProgressDialog):
-            def __init__(self, title, jobs, parent=None, run_in_thread=True):
-                # Force run_in_thread False to run jobs deterministically on the Qt event loop
-                super().__init__(title, jobs, parent=parent, run_in_thread=False, auto_close_on_finish=True)
-
-        monkeypatch.setattr(main_window_mod, "ProgressDialog", TestProgressDialog)
 
         # Prepare project file path in a temporary directory
         project_file = tmp_path / "test_project.pbproj"

@@ -2,6 +2,8 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QStyle, QTreeWidgetItem
 from PySide6.QtCore import QTimer
 
+from typing import Iterable
+
 from preprocessor.gui.qjobs import QJobProcessor, QJob
 from preprocessor.gui.ui_progress_dialog import Ui_ProgressDialog
 
@@ -15,7 +17,7 @@ class ProgressDialog(QDialog):
     def __init__(
         self,
         title: str,
-        jobs: set[QJob],
+        jobs: Iterable[QJob],
         parent: QWidget | None = None,
         run_in_thread: bool = True,
         auto_close_on_finish: bool = False,

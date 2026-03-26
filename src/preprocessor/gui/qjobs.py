@@ -2,6 +2,7 @@ from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool, QTimer
 
 
 from threading import Event
+from typing import Iterable, List
 
 
 class CancelToken:
@@ -37,13 +38,14 @@ class QJob(QRunnable):
     """The name of the job, used for display purposes."""
     signals: QJobSignals
     """The signals used to communicate with the UI."""
-    cancel_token: CancelToken | None
-    """An optional cancellation token that can be used to signal the job to stop."""
+    cancel_token: CancelToken
+    """A cancellation token that can be used to signal the job to stop."""
 
     def __init__(self, name: str) -> None:
         super().__init__()
         self.name = name
         self.signals = QJobSignals()
+        # Default token; the processor will replace this with a shared token
         self.cancel_token = CancelToken()
 
     @Slot()
@@ -78,16 +80,16 @@ class QJob(QRunnable):
 class QJobProcessor(QObject):
     _pool: QThreadPool
     """The thread pool used to run the jobs."""
-    _jobs: set[QJob]
-    """The set of jobs being processed."""
+    _jobs: List[QJob]
+    """The ordered list of jobs being processed."""
     _finished: int
     """The number of finished jobs."""
     total: int
     """The total number of jobs."""
     _any_aborted: bool
     """Whether any job was aborted."""
-    _cancel_token: CancelToken | None
-    """An optional cancellation token that can be used to signal jobs to stop."""
+    _cancel_token: CancelToken
+    """A cancellation token that can be used to signal jobs to stop."""
 
     on_started: Signal = Signal()
     """Signal when processing starts."""
@@ -107,12 +109,13 @@ class QJobProcessor(QObject):
     on_job_progress: Signal = Signal(object, int, int)
     """Signal job progress: QJob, steps, total steps."""
 
-    def __init__(self, jobs: set[QJob], parent: QObject | None = None, run_in_thread: bool = True) -> None:
+    def __init__(self, jobs: Iterable[QJob], parent: QObject | None = None, run_in_thread: bool = True) -> None:
         super().__init__(parent)
         self._pool = QThreadPool.globalInstance()
-        self._jobs = jobs
+        # Preserve the iteration order by storing a list
+        self._jobs = list(jobs)
         self._finished = 0
-        self.total = len(jobs)
+        self.total = len(self._jobs)
         self._any_aborted = False
         self._cancel_token = CancelToken()
         # Whether to execute jobs in background threads (True) or schedule
@@ -120,7 +123,7 @@ class QJobProcessor(QObject):
         # to run jobs deterministically on the main thread.
         self._run_in_thread = run_in_thread
 
-        for job in jobs:
+        for job in self._jobs:
             self._connect_job_signals(job)
 
     def _connect_job_signals(self, job: QJob) -> None:
