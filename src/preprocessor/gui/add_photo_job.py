@@ -22,54 +22,42 @@ class AddPhotoJob(QJob):
         self._project_basepath = project_basepath
         self.result = None
 
-    def process(self) -> bool:  # type: ignore[override]
-        """Perform the work: create PhotoModel and extract EXIF metadata.
+    def process(self) -> None:  # type: ignore[override]
+        """Create PhotoData and extract EXIF metadata."""
+        self.assert_not_cancelled()
 
-        Returns False on success, True if aborted/failed.
-        """
-        if self.cancel_token.is_cancelled():
-            self.update_status("Cancelled")
-            return True
-        try:
-            # Import here to avoid circular imports at module import time
-            # Work with pydantic data objects in the worker thread (they are not QObjects)
-            from preprocessor.processing.exif import extract_exif_metadata
+        # Import here to avoid circular imports at module import time
+        # Work with pydantic data objects in the worker thread (they are not QObjects)
+        from preprocessor.processing.exif import extract_exif_metadata
 
-            # Compute relative path and image dimensions without creating any QObject
-            from PIL import Image
+        # Compute relative path and image dimensions without creating any QObject
+        from PIL import Image
 
-            relative_path = update_basepath(None, self._project_basepath, self._filepath)
-            with Image.open(self._filepath) as img:
-                width, height = img.size
+        relative_path = update_basepath(None, self._project_basepath, self._filepath)
+        with Image.open(self._filepath) as img:
+            width, height = img.size
 
-            # Create PhotoData (a pydantic BaseModel) which is safe to pass across threads
-            data = PhotoData(original_filename=relative_path, width=width, height=height)
+        # Create PhotoData (a pydantic BaseModel) which is safe to pass across threads
+        data = PhotoData(original_filename=relative_path, width=width, height=height)
 
-            if self.cancel_token.is_cancelled():
-                self.update_status("Cancelled")
-                return True
+        self.assert_not_cancelled()
 
-            abs_path = (self._project_basepath / data.original_filename).resolve()
-            exif_data = extract_exif_metadata(abs_path)
+        abs_path = (self._project_basepath / data.original_filename).resolve()
+        exif_data = extract_exif_metadata(abs_path)
 
-            # Fill metadata fields on the PhotoData.model (MetadataData)
-            md = data.metadata
-            md.date = exif_data.get("DateTime")
-            md.photographer = exif_data.get("Photographer")
-            md.camera = exif_data.get("Camera")
-            md.comments = exif_data.get("Comments")
-            md.latitude = exif_data.get("Latitude")
-            md.longitude = exif_data.get("Longitude")
+        # Fill metadata fields on the PhotoData.model (MetadataData)
+        md = data.metadata
+        md.date = exif_data.get("DateTime")
+        md.photographer = exif_data.get("Photographer")
+        md.camera = exif_data.get("Camera")
+        md.comments = exif_data.get("Comments")
+        md.latitude = exif_data.get("Latitude")
+        md.longitude = exif_data.get("Longitude")
 
-            # Return the data object; the main thread will create the PhotoModel QObject
-            self.result = data
-            # Report trivial progress/status
-            self.update_progress(1, 1)
-            self.update_status("Added")
-            return False
-        except Exception as exc:  # pragma: no cover - difficult to trigger in tests
-            # Signal failure via status and indicate aborted
-            self.update_status(f"Error: {exc!s}")
-            return True
+        # Return the data object; the main thread will create the PhotoModel QObject
+        self.result = data
+        # Report trivial progress/status
+        self.update_progress(1, 1)
+        self.update_status("Added")
 
 

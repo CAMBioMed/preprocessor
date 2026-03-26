@@ -50,23 +50,24 @@ class QJob(QRunnable):
 
     @Slot()
     def run(self) -> None:
-        aborted = False
         try:
             self.signals.on_job_start.emit(self)
-            aborted = self.process()
+            self.process()
+            self.signals.on_job_end.emit(self, False)
+        except JobCancelledException:
+            self.update_status(f"Cancelled")
+            self.signals.on_job_end.emit(self, True)
         except Exception as e:
             self.update_status(f"Error: {e!s}")
-            aborted = True
-        finally:
-            self.signals.on_job_end.emit(self, aborted)
+            self.signals.on_job_end.emit(self, True)
 
-    def process(self) -> bool:
+    def process(self) -> None:
         """Override this method with the job's task.
         This method will be called in the background thread.
-
-        :return: True if the job was aborted, False otherwise.
+        
+        :raises JobCancelledException: If cancellation is requested during processing.
         """
-        return False
+        return
 
     def update_progress(self, steps: int, total_steps: int) -> None:
         """Call this method to update the job's progress."""
@@ -76,6 +77,17 @@ class QJob(QRunnable):
         """Call this method to update the job's status."""
         self.signals.on_job_status.emit(self, status, None)
 
+    def assert_not_cancelled(self) -> None:
+        """Call this method to check if cancellation has been requested, and raise an exception if so."""
+        if self.cancel_token.is_cancelled():
+            self.update_status("Cancelled")
+            raise JobCancelledException()
+
+
+
+class JobCancelledException(Exception):
+    """An exception that can be raised by a QJob to indicate it was canceled."""
+    pass
 
 class QJobProcessor(QObject):
     _pool: QThreadPool
