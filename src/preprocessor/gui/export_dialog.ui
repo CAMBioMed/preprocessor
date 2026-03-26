@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>597</width>
-    <height>637</height>
+    <height>155</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
         <x>0</x>
         <y>0</y>
         <width>573</width>
-        <height>320</height>
+        <height>78</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_2">
@@ -51,65 +51,13 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QLabel" name="lblFilename">
-         <property name="text">
-          <string>Filename format:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QLineEdit" name="txtFilename">
-           <property name="text">
-            <string>{partner}_{area}_{site}_{date:%Y}_{season}_{depth}_{transect}_{date:%m%d}_{i:03d}.{ext}</string>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPlainTextEdit" name="txtFilenameFormatExplanation">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="plainText">
-            <string>Specify the filename format using these format specifiers:
-- {i}: The one-based index of the 
-- {date}: The date in the form yyyy-MM-dd
-- {name}: The name part of the filename.
-- {ext}: The extension part of the filename (without the leading dot).
-Or any of these metadata fields:
-- {partner}
-- {area}
-- {site}
-- {season}
-- {transect}
-- {height}
-- {latitude}
-- {longitude}
-- {depth}
-- {camera}
-- {photographer}
-- {water_quality}
-- {strobes}
-- {framing}
-- {white_balance_card}
-- {comments}</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="1" column="0">
         <widget class="QLabel" name="lblOutputDirectory">
          <property name="text">
           <string>Output directory:</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="0" column="1">
         <layout class="QHBoxLayout" name="layOutputDir">
          <item>
           <widget class="QLineEdit" name="txtOutputDir"/>
@@ -135,102 +83,12 @@ Or any of these metadata fields:
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frmProgress">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::Shape::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Shadow::Raised</enum>
-     </property>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="fieldGrowthPolicy">
-       <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
-      </property>
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblProgress">
-        <property name="text">
-         <string>Progress:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <layout class="QHBoxLayout" name="layProgress">
-        <item>
-         <widget class="QProgressBar" name="prbProgress">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>5</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="value">
-           <number>0</number>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lblProgress_Status">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>1</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Ready</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lblMessages">
-        <property name="text">
-         <string>Messages:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QListWidget" name="lstMessages">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <widget class="QDialogButtonBox" name="btnsDialog">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Close|QDialogButtonBox::StandardButton::SaveAll</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::SaveAll</set>
      </property>
      <property name="centerButtons">
       <bool>false</bool>
