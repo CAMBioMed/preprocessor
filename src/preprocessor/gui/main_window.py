@@ -283,10 +283,12 @@ class MainWindow(QMainWindow):
                 # Only append if the job completed successfully and produced a photo
                 if aborted:
                     return
-                photo = getattr(job, "result_photo", None)
-                # TODO: Move photo back to main thread?
-                if photo is not None:
-                    project.photos.append(photo)
+                photo_data = job.result
+                if photo_data is not None:
+                    # Note that we create the PhotoModel (a QObject) on the main thread,
+                    # using the data produced by the background job. This is required.
+                    photo_model = PhotoModel(photo_data)
+                    project.photos.append(photo_model)
 
         jobs: list[QJob] = []
         helper = _AppendHelper(self)

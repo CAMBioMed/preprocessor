@@ -22,7 +22,7 @@ def test_append_photo_model_populates_photo_metadata(tmp_path: Path) -> None:
     job = AddPhotoJob(str(img1), project.file.parent)
     aborted = job.process()
     assert aborted is False
-    photo = job.result_photo
+    photo = job.result
 
     # The photo metadata should have been populated from EXIF
     assert photo is not None

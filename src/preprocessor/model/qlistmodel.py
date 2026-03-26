@@ -63,6 +63,9 @@ class QListModel[E: QModel](QObject):
                 if not isinstance(item, QObject):
                     msg = "QObjectList only accepts QObjects"
                     raise TypeError(msg)
+                # NOTE: This will fail with a message "Cannot set parent, new parent is in a different thread" when
+                # the inserted object was created on a different thread from this object. In practice for this app
+                # we need to create all QObjects that will be inserted into QListModel on the main thread.
                 item.setParent(self)
             old_items = self._items[index]
             for old in old_items:
@@ -76,6 +79,9 @@ class QListModel[E: QModel](QObject):
                 raise TypeError(msg)
             old = self._items[index]
             old.setParent(None)
+            # NOTE: This will fail with a message "Cannot set parent, new parent is in a different thread" when
+            # the inserted object was created on a different thread from this object. In practice for this app
+            # we need to create all QObjects that will be inserted into QListModel on the main thread.
             value.setParent(self)
             self._items[index] = value
             self.mark_dirty()
@@ -101,6 +107,9 @@ class QListModel[E: QModel](QObject):
         if not isinstance(value, QObject):
             msg = "QObjectList only accepts QObjects"
             raise TypeError(msg)
+        # NOTE: This will fail with a message "Cannot set parent, new parent is in a different thread" when
+        # the inserted object was created on a different thread from this object. In practice for this app
+        # we need to create all QObjects that will be inserted into QListModel on the main thread.
         value.setParent(self)
         self._items.insert(index, value)
         self.mark_dirty()
