@@ -29,6 +29,10 @@ from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.detect_quadrat import detect_quadrat
 from preprocessor.processing.load_image import load_image
 from preprocessor.processing.params import defaultParams
+from preprocessor.gui.qjobs import QJob
+from preprocessor.gui.progress_dialog import ProgressDialog
+from preprocessor.gui.add_photo_job import AddPhotoJob
+from PySide6.QtCore import QObject, Slot
 
 
 class MainWindow(QMainWindow):
@@ -257,6 +261,7 @@ class MainWindow(QMainWindow):
         show_about_dialog(self)
 
     def _handle_add_photos_action(self) -> None:
+        """Add photos using background jobs."""
         assert self.model.current_project is not None
         project = self.model.current_project
         # If the path is not valid (anymore), the dialog still works and defaults to the current working directory
@@ -264,10 +269,35 @@ class MainWindow(QMainWindow):
         paths, _ = QFileDialog.getOpenFileNames(self, "Add Photo", initial_path, "Photos (*.jpg;*.jpeg);;All Files (*)")
         if not paths:
             return
-        for path in paths:
-            project.append_photo_model(Path(path))
-        # Set the path as photos_path for future dialogs
-        project.photos_path = Path(paths[0]).parent
+
+        # Set the path as photos_path for future dialogs (if any files were added)
+        if paths:
+            project.photos_path = Path(paths[0]).parent
+
+        # Use the shared AddPhotoJob implementation to create PhotoModel and extract EXIF in the background.
+
+        # Helper QObject to perform the actual append on the main thread
+        class _AppendHelper(QObject):
+            @Slot(object, bool)
+            def handle_job_end(self, job: AddPhotoJob, aborted: bool) -> None:
+                # Only append if the job completed successfully and produced a photo
+                if aborted:
+                    return
+                photo = getattr(job, "result_photo", None)
+                if photo is not None:
+                    project.photos.append(photo)
+
+        jobs: set[QJob] = set()
+        helper = _AppendHelper(self)
+        for p in paths:
+            job = AddPhotoJob(p, project.file.parent)
+            # Connect the job end signal to the helper so append happens on the main thread
+            job.signals.on_job_end.connect(helper.handle_job_end)
+            jobs.add(job)
+
+        # Show progress dialog and run jobs; dialog is modal and will block until done
+        dlg = ProgressDialog("Adding Photos", jobs, parent=self, run_in_thread=True)
+        dlg.exec()
 
     def _handle_remove_photos_action(self, selected: list[PhotoModel]) -> None:
         assert self.model.current_project is not None
