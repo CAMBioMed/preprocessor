@@ -1,5 +1,6 @@
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QStyle, QTreeWidgetItem
+from PySide6.QtCore import QTimer
 
 from preprocessor.gui.qjobs import QJobProcessor, QJob
 from preprocessor.gui.ui_progress_dialog import Ui_ProgressDialog
@@ -17,6 +18,7 @@ class ProgressDialog(QDialog):
         jobs: set[QJob],
         parent: QWidget | None = None,
         run_in_thread: bool = True,
+        auto_close_on_finish: bool = False,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle(title)
@@ -27,6 +29,9 @@ class ProgressDialog(QDialog):
         self._connect_signals()
         # Create the processor first so initial state handlers can access its properties
         self._processor = QJobProcessor(jobs=jobs, parent=self, run_in_thread=run_in_thread)
+        # Optionally auto-close the dialog when processing finishes (useful for tests)
+        if auto_close_on_finish:
+            self._processor.on_finished.connect(lambda aborted: QTimer.singleShot(0, self.accept))
         self._connect_processor()
         self._set_initial_state()
         self._add_jobs_to_ui(jobs)
