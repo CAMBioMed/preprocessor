@@ -24,12 +24,19 @@ class AddPhotoJob(QJob):
 
         Returns False on success, True if aborted/failed.
         """
+        if self.cancel_token.is_cancelled():
+            self.update_status("Cancelled")
+            return True
         try:
             # Import here to avoid circular imports at module import time
             from preprocessor.model.photo_model import PhotoModel
             from preprocessor.processing.exif import extract_exif_metadata
 
             photo = PhotoModel.from_file(self._filepath, self._project_basepath)
+
+            if self.cancel_token.is_cancelled():
+                self.update_status("Cancelled")
+                return True
 
             abs_path = (self._project_basepath / photo.original_filename).resolve()
             exif_data = extract_exif_metadata(abs_path)
@@ -44,7 +51,7 @@ class AddPhotoJob(QJob):
             self.result_photo = photo
             # Report trivial progress/status
             self.update_progress(1, 1)
-            self.update_status("Loaded")
+            self.update_status("Added")
             return False
         except Exception as exc:  # pragma: no cover - difficult to trigger in tests
             # Signal failure via status and indicate aborted

@@ -1,5 +1,5 @@
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QStyle, QTreeWidgetItem
+from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QStyle, QTreeWidgetItem, QPushButton
 from PySide6.QtCore import QTimer
 
 from typing import Iterable
@@ -13,6 +13,8 @@ class ProgressDialog(QDialog):
 
     ui: Ui_ProgressDialog
     _processor: QJobProcessor
+    _cancel_button: QPushButton
+    _close_button: QPushButton
 
     def __init__(
         self,
@@ -41,6 +43,13 @@ class ProgressDialog(QDialog):
     def _setup_ui(self) -> None:
         self.ui = Ui_ProgressDialog()
         self.ui.setupUi(self)
+        # Add Close/Cancel buttons to the button box
+        self._close_button = QPushButton("Close")
+        self._cancel_button = QPushButton("Cancel")
+        self.ui.btnDialogButtons.addButton(self._cancel_button, QDialogButtonBox.ButtonRole.NoRole)
+        self.ui.btnDialogButtons.addButton(self._close_button, QDialogButtonBox.ButtonRole.AcceptRole)
+        self.ui.btnDialogButtons.accepted.disconnect()
+        self.ui.btnDialogButtons.rejected.disconnect()
         # Show the columns
         self.ui.treeItems.setHeaderLabels(["Item", "Status"])
         self.ui.treeItems.header().setStretchLastSection(False)
@@ -49,12 +58,16 @@ class ProgressDialog(QDialog):
         self.ui.treeItems.header().resizeSection(0, 80)
         # While a worker is running the user should be able to cancel;
         # the Close button should only be visible after finishing.
-        self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setVisible(True)
-        self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).setVisible(False)
+        self._cancel_button.setVisible(True)
+        self._close_button.setVisible(False)
+        # self.ui.btnDialogButtons.button(self._cancel_button).setVisible(True)
+        # self.ui.btnDialogButtons.button(self._close_button).setVisible(False)
 
     def _connect_signals(self) -> None:
-        self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(self._handle_cancel)
-        self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self._handle_close)
+        self._cancel_button.clicked.connect(self._handle_cancel)
+        self._close_button.clicked.connect(self._handle_close)
+        # self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(self._handle_cancel)
+        # self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self._handle_close)
 
     def _connect_processor(self) -> None:
         self._processor.on_started.connect(self._handle_started)
@@ -94,8 +107,10 @@ class ProgressDialog(QDialog):
         else:
             self._handle_status("Done.")
 
-        self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setVisible(False)
-        self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).setVisible(True)
+        self._cancel_button.setVisible(False)
+        self._close_button.setVisible(True)
+        # self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setVisible(False)
+        # self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).setVisible(True)
 
     def _handle_status(self, status: str) -> None:
         self.ui.lblStatus.setText(status)
@@ -127,11 +142,12 @@ class ProgressDialog(QDialog):
                 break
 
     def _handle_cancel(self) -> None:
-        self._processor.cancel()
-
         # Disable the Cancel button to prevent repeated clicks
-        self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setEnabled(False)
+        self._cancel_button.setEnabled(False)
+        # self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setEnabled(False)
         self.ui.lblStatus.setText("Cancelling...")
+
+        self._processor.cancel()
 
     def _handle_close(self) -> None:
         self.accept()

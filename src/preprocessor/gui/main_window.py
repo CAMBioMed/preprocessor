@@ -284,6 +284,7 @@ class MainWindow(QMainWindow):
                 if aborted:
                     return
                 photo = getattr(job, "result_photo", None)
+                # TODO: Move photo back to main thread?
                 if photo is not None:
                     project.photos.append(photo)
 

@@ -78,7 +78,6 @@ class Ui_ProgressDialog(object):
         self.btnDialogButtons = QDialogButtonBox(ProgressDialog)
         self.btnDialogButtons.setObjectName(u"btnDialogButtons")
         self.btnDialogButtons.setOrientation(Qt.Orientation.Horizontal)
-        self.btnDialogButtons.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Close)
 
         self.verticalLayout.addWidget(self.btnDialogButtons)
 
