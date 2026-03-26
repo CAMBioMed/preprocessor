@@ -16,15 +16,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
-    QHBoxLayout, QHeaderView, QLabel, QListWidget,
-    QListWidgetItem, QProgressBar, QSizePolicy, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget)
+    QHBoxLayout, QHeaderView, QLabel, QProgressBar,
+    QSizePolicy, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
+    QWidget)
 
 class Ui_ProgressDialog(object):
     def setupUi(self, ProgressDialog):
         if not ProgressDialog.objectName():
             ProgressDialog.setObjectName(u"ProgressDialog")
-        ProgressDialog.resize(561, 397)
+        ProgressDialog.resize(561, 254)
         self.verticalLayout = QVBoxLayout(ProgressDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.lblStatus = QLabel(ProgressDialog)
@@ -74,11 +74,6 @@ class Ui_ProgressDialog(object):
         self.treeItems.header().setVisible(False)
 
         self.verticalLayout.addWidget(self.treeItems)
-
-        self.lstMessages = QListWidget(ProgressDialog)
-        self.lstMessages.setObjectName(u"lstMessages")
-
-        self.verticalLayout.addWidget(self.lstMessages)
 
         self.btnDialogButtons = QDialogButtonBox(ProgressDialog)
         self.btnDialogButtons.setObjectName(u"btnDialogButtons")

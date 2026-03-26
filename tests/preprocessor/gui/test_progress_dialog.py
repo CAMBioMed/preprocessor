@@ -89,25 +89,6 @@ def test_running_worker_and_progress_and_status_and_finish(qtbot: QtBot) -> None
     assert any(x in item.text(1) for x in ("Done", "Aborted", "Processing...", "Step 2", "2 / 2"))
 
 
-def test_adding_messages_and_closing(qtbot: QtBot) -> None:
-    # The dialog doesn't expose a public message API; add messages directly to the list
-    job = AsyncTestJob("job-msg", steps=1, interval_ms=5)
-    dlg = _make_dialog(qtbot, {job})
-
-    # Initially messages widget is hidden
-    assert not dlg.ui.lstMessages.isVisible()
-
-    # Add a message and ensure it appears
-    dlg.ui.lstMessages.addItem("Test message")
-    dlg.ui.lstMessages.setVisible(True)
-    assert dlg.ui.lstMessages.count() == 1
-
-    # Close the dialog using the Close button (first ensure it's visible by faking finish)
-    dlg._handle_finished(False)
-    assert not dlg.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Close).isVisible() == False or True
-    # call close handler to accept the dialog
-    dlg._handle_close()
-
 
 def test_cancel_aborts_running_job(qtbot: QtBot) -> None:
     # Long running job (many steps) so we can cancel it

@@ -23,11 +23,10 @@ class ProgressDialog(QDialog):
         auto_close_on_finish: bool = False,
     ) -> None:
         super().__init__(parent)
-        self.setWindowTitle(title)
-        self.setModal(True)
-        self.resize(300, 100)
 
         self._setup_ui()
+        self.setWindowTitle(title)
+        self.setModal(True)
         self._connect_signals()
         # Create the processor first so initial state handlers can access its properties
         self._processor = QJobProcessor(jobs=jobs, parent=self, run_in_thread=run_in_thread)
@@ -42,7 +41,12 @@ class ProgressDialog(QDialog):
     def _setup_ui(self) -> None:
         self.ui = Ui_ProgressDialog()
         self.ui.setupUi(self)
+        # Show the columns
         self.ui.treeItems.setHeaderLabels(["Item", "Status"])
+        self.ui.treeItems.header().setStretchLastSection(False)
+        self.ui.treeItems.header().setSectionResizeMode(0, self.ui.treeItems.header().ResizeMode.Stretch)
+        self.ui.treeItems.header().setSectionResizeMode(1, self.ui.treeItems.header().ResizeMode.Fixed)
+        self.ui.treeItems.header().resizeSection(0, 80)
         # While a worker is running the user should be able to cancel;
         # the Close button should only be visible after finishing.
         self.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel).setVisible(True)
@@ -62,7 +66,7 @@ class ProgressDialog(QDialog):
         self._processor.on_job_status.connect(self._handle_job_status)
         self._processor.on_job_progress.connect(self._handle_job_progress)
 
-    def _add_jobs_to_ui(self, jobs: set[QJob]) -> None:
+    def _add_jobs_to_ui(self, jobs: Iterable[QJob]) -> None:
         for job in jobs:
             item = QTreeWidgetItem()
             item.setText(0, job.name)
@@ -75,12 +79,9 @@ class ProgressDialog(QDialog):
     def _set_initial_state(self) -> None:
         self._handle_status("Ready.")
         self._handle_progress(0, self._processor.total)
-        self.ui.lstMessages.setVisible(False)  # Hide messages until we have some
-        self.ui.treeItems.setVisible(False)  # Hide items until we have some
 
     def _handle_started(self) -> None:
         self._handle_status("Starting...")
-        self.ui.lstMessages.clear()
 
     def _handle_progress(self, processed: int, total: int) -> None:
         self.ui.prbProgress.setMaximum(total)
@@ -100,11 +101,11 @@ class ProgressDialog(QDialog):
         self.ui.lblStatus.setText(status)
 
     def _handle_job_start(self, job: QJob) -> None:
-        self._update_item(job, "Processing...", "info")
+        self._update_item(job, "Processing...", "file")
 
     def _handle_job_end(self, job: QJob, aborted: bool) -> None:
         status = "Aborted" if aborted else "Done"
-        icon = "error" if aborted else "info"
+        icon = "error" if aborted else "file"
         self._update_item(job, status, icon)
 
     def _handle_job_status(self, job: QJob, status: str, icon: QIcon | str | None) -> None:

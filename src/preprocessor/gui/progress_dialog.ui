@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>561</width>
-    <height>397</height>
+    <height>254</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,9 +79,6 @@
       </property>
      </column>
     </widget>
-   </item>
-   <item>
-    <widget class="QListWidget" name="lstMessages"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="btnDialogButtons">
