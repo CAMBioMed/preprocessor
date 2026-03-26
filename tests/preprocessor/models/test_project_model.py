@@ -25,7 +25,6 @@ from pytestqt.qtbot import QtBot
 
 from preprocessor.model.project_model import ProjectModel, ProjectData
 from preprocessor.model.photo_model import PhotoModel, PhotoData
-from preprocessor.model.camera_model import CameraModel, CameraData
 from preprocessor.model.metadata_model import MetadataData
 from preprocessor.model.qlistmodel import QListModel
 

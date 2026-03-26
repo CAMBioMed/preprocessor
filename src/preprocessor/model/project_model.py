@@ -1,7 +1,6 @@
 from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, ValidationError
 
-from preprocessor.model.camera_model import CameraModel, CameraData
 from preprocessor.model.metadata_model import MetadataModel, MetadataData
 from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel, PhotoData
@@ -33,8 +32,6 @@ class ProjectData(BaseModel):
     target_height: int | None = None
     """The target height for perspective correction, or None if not set."""
     photos: list[PhotoData] = []
-    """The list of photos in the project."""
-    cameras: list[CameraData] = []
     """The list of cameras in the project."""
     default_metadata: MetadataData = MetadataData()
 
@@ -75,7 +72,6 @@ class ProjectModel(QModel[ProjectData]):
 
     _file: Path
     _photos: QListModel[PhotoModel]
-    _cameras: QListModel[CameraModel]
     _default_metadata: MetadataModel
 
     def __init__(self, file: Path, data: ProjectData | dict[str, Any] | None = None) -> None:
@@ -85,7 +81,6 @@ class ProjectModel(QModel[ProjectData]):
 
         # Create QListModel containers for interactive use
         self._photos = QListModel[PhotoModel](parent=self)
-        self._cameras = QListModel[CameraModel](parent=self)
         self._default_metadata = MetadataModel(data=self._data.default_metadata)
 
         # Track which model instances we've connected to
@@ -94,7 +89,6 @@ class ProjectModel(QModel[ProjectData]):
 
         # wire photos list changes to mark dirty and (re)wire photo handlers
         self._photos.bind_to_model(self, "photos", self._handle_photos_changed)
-        self._cameras.bind_to_model(self, "cameras", self._handle_cameras_changed)
         self._default_metadata.on_changed.connect(self._handle_default_metadata_changed)
 
         self._populate_lists_from_data()
@@ -141,11 +135,6 @@ class ProjectModel(QModel[ProjectData]):
         return self._photos
 
     @property
-    def cameras(self) -> QListModel[CameraModel]:
-        """The list of cameras in the project."""
-        return self._cameras
-
-    @property
     def default_metadata(self) -> MetadataModel:
         """The default metadata for the project."""
         return self._default_metadata
@@ -156,21 +145,12 @@ class ProjectModel(QModel[ProjectData]):
         Uses the QListModel helper to reduce boilerplate.
         """
         self._photos.populate_from_data(self._data.photos, PhotoModel)
-        self._cameras.populate_from_data(self._data.cameras, CameraModel)
 
     def _handle_photos_changed(self) -> None:
         """Handle a change in the photo models."""
         self.mark_dirty()
         with contextlib.suppress(Exception):
             self.on_photos_changed.emit()
-        with contextlib.suppress(Exception):
-            self.on_changed.emit()
-
-    def _handle_cameras_changed(self) -> None:
-        """Handle a change in the camera models."""
-        self.mark_dirty()
-        with contextlib.suppress(Exception):
-            self.on_cameras_changed.emit()
         with contextlib.suppress(Exception):
             self.on_changed.emit()
 
