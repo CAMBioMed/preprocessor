@@ -236,7 +236,7 @@ class MainWindow(QMainWindow):
         except Exception:
             img = None
         if img is None:
-            original_path = self.model.current_project.get_absolute_path(self.model.current_photo.original_filename)
+            original_path = self.model.current_photo.original_filename
             img = load_image(str(original_path))
         if img is None:
             QMessageBox.critical(
@@ -293,7 +293,7 @@ class MainWindow(QMainWindow):
         jobs: list[QJob] = []
         helper = _AppendHelper(self)
         for p in paths:
-            job = AddPhotoJob(p, project.file.parent)
+            job = AddPhotoJob(p)
             # Connect the job end signal to the helper so append happens on the main thread
             job.signals.on_job_end.connect(helper.handle_job_end)
             jobs.append(job)

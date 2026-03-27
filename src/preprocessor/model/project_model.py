@@ -2,6 +2,7 @@ from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator, ValidationError
 
 from preprocessor.model.metadata_model import MetadataModel, MetadataData
+from preprocessor.model.project_path import ProjectPath
 from preprocessor.model.qlistmodel import QListModel
 from preprocessor.model.photo_model import PhotoModel, PhotoData
 
@@ -23,16 +24,16 @@ class ProjectData(BaseModel):
 
     model_version: int = SERIAL_VERSION
     """The version of the data model, used for compatibility checks during deserialization."""
-    photos_path: Path | None = None
+    photos_path: ProjectPath | None = None
     """The file path from which photos were last added, or None if not set."""
-    export_path: Path | None = None
+    export_path: ProjectPath | None = None
     """The file path where the photos will be exported to, or None if not set."""
     target_width: int | None = None
     """The target width for perspective correction, or None if not set."""
     target_height: int | None = None
     """The target height for perspective correction, or None if not set."""
     photos: list[PhotoData] = []
-    """The list of cameras in the project."""
+    """The list of photos in the project."""
     default_metadata: MetadataData = MetadataData()
 
     @field_validator("model_version", mode="after")
@@ -67,7 +68,6 @@ class ProjectModel(QModel[ProjectData]):
     on_target_width_changed: Signal = Signal(object)
     on_target_height_changed: Signal = Signal(object)
     on_photos_changed: Signal = Signal()
-    on_cameras_changed: Signal = Signal()
     on_default_metadata_changed: Signal = Signal()
 
     _file: Path
@@ -75,7 +75,7 @@ class ProjectModel(QModel[ProjectData]):
     _default_metadata: MetadataModel
 
     def __init__(self, file: Path, data: ProjectData | dict[str, Any] | None = None) -> None:
-        super().__init__(model_cls=ProjectData, project_dir=file.parent, data=data)
+        super().__init__(model_cls=ProjectData, data=data)
 
         self._file = file
 
@@ -85,7 +85,6 @@ class ProjectModel(QModel[ProjectData]):
 
         # Track which model instances we've connected to
         self._connected_photos: set[PhotoModel] = set()
-        self._connected_cameras: set[CameraModel] = set()
 
         # wire photos list changes to mark dirty and (re)wire photo handlers
         self._photos.bind_to_model(self, "photos", self._handle_photos_changed)
@@ -169,6 +168,8 @@ class ProjectModel(QModel[ProjectData]):
         """
         Write the serialized project JSON to the given file path.
         Parent directories will be created if necessary.
+
+        :param path: The file path to write the project JSON to.
         """
         p = Path(path)
         if p.parent:
@@ -183,58 +184,18 @@ class ProjectModel(QModel[ProjectData]):
 
     def write_to_json(self) -> str:
         """Return a JSON string representation of the model."""
-        # Ensure metadata.date fields are datetime.datetime for consistent serialization.
-        try:
-            for photo in self._data.photos:
-                md = getattr(photo, "metadata", None)
-                if md is None:
-                    continue
-                d = getattr(md, "date", None)
-                if d is None:
-                    continue
-                # If it's a date (not datetime), convert to datetime at midnight
-                if isinstance(d, date) and not isinstance(d, datetime):
-                    md.date = datetime(d.year, d.month, d.day)
-                # If it's a string, try parsing ISO date/datetime
-                elif isinstance(d, str):
-                    try:
-                        # try full ISO datetime first
-                        parsed = datetime.fromisoformat(d)
-                        md.date = parsed
-                    except Exception:
-                        try:
-                            parsed_date = date.fromisoformat(d)
-                            md.date = datetime(parsed_date.year, parsed_date.month, parsed_date.day)
-                        except Exception:
-                            # leave as-is
-                            pass
-            # Default metadata too
-            d = getattr(self._data.default_metadata, "date", None)
-            if d is not None:
-                if isinstance(d, date) and not isinstance(d, datetime):
-                    self._data.default_metadata.date = datetime(d.year, d.month, d.day)
-                elif isinstance(d, str):
-                    try:
-                        self._data.default_metadata.date = datetime.fromisoformat(d)
-                    except Exception:
-                        try:
-                            parsed_date = date.fromisoformat(d)
-                            self._data.default_metadata.date = datetime(
-                                parsed_date.year, parsed_date.month, parsed_date.day
-                            )
-                        except Exception:
-                            pass
-        except Exception:
-            # Be tolerant: if anything goes wrong, fall back to default serialization
-            pass
-
-        return self._data.model_dump_json(indent=2)
+        return self._data.model_dump_json(
+            context={"project_dir": self.file.parent.resolve()},
+            indent=2,
+        )
 
     @classmethod
     def read_from_file(cls: type["ProjectModel"], path: str | Path) -> "ProjectModel":
         """
         Load project JSON from the given file path and apply via deserialize().
-        Raises FileNotFoundError if the path does not exist.
+
+        :param path: The file path to read the project JSON from.
+        :raises FileNotFoundError: If the specified file does not exist.
         """
         p = Path(path)
         if not p.exists():
@@ -245,15 +206,16 @@ class ProjectModel(QModel[ProjectData]):
 
     @classmethod
     def read_from_json(cls: type["ProjectModel"], path: str | Path, json_str: str) -> "ProjectModel":
-        """Load model data from a JSON string."""
-        try:
-            new_data = ProjectData.model_validate_json(json_str)  # type: ignore[arg-type]
-        except ValidationError as exc:
-            raise ValueError(str(exc)) from exc
+        """Load model data from a JSON string.
+
+        :param path: The file path where the project is or will be saved. This is used as the base path for resolving project-relative paths in the JSON.
+        :param json_str: The JSON string to parse into the model.
+        :raises ValidationError: If the JSON data is invalid or incompatible with the model.
+        """
+        new_data = ProjectData.model_validate_json(
+            json_str,
+            context={"project_dir": Path(path).parent.resolve()},
+        )
 
         return ProjectModel(file=Path(path), data=new_data)
-
-    def get_absolute_path(self, path: Path) -> Path:
-        """Get the absolute file path of the photo, resolved from original_filename relative to the given basepath."""
-        return (self.file.parent / path).resolve()
 

@@ -7,6 +7,7 @@ from pydantic import BaseModel, field_validator
 
 from preprocessor.model import Point2, Matrix3x3
 from preprocessor.model.metadata_model import MetadataData, MetadataModel
+from preprocessor.model.project_path import ProjectPath
 from preprocessor.model.qmodel import QModel
 
 
@@ -17,7 +18,7 @@ class PhotoData(BaseModel, validate_assignment=True):
     ## Fixed properties ##
     ######################
 
-    original_filename: Path
+    original_filename: ProjectPath
     """The path to the photo file, relative to the project."""
     width: int
     """The width of the photo in pixels."""
@@ -94,13 +95,11 @@ class PhotoModel(QModel[PhotoData]):
 
     _metadata: MetadataModel
 
-    def __init__(self, project_dir: Path | None, data: PhotoData | dict[str, Any] | None = None) -> None:
-        super().__init__(model_cls=PhotoData, project_dir=project_dir, data=data)
+    def __init__(self, data: PhotoData | dict[str, Any] | None = None) -> None:
+        super().__init__(model_cls=PhotoData, data=data)
 
         self._metadata = MetadataModel(data=self._data.metadata)
         self._metadata.on_changed.connect(self._handle_metadata_changed)
-
-        self._update_path_field("original_filename", None)
 
     #############
     ## Helpers ##
@@ -118,11 +117,11 @@ class PhotoModel(QModel[PhotoData]):
     @property
     def original_filename(self) -> Path:
         """The original path of the photo, as an absolute path."""
-        return self._make_path_absolute(self._data.original_filename)
+        return self._data.original_filename
 
     @original_filename.setter
     def original_filename(self, value: Path) -> None:
-        self._set_path_field("original_filename", value)
+        self._set_field("original_filename", value)
 
     @property
     def width(self) -> int:
@@ -207,13 +206,3 @@ class PhotoModel(QModel[PhotoData]):
             self.on_metadata_changed.emit()
         with contextlib.suppress(Exception):
             self.on_changed.emit()
-
-    def set_project_dir(self, project_dir: Path | None) -> None:
-        """
-        Set the project directory for this PhotoModel. Normalize stored original_filename to be
-        relative to the project directory when possible. This does not mark the model dirty.
-        """
-        old_project_dir = self._project_dir
-        super().set_project_dir(project_dir)
-        self._update_path_field("original_filename", old_project_dir)
-

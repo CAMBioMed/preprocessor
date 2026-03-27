@@ -30,9 +30,10 @@ from preprocessor.model.qlistmodel import QListModel
 
 
 class TestProjectModel:
-    def test_photos(self) -> None:
+    def test_photos(self, tmp_path: Path) -> None:
         # Arrange
-        project_model = ProjectModel(file=Path("test.pbproj"))
+        project_dir = tmp_path / "project"
+        project_model = ProjectModel(file=project_dir / "test.pbproj")
 
         # Assert initial state
         assert isinstance(project_model.photos, QListModel)
@@ -41,7 +42,7 @@ class TestProjectModel:
         # Act: add a photo
         photo0 = PhotoModel(
             PhotoData(
-                original_filename=Path("photo0.jpg"),
+                original_filename=project_dir / "photo0.jpg",
                 width=1024,
                 height=768,
             )
@@ -61,12 +62,13 @@ class TestProjectModel:
         assert len(project_model.photos) == 0
         assert photo0.parent() is None
 
-    def test_serialize_deserialize_photos(self) -> None:
+    def test_serialize_deserialize_photos(self, tmp_path: Path) -> None:
         # Arrange
-        project = ProjectModel(file=Path("test1.pbproj"))
+        project_dir = tmp_path / "project"
+        project = ProjectModel(file=project_dir / "test1.pbproj")
         p = PhotoModel(
             PhotoData(
-                original_filename=Path("picA.jpg"),
+                original_filename=project_dir / "picA.jpg",
                 width=1024,
                 height=768,
                 red_shift=(1.0, 2.0),
@@ -80,21 +82,21 @@ class TestProjectModel:
         # Assert
         assert len(project.photos) == 1
         assert isinstance(project.photos[0], PhotoModel)
-        assert project.photos[0].original_filename == Path("picA.jpg")
+        assert project.photos[0].original_filename == project_dir / "picA.jpg"
         assert project.photos[0].red_shift == (1.0, 2.0)
 
         # Act: deserialize (valid version included)
-        new_project1 = ProjectModel.read_from_json(Path("test.pbproj"), json_str)
+        new_project1 = ProjectModel.read_from_json(project_dir / "test.pbproj", json_str)
 
         # Assert: one photo restored with properties
         assert len(new_project1.photos) == 1
         assert isinstance(new_project1.photos[0], PhotoModel)
-        assert new_project1.photos[0].original_filename == Path("picA.jpg")
+        assert new_project1.photos[0].original_filename == project_dir / "picA.jpg"
         assert new_project1.photos[0].red_shift == (1.0, 2.0)
 
         # Act: clear photos via deserialize with None (include version)
         # fmt: off
-        new_project2 = ProjectModel.read_from_json(Path("test.pbproj"), json.dumps({
+        new_project2 = ProjectModel.read_from_json(project_dir / "test.pbproj", json.dumps({
             "model_version": ProjectData.SERIAL_VERSION,
             "photos": [],
         }))
@@ -103,57 +105,58 @@ class TestProjectModel:
         # Assert: photos cleared and on_changed emitted
         assert len(new_project2.photos) == 0
 
-    def test_save_and_load_file(self) -> None:
-        # Use a temporary directory and file path
-        with tempfile.TemporaryDirectory() as td:
-            # Arrange: create project with one photo
-            path = Path(td) / "test.pbproj"
-            project = ProjectModel(file=path)
-            p = PhotoModel(
-                PhotoData(
-                    original_filename=Path("fileX.jpg"),
-                    width=1024,
-                    height=768,
-                    red_shift=(3.0, 4.0),
-                )
+    def test_save_and_load_file(self, tmp_path: Path) -> None:
+        # Arrange: create project with one photo
+        project_dir = tmp_path / "project"
+        project_file = project_dir / "test.pbproj"
+        project = ProjectModel(file=project_file)
+        p = PhotoModel(
+            PhotoData(
+                original_filename=project_dir / "fileX.jpg",
+                width=1024,
+                height=768,
+                red_shift=(3.0, 4.0),
             )
-            project.photos.append(p)
+        )
+        project.photos.append(p)
 
-            # Act: save to file
-            project.write_to_file(path)
+        # Act: save to file
+        project.write_to_file(project_file)
 
-            # Assert file exists and JSON matches serialize()
-            assert path.exists()
-            with path.open("r", encoding="utf-8") as fh:
-                json.load(fh)
+        # Assert file exists and JSON matches serialize()
+        assert project_file.exists()
+        with project_file.open("r", encoding="utf-8") as fh:
+            json.load(fh)
 
-            # Act: load from file
-            new_project2 = ProjectModel.read_from_file(path)
+        # Act: load from file
+        new_project2 = ProjectModel.read_from_file(project_file)
 
-            # Assert: loaded project restored and on_changed fired
-            assert len(new_project2.photos) == 1
-            loaded = new_project2.photos[0]
-            assert isinstance(loaded, PhotoModel)
-            assert loaded.original_filename == Path("fileX.jpg")
-            assert loaded.red_shift == (3.0, 4.0)
+        # Assert: loaded project restored and on_changed fired
+        assert len(new_project2.photos) == 1
+        loaded = new_project2.photos[0]
+        assert isinstance(loaded, PhotoModel)
+        assert loaded.original_filename == project_dir / "fileX.jpg"
+        assert loaded.red_shift == (3.0, 4.0)
 
     def test_load_missing_file_raises(self) -> None:
         missing = Path("/nonexistent/path/does_not_exist.json")
         with pytest.raises(FileNotFoundError):
             ProjectModel.read_from_file(missing)
 
-    def test_deserialize_version_mismatch_raises(self) -> None:
+    def test_deserialize_version_mismatch_raises(self, tmp_path: Path) -> None:
         # Arrange
+        project_dir = tmp_path / "project"
         bad = {"model_version": ProjectData.SERIAL_VERSION + 1, "photos": []}
         json_str = json.dumps(bad)
 
         # Act / Assert
         with pytest.raises(ValueError):  # noqa: PT011
-            ProjectModel.read_from_json(Path("test.pbproj"), json_str)
+            ProjectModel.read_from_json(project_dir / "test.pbproj", json_str)
 
-    def test_dirty_flag(self) -> None:
+    def test_dirty_flag(self, tmp_path: Path) -> None:
         # Arrange
-        project = ProjectModel(file=Path("test.pbproj"))
+        project_dir = tmp_path / "project"
+        project = ProjectModel(file=project_dir / "test.pbproj")
 
         # Initial state: clean
         assert not project.dirty
@@ -161,7 +164,7 @@ class TestProjectModel:
         # Act: append a photo -> project becomes dirty
         p = PhotoModel(
             PhotoData(
-                original_filename=Path("original.jpg"),
+                original_filename=project_dir / "original.jpg",
                 width=1024,
                 height=768,
             )
@@ -174,7 +177,7 @@ class TestProjectModel:
         assert not project.dirty
 
         # Act: change a child photo property -> project becomes dirty
-        p.original_filename = Path("changed.jpg")
+        p.original_filename = project_dir / "changed.jpg"
         assert project.dirty
 
         # Act: mark clean again and modify another child property
@@ -195,30 +198,33 @@ class TestProjectModel:
     def test_file_property_getter_setter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
         with qtbot.capture_exceptions():
             # Delegate to helper to keep tests DRY
-            p = tmp_path / "proj.json"
+            project_dir = tmp_path / "project"
+            p = project_dir / "proj.json"
             model = ProjectModel(file=p)
             self._assert_property_getter_setter_and_signal(
-                qtbot, model, "file", p, tmp_path / "new_proj.json", "on_file_changed"
+                qtbot, model, "file", p, project_dir / "new_proj.json", "on_file_changed"
             )
 
     def test_export_path_getter_setter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
         with qtbot.capture_exceptions():
             # Arrange
-            model = ProjectModel(file=tmp_path / "proj.json")
+            project_dir = tmp_path / "project"
+            model = ProjectModel(file=project_dir / "proj.json")
 
             # Use helper to test export_path property
             self._assert_property_getter_setter_and_signal(
-                qtbot, model, "export_path", None, tmp_path / "export", "on_export_path_changed"
+                qtbot, model, "export_path", None, project_dir / "export", "on_export_path_changed"
             )
 
     def test_photos_list_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
         with qtbot.capture_exceptions():
             # Arrange
-            model = ProjectModel(file=tmp_path / "proj.json")
+            project_dir = tmp_path / "project"
+            model = ProjectModel(file=project_dir / "proj.json")
             assert len(model.photos) == 0
 
             # Act / Assert: appending a PhotoModel should emit on_photos_changed and update serialized data
-            photo = PhotoModel(data={"original_filename": Path("img.jpg"), "width": 10, "height": 5})
+            photo = PhotoModel(data={"original_filename": project_dir / "img.jpg", "width": 10, "height": 5})
             with qtbot.waitSignal(model.on_photos_changed, timeout=1000) as blocker:
                 model.photos.append(photo)
 
@@ -236,34 +242,13 @@ class TestProjectModel:
             bad = {"model_version": ProjectData.SERIAL_VERSION, "photos": [bad_photo]}
             json_str = json.dumps(bad)
             with pytest.raises(ValueError):
-                ProjectModel.read_from_json(tmp_path / "f.json", json_str)
-
-    def test_cameras_list_getter_setter_and_validator_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
-        with qtbot.capture_exceptions():
-            # Arrange
-            model = ProjectModel(file=tmp_path / "proj.json")
-            assert len(model.cameras) == 0
-
-            # Act / Assert: appending a CameraModel should emit on_cameras_changed and update serialized data
-            cam = CameraModel(file=None, data={"name": "C1", "distortion_coefficients": [0, 0, 0, 0, 0]})
-            with qtbot.waitSignal(model.on_cameras_changed, timeout=1000) as blocker:
-                model.cameras.append(cam)
-
-            assert len(model.cameras) == 1
-            assert isinstance(model._data.cameras[0], CameraData)
-            assert blocker.args is not None
-
-            # Validator: invalid distortion_coefficients length in camera JSON should raise
-            bad_cam = {"name": "C2", "distortion_coefficients": [1.0, 2.0, 3.0]}
-            bad = {"model_version": ProjectData.SERIAL_VERSION, "cameras": [bad_cam]}
-            json_str = json.dumps(bad)
-            with pytest.raises(ValueError):
-                ProjectModel.read_from_json(tmp_path / "f.json", json_str)
+                ProjectModel.read_from_json(project_dir / "f.json", json_str)
 
     def test_default_metadata_getter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
         with qtbot.capture_exceptions():
             # Arrange
-            model = ProjectModel(file=tmp_path / "proj.json")
+            project_dir = tmp_path / "project"
+            model = ProjectModel(file=project_dir / "proj.json")
             md = model.default_metadata
             assert md is not None
             assert isinstance(md._data, MetadataData)

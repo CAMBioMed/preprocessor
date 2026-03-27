@@ -13,7 +13,7 @@ from preprocessor.model.photo_model import PhotoModel
 def _make_photo(metadata: dict[str, Any] | None = None) -> PhotoModel:
     # Create a minimal PhotoModel with a given metadata dict
     data = {
-        "original_filename": Path("IMG_TEST.JPG"),
+        "original_filename": Path("IMG_TEST.JPG").resolve(),
         "width": 10,
         "height": 10,
     }

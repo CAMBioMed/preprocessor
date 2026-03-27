@@ -34,7 +34,7 @@ def undistort_photo(
     dist = photo.distortion_coefficients or [0.0, 0.0, 0.0, 0.0, 0.0]
 
     # Load the image from disk
-    original_path = project.get_absolute_path(photo.original_filename)
+    original_path = photo.original_filename
     img = load_image(str(original_path))
     if img is None:
         logger.error("Failed to load image %s", original_path)

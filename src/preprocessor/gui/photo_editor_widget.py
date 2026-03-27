@@ -2,7 +2,7 @@ import contextlib
 import math
 from collections.abc import Callable
 
-from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
+from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent, QPointF
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
 from PySide6.QtWidgets import QWidget
@@ -62,7 +62,7 @@ class PhotoEditorWidget(QWidget):
 
     def show_photo(self, photo: PhotoModel | None, project: ProjectModel) -> None:
         if photo is not None:
-            original_path = project.get_absolute_path(photo.original_filename)
+            original_path = photo.original_filename
             # Load a QPixmap for fast rendering and also attempt to load a cv image
             self._pixmap = QPixmap(str(original_path))
             # Disconnect signals from previous photo (if any)

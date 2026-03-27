@@ -25,19 +25,16 @@ class QModel[M: BaseModel](QObject):
     _model_cls: type[M]
     _model_version: int
     _data: M
-    _project_dir: Path | None
     _dirty: bool
 
     def __init__(
         self,
         model_cls: type[M],
-        project_dir: Path | None,
         data: M | dict[str, Any] | None,
     ) -> None:
         super().__init__()
         self._model_cls = model_cls
         self._model_version = int(getattr(model_cls, "SERIAL_VERSION", 1))
-        self._project_dir = project_dir
         self._set_data(data)
 
     def _set_data(self, data: M | dict[str, Any] | None) -> None:
@@ -60,14 +57,6 @@ class QModel[M: BaseModel](QObject):
         This is called after deserialization to ensure that the interactive list models reflect the current data.
         """
         # This method is meant to be overridden by subclasses that have QListModel children.
-
-    def set_project_dir(self, project_dir: Path | None) -> None:
-        """
-        Set the project directory context for this model and propagate to child models/lists.
-
-        Subclasses should override this for model-specific logic.
-        """
-        self._project_dir = project_dir
 
 
     @property
@@ -140,47 +129,3 @@ class QModel[M: BaseModel](QObject):
                 self._emit_field_signal(field)
             with contextlib.suppress(Exception):
                 self.on_changed.emit()
-
-    def _make_path_absolute(self, path: Path) -> Path:
-        """
-        Makes a path absolute by resolving it relative to the project directory if necessary.
-        """
-        if self._project_dir is not None:
-            return (self._project_dir / path).resolve()
-        else:
-            return path.resolve()
-
-    def _set_path_field(self, field_name: str, value: Path | None) -> None:
-        """
-        Helper for setting a Path field that may be stored as a relative path in the model.
-
-        Converts the value to a relative path if possible before storing in the model.
-        """
-        if value is not None:
-            if not value.is_absolute():
-                raise ValueError("Value must be an absolute path")
-            if self._project_dir is not None:
-                try:
-                    value = value.relative_to(self._project_dir.resolve(), walk_up=False)
-                except ValueError:
-                    # Unchanged
-                    pass
-        self._set_field(field_name, value)
-
-    def _update_path_field(self, field_name: str, old_project_dir: Path | None) -> None:
-        """
-        Helper for updating a Path field when the project directory changes.
-
-        Updates the stored path to be relative to the new base path if possible.
-        """
-        old_path = getattr(self._data, field_name)
-
-        abs_path: Path | None
-        if old_path is None:
-            abs_path = None
-        elif old_project_dir is not None:
-            abs_path = (old_project_dir / old_path).resolve()
-        else:
-            abs_path = old_path.resolve()
-
-        self._set_path_field(field_name, abs_path)

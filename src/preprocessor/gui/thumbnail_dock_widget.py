@@ -156,7 +156,7 @@ class ThumbnailDockWidget(QDockWidget):
             display_text = photo.name
             item = QListWidgetItem(display_text)
 
-            original_path = project.get_absolute_path(photo.original_filename)
+            original_path = photo.original_filename
             pix = QPixmap(str(original_path))
             if not pix.isNull():
                 thumb = pix.scaled(

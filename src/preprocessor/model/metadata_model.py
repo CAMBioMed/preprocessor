@@ -81,7 +81,7 @@ class MetadataModel(QModel[MetadataData]):
     on_comments_changed: Signal = Signal(object)
 
     def __init__(self, data: MetadataData | dict[str, Any] | None = None) -> None:
-        super().__init__(project_dir=None, model_cls=MetadataData, data=data)
+        super().__init__(model_cls=MetadataData, data=data)
 
     @property
     def filename(self) -> str | None:

@@ -14,13 +14,12 @@ class AddPhotoJob(QJob):
     result: PhotoData | None = None
     """The result of this job."""
 
-    def __init__(self, filepath: Path, project_basepath: Path, name: Optional[str] = None) -> None:
+    def __init__(self, filepath: Path | str, name: str | None = None) -> None:
         self._filepath = Path(filepath)
         if not self._filepath.is_absolute():
             raise ValueError(f"Filepath must be absolute: {filepath}")
         name = name or self._filepath.name
         super().__init__(name=name)
-        self._project_basepath = project_basepath
         self.result = None
 
     def process(self) -> None:  # type: ignore[override]

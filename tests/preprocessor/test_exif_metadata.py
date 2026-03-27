@@ -1,8 +1,6 @@
 from pathlib import Path
 from datetime import datetime
 
-from preprocessor.model.project_model import ProjectModel
-from preprocessor.processing.exif import extract_exif_metadata
 from preprocessor.gui.add_photo_job import AddPhotoJob
 
 
@@ -16,12 +14,9 @@ def test_append_photo_model_populates_photo_metadata(tmp_path: Path) -> None:
     project_file = tmp_path / "proj.pbproj"
     project_file.parent.mkdir(parents=True, exist_ok=True)
 
-    project = ProjectModel(file=project_file)
-
     # Use the shared AddPhotoJob implementation
-    job = AddPhotoJob(str(img1), project.file.parent)
-    aborted = job.process()
-    assert aborted is False
+    job = AddPhotoJob(img1)
+    job.process()
     photo = job.result
 
     # The photo metadata should have been populated from EXIF
