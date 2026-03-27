@@ -2,7 +2,7 @@ import contextlib
 import math
 from collections.abc import Callable
 
-from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent, QPointF
+from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
 from PySide6.QtWidgets import QWidget
@@ -384,9 +384,7 @@ class PhotoEditorWidget(QWidget):
         cy = sum(p.y() for p in pts) / len(pts)
         return sorted(pts, key=lambda p: math.atan2(p.y() - cy, p.x() - cx))
 
-    def undistort_photo_async(
-        self, photo: PhotoModel, project: ProjectModel, result_callback: Callable[[object], None] | None = None
-    ) -> None:
+    def undistort_photo_async(self, photo: PhotoModel, result_callback: Callable[[object], None] | None = None) -> None:
         """Start an asynchronous undistortion for the specified photo/project.
 
         The result_callback (if provided) will be called with one argument:
@@ -394,7 +392,7 @@ class PhotoEditorWidget(QWidget):
         This method can be used to batch undistort photos that are not currently displayed.
         """
         # Create a worker to run the undistort in background
-        worker = Worker(undistort_photo, photo, project)
+        worker = Worker(undistort_photo, photo)
 
         def _on_result(result: object) -> None:
             if result_callback is not None:
@@ -417,7 +415,7 @@ class PhotoEditorWidget(QWidget):
             return
 
         # If a previous worker is running, we won't cancel it here; just start another
-        worker = Worker(undistort_photo, self._photo, self._current_project)
+        worker = Worker(undistort_photo, self._photo)
         self._current_undistort_worker = worker
 
         def _on_result(result: MatLike | None) -> None:

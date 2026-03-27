@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional, Any
 
 from preprocessor.gui.qjobs import QJob
 from preprocessor.model.photo_model import PhotoData
@@ -17,7 +16,8 @@ class AddPhotoJob(QJob):
     def __init__(self, filepath: Path | str, name: str | None = None) -> None:
         self._filepath = Path(filepath)
         if not self._filepath.is_absolute():
-            raise ValueError(f"Filepath must be absolute: {filepath}")
+            msg = f"Filepath must be absolute: {filepath}"
+            raise ValueError(msg)
         name = name or self._filepath.name
         super().__init__(name=name)
         self.result = None
@@ -57,5 +57,3 @@ class AddPhotoJob(QJob):
         # Report trivial progress/status
         self.update_progress(1, 1)
         self.update_status("Added")
-
-

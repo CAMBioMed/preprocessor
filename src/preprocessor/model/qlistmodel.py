@@ -179,9 +179,7 @@ class QListModel[E: QModel](QObject):
         self[:] = items
 
     def set_project_dir(self, project_dir: Path | None) -> None:
-        """
-        Propagate project_dir to every child item if they implement set_project_dir.
-        """
+        """Propagate project_dir to every child item if they implement set_project_dir."""
         for item in self._items:
             if hasattr(item, "set_project_dir"):
                 item.set_project_dir(project_dir)

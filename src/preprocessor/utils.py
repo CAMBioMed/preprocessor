@@ -2,7 +2,6 @@ from enum import Enum, auto
 import re
 
 
-
 # The following case functions are adapted from:
 # https://github.com/Virtlink/pidgyn/blob/d2e057f9b3a03c8b1f5a1f9330740ea5aa9cb1be/pidgyn-utils/src/main/kotlin/net/pelsmaeker/pidgyn/text/CharSequence.ext.kt#L137-L311
 

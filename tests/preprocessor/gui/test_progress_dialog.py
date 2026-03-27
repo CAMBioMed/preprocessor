@@ -89,7 +89,6 @@ def test_running_worker_and_progress_and_status_and_finish(qtbot: QtBot) -> None
     assert any(x in item.text(1) for x in ("Done", "Aborted", "Processing...", "Step 2", "2 / 2"))
 
 
-
 def test_cancel_aborts_running_job(qtbot: QtBot) -> None:
     # Long running job (many steps) so we can cancel it
     job = AsyncTestJob("job-cancel", steps=20, interval_ms=20)

@@ -215,9 +215,7 @@ class _ExportWorker(QObject):
                 img = None
                 try:
                     # Provide a stop_checker callable so undistort_photo can cancel early
-                    img = undistort_photo(
-                        photo, self.project, progress_callback=None, stop_checker=lambda: self._stop_requested
-                    )
+                    img = undistort_photo(photo, progress_callback=None, stop_checker=lambda: self._stop_requested)
                 except Exception as e:
                     self.message.emit("error", f"Lens correction failed for {original_name}: {e}")
                     self.progress.emit(idx, total)

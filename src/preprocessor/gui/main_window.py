@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
 
     def _update_thumbnails(self) -> None:
         if self.model.current_project is not None:
-            self.thumbnail_dock.update_thumbnails(self.model.current_project.photos, self.model.current_project)
+            self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""

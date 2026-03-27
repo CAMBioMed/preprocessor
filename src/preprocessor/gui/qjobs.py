@@ -2,7 +2,7 @@ from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool, QTimer
 
 
 from threading import Event
-from typing import Iterable, List
+from collections.abc import Iterable
 
 
 class CancelToken:
@@ -55,7 +55,7 @@ class QJob(QRunnable):
             self.process()
             self.signals.on_job_end.emit(self, False)
         except JobCancelledException:
-            self.update_status(f"Cancelled")
+            self.update_status("Cancelled")
             self.signals.on_job_end.emit(self, True)
         except Exception as e:
             self.update_status(f"Error: {e!s}")
@@ -64,7 +64,7 @@ class QJob(QRunnable):
     def process(self) -> None:
         """Override this method with the job's task.
         This method will be called in the background thread.
-        
+
         :raises JobCancelledException: If cancellation is requested during processing.
         """
         return
@@ -84,15 +84,14 @@ class QJob(QRunnable):
             raise JobCancelledException()
 
 
-
 class JobCancelledException(Exception):
     """An exception that can be raised by a QJob to indicate it was canceled."""
-    pass
+
 
 class QJobProcessor(QObject):
     _pool: QThreadPool
     """The thread pool used to run the jobs."""
-    _jobs: List[QJob]
+    _jobs: list[QJob]
     """The ordered list of jobs being processed."""
     _finished: int
     """The number of finished jobs."""

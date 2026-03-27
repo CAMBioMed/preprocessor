@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import pytest
@@ -11,6 +10,7 @@ from preprocessor.model.qmodel import QModel
 
 class ExampleData(BaseModel, validate_assignment=True):
     """A simple Pydantic model for testing."""
+
     name: str
     path: ProjectPath | None
 

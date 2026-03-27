@@ -5,7 +5,6 @@ from collections.abc import Callable
 from cv2.typing import MatLike
 
 from preprocessor.model.photo_model import PhotoModel
-from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.load_image import load_image
 
 logger = logging.getLogger(__name__)
@@ -13,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 def undistort_photo(
     photo: PhotoModel,
-    project: ProjectModel,
     progress_callback: Callable[[float], None] | None = None,
     stop_checker: Callable[[], bool] | None = None,
 ) -> MatLike | None:

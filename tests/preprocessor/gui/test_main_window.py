@@ -10,7 +10,9 @@ from preprocessor.gui.launch_dialog import new_project, open_project
 class TestMainWindow:
     """Tests for the MainWindow class in the preprocessor GUI."""
 
-    def test_photos_are_added(self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object) -> None:
+    def test_photos_are_added(
+        self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
+    ) -> None:
         """Test that photos are added and the photos_path is adjusted correctly."""
         from preprocessor.gui.main_window import MainWindow
         from preprocessor.model.application_model import ApplicationModel

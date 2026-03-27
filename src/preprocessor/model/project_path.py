@@ -5,7 +5,7 @@ from pydantic import PlainSerializer, AfterValidator
 from pydantic_core.core_schema import ValidationInfo, SerializationInfo
 
 
-def _parse_project_path(v: Any, info: ValidationInfo) -> Path:
+def _parse_project_path(v: Any, info: ValidationInfo) -> Path:  # noqa: ANN401
     """Pydantic validator to parse a path relative to the project directory."""
 
     p = Path(v) if not isinstance(v, Path) else v
@@ -14,10 +14,12 @@ def _parse_project_path(v: Any, info: ValidationInfo) -> Path:
 
     project_dir = (info.context or {}).get("project_dir")
     if project_dir is None:
-        raise ValueError("Project directory must be set in context for parsing project paths")
+        msg = "Project directory must be set in context for parsing project paths"
+        raise ValueError(msg)
     project_dir = Path(project_dir).resolve()
 
     return (project_dir / p).resolve()
+
 
 def _dump_project_path(v: Path, info: SerializationInfo) -> str:
     """Pydantic serializer to dump a path as relative to the project directory if possible."""
@@ -34,6 +36,7 @@ def _dump_project_path(v: Path, info: SerializationInfo) -> str:
         return relative_path.as_posix()
     except ValueError:
         return p.as_posix()
+
 
 ProjectPath = Annotated[
     Path,

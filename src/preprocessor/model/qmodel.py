@@ -1,5 +1,4 @@
-from pathlib import Path
-from typing import TypeVar, Any, cast
+from typing import TypeVar, Any
 
 from PySide6.QtCore import QObject, Signal
 from pydantic import BaseModel
@@ -57,7 +56,6 @@ class QModel[M: BaseModel](QObject):
         This is called after deserialization to ensure that the interactive list models reflect the current data.
         """
         # This method is meant to be overridden by subclasses that have QListModel children.
-
 
     @property
     def dirty(self) -> bool:

@@ -1,5 +1,5 @@
 from PySide6.QtCore import Signal
-from pydantic import BaseModel, field_validator, ValidationError
+from pydantic import BaseModel, field_validator
 
 from preprocessor.model.metadata_model import MetadataModel, MetadataData
 from preprocessor.model.project_path import ProjectPath
@@ -11,9 +11,6 @@ from typing import ClassVar, Any
 
 from preprocessor.model.qmodel import QModel
 import contextlib
-from datetime import datetime, date
-
-from preprocessor.processing.exif import extract_exif_metadata
 
 
 class ProjectData(BaseModel):
@@ -208,7 +205,8 @@ class ProjectModel(QModel[ProjectData]):
     def read_from_json(cls: type["ProjectModel"], path: str | Path, json_str: str) -> "ProjectModel":
         """Load model data from a JSON string.
 
-        :param path: The file path where the project is or will be saved. This is used as the base path for resolving project-relative paths in the JSON.
+        :param path: The file path where the project is or will be saved.
+        This is used as the base path for resolving project-relative paths in the JSON.
         :param json_str: The JSON string to parse into the model.
         :raises ValidationError: If the JSON data is invalid or incompatible with the model.
         """
@@ -218,4 +216,3 @@ class ProjectModel(QModel[ProjectData]):
         )
 
         return ProjectModel(file=Path(path), data=new_data)
-

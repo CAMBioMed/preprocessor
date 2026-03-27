@@ -21,5 +21,3 @@ def auto_close_progress_dialog(monkeypatch: MonkeyPatch) -> Generator[None, Any,
 
     monkeypatch.setattr(main_window_mod, "ProgressDialog", TestProgressDialog)
     yield
-
-
