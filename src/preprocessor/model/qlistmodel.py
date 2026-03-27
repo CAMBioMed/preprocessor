@@ -1,4 +1,5 @@
 from typing import TypeVar, cast, overload, SupportsIndex
+from pathlib import Path
 from collections.abc import Iterable, Iterator, Callable
 from PySide6.QtCore import QObject, Signal
 from pydantic import BaseModel
@@ -63,6 +64,9 @@ class QListModel[E: QModel](QObject):
                 if not isinstance(item, QObject):
                     msg = "QObjectList only accepts QObjects"
                     raise TypeError(msg)
+                # NOTE: This will fail with a message "Cannot set parent, new parent is in a different thread" when
+                # the inserted object was created on a different thread from this object. In practice for this app
+                # we need to create all QObjects that will be inserted into QListModel on the main thread.
                 item.setParent(self)
             old_items = self._items[index]
             for old in old_items:
@@ -76,6 +80,9 @@ class QListModel[E: QModel](QObject):
                 raise TypeError(msg)
             old = self._items[index]
             old.setParent(None)
+            # NOTE: This will fail with a message "Cannot set parent, new parent is in a different thread" when
+            # the inserted object was created on a different thread from this object. In practice for this app
+            # we need to create all QObjects that will be inserted into QListModel on the main thread.
             value.setParent(self)
             self._items[index] = value
             self.mark_dirty()
@@ -101,6 +108,9 @@ class QListModel[E: QModel](QObject):
         if not isinstance(value, QObject):
             msg = "QObjectList only accepts QObjects"
             raise TypeError(msg)
+        # NOTE: This will fail with a message "Cannot set parent, new parent is in a different thread" when
+        # the inserted object was created on a different thread from this object. In practice for this app
+        # we need to create all QObjects that will be inserted into QListModel on the main thread.
         value.setParent(self)
         self._items.insert(index, value)
         self.mark_dirty()
@@ -168,6 +178,12 @@ class QListModel[E: QModel](QObject):
             items.append(cast(E, obj))
         self[:] = items
 
+    def set_project_dir(self, project_dir: Path | None) -> None:
+        """Propagate project_dir to every child item if they implement set_project_dir."""
+        for item in self._items:
+            if hasattr(item, "set_project_dir"):
+                item.set_project_dir(project_dir)
+
     def to_serializable_list(self) -> list[dict]:
         """
         Return a JSON-friendly list for serialization. Each child is expected
@@ -206,10 +222,18 @@ class QListModel[E: QModel](QObject):
                     with contextlib.suppress(Exception):
                         a.on_changed.connect(child_changed_callback)  # type: ignore[attr-defined]
                         a.on_dirty_changed.connect(self._handle_child_dirty_changed)
+                    # Set project dir from owner if available
+                    project_dir = getattr(owner, "file", None)
+                    if project_dir is not None:
+                        project_dir = project_dir.parent
+                    if hasattr(a, "set_project_dir"):
+                        a.set_project_dir(project_dir)
                 for r in removed:
                     with contextlib.suppress(Exception):
                         r.on_changed.disconnect(child_changed_callback)  # type: ignore[attr-defined]
                         r.on_dirty_changed.disconnect(self._handle_child_dirty_changed)
+                    if hasattr(r, "set_project_dir"):
+                        r.set_project_dir(None)
 
             payload = [item._data for item in self._items] if len(self._items) > 0 else []
             owner._set_field(field_name, payload)

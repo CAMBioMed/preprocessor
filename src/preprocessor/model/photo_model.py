@@ -7,8 +7,8 @@ from pydantic import BaseModel, field_validator
 
 from preprocessor.model import Point2, Matrix3x3
 from preprocessor.model.metadata_model import MetadataData, MetadataModel
+from preprocessor.model.project_path import ProjectPath
 from preprocessor.model.qmodel import QModel
-from preprocessor.utils import update_basepath
 
 
 class PhotoData(BaseModel, validate_assignment=True):
@@ -18,7 +18,7 @@ class PhotoData(BaseModel, validate_assignment=True):
     ## Fixed properties ##
     ######################
 
-    original_filename: Path
+    original_filename: ProjectPath
     """The path to the photo file, relative to the project."""
     width: int
     """The width of the photo in pixels."""
@@ -101,22 +101,6 @@ class PhotoModel(QModel[PhotoData]):
         self._metadata = MetadataModel(data=self._data.metadata)
         self._metadata.on_changed.connect(self._handle_metadata_changed)
 
-    @classmethod
-    def from_file(cls, fullpath: Path, basepath: Path | None) -> "PhotoModel":
-        """Create a PhotoModel from a photo file, extracting its dimensions."""
-        from PIL import Image
-
-        relative_path = update_basepath(None, basepath, fullpath)
-        with Image.open(fullpath) as img:
-            width, height = img.size
-
-        data = PhotoData(
-            original_filename=relative_path,
-            width=width,
-            height=height,
-        )
-        return cls(data=data)
-
     #############
     ## Helpers ##
     #############
@@ -132,7 +116,7 @@ class PhotoModel(QModel[PhotoData]):
 
     @property
     def original_filename(self) -> Path:
-        """The original filename of the photo."""
+        """The original path of the photo, as an absolute path."""
         return self._data.original_filename
 
     @original_filename.setter
@@ -223,5 +207,23 @@ class PhotoModel(QModel[PhotoData]):
         with contextlib.suppress(Exception):
             self.on_changed.emit()
 
-    def update_paths_relative_to(self, old_basepath: Path, new_basepath: Path) -> None:
-        self.original_filename = update_basepath(old_basepath, new_basepath, self.original_filename)
+    def output_filename(self, index: int) -> str:
+        if self.metadata.filename is not None:
+            return self.metadata.filename
+        # FIXME: Should index be calculated per country/location/site?
+        # TODO: format should be {date:%Y}_{country_code:s}_{location_code:s}_{site_nr:02d}_{index:02d}.{extension}
+        date = self.metadata.date
+        extension = Path(self.original_filename).suffix.lower()
+        parts = [
+            self.metadata.partner,
+            self.metadata.area,
+            self.metadata.site,
+            f"{date:%Y}" if date else None,  # year
+            self.metadata.season,
+            self.metadata.depth,
+            self.metadata.transect,
+            f"{date:%m%d}" if date else None,  # month and day
+            f"{index:03d}",
+        ]
+        newname = "_".join([x for x in parts if x])
+        return newname + extension

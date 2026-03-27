@@ -20,7 +20,7 @@ class TestPhotoModel:
         """Helper to create a test PhotoModel with default values."""
         return PhotoModel(
             PhotoData(
-                original_filename=Path("img_001.jpg"),
+                original_filename=Path("img_001.jpg").resolve(),
                 width=1024,
                 height=768,
             )
@@ -31,7 +31,7 @@ class TestPhotoModel:
         assert_has_a_property_for_each_data_field(PhotoModel, PhotoData)
 
     fields_name_initial_new = [
-        ("original_filename", Path("img_001.jpg"), Path("img_002.jpg")),
+        ("original_filename", Path("img_001.jpg").resolve(), Path("img_002.jpg").resolve()),
         ("width", 1024, 2048),
         ("height", 768, 1536),
         ("quadrat_corners", None, [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]),
@@ -86,7 +86,7 @@ class TestPhotoModel:
 
     fields_name_value_normalized = [
         # Paths are normalized
-        ("original_filename", "img_003.jpg", Path("img_003.jpg")),  # str to Path
+        ("original_filename", str(Path("img_003.jpg").resolve()), Path("img_003.jpg").resolve()),  # str to Path
         # Empty lists become None
         ("quadrat_corners", [], None),
     ]
@@ -120,18 +120,19 @@ class TestPhotoModel:
                 fn_set_new=lambda m, p: setattr(m.metadata, "partner", "Acme Corp"),
             )
 
-    def test_serialize_deserialize(self) -> None:
+    def test_serialize_deserialize(self, tmp_path: Path) -> None:
         # Arrange
+        project_dir = tmp_path / "project"
         photo0 = PhotoModel(
             PhotoData(
-                original_filename=Path("img_001.jpg"),
+                original_filename=project_dir / "img_001.jpg",
                 width=1024,
                 height=768,
             )
         )
 
         # Assert: defaults set (quadrat_corners defaults to None)
-        assert photo0.original_filename == Path("img_001.jpg")
+        assert photo0.original_filename == project_dir / "img_001.jpg"
         assert photo0.quadrat_corners is None
         assert photo0.red_shift is None
         assert photo0.blue_shift is None
@@ -156,7 +157,7 @@ class TestPhotoModel:
             (0.0, 0.0, 1.0),
         )
         distortion = [0.01, -0.02, 0.0, 0.0]
-        photo1.original_filename = Path("img_001.jpg")
+        photo1.original_filename = project_dir / "img_001.jpg"
         photo1.quadrat_corners = corners
         photo1.red_shift = (0.3, -0.2)
         photo1.blue_shift = (0.0, 0.5)
@@ -164,7 +165,7 @@ class TestPhotoModel:
         photo1.distortion_coefficients = distortion
 
         # Assert: verify values set
-        assert photo1.original_filename == Path("img_001.jpg")
+        assert photo1.original_filename == project_dir / "img_001.jpg"
         assert photo1.quadrat_corners == corners
         assert photo1.red_shift == (0.3, -0.2)
         assert photo1.blue_shift == (0.0, 0.5)
@@ -176,7 +177,7 @@ class TestPhotoModel:
         photo2: PhotoModel = PhotoModel(PhotoData.model_validate_json(json_str1))
 
         # Assert: verify values read
-        assert photo2.original_filename == Path("img_001.jpg")
+        assert photo2.original_filename == project_dir / "img_001.jpg"
         assert photo2.quadrat_corners == corners
         assert photo2.red_shift == (0.3, -0.2)
         assert photo2.blue_shift == (0.0, 0.5)

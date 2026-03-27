@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QFileDialog
 
 
 def test_integration_new_project_add_images_save_and_quit(
-    qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch
+    qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
 ) -> None:
     """Integration test: New Project -> add images -> save -> quit.
 
