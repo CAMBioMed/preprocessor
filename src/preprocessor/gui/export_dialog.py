@@ -56,9 +56,9 @@ class ExportDialog(QDialog):
         if not export_dir:
             QMessageBox.warning(self, "Error", "Please specify an output directory.")
             return
-        export_path = Path(export_dir)
+        export_dir = Path(export_dir)
         try:
-            export_path.mkdir(parents=True, exist_ok=True)
+            export_dir.mkdir(parents=True, exist_ok=True)
         except FileExistsError:
             QMessageBox.warning(self, "Error", "The output path exists and is not a directory.")
             return
@@ -69,7 +69,7 @@ class ExportDialog(QDialog):
         # Show the progress UI and start export
         jobs: list[QJob] = []
         for idx, p in enumerate(self.current_project.photos):
-            job = ExportPhotoJob(p, idx, export_path)
+            job = ExportPhotoJob(p, idx, export_dir)
             jobs.append(job)
 
         # Show progress dialog and run jobs; dialog is modal and will block until done
