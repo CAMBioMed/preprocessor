@@ -30,9 +30,7 @@ class ExportPhotoJob(QJob):
         img = None
         try:
             # Provide a stop_checker callable so undistort_photo can cancel early
-            img = undistort_photo(
-                self.photo, progress_callback=None, stop_checker=self.cancel_token.is_cancelled
-            )
+            img = undistort_photo(self.photo, progress_callback=None, stop_checker=self.cancel_token.is_cancelled)
         except Exception:
             # TODO: Append errors to status message
             # self.message.emit("error", f"Lens correction failed for {original_name}: {e}")

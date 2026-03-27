@@ -2,14 +2,14 @@ import warnings
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QDialog
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
 from pathlib import Path
 
 from preprocessor import app_formal_name
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
-from preprocessor.gui.export_dialog import ExportDialog
+from preprocessor.gui.export_photo_job import ExportPhotoJob
 from preprocessor.gui.launch_dialog import (
     new_project_dialog,
     open_project_dialog,
@@ -221,9 +221,33 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def _handle_export_all_action(self) -> None:
-        dialog = ExportDialog(self.model.current_project, self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            pass
+        assert self.model.current_project is not None
+        project = self.model.current_project
+        # If the path is not valid (anymore), the dialog still works and defaults to the current working directory
+        initial_path = str(project.export_path or "")
+        export_dir = QFileDialog.getExistingDirectory(self, "Export photos", initial_path)
+        if not export_dir:
+            return
+        export_path = Path(export_dir)
+
+        # Save the settings
+        self.model.current_project.export_path = export_path
+
+        try:
+            export_path.mkdir(parents=True, exist_ok=True)
+        except FileExistsError:
+            QMessageBox.warning(self, "Error", "The output path exists and is not a directory.")
+            return
+
+        # Show the progress UI and start export
+        jobs: list[QJob] = []
+        for idx, p in enumerate(self.model.current_project.photos):
+            job = ExportPhotoJob(p, idx, export_path)
+            jobs.append(job)
+
+        # Show progress dialog and run jobs; dialog is modal and will block until done
+        dlg = ProgressDialog("Exporting Photos", jobs, parent=self, run_in_thread=True)
+        dlg.exec()
 
     def _handle_detect_quadrat_action(self) -> None:
         if self.model.current_photo is None:
