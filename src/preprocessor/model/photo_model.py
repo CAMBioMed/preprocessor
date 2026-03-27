@@ -206,3 +206,24 @@ class PhotoModel(QModel[PhotoData]):
             self.on_metadata_changed.emit()
         with contextlib.suppress(Exception):
             self.on_changed.emit()
+
+    def output_filename(self, index: int) -> str:
+        if self.metadata.filename is not None:
+            return self.metadata.filename
+        # FIXME: Should index be calculated per country/location/site?
+        # TODO: format should be {date:%Y}_{country_code:s}_{location_code:s}_{site_nr:02d}_{index:02d}.{extension}
+        date = self.metadata.date
+        extension = Path(self.original_filename).suffix.lower()
+        parts = [
+            self.metadata.partner,
+            self.metadata.area,
+            self.metadata.site,
+            f"{date:%Y}" if date else None,  # year
+            self.metadata.season,
+            self.metadata.depth,
+            self.metadata.transect,
+            f"{date:%m%d}" if date else None,  # month and day
+            f"{index:03d}",
+        ]
+        newname = "_".join([x for x in parts if x])
+        return newname + extension

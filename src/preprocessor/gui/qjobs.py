@@ -4,6 +4,8 @@ from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool, QTimer
 from threading import Event
 from collections.abc import Iterable
 
+from PySide6.QtGui import QIcon
+
 
 class CancelToken:
     """A simple cancellation token that can be shared between threads to signal when a job should be canceled."""
@@ -73,9 +75,9 @@ class QJob(QRunnable):
         """Call this method to update the job's progress."""
         self.signals.on_job_progress.emit(self, steps, total_steps)
 
-    def update_status(self, status: str) -> None:
+    def update_status(self, status: str, icon: QIcon | str | None = None) -> None:
         """Call this method to update the job's status."""
-        self.signals.on_job_status.emit(self, status, None)
+        self.signals.on_job_status.emit(self, status, icon)
 
     def assert_not_cancelled(self) -> None:
         """Call this method to check if cancellation has been requested, and raise an exception if so."""

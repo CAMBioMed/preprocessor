@@ -1,23 +1,19 @@
 from pathlib import Path
 
-from PySide6.QtCore import Signal, Slot, QObject, QThread
+from PySide6.QtCore import QObject, QThread
 from PySide6.QtWidgets import (
     QDialog,
     QWidget,
     QFileDialog,
     QMessageBox,
     QDialogButtonBox,
-    QListWidgetItem,
-    QStyle,
 )
 
+from preprocessor.gui.export_photo_job import ExportPhotoJob
+from preprocessor.gui.progress_dialog import ProgressDialog
+from preprocessor.gui.qjobs import QJob
 from preprocessor.gui.ui_export_dialog import Ui_ExportDialog
-from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
-from preprocessor.processing.fix_perspective import fix_perspective
-from preprocessor.processing.load_image import load_image
-from preprocessor.processing.save_image import save_image
-from preprocessor.processing.undistort import undistort_photo
 
 
 class ExportDialog(QDialog):
@@ -37,16 +33,11 @@ class ExportDialog(QDialog):
         self.ui = Ui_ExportDialog()
         self.ui.setupUi(self)
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.SaveAll).setText("Export All")
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Cancel).setVisible(False)
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Close).setVisible(True)
-        # Hide for now; can be re-enabled when filename formatting is implemented
-        self.ui.txtFilenameFormatExplanation.setVisible(False)
+        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Cancel)
 
     def _connect_signals(self) -> None:
         self.ui.btnOutputDir.clicked.connect(self._handle_outputdir_browse_clicked)
         self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.SaveAll).clicked.connect(self._handle_save_all)
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(self._handle_cancel)
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self._handle_close)
 
     def _set_initial_state(self) -> None:
         # Set the output directory to the last used export path, if available
@@ -72,242 +63,15 @@ class ExportDialog(QDialog):
             QMessageBox.warning(self, "Error", "The output path exists and is not a directory.")
             return
 
-        # Disable UI controls while exporting
-        self.ui.btnOutputDir.setEnabled(False)
-        self.ui.txtOutputDir.setEnabled(False)
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.SaveAll).setEnabled(False)
-
         # Save the settings
-        self.current_project.export_path = Path(export_dir)
+        self.current_project.export_path = export_dir
 
-        # Prepare progress UI
-        self.ui.prbProgress.setValue(0)
-        self.ui.prbProgress.setMaximum(max(1, len(list(self.current_project.photos))))
-        self.ui.lblProgress_Status.setText("Starting export...")
+        # Show the progress UI and start export
+        jobs: list[QJob] = []
+        for idx, p in enumerate(self.current_project.photos):
+            job = ExportPhotoJob(p, idx, export_path)
+            jobs.append(job)
 
-        # Start export worker in background thread
-        worker = _ExportWorker(self.current_project)
-        thread = QThread(self)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        worker.progress.connect(self._on_worker_progress)
-        worker.status.connect(self._on_worker_status)
-        worker.message.connect(self._on_worker_message)  # <-- connect message signal
-        worker.finished.connect(self._on_worker_finished)
-        worker.finished.connect(thread.quit)
-        thread.finished.connect(thread.deleteLater)
-        # keep refs to avoid GC
-        self._worker_thread = thread
-        self._worker = worker
-        thread.start()
-
-        # Show Close only after finished; keep Cancel visible for cancellation
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Cancel).setVisible(True)
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Close).setVisible(False)
-
-    @Slot(int, int)
-    def _on_worker_progress(self, processed: int, total: int) -> None:
-        # Update progress bar using count-based progress
-        self.ui.prbProgress.setMaximum(max(1, total))
-        self.ui.prbProgress.setValue(processed)
-
-    @Slot(str)
-    def _on_worker_status(self, text: str) -> None:
-        self.ui.lblProgress_Status.setText(text)
-
-    @Slot()
-    def _on_worker_finished(self) -> None:
-        # Re-enable UI
-        self.ui.btnOutputDir.setEnabled(True)
-        self.ui.txtOutputDir.setEnabled(True)
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.SaveAll).setEnabled(True)
-        # Swap Cancel -> Close
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Cancel).setVisible(False)
-        self.ui.btnsDialog.button(QDialogButtonBox.StandardButton.Close).setVisible(True)
-        # Clear worker refs
-        self._worker = None
-        self._worker_thread = None
-        self.ui.lblProgress_Status.setText("Export finished.")
-
-    @Slot(str, str)
-    def _on_worker_message(self, severity: str, text: str) -> None:
-        """
-        Append a message to the dialog's message list with an icon.
-
-        severity: 'error' | 'warning' | 'info' (fallback to info)
-        """
-        if not hasattr(self.ui, "lstMessages"):
-            return
-        item = QListWidgetItem(text)
-        if severity == "error":
-            icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical)
-        elif severity == "warning":
-            icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)
-        else:
-            icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
-        item.setIcon(icon)
-        self.ui.lstMessages.addItem(item)
-
-    def _handle_cancel(self) -> None:
-        if self._worker is not None:
-            # If an export is in progress, ask for confirmation before canceling
-            res = QMessageBox.question(
-                self,
-                "Cancel export",
-                "An export is in progress. Do you want to cancel?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            )
-            if res == QMessageBox.StandardButton.Yes and hasattr(self._worker, "request_stop"):
-                # Request stop (worker checks periodically)
-                self._worker.request_stop()
-                self.ui.lblProgress_Status.setText("Canceling...")
-                # Do not close dialog immediately; wait for worker to finish cleaning up
-            return
-
-        # No export in progress, just close the dialog
-        self.reject()
-
-    def _handle_close(self) -> None:
-        self.accept()
-
-
-class _ExportWorker(QObject):
-    """Background worker that exports photos one by one."""
-
-    progress: Signal = Signal(int, int)  # processed, total
-    status: Signal = Signal(str)
-    message: Signal = Signal(str, str)  # severity, text
-    finished: Signal = Signal()
-
-    def __init__(self, project: ProjectModel) -> None:
-        super().__init__()
-        self.project = project
-        self._stop_requested = False
-
-    @Slot()
-    def run(self) -> None:
-        photos = list(self.project.photos)
-        total = len(photos)
-        if total == 0:
-            self.status.emit("No photos to export.")
-            self.progress.emit(0, 0)
-            self.message.emit("info", "No photos to export.")
-            self.finished.emit()
-            return
-
-        assert self.project.export_path is not None, "Export path must be set before running export worker"
-
-        success_count = 0
-
-        for idx, photo in enumerate(photos, start=1):
-            if self._stop_requested:
-                self.status.emit("Export canceled.")
-                break
-
-            try:
-                # Prepare names/paths
-                output_name = self.determine_output_name(photo, idx)
-                output_path = self.project.export_path / output_name
-                original_name = photo.original_filename.name
-                self.status.emit(f"Exporting {idx}/{total}: {original_name} to {output_name}")
-
-                # Prefer undistorted image when available. If undistort was canceled, stop export
-                img = None
-                try:
-                    # Provide a stop_checker callable so undistort_photo can cancel early
-                    img = undistort_photo(photo, progress_callback=None, stop_checker=lambda: self._stop_requested)
-                except Exception as e:
-                    self.message.emit("error", f"Lens correction failed for {original_name}: {e}")
-                    self.progress.emit(idx, total)
-                    img = None
-
-                # If undistort returned None and a cancellation was requested, stop export immediately
-                if img is None and self._stop_requested:
-                    self.status.emit("Export canceled.")
-                    break
-
-                # Otherwise fall back to loading the original image
-                if img is None:
-                    original_path = self.project.get_absolute_path(photo.original_filename)
-                    img = load_image(str(original_path))
-
-                if img is None:
-                    # Couldn't load image (either undistort failed & load failed)
-                    original_path = self.project.get_absolute_path(photo.original_filename)
-                    self.message.emit(
-                        "warning",
-                        f"Failed to load image: {original_path}",
-                    )
-                    # continue to next photo but still report progress
-                    self.progress.emit(idx, total)
-                    continue
-
-                # Check cancellation again before heavy processing
-                if self._stop_requested:
-                    self.status.emit("Export canceled.")
-                    break
-
-                # Ensure quadrat corners are set
-                if photo.quadrat_corners:
-                    # Process perspective; guard against processing errors
-                    try:
-                        final_img = fix_perspective(
-                            img,
-                            list(photo.quadrat_corners),
-                        )
-                    except Exception as e:
-                        self.message.emit("error", f"Processing failed for {original_name}: {e}")
-                        self.progress.emit(idx, total)
-                        continue
-                else:
-                    # No quadrat corners, skip perspective correction but still export the image
-                    final_img = img
-                    self.message.emit("warning", f"Quadrat corners not set for: {original_name}")
-                    self.progress.emit(idx, total)
-
-                # Save result
-                ok = save_image(output_path, final_img)
-                if not ok:
-                    self.message.emit("error", f"Failed to save {original_name} to {output_path}")
-                    self.progress.emit(idx, total)
-                    continue
-
-                success_count += 1
-                # Too verbose.
-                # self.message.emit("info", f"Exported {original_name} as {output_name}")
-
-            except Exception as e:
-                # Catch-all per-photo to avoid aborting the entire export
-                self.message.emit("error", f"Unexpected error for photo {idx}: {e}")
-
-            # report progress after each photo (whether success or failure)
-            self.progress.emit(idx, total)
-
-        # Final summary message: canceled vs finished
-        if self._stop_requested:
-            self.message.emit("info", f"Export canceled after {success_count}/{total} photos exported.")
-        else:
-            self.message.emit("info", f"Export finished: {success_count}/{total} photos exported.")
-
-        self.finished.emit()
-
-    def request_stop(self) -> None:
-        self._stop_requested = True
-
-    def determine_output_name(self, photo: PhotoModel, index: int) -> str:
-        # Placeholder for any logic to determine output filename based on photo metadata
-        date = photo.metadata.date or self.project.default_metadata.date
-        extension = Path(photo.original_filename).suffix.lower()
-        parts = [
-            photo.metadata.partner or self.project.default_metadata.partner,
-            photo.metadata.area or self.project.default_metadata.area,
-            photo.metadata.site or self.project.default_metadata.site,
-            f"{date:%Y}" if date else None,  # year
-            photo.metadata.season or self.project.default_metadata.season,
-            photo.metadata.depth or self.project.default_metadata.depth,
-            photo.metadata.transect or self.project.default_metadata.transect,
-            f"{date:%m%d}" if date else None,  # month and day
-            f"{index:03d}",
-        ]
-        newname = "_".join([x for x in parts if x])
-        return newname + extension
+        # Show progress dialog and run jobs; dialog is modal and will block until done
+        dlg = ProgressDialog("Exporting Photos", jobs, parent=self, run_in_thread=True)
+        dlg.exec()
