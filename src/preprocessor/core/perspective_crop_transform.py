@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 from preprocessor.core.image_transform import ImageTransformWorkItem
+from preprocessor.core.types import ImageRGB
 
 
 class PerspectiveCropTransform:
@@ -21,7 +22,7 @@ class PerspectiveCropTransform:
             return item
 
         try:
-            ordered_corners = item.params.crop.corners.ordered()
+            ordered_corners = item.params.crop.corners.ordered().astype(np.float32)
             tl, tr, bl, br = ordered_corners
 
             # Compute widths (distance between left and right points) and heights (distance between top and bottom)
@@ -46,12 +47,12 @@ class PerspectiveCropTransform:
             )
 
             M = cv2.getPerspectiveTransform(ordered_corners, tgt_pts)
-            cropped_image = cv2.warpPerspective(item.image, M, (tgt_width, tgt_height))
+            cropped_image = cv2.warpPerspective(item.image.data, M, (tgt_width, tgt_height))
 
             return ImageTransformWorkItem(
                 image_id=item.image_id,
                 image_path=item.image_path,
-                image=cropped_image,
+                image=ImageRGB.from_rgb_array(cropped_image),
                 params=item.params,
                 messages=item.messages,
             )

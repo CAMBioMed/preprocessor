@@ -1,11 +1,14 @@
+from dataclasses import dataclass
+
+import cv2
 import numpy as np
 import numpy.typing as npt
 
 Point2D = tuple[float, float]
 """A 2D point represented as a tuple of (x, y) coordinates."""
 
-Image = npt.NDArray[np.number]
-"""Defines the Image type as a numpy array with a numeric dtype (integer or floating),
+ImageArray = npt.NDArray[np.uint8]
+"""Defines the Image type as a numpy array of 8-bit integers,
 and with 2 or 3 dimensions (grayscale or color).
 
 This is also an OpenCV2 MatLike."""
@@ -13,12 +16,99 @@ This is also an OpenCV2 MatLike."""
 LensVector = list[float]
 """Defines the LensVector type as a list of floats, representing distortion coefficients for lens correction."""
 
-# def require_is_image(obj: object) -> None:
-#     """Helper function to check if an object is a valid Image, and raise a TypeError if not."""
-#     if not isinstance(obj, np.ndarray):
-#         raise TypeError(f"Expected numpy.ndarray, got {type(obj)!r}")
-#     if obj.ndim not in (2, 3):
-#         raise ValueError(f"Expected 2D (grayscale) or 3D (color) array, got ndim={obj.ndim}")
-#     if obj.size == 0:
-#         raise ValueError("Empty image array")
 
+@dataclass(frozen=True)
+class ImageRGB:
+    """Wrapper for an RGB image."""
+    data: ImageArray
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.data, np.ndarray):
+            raise TypeError("Data must be a numpy.ndarray")
+        if self.data.dtype != np.uint8:
+            raise TypeError(f"Expected dtype np.uint8, got {self.data.dtype!r}")
+        nd = self.data.ndim
+        if nd != 3 or self.data.shape[2] != 3:
+            raise ValueError(f"RGB image must be HxWx3")
+        if self.data.size == 0:
+            raise ValueError("Empty image array")
+
+    @classmethod
+    def from_rgb_array(cls, arr: npt.ArrayLike) -> "ImageRGB":
+        """Create an ImageRGB from an array-like, validating and casting it to np.uint8."""
+        arr = np.asarray(arr)
+        return cls(data=arr.astype(np.uint8, copy=False))
+
+    def to_bgr_image(self) -> "ImageBGR":
+        return ImageBGR.from_bgr_array(cv2.cvtColor(self.data, cv2.COLOR_RGB2BGR))
+
+    def to_rgb_image(self) -> "ImageRGB":
+        return self
+
+    def to_grayscale_image(self) -> "ImageGreyscale":
+        return ImageGreyscale.from_greyscale_array(cv2.cvtColor(self.data, cv2.COLOR_RGB2GRAY))
+
+
+@dataclass(frozen=True)
+class ImageBGR:
+    """Wrapper for a BGR image."""
+    data: ImageArray
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.data, np.ndarray):
+            raise TypeError("Data must be a numpy.ndarray")
+        if self.data.dtype != np.uint8:
+            raise TypeError(f"Expected dtype np.uint8, got {self.data.dtype!r}")
+        nd = self.data.ndim
+        if nd != 3 or self.data.shape[2] != 3:
+            raise ValueError(f"BGR image must be HxWx3")
+        if self.data.size == 0:
+            raise ValueError("Empty image array")
+
+    @classmethod
+    def from_bgr_array(cls, arr: npt.ArrayLike) -> "ImageBGR":
+        """Create an ImageBGR from an array-like, validating and casting it to np.uint8."""
+        arr = np.asarray(arr)
+        return cls(data=arr.astype(np.uint8, copy=False))
+
+    def to_bgr_image(self) -> "ImageBGR":
+        return self
+
+    def to_rgb_image(self) -> ImageRGB:
+        return ImageRGB.from_rgb_array(cv2.cvtColor(self.data, cv2.COLOR_BGR2RGB))
+
+    def to_grayscale_image(self) -> "ImageGreyscale":
+        return ImageGreyscale.from_greyscale_array(cv2.cvtColor(self.data, cv2.COLOR_BGR2GRAY))
+
+
+@dataclass(frozen=True)
+class ImageGreyscale:
+    """Wrapper for a greyscale image."""
+    data: ImageArray
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.data, np.ndarray):
+            raise TypeError("Data must be a numpy.ndarray")
+        if self.data.dtype != np.uint8:
+            raise TypeError(f"Expected dtype np.uint8, got {self.data.dtype!r}")
+        nd = self.data.ndim
+        # Accept either a 2D array (H, W) or a 3D array with a singleton channel (H, W, 1)
+        if not (nd == 2 or (nd == 3 and self.data.shape[2] == 1)):
+            raise ValueError("Greyscale image must be HxW or HxWx1")
+        if self.data.size == 0:
+            raise ValueError("Empty image array")
+
+    @classmethod
+    def from_greyscale_array(cls, arr: npt.ArrayLike) -> "ImageGreyscale":
+        """Create an ImageGreyscale from an array-like, validating and casting it to np.uint8."""
+        arr = np.asarray(arr)
+        return cls(data=arr.astype(np.uint8, copy=False))
+
+    def to_bgr_image(self) -> ImageBGR:
+        return ImageBGR.from_bgr_array(cv2.cvtColor(self.data, cv2.COLOR_GRAY2BGR))
+
+    def to_rgb_image(self) -> ImageRGB:
+        return ImageRGB.from_rgb_array(cv2.cvtColor(self.data, cv2.COLOR_GRAY2RGB))
+
+    def to_grayscale_image(self) -> "ImageGreyscale":
+        return self

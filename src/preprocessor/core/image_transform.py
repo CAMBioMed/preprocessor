@@ -5,8 +5,7 @@ from typing import Protocol, Any
 
 from preprocessor.core.messages import Message, MessageLevel
 from preprocessor.core.photo_params import PhotoParams
-from preprocessor.core.types import Image
-
+from preprocessor.core.types import Image, ImageRGB
 
 
 @dataclass(slots=True)
@@ -18,7 +17,7 @@ class ImageTransformWorkItem:
     """Stable image ID."""
     image_path: Path
     """The original path to the image file."""
-    image: Image
+    image: ImageRGB
     """The image data as a numpy array."""
     params: PhotoParams
     """The parameters used for processing this image, e.g. quadrat corners."""
