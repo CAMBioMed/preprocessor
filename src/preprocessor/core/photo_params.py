@@ -2,7 +2,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from preprocessor.core.types import Corners, LensVector
+from preprocessor.core.type_corners import Corners
+from preprocessor.core.types import LensVector
 
 
 class ColorCorrectionParams(BaseModel, validate_assignment=True):

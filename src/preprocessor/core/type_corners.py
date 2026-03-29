@@ -62,12 +62,14 @@ class Corners(RootModel[tuple[Point2D, ...]]):
             return False
 
     def ordered(self) -> tuple[Point2D, Point2D, Point2D, Point2D]:
-        """Return the corners ordered in a consistent way (top-left, top-right, bottom-left, bottom-right).
+        """Return the corners ordered in a consistent polygon traversal order.
+
+        The returned order is (top-left, top-right, bottom-right, bottom-left).
 
         Call is_valid() first to check if the corners are valid (i.e., 4 corners and non-degenerate)
         before calling this method.
 
-        :return: A tuple of 4 points ordered as (top-left, top-right, bottom-left, bottom-right).
+        :return: A tuple of 4 points ordered as (top-left, top-right, bottom-right, bottom-left).
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
         """
         # Needs to have exactly 4 corners
@@ -117,7 +119,7 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
         :return: The bottom-left corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate)."""
-        return self.ordered()[2]
+        return self.ordered()[3]
 
     @property
     def br(self) -> Point2D:
@@ -125,13 +127,13 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
         :return: The bottom-right corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate)."""
-        return self.ordered()[3]
+        return self.ordered()[2]
 
     def as_tuple(self) -> tuple[Point2D, ...]:
         """Return the corners as a tuple of (x, y) points.
 
-        If the corners are valid (4 corners and non-degenerate), they will be returned in a consistent order
-        (top-left, top-right, bottom-left, bottom-right).
+        If the corners are valid (4 corners and non-degenerate), they will be returned in a consistent polygon
+        traversal order (top-left, top-right, bottom-right, bottom-left).
 
         :return: A tuple of (x, y) points representing the corners."""
         try:
@@ -141,10 +143,10 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
 
 def _order_corners(points: Sequence[Point2D]) -> tuple[Point2D, Point2D, Point2D, Point2D]:
-    """Helper function to order 4 points in polygon traversal order: top-left, top-right, bottom-left, bottom-right.
+    """Helper function to order 4 points in polygon traversal order: top-left, top-right, bottom-right, bottom-left.
 
     :param points: A sequence of 4 (x, y) points.
-    :return: A tuple of 4 points ordered as (top-left, top-right, bottom-left, bottom-right).
+    :return: A tuple of 4 points ordered as (top-left, top-right, bottom-right, bottom-left).
     :raises ValueError: If the input does not contain exactly 4 points,
     or if the corners are ambiguous (e.g., duplicate points).
     """
@@ -160,7 +162,8 @@ def _order_corners(points: Sequence[Point2D]) -> tuple[Point2D, Point2D, Point2D
     tr = pts[int(max(range(4), key=lambda i: d[i]))]
     bl = pts[int(min(range(4), key=lambda i: d[i]))]
 
-    ordered = (tl, tr, bl, br)
+    # Return polygon traversal order: top-left, top-right, bottom-right, bottom-left
+    ordered = (tl, tr, br, bl)
 
     if len(set(ordered)) != 4:
         raise ValueError("Corners are ambiguous (duplicate points)")

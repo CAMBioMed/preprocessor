@@ -10,20 +10,22 @@ class PerspectiveCropTransform:
 
     def __call__(self, item: ImageTransformWorkItem) -> ImageTransformWorkItem:
         if not item.params.crop:
-            item.info("no_crop_requested", "No crop requested; skipping perspective crop", step=self.name)
+            item.info("no_crop_requested", "Perspective crop skipped: no crop requested", step=self.name)
             return item
 
-        if not item.params.crop.corners:
-            item.warn("no_quadrat_corners", "No quadrat corners set; skipping perspective crop", step=self.name)
+        # If corners object exists but contains no points, signal no corners
+        if len(item.params.crop.corners) == 0:
+            item.warn("no_quadrat_corners", "Perspective crop skipped: no quadrat corners set", step=self.name)
             return item
 
         if not item.params.crop.corners.is_valid():
-            item.warn("invalid_quadrat_corners", "Quadrat corners are invalid; skipping perspective crop", step=self.name, details={"corners": item.params.crop.corners})
+            item.warn("invalid_quadrat_corners", "Perspective crop skipped: quadrat corners are invalid", step=self.name, details={"corners": item.params.crop.corners})
             return item
 
         try:
-            ordered_corners = item.params.crop.corners.ordered().astype(np.float32)
-            tl, tr, bl, br = ordered_corners
+            # ordered() returns a tuple in traversal order (tl, tr, br, bl).
+            ordered_corners = np.array(item.params.crop.corners.ordered(), dtype=np.float32)
+            tl, tr, br, bl = ordered_corners
 
             # Compute widths (distance between left and right points) and heights (distance between top and bottom)
             w_bottom = float(np.linalg.norm(br - bl))
@@ -36,12 +38,13 @@ class PerspectiveCropTransform:
             tgt_height = max(round(h_right), round(h_left), 1)
 
             # Destination points: top-left, top-right, bottom-left, bottom-right
+            # Use (width-1,height-1) for destination coordinates so they map to valid pixel indices
             tgt_pts = np.array(
                 [
                     [0.0, 0.0],
-                    [float(tgt_width), 0.0],
-                    [0.0, float(tgt_height)],
-                    [float(tgt_width), float(tgt_height)],
+                    [float(max(tgt_width - 1, 0)), 0.0],
+                    [0.0, float(max(tgt_height - 1, 0))],
+                    [float(max(tgt_width - 1, 0)), float(max(tgt_height - 1, 0))],
                 ],
                 dtype=np.float32,
             )

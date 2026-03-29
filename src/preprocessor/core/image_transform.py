@@ -5,7 +5,7 @@ from typing import Protocol, Any
 
 from preprocessor.core.messages import Message, MessageLevel
 from preprocessor.core.photo_params import PhotoParams
-from preprocessor.core.types import Image, ImageRGB
+from preprocessor.core.types import ImageRGB
 
 
 @dataclass(slots=True)
@@ -46,6 +46,14 @@ class ImageTransformWorkItem:
     def error(self, code: str, text: str, step: str | None = None, details: dict[str, Any] | None = None) -> None:
         """Add an error message to this work item."""
         self.add_message(MessageLevel.error, code, text, step, details)
+
+    def get_errors(self) -> list[Message]:
+        """Return True if this work item has any error messages."""
+        return [msg for msg in self.messages if msg.level == MessageLevel.error]
+
+    def get_warnings(self) -> list[Message]:
+        """Return True if this work item has any warning messages."""
+        return [msg for msg in self.messages if msg.level == MessageLevel.warning]
 
 
 class ImageTransform(Protocol):
