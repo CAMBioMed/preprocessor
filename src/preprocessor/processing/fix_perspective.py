@@ -7,6 +7,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
+# Deprecated: use PerspectiveCropTransform
 def fix_perspective(
     img: np.ndarray,
     src_pts: Sequence[tuple[float, float]],

@@ -58,17 +58,14 @@ class ImageRGB:
         rgb_arr = cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)
         return cls.from_rgb_array(rgb_arr)
 
-    def to_file(self, path: Path) -> None:
+    def to_file(self, path: Path, quality: float = 0.95) -> None:
         """Save the image to a file path.
 
         :param path: The file path to save the image to.
+        :param quality: The JPEG quality (0.0-1.0) to use when saving the image.
         :raises ValueError: If saving the image fails.
         """
-        bgr_arr = cv2.cvtColor(self.data, cv2.COLOR_RGB2BGR)
-        success = cv2.imwrite(str(path), bgr_arr)
-        if not success:
-            msg = f"Failed to save image to {path!s}"
-            raise ValueError(msg)
+        return self.to_bgr_image().to_file(path, quality=quality)
 
     @classmethod
     def from_rgb_array(cls, arr: npt.ArrayLike) -> "ImageRGB":
@@ -121,14 +118,16 @@ class ImageBGR:
             raise ValueError(msg)
         return cls.from_bgr_array(arr)
 
-    def to_file(self, path: Path) -> None:
+    def to_file(self, path: Path, quality: float = 0.95) -> None:
         """Save the image to a file path.
 
         :param path: The file path to save the image to.
+        :param quality: The JPEG quality (0.0-1.0) to use when saving the image.
         :raises ValueError: If saving the image fails.
         """
         bgr_arr = self.data
-        success = cv2.imwrite(str(path), bgr_arr)
+        params = [cv2.IMWRITE_JPEG_QUALITY, round(quality * 100)]
+        success = cv2.imwrite(str(path), bgr_arr, params)
         if not success:
             msg = f"Failed to save image to {path!s}"
             raise ValueError(msg)
@@ -185,17 +184,14 @@ class ImageGreyscale:
             raise ValueError(msg)
         return cls.from_greyscale_array(arr)
 
-    def to_file(self, path: Path) -> None:
+    def to_file(self, path: Path, quality: float = 0.95) -> None:
         """Save the image to a file path.
 
         :param path: The file path to save the image to.
+        :param quality: The JPEG quality (0.0-1.0) to use when saving the image.
         :raises ValueError: If saving the image fails.
         """
-        gray_arr = self.data
-        success = cv2.imwrite(str(path), gray_arr)
-        if not success:
-            msg = f"Failed to save image to {path!s}"
-            raise ValueError(msg)
+        return self.to_bgr_image().to_file(path, quality=quality)
 
     @classmethod
     def from_greyscale_array(cls, arr: npt.ArrayLike) -> "ImageGreyscale":

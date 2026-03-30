@@ -6,6 +6,7 @@ from cv2.typing import MatLike
 logger = logging.getLogger(__name__)
 
 
+# Deprecated: use ImageRGB.from_file()
 def load_image(image_path: str) -> MatLike | None:
     """Load an image from the given path using OpenCV's default ordering (BGR)."""
     # Use default color flag (BGR) to keep consistency with other OpenCV functions

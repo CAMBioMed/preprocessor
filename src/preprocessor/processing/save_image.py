@@ -8,6 +8,7 @@ from cv2.typing import MatLike
 logger = logging.getLogger(__name__)
 
 
+# Deprecated: use ImageRGB.to_file()
 def save_image(path: Path, img: MatLike | None, quality: int = 95, is_rgb: bool = False) -> bool:
     """
     Save image data to the given path as JPEG,
@@ -29,6 +30,7 @@ def save_image(path: Path, img: MatLike | None, quality: int = 95, is_rgb: bool 
     return ok
 
 
+# Deprecated: use ImageRGB.to_file()
 def _save_jpeg_image(path: Path, img: MatLike, quality: int, is_rgb: bool = False) -> bool:
     """
     Save image data to the given path as JPEG,

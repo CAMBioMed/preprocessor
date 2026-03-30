@@ -10,6 +10,7 @@ from preprocessor.processing.load_image import load_image
 logger = logging.getLogger(__name__)
 
 
+# Deprecated: use LensCorrectTransform instead, which also returns a debug image with the distortion grid.
 def undistort_photo(
     photo: PhotoModel,
     progress_callback: Callable[[float], None] | None = None,
