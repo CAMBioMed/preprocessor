@@ -1,6 +1,6 @@
 from preprocessor.core.image_transform import ImageTransformWorkItem
-from preprocessor.core.message_reporter import MessageReporter, NoopMessageReporter
-from preprocessor.core.progress_reporter import ProgressReporter, NoopProgressReporter
+from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
+from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.types import ImageRGB
 
 import cv2
@@ -15,8 +15,8 @@ class LensCorrectTransform:
         item: ImageTransformWorkItem,
         /,
         *,
-        messages: MessageReporter = NoopMessageReporter(),
-        progress: ProgressReporter = NoopProgressReporter(),
+        messages: MessageReporter = NOOP_MESSAGE_REPORTER,
+        progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
     ) -> ImageTransformWorkItem:
         if not item.params.lens_correction:
             messages.info(

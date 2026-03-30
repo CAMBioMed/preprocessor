@@ -1,9 +1,9 @@
 from pathlib import Path
 
 from preprocessor.core.image_transform import ImageTransform, ImageTransformWorkItem
-from preprocessor.core.message_reporter import MessageReporter, NoopMessageReporter
+from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.photo_params import PhotoParams
-from preprocessor.core.progress_reporter import ProgressReporter, NoopProgressReporter, WeightedSubProgressReporter
+from preprocessor.core.progress_reporter import ProgressReporter, WeightedSubProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.types import ImageRGB
 
 
@@ -12,8 +12,8 @@ def process_image(
     params: PhotoParams,
     output_path: Path | None,
     transforms: list[ImageTransform],
-    messages: MessageReporter = NoopMessageReporter(),
-    progress: ProgressReporter = NoopProgressReporter(),
+    messages: MessageReporter = NOOP_MESSAGE_REPORTER,
+    progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
 ) -> ImageRGB | None:
     """Process an image with the given transforms and export it to the output path, if given.
 

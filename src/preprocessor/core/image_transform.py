@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
-from preprocessor.core.message_reporter import NoopMessageReporter, MessageReporter
+from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.photo_params import PhotoParams
-from preprocessor.core.progress_reporter import ProgressReporter, NoopProgressReporter
+from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.types import ImageRGB
 
 
@@ -33,8 +33,8 @@ class ImageTransform(Protocol):
         item: ImageTransformWorkItem,
         /,
         *,
-        messages: MessageReporter = NoopMessageReporter(),
-        progress: ProgressReporter = NoopProgressReporter(),
+        messages: MessageReporter = NOOP_MESSAGE_REPORTER,
+        progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
     ) -> ImageTransformWorkItem:
         """Apply the transformation to the given work item and return the new work item.
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any
+from typing import Any, Optional, Final, override
 
 
 class MessageLevel(StrEnum):
@@ -30,21 +30,11 @@ class Message:
 class MessageReporter:
     """Class handling reporting messages (info, warnings, errors) during image processing steps."""
 
-    _has_errors: bool = False
-    _has_warnings: bool = False
-    _has_infos: bool = False
-
     def report_msg(self, message: Message) -> None:
         """Report a message.
 
         :param message: The message to report.
         """
-        if message.level == MessageLevel.error:
-            self._has_errors = True
-        elif message.level == MessageLevel.warning:
-            self._has_warnings = True
-        elif message.level == MessageLevel.info:
-            self._has_infos = True
 
     def report(
         self,
@@ -124,28 +114,30 @@ class MessageReporter:
         """
         self.report(MessageLevel.info, code, text, step=step, image_id=image_id, details=details)
 
-    @property
-    def has_errors(self) -> bool:
-        """Whether any error messages have been collected."""
-        return self._has_errors
-
-    @property
-    def has_warnings(self) -> bool:
-        """Whether any warning messages have been collected."""
-        return self._has_warnings
-
-    @property
-    def has_infos(self) -> bool:
-        """Whether any info messages have been collected."""
-        return self._has_infos
-
 
 class NoopMessageReporter(MessageReporter):
     """A no-op implementation of MessageReporter that does nothing."""
 
+    # Singleton instance holder
+    _instance: Optional["NoopMessageReporter"] = None
+
+    def __new__(cls) -> "NoopMessageReporter":
+        """Ensure only one instance of NoopMessageReporter exists.
+
+        Any attempt to construct the class will return the same shared
+        instance. This simplifies usage and avoids unnecessary allocations
+        for a stateless no-op reporter.
+        """
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    @override
     def report_msg(self, message: Message) -> None:
-        super().report_msg(message)
-        # Nothing else to do: NOOP
+        # Intentionally do nothing (NOOP). We don't call the base
+        # implementation because it is a no-op (ellipsis) and calling
+        # super() is unnecessary here.
+        return None
 
 
 class CollectingMessageReporter(MessageReporter):
@@ -156,6 +148,7 @@ class CollectingMessageReporter(MessageReporter):
     def __init__(self) -> None:
         self._messages: list[Message] = []
 
+    @override
     def report_msg(self, message: Message) -> None:
         super().report_msg(message)
         self._messages.append(message)
@@ -194,3 +187,7 @@ class CollectingMessageReporter(MessageReporter):
     def has_infos(self) -> bool:
         """Whether any info messages have been collected."""
         return any(msg.level == MessageLevel.info for msg in self.messages)
+
+
+# Module-level singleton of NoopMessageReporter
+NOOP_MESSAGE_REPORTER: Final[NoopMessageReporter] = NoopMessageReporter()
