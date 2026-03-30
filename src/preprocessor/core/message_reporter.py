@@ -30,21 +30,30 @@ class Message:
 class MessageReporter:
     """Class handling reporting messages (info, warnings, errors) during image processing steps."""
 
-    _step: str | None
-    _image_id: str | None
     _has_errors: bool = False
     _has_warnings: bool = False
     _has_infos: bool = False
 
-    def __init__(self, step: str | None = None, image_id: str | None = None) -> None:
-        self._step = step
-        self._image_id = image_id
+    def report_msg(self, message: Message) -> None:
+        """Report a message.
+
+        :param message: The message to report.
+        """
+        if message.level == MessageLevel.error:
+            self._has_errors = True
+        elif message.level == MessageLevel.warning:
+            self._has_warnings = True
+        elif message.level == MessageLevel.info:
+            self._has_infos = True
 
     def report(
         self,
         level: MessageLevel,
         code: str,
         text: str,
+        *,
+        step: str | None = None,
+        image_id: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
         """Report a message.
@@ -52,56 +61,68 @@ class MessageReporter:
         :param level: The severity level of the message.
         :param code: A machine-readable code for the message, e.g. 'color_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
+        :param step: The name of the processing step that generated this message, e.g. 'color_correction'.
+        :param image_id: The stable image ID that this message pertains to, if applicable.
         :param details: Optional additional details about the message, for debugging or display purposes.
         """
-        if level == MessageLevel.error:
-            self._has_errors = True
-        elif level == MessageLevel.warning:
-            self._has_warnings = True
-        elif level == MessageLevel.info:
-            self._has_infos = True
+        self.report_msg(Message(level, code, text, step, image_id, details))
 
     def error(
         self,
         code: str,
         text: str,
+        *,
+        step: str | None = None,
+        image_id: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
         """Report an error message to this work item.
 
         :param code: A machine-readable code for the message, e.g. 'color_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
+        :param step: The name of the processing step that generated this message, e.g. 'color_correction'.
+        :param image_id: The stable image ID that this message pertains to, if applicable.
         :param details: Optional additional details about the message, for debugging or display purposes.
         """
-        self.report(MessageLevel.error, code, text, details)
+        self.report(MessageLevel.error, code, text, step=step, image_id=image_id, details=details)
 
     def warn(
         self,
         code: str,
         text: str,
+        *,
+        step: str | None = None,
+        image_id: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
         """Report a warning message to this work item.
 
         :param code: A machine-readable code for the message, e.g. 'color_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
+        :param step: The name of the processing step that generated this message, e.g. 'color_correction'.
+        :param image_id: The stable image ID that this message pertains to, if applicable.
         :param details: Optional additional details about the message, for debugging or display purposes.
         """
-        self.report(MessageLevel.warning, code, text, details)
+        self.report(MessageLevel.warning, code, text, step=step, image_id=image_id, details=details)
 
     def info(
         self,
         code: str,
         text: str,
+        *,
+        step: str | None = None,
+        image_id: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
         """Report an info message.
 
         :param code: A machine-readable code for the message, e.g. 'color_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
+        :param step: The name of the processing step that generated this message, e.g. 'color_correction'.
+        :param image_id: The stable image ID that this message pertains to, if applicable.
         :param details: Optional additional details about the message, for debugging or display purposes.
         """
-        self.report(MessageLevel.info, code, text, details)
+        self.report(MessageLevel.info, code, text, step=step, image_id=image_id, details=details)
 
     @property
     def has_errors(self) -> bool:
@@ -122,14 +143,8 @@ class MessageReporter:
 class NoopMessageReporter(MessageReporter):
     """A no-op implementation of MessageReporter that does nothing."""
 
-    def report(
-        self,
-        level: MessageLevel,
-        code: str,
-        text: str,
-        details: dict[str, Any] | None = None,
-    ) -> None:
-        super().report(level, code, text, details)
+    def report_msg(self, message: Message) -> None:
+        super().report_msg(message)
         # Nothing else to do: NOOP
 
 
@@ -138,27 +153,12 @@ class CollectingMessageReporter(MessageReporter):
 
     _messages: list[Message]
 
-    def __init__(self, step: str | None, image_id: str | None) -> None:
-        super().__init__(step, image_id)
+    def __init__(self) -> None:
         self._messages: list[Message] = []
 
-    def report(
-        self,
-        level: MessageLevel,
-        code: str,
-        text: str,
-        details: dict[str, Any] | None = None,
-    ) -> None:
-        super().report(level, code, text, details)
-        msg = Message(
-            level=level,
-            code=code,
-            text=text,
-            step=self._step,
-            image_id=self._image_id,
-            details=details,
-        )
-        self._messages.append(msg)
+    def report_msg(self, message: Message) -> None:
+        super().report_msg(message)
+        self._messages.append(message)
 
     @property
     def messages(self) -> list[Message]:

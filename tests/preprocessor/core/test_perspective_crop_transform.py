@@ -52,7 +52,7 @@ def test_should_crop_successfully() -> None:
         params=params,
     )
     transform = PerspectiveCropTransform()
-    messages = CollectingMessageReporter(step=transform.name, image_id="id4")
+    messages = CollectingMessageReporter()
     messages.info("orig", "original")
 
     # Act
@@ -88,7 +88,7 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
         params=params,
     )
     transform = PerspectiveCropTransform()
-    messages = CollectingMessageReporter(step=transform.name, image_id="id")
+    messages = CollectingMessageReporter()
 
     # Act
     result = transform(item, messages=messages)
@@ -119,7 +119,7 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
         params=params,
     )
     transform = PerspectiveCropTransform()
-    messages = CollectingMessageReporter(step=transform.name, image_id="id2")
+    messages = CollectingMessageReporter()
 
     # Act
     result = transform(item, messages=messages)
@@ -152,7 +152,7 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
         params=params,
     )
     transform = PerspectiveCropTransform()
-    messages = CollectingMessageReporter(step=transform.name, image_id="id3")
+    messages = CollectingMessageReporter()
 
     # Act
     result = transform(item, messages=messages)
@@ -190,7 +190,7 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
         params=params,
     )
     transform = PerspectiveCropTransform()
-    messages = CollectingMessageReporter(step=transform.name, image_id="id5")
+    messages = CollectingMessageReporter()
 
     # Make cv2.warpPerspective raise
     import cv2

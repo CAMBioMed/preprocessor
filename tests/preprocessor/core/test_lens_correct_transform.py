@@ -30,7 +30,7 @@ def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None
         params=params,
     )
     transform = LensCorrectTransform()
-    messages = CollectingMessageReporter(step=transform.name, image_id="img1")
+    messages = CollectingMessageReporter()
 
     # Act
     out = transform(item, messages=messages)
@@ -63,7 +63,7 @@ def test_should_return_transformed_image_when_lens_correction_requested() -> Non
         params=params,
     )
     transform = LensCorrectTransform()
-    messages = CollectingMessageReporter(step=transform.name, image_id="img2")
+    messages = CollectingMessageReporter()
 
     # Act
     out = transform(item, messages=messages)
@@ -91,7 +91,7 @@ def test_should_return_original_and_error_when_cv2_raises(monkeypatch: MonkeyPat
         params=params,
     )
     transform = LensCorrectTransform()
-    messages = CollectingMessageReporter(step=transform.name, image_id="img2")
+    messages = CollectingMessageReporter()
 
     # Force cv2.getOptimalNewCameraMatrix to raise
     import preprocessor.core.lens_correct_transform as lct_mod

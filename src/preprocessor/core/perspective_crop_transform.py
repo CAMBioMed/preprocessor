@@ -19,18 +19,30 @@ class PerspectiveCropTransform:
         progress: ProgressReporter = NoopProgressReporter(),
     ) -> ImageTransformWorkItem:
         if not item.params.crop:
-            messages.info("no_crop_requested", "Perspective crop skipped: no crop requested")
+            messages.info(
+                "no_crop_requested",
+                "Perspective crop skipped: no crop requested",
+                step=self.name,
+                image_id=item.image_id,
+            )
             return item
 
         # If corners object exists but contains no points, signal no corners
         if len(item.params.crop.corners) == 0:
-            messages.warn("no_quadrat_corners", "Perspective crop skipped: no quadrat corners set")
+            messages.warn(
+                "no_quadrat_corners",
+                "Perspective crop skipped: no quadrat corners set",
+                step=self.name,
+                image_id=item.image_id,
+            )
             return item
 
         if not item.params.crop.corners.is_valid():
             messages.warn(
                 "invalid_quadrat_corners",
                 "Perspective crop skipped: quadrat corners are invalid",
+                step=self.name,
+                image_id=item.image_id,
                 details={"corners": item.params.crop.corners},
             )
             return item
@@ -75,5 +87,10 @@ class PerspectiveCropTransform:
                 params=item.params,
             )
         except Exception as e:
-            messages.error("perspective_crop_failed", f"Perspective crop failed: {e!s}")
+            messages.error(
+                "perspective_crop_failed",
+                f"Perspective crop failed: {e!s}",
+                step=self.name,
+                image_id=item.image_id,
+            )
             return item

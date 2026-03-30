@@ -22,6 +22,8 @@ class LensCorrectTransform:
             messages.info(
                 "no_lens_correction_requested",
                 "Lens correction skipped: no lens correction requested",
+                step=self.name,
+                image_id=item.image_id,
             )
             return item
 
@@ -88,5 +90,10 @@ class LensCorrectTransform:
                 params=item.params,
             )
         except Exception as e:
-            messages.error("lens_correction_failed", f"Lens correction failed: {e!s}")
+            messages.error(
+                "lens_correction_failed",
+                f"Lens correction failed: {e!s}",
+                step=self.name,
+                image_id=item.image_id,
+            )
             return item

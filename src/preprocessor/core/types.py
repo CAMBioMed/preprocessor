@@ -45,13 +45,30 @@ class ImageRGB:
 
     @classmethod
     def from_file(cls, path: Path) -> "ImageRGB":
-        """Load an image from a file path and return an ImageRGB instance."""
+        """Load an image from a file path and return an ImageRGB instance.
+
+        :param path: The file path to load the image from.
+        :return: An ImageRGB instance containing the loaded image data.
+        :raises ValueError: If loading the image fails.
+        """
         arr = cv2.imread(str(path), cv2.IMREAD_COLOR)
         if arr is None:
             msg = f"Failed to load image from {path!s}"
             raise ValueError(msg)
         rgb_arr = cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)
         return cls.from_rgb_array(rgb_arr)
+
+    def to_file(self, path: Path) -> None:
+        """Save the image to a file path.
+
+        :param path: The file path to save the image to.
+        :raises ValueError: If saving the image fails.
+        """
+        bgr_arr = cv2.cvtColor(self.data, cv2.COLOR_RGB2BGR)
+        success = cv2.imwrite(str(path), bgr_arr)
+        if not success:
+            msg = f"Failed to save image to {path!s}"
+            raise ValueError(msg)
 
     @classmethod
     def from_rgb_array(cls, arr: npt.ArrayLike) -> "ImageRGB":
@@ -92,12 +109,29 @@ class ImageBGR:
 
     @classmethod
     def from_file(cls, path: Path) -> "ImageBGR":
-        """Load an image from a file path and return an ImageBGR instance."""
+        """Load an image from a file path and return an ImageBGR instance.
+
+        :param path: The file path to load the image from.
+        :return: An ImageRGB instance containing the loaded image data.
+        :raises ValueError: If loading the image fails.
+        """
         arr = cv2.imread(str(path), cv2.IMREAD_COLOR)
         if arr is None:
             msg = f"Failed to load image from {path!s}"
             raise ValueError(msg)
         return cls.from_bgr_array(arr)
+
+    def to_file(self, path: Path) -> None:
+        """Save the image to a file path.
+
+        :param path: The file path to save the image to.
+        :raises ValueError: If saving the image fails.
+        """
+        bgr_arr = self.data
+        success = cv2.imwrite(str(path), bgr_arr)
+        if not success:
+            msg = f"Failed to save image to {path!s}"
+            raise ValueError(msg)
 
     @classmethod
     def from_bgr_array(cls, arr: npt.ArrayLike) -> "ImageBGR":
@@ -139,12 +173,29 @@ class ImageGreyscale:
 
     @classmethod
     def from_file(cls, path: Path) -> "ImageGreyscale":
-        """Load an image from a file path and return an ImageGreyscale instance."""
+        """Load an image from a file path and return an ImageGreyscale instance.
+
+        :param path: The file path to load the image from.
+        :return: An ImageRGB instance containing the loaded image data.
+        :raises ValueError: If loading the image fails.
+        """
         arr = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
         if arr is None:
             msg = f"Failed to load image from {path!s}"
             raise ValueError(msg)
         return cls.from_greyscale_array(arr)
+
+    def to_file(self, path: Path) -> None:
+        """Save the image to a file path.
+
+        :param path: The file path to save the image to.
+        :raises ValueError: If saving the image fails.
+        """
+        gray_arr = self.data
+        success = cv2.imwrite(str(path), gray_arr)
+        if not success:
+            msg = f"Failed to save image to {path!s}"
+            raise ValueError(msg)
 
     @classmethod
     def from_greyscale_array(cls, arr: npt.ArrayLike) -> "ImageGreyscale":
