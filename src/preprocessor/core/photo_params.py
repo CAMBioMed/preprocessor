@@ -35,10 +35,13 @@ class LensCorrectionParams(BaseModel, validate_assignment=True):
     @classmethod
     def _validate_len(cls, v: LensVector) -> LensVector:
         if len(v) not in (4, 5, 8, 12, 14):
-            raise ValueError("Lens distortion coefficients must have length 4, 5, 8, 12, or 14")
+            msg = "Lens distortion coefficients must have length 4, 5, 8, 12, or 14"
+            raise ValueError(msg)
         if any((x != x) for x in v):  # NaN check without numpy
-            raise ValueError("Lens distortion coefficients must not contain NaN")
+            msg = "Lens distortion coefficients must not contain NaN"
+            raise ValueError(msg)
         return v
+
 
 class CropParams(BaseModel, validate_assignment=True):
     """Parameters for cropping the photo."""
@@ -47,8 +50,9 @@ class CropParams(BaseModel, validate_assignment=True):
 
     corners: Corners = Corners(())
     """The (x, y) coordinates of up to 4 corners of the crop rectangle.
-    
+
     When not Corners.is_valid(), the corners are ignored and no cropping is performed."""
+
 
 class PhotoParams(BaseModel, validate_assignment=True):
     """Parameters for photo processing."""

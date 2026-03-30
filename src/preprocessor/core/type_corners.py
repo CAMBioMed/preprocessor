@@ -1,7 +1,6 @@
-from typing import Sequence, Iterator, overload, Any
+from typing import overload, Any
+from collections.abc import Sequence, Iterator
 
-import numpy as np
-import numpy.typing as npt
 from pydantic import RootModel, ConfigDict, field_validator
 
 from preprocessor.core.types import Point2D
@@ -13,6 +12,7 @@ class Corners(RootModel[tuple[Point2D, ...]]):
     Use the is_valid() method to check if the corners are valid (i.e., 4 corners and non-degenerate).
     Use the ordered() method to get the corners in a consistent order (top-left, top-right, bottom-right, bottom-left).
     """
+
     model_config = ConfigDict(frozen=True)
 
     @field_validator("root")
@@ -22,12 +22,14 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         v: tuple[Point2D, Point2D, Point2D, Point2D],
     ) -> tuple[Point2D, Point2D, Point2D, Point2D]:
         if len(v) > 4:
-            raise ValueError("Expected at most 4 corners")
+            msg = "Expected at most 4 corners"
+            raise ValueError(msg)
 
         # Sanity check
         for x, y in v:
             if x != x or y != y:
-                raise ValueError("Corner coordinates must not contain NaN")
+                msg = "Corner coordinates must not contain NaN"
+                raise ValueError(msg)
 
         # We specifically allow negative coordinates (the user may drag off-canvas),
         # less than 4 coordinates (the user may not have specified all of them yet),
@@ -74,26 +76,24 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         """
         # Needs to have exactly 4 corners
         if len(self.root) != 4:
-            raise ValueError("Expected exactly 4 corners")
+            msg = "Expected exactly 4 corners"
+            raise ValueError(msg)
 
         # Coordinates must be non-negative and within image bounds (can't have corners off the canvas)
         for x, y in self.root:
             if x < 0 or y < 0:
-                raise ValueError("Corner coordinates must be non-negative")
+                msg = "Corner coordinates must be non-negative"
+                raise ValueError(msg)
 
         # Try to order the corners
         ordered = _order_corners(self.root)
 
         # Ensure non-degenerate quad (area != 0)
         (x1, y1), (x2, y2), (x3, y3), (x4, y4) = ordered
-        area = abs(
-            x1 * y2 - y1 * x2
-            + x2 * y3 - y2 * x3
-            + x3 * y4 - y3 * x4
-            + x4 * y1 - y4 * x1
-        )
+        area = abs(x1 * y2 - y1 * x2 + x2 * y3 - y2 * x3 + x3 * y4 - y3 * x4 + x4 * y1 - y4 * x1)
         if area == 0:
-            raise ValueError("Degenerate quad (area is zero)")
+            msg = "Degenerate quad (area is zero)"
+            raise ValueError(msg)
 
         return ordered
 
@@ -102,7 +102,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         """The top-left corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The top-left corner of the quadrilateral.
-        :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate)."""
+        :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
+        """
         return self.ordered()[0]
 
     @property
@@ -110,7 +111,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         """The top-right corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The top-right corner of the quadrilateral.
-        :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate)."""
+        :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
+        """
         return self.ordered()[1]
 
     @property
@@ -118,7 +120,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         """The bottom-left corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The bottom-left corner of the quadrilateral.
-        :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate)."""
+        :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
+        """
         return self.ordered()[3]
 
     @property
@@ -126,7 +129,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         """The bottom-right corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The bottom-right corner of the quadrilateral.
-        :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate)."""
+        :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
+        """
         return self.ordered()[2]
 
     def as_tuple(self) -> tuple[Point2D, ...]:
@@ -135,7 +139,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         If the corners are valid (4 corners and non-degenerate), they will be returned in a consistent polygon
         traversal order (top-left, top-right, bottom-right, bottom-left).
 
-        :return: A tuple of (x, y) points representing the corners."""
+        :return: A tuple of (x, y) points representing the corners.
+        """
         try:
             return self.ordered()
         except ValueError:
@@ -151,7 +156,8 @@ def _order_corners(points: Sequence[Point2D]) -> tuple[Point2D, Point2D, Point2D
     or if the corners are ambiguous (e.g., duplicate points).
     """
     if len(points) != 4:
-        raise ValueError("Expected 4 points")
+        msg = "Expected 4 points"
+        raise ValueError(msg)
 
     pts = list(points)
     s = [p[0] + p[1] for p in pts]
@@ -166,5 +172,6 @@ def _order_corners(points: Sequence[Point2D]) -> tuple[Point2D, Point2D, Point2D
     ordered = (tl, tr, br, bl)
 
     if len(set(ordered)) != 4:
-        raise ValueError("Corners are ambiguous (duplicate points)")
+        msg = "Corners are ambiguous (duplicate points)"
+        raise ValueError(msg)
     return ordered

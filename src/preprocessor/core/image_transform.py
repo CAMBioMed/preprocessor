@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from enum import Enum
 from pathlib import Path
 from typing import Protocol, Any
 
@@ -10,9 +9,8 @@ from preprocessor.core.types import ImageRGB
 
 @dataclass(slots=True)
 class ImageTransformWorkItem:
-    """
-    An image transformation work item.
-    """
+    """An image transformation work item."""
+
     image_id: str
     """Stable image ID."""
     image_path: Path
@@ -23,7 +21,9 @@ class ImageTransformWorkItem:
     """The parameters used for processing this image, e.g. quadrat corners."""
     messages: list[Message] = field(default_factory=list)
 
-    def add_message(self, level: MessageLevel, code: str, text: str, step: str | None = None, details: dict[str, Any] | None = None) -> None:
+    def add_message(
+        self, level: MessageLevel, code: str, text: str, step: str | None = None, details: dict[str, Any] | None = None
+    ) -> None:
         """Add a message to this work item."""
         msg = Message(
             level=level,

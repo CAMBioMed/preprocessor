@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class MessageLevel(str, Enum):
+class MessageLevel(StrEnum):
     """Specifies the severity level of a message."""
+
     info = "info"
     warning = "warning"
     error = "error"

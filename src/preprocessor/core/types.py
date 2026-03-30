@@ -17,23 +17,30 @@ LensVector = list[float]
 """Defines the LensVector type as a list of floats, representing distortion coefficients for lens correction."""
 
 CameraMatrix = tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]
-"""Defines the CameraMatrix type as a 3x3 tuple of floats, representing the camera intrinsic matrix for lens correction."""
+"""Defines the CameraMatrix type as a 3x3 tuple of floats,
+representing the camera intrinsic matrix for lens correction."""
+
 
 @dataclass(frozen=True)
 class ImageRGB:
     """Wrapper for an RGB image."""
+
     data: ImageArray
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, np.ndarray):
-            raise TypeError("Data must be a numpy.ndarray")
+            msg = "Data must be a numpy.ndarray"
+            raise TypeError(msg)
         if self.data.dtype != np.uint8:
-            raise TypeError(f"Expected dtype np.uint8, got {self.data.dtype!r}")
+            msg = f"Expected dtype np.uint8, got {self.data.dtype!r}"
+            raise TypeError(msg)
         nd = self.data.ndim
         if nd != 3 or self.data.shape[2] != 3:
-            raise ValueError(f"RGB image must be HxWx3")
+            msg = "RGB image must be HxWx3"
+            raise ValueError(msg)
         if self.data.size == 0:
-            raise ValueError("Empty image array")
+            msg = "Empty image array"
+            raise ValueError(msg)
 
     @classmethod
     def from_rgb_array(cls, arr: npt.ArrayLike) -> "ImageRGB":
@@ -54,18 +61,23 @@ class ImageRGB:
 @dataclass(frozen=True)
 class ImageBGR:
     """Wrapper for a BGR image."""
+
     data: ImageArray
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, np.ndarray):
-            raise TypeError("Data must be a numpy.ndarray")
+            msg = "Data must be a numpy.ndarray"
+            raise TypeError(msg)
         if self.data.dtype != np.uint8:
-            raise TypeError(f"Expected dtype np.uint8, got {self.data.dtype!r}")
+            msg = f"Expected dtype np.uint8, got {self.data.dtype!r}"
+            raise TypeError(msg)
         nd = self.data.ndim
         if nd != 3 or self.data.shape[2] != 3:
-            raise ValueError(f"BGR image must be HxWx3")
+            msg = "BGR image must be HxWx3"
+            raise ValueError(msg)
         if self.data.size == 0:
-            raise ValueError("Empty image array")
+            msg = "Empty image array"
+            raise ValueError(msg)
 
     @classmethod
     def from_bgr_array(cls, arr: npt.ArrayLike) -> "ImageBGR":
@@ -86,19 +98,24 @@ class ImageBGR:
 @dataclass(frozen=True)
 class ImageGreyscale:
     """Wrapper for a greyscale image."""
+
     data: ImageArray
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, np.ndarray):
-            raise TypeError("Data must be a numpy.ndarray")
+            msg = "Data must be a numpy.ndarray"
+            raise TypeError(msg)
         if self.data.dtype != np.uint8:
-            raise TypeError(f"Expected dtype np.uint8, got {self.data.dtype!r}")
+            msg = f"Expected dtype np.uint8, got {self.data.dtype!r}"
+            raise TypeError(msg)
         nd = self.data.ndim
         # Accept either a 2D array (H, W) or a 3D array with a singleton channel (H, W, 1)
         if not (nd == 2 or (nd == 3 and self.data.shape[2] == 1)):
-            raise ValueError("Greyscale image must be HxW or HxWx1")
+            msg = "Greyscale image must be HxW or HxWx1"
+            raise ValueError(msg)
         if self.data.size == 0:
-            raise ValueError("Empty image array")
+            msg = "Empty image array"
+            raise ValueError(msg)
 
     @classmethod
     def from_greyscale_array(cls, arr: npt.ArrayLike) -> "ImageGreyscale":

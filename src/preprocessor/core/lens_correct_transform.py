@@ -4,12 +4,15 @@ from preprocessor.core.types import ImageRGB
 import cv2
 import numpy as np
 
+
 class LensCorrectTransform:
     name = "lens_correct"
 
     def __call__(self, item: ImageTransformWorkItem) -> ImageTransformWorkItem:
         if not item.params.lens_correction:
-            item.info("no_lens_correction_requested", "Lens correction skipped: no lens correction requested", step=self.name)
+            item.info(
+                "no_lens_correction_requested", "Lens correction skipped: no lens correction requested", step=self.name
+            )
             return item
 
         try:
@@ -49,7 +52,6 @@ class LensCorrectTransform:
 
             # Chunked remap to allow cancellation and progress updates
             chunk_h = max(32, min(256, h // 8 if h >= 8 else 1))
-            rows_done = 0
             y = 0
             while y < h:
                 y1 = min(h, y + chunk_h)
@@ -59,7 +61,6 @@ class LensCorrectTransform:
                 remapped = cv2.remap(src, sub_map1, sub_map2, interpolation=cv2.INTER_LINEAR)
                 dst[y:y1, ...] = remapped
 
-                rows_done = y1
                 y = y1
 
             return ImageTransformWorkItem(
@@ -70,5 +71,5 @@ class LensCorrectTransform:
                 messages=item.messages,
             )
         except Exception as e:
-            item.error("lens_correction_failed", f"Lens correction failed: {str(e)}", step=self.name)
+            item.error("lens_correction_failed", f"Lens correction failed: {e!s}", step=self.name)
             return item

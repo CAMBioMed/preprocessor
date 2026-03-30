@@ -19,7 +19,12 @@ class PerspectiveCropTransform:
             return item
 
         if not item.params.crop.corners.is_valid():
-            item.warn("invalid_quadrat_corners", "Perspective crop skipped: quadrat corners are invalid", step=self.name, details={"corners": item.params.crop.corners})
+            item.warn(
+                "invalid_quadrat_corners",
+                "Perspective crop skipped: quadrat corners are invalid",
+                step=self.name,
+                details={"corners": item.params.crop.corners},
+            )
             return item
 
         try:
@@ -60,5 +65,5 @@ class PerspectiveCropTransform:
                 messages=item.messages,
             )
         except Exception as e:
-            item.error("perspective_crop_failed", f"Perspective crop failed: {str(e)}", step=self.name)
+            item.error("perspective_crop_failed", f"Perspective crop failed: {e!s}", step=self.name)
             return item
