@@ -3,7 +3,7 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from preprocessor.core.type_corners import Corners
-from preprocessor.core.types import LensVector
+from preprocessor.core.types import LensVector, CameraMatrix
 
 
 class ColorCorrectionParams(BaseModel, validate_assignment=True):
@@ -24,8 +24,12 @@ class LensCorrectionParams(BaseModel, validate_assignment=True):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    coefficients: Annotated[LensVector, Field(min_length=4, max_length=14)]
-    """Tuple of 4, 5, 8, 12, or 14 distortion coefficients."""
+    camera_matrix: CameraMatrix | None
+    """The 3x3 camera intrinsic matrix, or None to use the default
+    (focal lengths = image width, principal point = image center)."""
+
+    coefficients: Annotated[LensVector | None, Field(min_length=4, max_length=14)]
+    """Tuple of 4, 5, 8, 12, or 14 distortion coefficients, or None to use all-zero coefficients."""
 
     @field_validator("coefficients")
     @classmethod

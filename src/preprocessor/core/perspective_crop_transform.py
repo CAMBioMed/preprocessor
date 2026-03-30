@@ -23,7 +23,7 @@ class PerspectiveCropTransform:
             return item
 
         try:
-            # ordered() returns a tuple in traversal order (tl, tr, br, bl).
+            src = item.image.data
             ordered_corners = np.array(item.params.crop.corners.ordered(), dtype=np.float32)
             tl, tr, br, bl = ordered_corners
 
@@ -50,15 +50,15 @@ class PerspectiveCropTransform:
             )
 
             M = cv2.getPerspectiveTransform(ordered_corners, tgt_pts)
-            cropped_image = cv2.warpPerspective(item.image.data, M, (tgt_width, tgt_height))
+            dst = cv2.warpPerspective(src, M, (tgt_width, tgt_height))
 
             return ImageTransformWorkItem(
                 image_id=item.image_id,
                 image_path=item.image_path,
-                image=ImageRGB.from_rgb_array(cropped_image),
+                image=ImageRGB.from_rgb_array(dst),
                 params=item.params,
                 messages=item.messages,
             )
         except Exception as e:
-            item.error("perspective_crop_failed", f"Perspective crop failed: {e}", step=self.name)
+            item.error("perspective_crop_failed", f"Perspective crop failed: {str(e)}", step=self.name)
             return item

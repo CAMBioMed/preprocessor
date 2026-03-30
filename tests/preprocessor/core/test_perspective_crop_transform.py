@@ -15,149 +15,145 @@ from preprocessor.core.types import ImageRGB
 from preprocessor.core.messages import Message, MessageLevel
 
 
-class TestPerspectiveCropTransform:
-	"""Tests for PerspectiveCropTransform"""
-
-	@staticmethod
-	def _find_message(messages: list[Message], code: str) -> Message | None:
-		for m in messages:
-			if m.code == code:
-				return m
-		return None
+def _find_message(messages: list[Message], code: str) -> Message | None:
+	for m in messages:
+		if m.code == code:
+			return m
+	return None
 
 
-	def test_should_crop_successfully(self) -> None:
-		"""Should crop successfully"""
-		# Arrange
-		h, w = 100, 100
-		img = np.zeros((h, w, 3), dtype=np.uint8)
-		# Put a distinctive pixel inside the target rectangle at (20, 20)
-		img[20, 20] = [123, 45, 67]
-		image = ImageRGB.from_rgb_array(img)
+def test_should_crop_successfully() -> None:
+	"""Should crop successfully"""
+	# Arrange
+	h, w = 100, 100
+	img = np.zeros((h, w, 3), dtype=np.uint8)
+	# Put a distinctive pixel inside the target rectangle at (20, 20)
+	img[20, 20] = [123, 45, 67]
+	image = ImageRGB.from_rgb_array(img)
 
-		# Define corners for an axis-aligned square from (10,10) to (90,90)
-		tl = (10.0, 10.0)
-		tr = (90.0, 10.0)
-		bl = (10.0, 90.0)
-		br = (90.0, 90.0)
-		corners = Corners((tl, tr, bl, br))
-		params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=corners))
+	# Define corners for an axis-aligned square from (10,10) to (90,90)
+	tl = (10.0, 10.0)
+	tr = (90.0, 10.0)
+	bl = (10.0, 90.0)
+	br = (90.0, 90.0)
+	corners = Corners((tl, tr, bl, br))
+	params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=corners))
 
-		orig_messages = [Message(level=MessageLevel.info, code="orig", text="original", step=None)]
-		item = ImageTransformWorkItem(image_id="id4", image_path=Path("/tmp/img4.jpg"), image=image, params=params, messages=orig_messages)
-		transform = PerspectiveCropTransform()
+	orig_messages = [Message(level=MessageLevel.info, code="orig", text="original", step=None)]
+	item = ImageTransformWorkItem(image_id="id4", image_path=Path("/tmp/img4.jpg"), image=image, params=params, messages=orig_messages)
+	transform = PerspectiveCropTransform()
 
-		# Act
-		result = transform(item)
+	# Act
+	result = transform(item)
 
-		# Assert
-		assert not result.get_errors()
-		assert not result.get_warnings()
-		assert result is not item
-		assert isinstance(result.image, ImageRGB)
-		# Target width/height should be 80x80
-		assert result.image.data.shape == (80, 80, 3)
-		# We can't easily test whether a pixel occurs in the resulting image, so we just assume it works here
-		# Original messages are preserved
-		assert any(m.code == "orig" for m in result.messages)
-
-
-	def test_should_skip_perspective_crop_when_no_crop_requested(self) -> None:
-		"""Should skip perspective crop when no crop requested"""
-		# Arrange
-		img = np.zeros((10, 10, 3), dtype=np.uint8)
-		image = ImageRGB.from_rgb_array(img)
-		params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=None)
-		item = ImageTransformWorkItem(image_id="id", image_path=Path("/tmp/img.jpg"), image=image, params=params)
-		transform = PerspectiveCropTransform()
-
-		# Act
-		result = transform(item)
-
-		# Assert
-		assert result is item
-		msg = self._find_message(item.messages, "no_crop_requested")
-		assert msg is not None
-		assert msg.level == MessageLevel.info
-		assert msg.step == transform.name
+	# Assert
+	assert not result.get_errors()
+	assert not result.get_warnings()
+	assert result is not item
+	assert isinstance(result.image, ImageRGB)
+	# Target width/height should be 80x80
+	assert result.image.data.shape == (80, 80, 3)
+	# We can't easily test whether a pixel occurs in the resulting image, so we just assume it works here
+	# Original messages are preserved
+	assert any(m.code == "orig" for m in result.messages)
 
 
-	def test_should_warn_and_skip_when_crop_has_no_corners(self) -> None:
-		"""Should warn and skip when crop has no corners"""
-		# Arrange
-		img = np.zeros((10, 10, 3), dtype=np.uint8)
-		image = ImageRGB.from_rgb_array(img)
-		params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams())
-		item = ImageTransformWorkItem(image_id="id2", image_path=Path("/tmp/img2.jpg"), image=image, params=params)
-		transform = PerspectiveCropTransform()
+def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
+	"""Should skip perspective crop when no crop requested"""
+	# Arrange
+	img = np.zeros((10, 10, 3), dtype=np.uint8)
+	image = ImageRGB.from_rgb_array(img)
+	params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=None)
+	item = ImageTransformWorkItem(image_id="id", image_path=Path("/tmp/img.jpg"), image=image, params=params)
+	transform = PerspectiveCropTransform()
 
-		# Act
-		result = transform(item)
+	# Act
+	result = transform(item)
 
-		# Assert
-		assert result is item
-		msg = self._find_message(item.messages, "no_quadrat_corners")
-		assert msg is not None
-		assert msg.level == MessageLevel.warning
-		assert msg.step == transform.name
-
-
-	def test_should_warn_and_skip_when_corners_are_invalid(self) -> None:
-		"""Should warn and skip when corners are invalid"""
-		# Arrange
-		img = np.zeros((10, 10, 3), dtype=np.uint8)
-		image = ImageRGB.from_rgb_array(img)
-		# Create 4 corners but with a negative coordinate to make them invalid per Corners.ordered()
-		bad_corners = Corners(((-1.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
-		params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=bad_corners))
-		item = ImageTransformWorkItem(image_id="id3", image_path=Path("/tmp/img3.jpg"), image=image, params=params)
-		transform = PerspectiveCropTransform()
-
-		# Act
-		result = transform(item)
-
-		# Assert
-		assert result is item
-		msg = self._find_message(item.messages, "invalid_quadrat_corners")
-		assert msg is not None
-		assert msg.level == MessageLevel.warning
-		assert msg.step == transform.name
-		# details should include the corners
-		assert msg.details is not None and "corners" in msg.details
+	# Assert
+	assert result is item
+	msg = _find_message(item.messages, "no_crop_requested")
+	assert msg is not None
+	assert msg.level == MessageLevel.info
+	assert msg.step == transform.name
 
 
-	def test_should_log_error_and_return_original_on_exception(self, monkeypatch: MonkeyPatch) -> None:
-		"""Should log error and return original when cv2 raises an exception"""
-		# Arrange
-		h, w = 50, 50
-		img = np.zeros((h, w, 3), dtype=np.uint8)
-		image = ImageRGB.from_rgb_array(img)
-		tl = (5.0, 5.0)
-		tr = (45.0, 5.0)
-		bl = (5.0, 45.0)
-		br = (45.0, 45.0)
-		corners = Corners((tl, tr, bl, br))
-		params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=corners))
-		item = ImageTransformWorkItem(image_id="id5", image_path=Path("/tmp/img5.jpg"), image=image, params=params)
-		transform = PerspectiveCropTransform()
+def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
+	"""Should warn and skip when crop has no corners"""
+	# Arrange
+	img = np.zeros((10, 10, 3), dtype=np.uint8)
+	image = ImageRGB.from_rgb_array(img)
+	params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams())
+	item = ImageTransformWorkItem(image_id="id2", image_path=Path("/tmp/img2.jpg"), image=image, params=params)
+	transform = PerspectiveCropTransform()
 
-		# Make cv2.warpPerspective raise
-		import cv2
+	# Act
+	result = transform(item)
 
-		def _boom(*args, **kwargs):
-			raise RuntimeError("boom")
+	# Assert
+	assert result is item
+	msg = _find_message(item.messages, "no_quadrat_corners")
+	assert msg is not None
+	assert msg.level == MessageLevel.warning
+	assert msg.step == transform.name
 
-		monkeypatch.setattr(cv2, "warpPerspective", _boom)
 
-		# Act
-		result = transform(item)
+def test_should_warn_and_skip_when_corners_are_invalid() -> None:
+	"""Should warn and skip when corners are invalid"""
+	# Arrange
+	img = np.zeros((10, 10, 3), dtype=np.uint8)
+	image = ImageRGB.from_rgb_array(img)
+	# Create 4 corners but with a negative coordinate to make them invalid per Corners.ordered()
+	bad_corners = Corners(((-1.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
+	params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=bad_corners))
+	item = ImageTransformWorkItem(image_id="id3", image_path=Path("/tmp/img3.jpg"), image=image, params=params)
+	transform = PerspectiveCropTransform()
 
-		# Assert
-		assert result is item
-		msg = self._find_message(item.messages, "perspective_crop_failed")
-		assert msg is not None
-		assert msg.level == MessageLevel.error
-		assert "boom" in msg.text
+	# Act
+	result = transform(item)
+
+	# Assert
+	assert result is item
+	msg = _find_message(item.messages, "invalid_quadrat_corners")
+	assert msg is not None
+	assert msg.level == MessageLevel.warning
+	assert msg.step == transform.name
+	# details should include the corners
+	assert msg.details is not None and "corners" in msg.details
+
+
+def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPatch) -> None:
+	"""Should log error and return original when cv2 raises an exception"""
+	# Arrange
+	h, w = 50, 50
+	img = np.zeros((h, w, 3), dtype=np.uint8)
+	image = ImageRGB.from_rgb_array(img)
+	tl = (5.0, 5.0)
+	tr = (45.0, 5.0)
+	bl = (5.0, 45.0)
+	br = (45.0, 45.0)
+	corners = Corners((tl, tr, bl, br))
+	params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=corners))
+	item = ImageTransformWorkItem(image_id="id5", image_path=Path("/tmp/img5.jpg"), image=image, params=params)
+	transform = PerspectiveCropTransform()
+
+	# Make cv2.warpPerspective raise
+	import cv2
+
+	def _boom(*args: object, **kwargs: object) -> None:
+		raise RuntimeError("boom")
+
+	monkeypatch.setattr(cv2, "warpPerspective", _boom)
+
+	# Act
+	result = transform(item)
+
+	# Assert
+	assert result is item
+	msg = _find_message(item.messages, "perspective_crop_failed")
+	assert msg is not None
+	assert msg.level == MessageLevel.error
+	assert "boom" in msg.text
 
 
 
