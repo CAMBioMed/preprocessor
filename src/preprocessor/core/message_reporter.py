@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Protocol, Any
+from typing import Any
 
 
 class MessageLevel(StrEnum):
@@ -118,6 +118,7 @@ class MessageReporter:
         """Whether any info messages have been collected."""
         return self._has_infos
 
+
 class NoopMessageReporter(MessageReporter):
     """A no-op implementation of MessageReporter that does nothing."""
 
@@ -130,6 +131,7 @@ class NoopMessageReporter(MessageReporter):
     ) -> None:
         super().report(level, code, text, details)
         # Nothing else to do: NOOP
+
 
 class CollectingMessageReporter(MessageReporter):
     """An implementation of MessageReporter that collects messages in a list."""

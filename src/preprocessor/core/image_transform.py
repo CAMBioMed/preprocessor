@@ -1,12 +1,11 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol, Any
+from typing import Protocol
 
 from preprocessor.core.message_reporter import NoopMessageReporter, MessageReporter
 from preprocessor.core.photo_params import PhotoParams
 from preprocessor.core.progress_reporter import ProgressReporter, NoopProgressReporter
 from preprocessor.core.types import ImageRGB
-
 
 
 @dataclass(slots=True)
@@ -21,7 +20,6 @@ class ImageTransformWorkItem:
     """The image data as a numpy array."""
     params: PhotoParams
     """The parameters used for processing this image, e.g. quadrat corners."""
-
 
 
 class ImageTransform(Protocol):
@@ -44,5 +42,6 @@ class ImageTransform(Protocol):
         :param messages: A message reporter for reporting messages during processing of this image.
         If not provided, a no-op message reporter will be used.
         :param progress: A progress reporter for reporting progress of processing steps.
-        If not provided, a no-op progress reporter will be used."""
+        If not provided, a no-op progress reporter will be used.
+        """
         ...

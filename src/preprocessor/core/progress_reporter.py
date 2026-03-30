@@ -12,6 +12,7 @@ class ProgressReporter(Protocol):
         """
         ...
 
+
 class NoopProgressReporter(ProgressReporter):
     """A no-op implementation of ProgressReporter that does nothing."""
 
