@@ -2,9 +2,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol, Any
 
-from preprocessor.core.messages import Message, MessageLevel
+from preprocessor.core.message_reporter import NoopMessageReporter, MessageReporter
 from preprocessor.core.photo_params import PhotoParams
+from preprocessor.core.progress_reporter import ProgressReporter, NoopProgressReporter
 from preprocessor.core.types import ImageRGB
+
 
 
 @dataclass(slots=True)
@@ -19,41 +21,7 @@ class ImageTransformWorkItem:
     """The image data as a numpy array."""
     params: PhotoParams
     """The parameters used for processing this image, e.g. quadrat corners."""
-    messages: list[Message] = field(default_factory=list)
 
-    def add_message(
-        self, level: MessageLevel, code: str, text: str, step: str | None = None, details: dict[str, Any] | None = None
-    ) -> None:
-        """Add a message to this work item."""
-        msg = Message(
-            level=level,
-            code=code,
-            text=text,
-            step=step,
-            image_id=self.image_id,
-            details=details,
-        )
-        self.messages.append(msg)
-
-    def info(self, code: str, text: str, step: str | None = None, details: dict[str, Any] | None = None) -> None:
-        """Add an info message to this work item."""
-        self.add_message(MessageLevel.info, code, text, step, details)
-
-    def warn(self, code: str, text: str, step: str | None = None, details: dict[str, Any] | None = None) -> None:
-        """Add a warning message to this work item."""
-        self.add_message(MessageLevel.warning, code, text, step, details)
-
-    def error(self, code: str, text: str, step: str | None = None, details: dict[str, Any] | None = None) -> None:
-        """Add an error message to this work item."""
-        self.add_message(MessageLevel.error, code, text, step, details)
-
-    def get_errors(self) -> list[Message]:
-        """Return True if this work item has any error messages."""
-        return [msg for msg in self.messages if msg.level == MessageLevel.error]
-
-    def get_warnings(self) -> list[Message]:
-        """Return True if this work item has any warning messages."""
-        return [msg for msg in self.messages if msg.level == MessageLevel.warning]
 
 
 class ImageTransform(Protocol):
@@ -62,6 +30,19 @@ class ImageTransform(Protocol):
     name: str
     """The name of the transformation, displayed to the user and used for logging."""
 
-    def __call__(self, item: ImageTransformWorkItem, /) -> ImageTransformWorkItem:
-        """Apply the transformation to the given work item and return the new work item."""
+    def __call__(
+        self,
+        item: ImageTransformWorkItem,
+        /,
+        *,
+        messages: MessageReporter = NoopMessageReporter(),
+        progress: ProgressReporter = NoopProgressReporter(),
+    ) -> ImageTransformWorkItem:
+        """Apply the transformation to the given work item and return the new work item.
+
+        :param item: The work item to transform.
+        :param messages: A message reporter for reporting messages during processing of this image.
+        If not provided, a no-op message reporter will be used.
+        :param progress: A progress reporter for reporting progress of processing steps.
+        If not provided, a no-op progress reporter will be used."""
         ...

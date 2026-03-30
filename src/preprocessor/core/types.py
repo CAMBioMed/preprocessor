@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from os import PathLike
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -43,6 +45,16 @@ class ImageRGB:
             raise ValueError(msg)
 
     @classmethod
+    def from_file(cls, path: Path) -> "ImageRGB":
+        """Load an image from a file path and return an ImageRGB instance."""
+        arr = cv2.imread(str(path), cv2.IMREAD_COLOR)
+        if arr is None:
+            msg = f"Failed to load image from {path!s}"
+            raise ValueError(msg)
+        rgb_arr = cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)
+        return cls.from_rgb_array(rgb_arr)
+
+    @classmethod
     def from_rgb_array(cls, arr: npt.ArrayLike) -> "ImageRGB":
         """Create an ImageRGB from an array-like, validating and casting it to np.uint8."""
         arr = np.asarray(arr)
@@ -78,6 +90,15 @@ class ImageBGR:
         if self.data.size == 0:
             msg = "Empty image array"
             raise ValueError(msg)
+
+    @classmethod
+    def from_file(cls, path: Path) -> "ImageBGR":
+        """Load an image from a file path and return an ImageBGR instance."""
+        arr = cv2.imread(str(path), cv2.IMREAD_COLOR)
+        if arr is None:
+            msg = f"Failed to load image from {path!s}"
+            raise ValueError(msg)
+        return cls.from_bgr_array(arr)
 
     @classmethod
     def from_bgr_array(cls, arr: npt.ArrayLike) -> "ImageBGR":
@@ -116,6 +137,15 @@ class ImageGreyscale:
         if self.data.size == 0:
             msg = "Empty image array"
             raise ValueError(msg)
+
+    @classmethod
+    def from_file(cls, path: Path) -> "ImageGreyscale":
+        """Load an image from a file path and return an ImageGreyscale instance."""
+        arr = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
+        if arr is None:
+            msg = f"Failed to load image from {path!s}"
+            raise ValueError(msg)
+        return cls.from_greyscale_array(arr)
 
     @classmethod
     def from_greyscale_array(cls, arr: npt.ArrayLike) -> "ImageGreyscale":

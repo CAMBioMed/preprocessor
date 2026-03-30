@@ -2,32 +2,41 @@ import cv2
 import numpy as np
 
 from preprocessor.core.image_transform import ImageTransformWorkItem
+from preprocessor.core.message_reporter import MessageReporter, NoopMessageReporter
+from preprocessor.core.progress_reporter import ProgressReporter, NoopProgressReporter
 from preprocessor.core.types import ImageRGB
 
 
 class PerspectiveCropTransform:
     name = "perspective_crop"
 
-    def __call__(self, item: ImageTransformWorkItem) -> ImageTransformWorkItem:
+    def __call__(
+        self,
+        item: ImageTransformWorkItem,
+        /,
+        *,
+        messages: MessageReporter = NoopMessageReporter(),
+        progress: ProgressReporter = NoopProgressReporter(),
+    ) -> ImageTransformWorkItem:
         if not item.params.crop:
-            item.info("no_crop_requested", "Perspective crop skipped: no crop requested", step=self.name)
+            messages.info("no_crop_requested", "Perspective crop skipped: no crop requested")
             return item
 
         # If corners object exists but contains no points, signal no corners
         if len(item.params.crop.corners) == 0:
-            item.warn("no_quadrat_corners", "Perspective crop skipped: no quadrat corners set", step=self.name)
+            messages.warn("no_quadrat_corners", "Perspective crop skipped: no quadrat corners set")
             return item
 
         if not item.params.crop.corners.is_valid():
-            item.warn(
+            messages.warn(
                 "invalid_quadrat_corners",
                 "Perspective crop skipped: quadrat corners are invalid",
-                step=self.name,
                 details={"corners": item.params.crop.corners},
             )
             return item
 
         try:
+            progress(0.0, "Computing perspective transform...")
             src = item.image.data
             ordered_corners = np.array(item.params.crop.corners.ordered(), dtype=np.float32)
             tl, tr, br, bl = ordered_corners
@@ -54,16 +63,17 @@ class PerspectiveCropTransform:
                 dtype=np.float32,
             )
 
+            progress(0.5, "Applying perspective transform...")
             M = cv2.getPerspectiveTransform(ordered_corners, tgt_pts)
             dst = cv2.warpPerspective(src, M, (tgt_width, tgt_height))
+            progress(1.0)
 
             return ImageTransformWorkItem(
                 image_id=item.image_id,
                 image_path=item.image_path,
                 image=ImageRGB.from_rgb_array(dst),
                 params=item.params,
-                messages=item.messages,
             )
         except Exception as e:
-            item.error("perspective_crop_failed", f"Perspective crop failed: {e!s}", step=self.name)
+            messages.error("perspective_crop_failed", f"Perspective crop failed: {e!s}")
             return item

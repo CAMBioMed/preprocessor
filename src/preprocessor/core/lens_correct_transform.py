@@ -1,4 +1,6 @@
 from preprocessor.core.image_transform import ImageTransformWorkItem
+from preprocessor.core.message_reporter import MessageReporter, NoopMessageReporter
+from preprocessor.core.progress_reporter import ProgressReporter, NoopProgressReporter
 from preprocessor.core.types import ImageRGB
 
 import cv2
@@ -8,14 +10,23 @@ import numpy as np
 class LensCorrectTransform:
     name = "lens_correct"
 
-    def __call__(self, item: ImageTransformWorkItem) -> ImageTransformWorkItem:
+    def __call__(
+        self,
+        item: ImageTransformWorkItem,
+        /,
+        *,
+        messages: MessageReporter = NoopMessageReporter(),
+        progress: ProgressReporter = NoopProgressReporter(),
+    ) -> ImageTransformWorkItem:
         if not item.params.lens_correction:
-            item.info(
-                "no_lens_correction_requested", "Lens correction skipped: no lens correction requested", step=self.name
+            messages.info(
+                "no_lens_correction_requested",
+                "Lens correction skipped: no lens correction requested",
             )
             return item
 
         try:
+            progress(0.0, "Computing parameters...")
             src = item.image.data
             h, w = src.shape[:2]
 
@@ -38,6 +49,7 @@ class LensCorrectTransform:
             )
 
             # Build remap matrices
+            progress(0.1, "Computing remap matrices...")
             mapx, mapy = cv2.initUndistortRectifyMap(
                 cam,
                 coeff,
@@ -52,8 +64,11 @@ class LensCorrectTransform:
 
             # Chunked remap to allow cancellation and progress updates
             chunk_h = max(32, min(256, h // 8 if h >= 8 else 1))
+            rows_done = 0
             y = 0
             while y < h:
+                progress(0.2 + 0.8 * (rows_done / float(h)), "Remapping...")
+
                 y1 = min(h, y + chunk_h)
                 sub_map1 = mapx[y:y1, :]
                 sub_map2 = mapy[y:y1, :]
@@ -61,15 +76,17 @@ class LensCorrectTransform:
                 remapped = cv2.remap(src, sub_map1, sub_map2, interpolation=cv2.INTER_LINEAR)
                 dst[y:y1, ...] = remapped
 
+                rows_done = y1
                 y = y1
+
+            progress(1.0)
 
             return ImageTransformWorkItem(
                 image_id=item.image_id,
                 image_path=item.image_path,
                 image=ImageRGB.from_rgb_array(dst),
                 params=item.params,
-                messages=item.messages,
             )
         except Exception as e:
-            item.error("lens_correction_failed", f"Lens correction failed: {e!s}", step=self.name)
+            messages.error("lens_correction_failed", f"Lens correction failed: {e!s}")
             return item

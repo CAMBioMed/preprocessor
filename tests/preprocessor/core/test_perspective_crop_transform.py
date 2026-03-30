@@ -4,6 +4,8 @@ from pathlib import Path
 
 from _pytest.monkeypatch import MonkeyPatch
 
+from preprocessor.core.message_reporter import CollectingMessageReporter, Message, MessageLevel
+
 # Make local package importable when running tests from repository root
 sys.path.insert(0, "src")
 
@@ -12,7 +14,6 @@ from preprocessor.core.image_transform import ImageTransformWorkItem
 from preprocessor.core.photo_params import PhotoParams, CropParams
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import ImageRGB
-from preprocessor.core.messages import Message, MessageLevel
 
 
 def _find_message(messages: list[Message], code: str) -> Message | None:
@@ -38,28 +39,35 @@ def test_should_crop_successfully() -> None:
     br = (90.0, 90.0)
     corners = Corners((tl, tr, bl, br))
     params = PhotoParams(
-        schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=corners)
+        schema_version=1,
+        color_correction=None,
+        lens_correction=None,
+        crop=CropParams(corners=corners),
     )
 
-    orig_messages = [Message(level=MessageLevel.info, code="orig", text="original", step=None)]
     item = ImageTransformWorkItem(
-        image_id="id4", image_path=Path("/tmp/img4.jpg"), image=image, params=params, messages=orig_messages
+        image_id="id4",
+        image_path=Path("/tmp/img4.jpg"),
+        image=image,
+        params=params,
     )
     transform = PerspectiveCropTransform()
+    messages = CollectingMessageReporter(step=transform.name, image_id="id4")
+    messages.info("orig", "original")
 
     # Act
-    result = transform(item)
+    result = transform(item, messages=messages)
 
     # Assert
-    assert not result.get_errors()
-    assert not result.get_warnings()
+    assert not messages.errors
+    assert not messages.warnings
     assert result is not item
     assert isinstance(result.image, ImageRGB)
     # Target width/height should be 80x80
     assert result.image.data.shape == (80, 80, 3)
     # We can't easily test whether a pixel occurs in the resulting image, so we just assume it works here
     # Original messages are preserved
-    assert any(m.code == "orig" for m in result.messages)
+    assert any(m.code == "orig" for m in messages.messages)
 
 
 def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
@@ -67,16 +75,27 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
-    params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=None)
-    item = ImageTransformWorkItem(image_id="id", image_path=Path("/tmp/img.jpg"), image=image, params=params)
+    params = PhotoParams(
+        schema_version=1,
+        color_correction=None,
+        lens_correction=None,
+        crop=None,
+    )
+    item = ImageTransformWorkItem(
+        image_id="id",
+        image_path=Path("/tmp/img.jpg"),
+        image=image,
+        params=params,
+    )
     transform = PerspectiveCropTransform()
+    messages = CollectingMessageReporter(step=transform.name, image_id="id")
 
     # Act
-    result = transform(item)
+    result = transform(item, messages=messages)
 
     # Assert
     assert result is item
-    msg = _find_message(item.messages, "no_crop_requested")
+    msg = _find_message(messages.messages, "no_crop_requested")
     assert msg is not None
     assert msg.level == MessageLevel.info
     assert msg.step == transform.name
@@ -87,16 +106,27 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
-    params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=CropParams())
-    item = ImageTransformWorkItem(image_id="id2", image_path=Path("/tmp/img2.jpg"), image=image, params=params)
+    params = PhotoParams(
+        schema_version=1,
+        color_correction=None,
+        lens_correction=None,
+        crop=CropParams(),
+    )
+    item = ImageTransformWorkItem(
+        image_id="id2",
+        image_path=Path("/tmp/img2.jpg"),
+        image=image,
+        params=params,
+    )
     transform = PerspectiveCropTransform()
+    messages = CollectingMessageReporter(step=transform.name, image_id="id2")
 
     # Act
-    result = transform(item)
+    result = transform(item, messages=messages)
 
     # Assert
     assert result is item
-    msg = _find_message(item.messages, "no_quadrat_corners")
+    msg = _find_message(messages.messages, "no_quadrat_corners")
     assert msg is not None
     assert msg.level == MessageLevel.warning
     assert msg.step == transform.name
@@ -110,21 +140,29 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     # Create 4 corners but with a negative coordinate to make them invalid per Corners.ordered()
     bad_corners = Corners(((-1.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
     params = PhotoParams(
-        schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=bad_corners)
+        schema_version=1,
+        color_correction=None,
+        lens_correction=None,
+        crop=CropParams(corners=bad_corners),
     )
-    item = ImageTransformWorkItem(image_id="id3", image_path=Path("/tmp/img3.jpg"), image=image, params=params)
+    item = ImageTransformWorkItem(
+        image_id="id3",
+        image_path=Path("/tmp/img3.jpg"),
+        image=image,
+        params=params,
+    )
     transform = PerspectiveCropTransform()
+    messages = CollectingMessageReporter(step=transform.name, image_id="id3")
 
     # Act
-    result = transform(item)
+    result = transform(item, messages=messages)
 
     # Assert
     assert result is item
-    msg = _find_message(item.messages, "invalid_quadrat_corners")
+    msg = _find_message(messages.messages, "invalid_quadrat_corners")
     assert msg is not None
     assert msg.level == MessageLevel.warning
     assert msg.step == transform.name
-    # details should include the corners
     assert msg.details is not None and "corners" in msg.details
 
 
@@ -140,10 +178,19 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
     br = (45.0, 45.0)
     corners = Corners((tl, tr, bl, br))
     params = PhotoParams(
-        schema_version=1, color_correction=None, lens_correction=None, crop=CropParams(corners=corners)
+        schema_version=1,
+        color_correction=None,
+        lens_correction=None,
+        crop=CropParams(corners=corners),
     )
-    item = ImageTransformWorkItem(image_id="id5", image_path=Path("/tmp/img5.jpg"), image=image, params=params)
+    item = ImageTransformWorkItem(
+        image_id="id5",
+        image_path=Path("/tmp/img5.jpg"),
+        image=image,
+        params=params,
+    )
     transform = PerspectiveCropTransform()
+    messages = CollectingMessageReporter(step=transform.name, image_id="id5")
 
     # Make cv2.warpPerspective raise
     import cv2
@@ -154,11 +201,11 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
     monkeypatch.setattr(cv2, "warpPerspective", _boom)
 
     # Act
-    result = transform(item)
+    result = transform(item, messages=messages)
 
     # Assert
     assert result is item
-    msg = _find_message(item.messages, "perspective_crop_failed")
+    msg = _find_message(messages.messages, "perspective_crop_failed")
     assert msg is not None
     assert msg.level == MessageLevel.error
     assert "boom" in msg.text
