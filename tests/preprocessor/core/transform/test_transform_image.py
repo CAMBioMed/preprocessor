@@ -58,8 +58,16 @@ class _BadTransform(ImageTransform):
 def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: MonkeyPatch) -> None:
     """should return None and report error when image load fails"""
     # Arrange
-    input_path = Path("/nonexistent/path.jpg")
-    params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=None)
+    image_path = Path("/nonexistent/path.jpg")
+    image_id = "path"
+    params = PhotoParams(
+        schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
+        color_correction=None,
+        lens_correction=None,
+        crop=None,
+    )
     messages = CollectingMessageReporter()
 
     # Make ImageRGB.from_file raise
@@ -69,7 +77,7 @@ def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: 
     monkeypatch.setattr(ImageRGB, "from_file", staticmethod(_boom))
 
     # Act
-    result = transform_image(input_path, params, output_path=None, transforms=[], messages=messages)
+    result = transform_image(image_path, params, output_path=None, transforms=[], messages=messages)
 
     # Assert
     assert result is None
@@ -86,8 +94,16 @@ def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_p
     # set a pixel to make the image non-empty
     arr[1, 1] = [1, 2, 3]
     image = ImageRGB.from_rgb_array(arr)
-    input_path = Path("/tmp/img.jpg")
-    params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=None)
+    image_path = Path("/tmp/img.jpg")
+    image_id = "img"
+    params = PhotoParams(
+        schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
+        color_correction=None,
+        lens_correction=None,
+        crop=None,
+    )
     messages = CollectingMessageReporter()
 
     # Monkeypatch loading to return our in-memory image
@@ -103,7 +119,7 @@ def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_p
 
     # Act
     result = transform_image(
-        input_path,
+        image_path,
         params,
         output_path=output_path,
         transforms=[_IdentityTransform()],
@@ -123,14 +139,22 @@ def test_should_report_transform_failed_and_return_none_when_transform_raises(mo
     h, w = 5, 5
     arr = np.zeros((h, w, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(arr)
-    input_path = Path("/tmp/img2.jpg")
-    params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=None)
+    image_path = Path("/tmp/img2.jpg")
+    image_id = "img2"
+    params = PhotoParams(
+        schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
+        color_correction=None,
+        lens_correction=None,
+        crop=None,
+    )
     messages = CollectingMessageReporter()
 
     monkeypatch.setattr(ImageRGB, "from_file", staticmethod(lambda p: image))
 
     # Act
-    result = transform_image(input_path, params, output_path=None, transforms=[_BadTransform()], messages=messages)
+    result = transform_image(image_path, params, output_path=None, transforms=[_BadTransform()], messages=messages)
 
     # Assert
     assert result is None
@@ -146,8 +170,16 @@ def test_should_report_image_save_failed_and_return_none_when_save_raises(
     h, w = 6, 6
     arr = np.zeros((h, w, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(arr)
-    input_path = Path("/tmp/img3.jpg")
-    params = PhotoParams(schema_version=1, color_correction=None, lens_correction=None, crop=None)
+    image_path = Path("/tmp/img3.jpg")
+    image_id = "img3"
+    params = PhotoParams(
+        schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
+        color_correction=None,
+        lens_correction=None,
+        crop=None,
+    )
     messages = CollectingMessageReporter()
 
     monkeypatch.setattr(ImageRGB, "from_file", staticmethod(lambda p: image))
@@ -161,7 +193,7 @@ def test_should_report_image_save_failed_and_return_none_when_save_raises(
 
     # Act
     result = transform_image(
-        input_path,
+        image_path,
         params,
         output_path=output_path,
         transforms=[_IdentityTransform()],

@@ -2,8 +2,10 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from preprocessor.core.model.metadata import MetadataData
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import LensVector, CameraMatrix
+from preprocessor.model.project_path import ProjectPath
 
 
 class ColorCorrectionParams(BaseModel, validate_assignment=True):
@@ -59,14 +61,37 @@ class PhotoParams(BaseModel, validate_assignment=True):
 
     model_config = ConfigDict(extra="forbid")
 
-    # Future-proofing / provenance
+    #######################
+    ## Schema properties ##
+    #######################
+
     schema_version: int = Field(1, ge=1)
     """The schema version."""
 
-    # Transformation parameters
+    ######################
+    ## Fixed properties ##
+    ######################
+
+    photo_id: str
+    """The unique identifier for the photo."""
+    original_filename: ProjectPath
+    """The path to the photo file, relative to the project."""
+
+    ######################
+    ## Photo correction ##
+    ######################
+
     color_correction: ColorCorrectionParams | None
     """The parameters for color correction, or None to not perform color correction."""
     lens_correction: LensCorrectionParams | None
     """The parameters for lens correction, or None to not perform lens correction."""
     crop: CropParams | None
     """The parameters for cropping the photo, or None to not crop the photo."""
+
+    ##############
+    ## Metadata ##
+    ##############
+
+    metadata: MetadataData = MetadataData()
+    """The metadata for the photo."""
+

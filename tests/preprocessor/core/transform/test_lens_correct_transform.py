@@ -17,15 +17,19 @@ def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None
     h, w = 32, 48
     arr = np.zeros((h, w, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(arr)
+    image_path = Path("/tmp/img1.jpg")
+    image_id = "img1"
     params = PhotoParams(
         schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=None,
     )
     item = ImageTransformWorkItem(
-        image_id="img1",
-        image_path=Path("/tmp/img1.jpg"),
+        image_id=image_id,
+        image_path=image_path,
         image=image,
         params=params,
     )
@@ -49,16 +53,20 @@ def test_should_return_transformed_image_when_lens_correction_requested() -> Non
     arr = np.tile(np.arange(w, dtype=np.uint8), (h, 1))
     rgb = np.stack([arr, arr, arr], axis=2)
     image = ImageRGB.from_rgb_array(rgb)
+    image_path = Path("/tmp/img2.jpg")
+    image_id = "img2"
     lens_params = LensCorrectionParams(camera_matrix=None, coefficients=[0.0, 0.0, 0.0, 0.0])
     params = PhotoParams(
         schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
         color_correction=None,
         lens_correction=lens_params,
         crop=None,
     )
     item = ImageTransformWorkItem(
-        image_id="img2",
-        image_path=Path("/tmp/img2.jpg"),
+        image_id=image_id,
+        image_path=image_path,
         image=image,
         params=params,
     )
@@ -82,11 +90,20 @@ def test_should_return_original_and_error_when_cv2_raises(monkeypatch: MonkeyPat
     h, w = 32, 32
     arr = np.zeros((h, w, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(arr)
+    image_path = Path("/tmp/img3.jpg")
+    image_id = "img3"
     lens_params = LensCorrectionParams(camera_matrix=None, coefficients=[0.0, 0.0, 0.0, 0.0])
-    params = PhotoParams(schema_version=1, color_correction=None, lens_correction=lens_params, crop=None)
+    params = PhotoParams(
+        schema_version=1,
+        photo_id=image_id,
+        original_filename=image_path,
+        color_correction=None,
+        lens_correction=lens_params,
+        crop=None,
+    )
     item = ImageTransformWorkItem(
-        image_id="img3",
-        image_path=Path("/tmp/img3.jpg"),
+        image_id=image_id,
+        image_path=image_path,
         image=image,
         params=params,
     )

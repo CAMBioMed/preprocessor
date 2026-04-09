@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, cast
 
 from pydantic import PlainSerializer, AfterValidator
 from pydantic_core.core_schema import ValidationInfo, SerializationInfo
@@ -12,10 +12,7 @@ def _parse_project_path(v: Any, info: ValidationInfo) -> Path:  # noqa: ANN401
     if p.is_absolute():
         return p.resolve()
 
-    project_dir = (info.context or {}).get("project_dir")
-    if project_dir is None:
-        msg = "Project directory must be set in context for parsing project paths"
-        raise ValueError(msg)
+    project_dir = cast(Path, (info.context or {}).get("project_dir")) or Path.cwd()
     project_dir = Path(project_dir).resolve()
 
     return (project_dir / p).resolve()
@@ -26,7 +23,7 @@ def _dump_project_path(v: Path, info: SerializationInfo) -> str:
 
     p = v.resolve()
 
-    project_dir = (info.context or {}).get("project_dir")
+    project_dir = cast(Path | None, (info.context or {}).get("project_dir"))
     if project_dir is None:
         return p.as_posix()
     project_dir = Path(project_dir).resolve()

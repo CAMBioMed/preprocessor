@@ -31,6 +31,8 @@ def test_should_crop_successfully() -> None:
     # Put a distinctive pixel inside the target rectangle at (20, 20)
     img[20, 20] = [123, 45, 67]
     image = ImageRGB.from_rgb_array(img)
+    image_path = Path("/tmp/img4.jpg")
+    image_id = "id4"
 
     # Define corners for an axis-aligned square from (10,10) to (90,90)
     tl = (10.0, 10.0)
@@ -40,14 +42,16 @@ def test_should_crop_successfully() -> None:
     corners = Corners((tl, tr, bl, br))
     params = PhotoParams(
         schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=CropParams(corners=corners),
     )
 
     item = ImageTransformWorkItem(
-        image_id="id4",
-        image_path=Path("/tmp/img4.jpg"),
+        image_id=image_id,
+        image_path=image_path,
         image=image,
         params=params,
     )
@@ -75,15 +79,19 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
+    image_path = Path("/tmp/img.jpg")
+    image_id = "id"
     params = PhotoParams(
         schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=None,
     )
     item = ImageTransformWorkItem(
-        image_id="id",
-        image_path=Path("/tmp/img.jpg"),
+        image_id=image_id,
+        image_path=image_path,
         image=image,
         params=params,
     )
@@ -106,15 +114,19 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
+    image_path = Path("/tmp/img2.jpg")
+    image_id = "id2"
     params = PhotoParams(
         schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=CropParams(),
     )
     item = ImageTransformWorkItem(
-        image_id="id2",
-        image_path=Path("/tmp/img2.jpg"),
+        image_id=image_id,
+        image_path=image_path,
         image=image,
         params=params,
     )
@@ -137,17 +149,21 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
+    image_path = Path("/tmp/img3.jpg")
+    image_id = "id3"
     # Create 4 corners but with a negative coordinate to make them invalid per Corners.ordered()
     bad_corners = Corners(((-1.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
     params = PhotoParams(
         schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=CropParams(corners=bad_corners),
     )
     item = ImageTransformWorkItem(
-        image_id="id3",
-        image_path=Path("/tmp/img3.jpg"),
+        image_id=image_id,
+        image_path=image_path,
         image=image,
         params=params,
     )
@@ -172,6 +188,8 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
     h, w = 50, 50
     img = np.zeros((h, w, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
+    image_path = Path("/tmp/img5.jpg")
+    image_id = "id5"
     tl = (5.0, 5.0)
     tr = (45.0, 5.0)
     bl = (5.0, 45.0)
@@ -179,13 +197,15 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
     corners = Corners((tl, tr, bl, br))
     params = PhotoParams(
         schema_version=1,
+        original_filename=image_path,
+        photo_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=CropParams(corners=corners),
     )
     item = ImageTransformWorkItem(
-        image_id="id5",
-        image_path=Path("/tmp/img5.jpg"),
+        image_id=image_id,
+        image_path=image_path,
         image=image,
         params=params,
     )
