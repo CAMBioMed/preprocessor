@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from preprocessor.core.model.metadata import MetadataData
+from preprocessor.core.model import MetadataData
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import LensVector, CameraMatrix
 from preprocessor.model.project_path import ProjectPath
@@ -56,7 +56,7 @@ class CropParams(BaseModel, validate_assignment=True):
     When not Corners.is_valid(), the corners are ignored and no cropping is performed."""
 
 
-class PhotoParams(BaseModel, validate_assignment=True):
+class PhotoData(BaseModel, validate_assignment=True):
     """Parameters for photo processing."""
 
     model_config = ConfigDict(extra="forbid")

@@ -11,7 +11,7 @@ sys.path.insert(0, "src")
 
 from preprocessor.core.transform.perspective_crop_transform import PerspectiveCropTransform
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem
-from preprocessor.core.model.photo_params import PhotoParams, CropParams
+from preprocessor.core.model import PhotoData, CropParams
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import ImageRGB
 
@@ -40,7 +40,7 @@ def test_should_crop_successfully() -> None:
     bl = (10.0, 90.0)
     br = (90.0, 90.0)
     corners = Corners((tl, tr, bl, br))
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -81,7 +81,7 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
     image = ImageRGB.from_rgb_array(img)
     image_path = Path("/tmp/img.jpg")
     image_id = "id"
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -116,7 +116,7 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
     image = ImageRGB.from_rgb_array(img)
     image_path = Path("/tmp/img2.jpg")
     image_id = "id2"
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -153,7 +153,7 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     image_id = "id3"
     # Create 4 corners but with a negative coordinate to make them invalid per Corners.ordered()
     bad_corners = Corners(((-1.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -195,7 +195,7 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
     bl = (5.0, 45.0)
     br = (45.0, 45.0)
     corners = Corners((tl, tr, bl, br))
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,

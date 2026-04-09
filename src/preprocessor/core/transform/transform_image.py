@@ -2,14 +2,14 @@ from pathlib import Path
 
 from preprocessor.core.transform.image_transform import ImageTransform, ImageTransformWorkItem
 from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
-from preprocessor.core.model.photo_params import PhotoParams
+from preprocessor.core.model import PhotoData
 from preprocessor.core.progress_reporter import ProgressReporter, WeightedSubProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.types import ImageRGB
 
 
 def transform_image(
     input_path: Path,
-    params: PhotoParams,
+    params: PhotoData,
     output_path: Path | None,
     transforms: list[ImageTransform],
     messages: MessageReporter = NOOP_MESSAGE_REPORTER,

@@ -4,7 +4,8 @@ from typing import cast
 import pytest
 from pytestqt.qtbot import QtBot
 
-from preprocessor.model.metadata_model import MetadataModel, MetadataData
+from preprocessor.model.metadata_model import MetadataModel
+from preprocessor.core.model import MetadataData
 from tests.preprocessor.models.qmodel_fixture import (
     assert_model_property_getter_setter_and_signal,
     assert_has_a_property_for_each_data_field,

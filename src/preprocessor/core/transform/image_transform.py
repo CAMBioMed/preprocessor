@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Protocol
 
 from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
-from preprocessor.core.model.photo_params import PhotoParams
+from preprocessor.core.model import PhotoData
 from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.types import ImageRGB
 
@@ -18,7 +18,7 @@ class ImageTransformWorkItem:
     """The original path to the image file."""
     image: ImageRGB
     """The image data as a numpy array."""
-    params: PhotoParams
+    params: PhotoData
     """The parameters used for processing this image, e.g. quadrat corners."""
 
 

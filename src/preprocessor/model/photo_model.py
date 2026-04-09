@@ -6,7 +6,8 @@ from PySide6.QtCore import Signal
 from pydantic import BaseModel, field_validator
 
 from preprocessor.model import Point2, Matrix3x3
-from preprocessor.model.metadata_model import MetadataData, MetadataModel
+from preprocessor.model.metadata_model import MetadataModel
+from preprocessor.core.model import MetadataData
 from preprocessor.model.project_path import ProjectPath
 from preprocessor.model.qmodel import QModel
 

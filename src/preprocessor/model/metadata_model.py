@@ -3,7 +3,7 @@ from typing import Any
 
 from PySide6.QtCore import Signal
 
-from preprocessor.core.model.metadata import MetadataData
+from preprocessor.core.model import MetadataData
 from preprocessor.model.qmodel import QModel
 
 

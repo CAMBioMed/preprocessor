@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from datetime import datetime
 from typing import Any, ClassVar
@@ -7,6 +7,8 @@ from pydantic import BaseModel, field_validator, Field
 
 class MetadataData(BaseModel, validate_assignment=True):
     """The metadata for a single photo in the project."""
+
+    # model_config = ConfigDict(frozen=True, extra="forbid")
 
     filename: str | None = Field(max_length=200, default=None)
     """The filename of the photo, or None if not set."""

@@ -15,7 +15,7 @@ from preprocessor.core.transform.transform_image import transform_image
 from preprocessor.core.message_reporter import CollectingMessageReporter, MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.types import ImageRGB
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem, ImageTransform
-from preprocessor.core.model.photo_params import PhotoParams
+from preprocessor.core.model import PhotoData
 
 
 class _IdentityTransform(ImageTransform):
@@ -60,7 +60,7 @@ def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: 
     # Arrange
     image_path = Path("/nonexistent/path.jpg")
     image_id = "path"
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -96,7 +96,7 @@ def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_p
     image = ImageRGB.from_rgb_array(arr)
     image_path = Path("/tmp/img.jpg")
     image_id = "img"
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -141,7 +141,7 @@ def test_should_report_transform_failed_and_return_none_when_transform_raises(mo
     image = ImageRGB.from_rgb_array(arr)
     image_path = Path("/tmp/img2.jpg")
     image_id = "img2"
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -172,7 +172,7 @@ def test_should_report_image_save_failed_and_return_none_when_save_raises(
     image = ImageRGB.from_rgb_array(arr)
     image_path = Path("/tmp/img3.jpg")
     image_id = "img3"
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,

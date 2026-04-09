@@ -8,7 +8,7 @@ from preprocessor.core.transform.lens_correct_transform import LensCorrectTransf
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem
 from preprocessor.core.message_reporter import CollectingMessageReporter
 from preprocessor.core.types import ImageRGB
-from preprocessor.core.model.photo_params import PhotoParams, LensCorrectionParams
+from preprocessor.core.model import PhotoData, LensCorrectionParams
 
 
 def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None:
@@ -19,7 +19,7 @@ def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None
     image = ImageRGB.from_rgb_array(arr)
     image_path = Path("/tmp/img1.jpg")
     image_id = "img1"
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -56,7 +56,7 @@ def test_should_return_transformed_image_when_lens_correction_requested() -> Non
     image_path = Path("/tmp/img2.jpg")
     image_id = "img2"
     lens_params = LensCorrectionParams(camera_matrix=None, coefficients=[0.0, 0.0, 0.0, 0.0])
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_path=image_path,
         image_id=image_id,
@@ -93,7 +93,7 @@ def test_should_return_original_and_error_when_cv2_raises(monkeypatch: MonkeyPat
     image_path = Path("/tmp/img3.jpg")
     image_id = "img3"
     lens_params = LensCorrectionParams(camera_matrix=None, coefficients=[0.0, 0.0, 0.0, 0.0])
-    params = PhotoParams(
+    params = PhotoData(
         schema_version=1,
         image_id=image_id,
         image_path=image_path,
