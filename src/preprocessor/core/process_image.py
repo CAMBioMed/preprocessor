@@ -2,7 +2,7 @@ from pathlib import Path
 
 from preprocessor.core.transform.image_transform import ImageTransform, ImageTransformWorkItem
 from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
-from preprocessor.core.photo_params import PhotoParams
+from preprocessor.core.model.photo_params import PhotoParams
 from preprocessor.core.progress_reporter import ProgressReporter, WeightedSubProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.types import ImageRGB
 

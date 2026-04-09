@@ -15,7 +15,7 @@ from preprocessor.core.process_image import process_image
 from preprocessor.core.message_reporter import CollectingMessageReporter, MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.types import ImageRGB
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem, ImageTransform
-from preprocessor.core.photo_params import PhotoParams
+from preprocessor.core.model.photo_params import PhotoParams
 
 
 class _IdentityTransform(ImageTransform):

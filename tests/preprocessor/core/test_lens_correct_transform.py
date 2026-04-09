@@ -8,7 +8,7 @@ from preprocessor.core.transform.lens_correct_transform import LensCorrectTransf
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem
 from preprocessor.core.message_reporter import CollectingMessageReporter
 from preprocessor.core.types import ImageRGB
-from preprocessor.core.photo_params import PhotoParams, LensCorrectionParams
+from preprocessor.core.model.photo_params import PhotoParams, LensCorrectionParams
 
 
 def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None:
