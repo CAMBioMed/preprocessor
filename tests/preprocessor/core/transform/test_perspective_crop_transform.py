@@ -42,8 +42,8 @@ def test_should_crop_successfully() -> None:
     corners = Corners((tl, tr, bl, br))
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=CropParams(corners=corners),
@@ -83,8 +83,8 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
     image_id = "id"
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=None,
@@ -118,8 +118,8 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
     image_id = "id2"
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=CropParams(),
@@ -155,8 +155,8 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     bad_corners = Corners(((-1.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=CropParams(corners=bad_corners),
@@ -197,8 +197,8 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
     corners = Corners((tl, tr, bl, br))
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=CropParams(corners=corners),

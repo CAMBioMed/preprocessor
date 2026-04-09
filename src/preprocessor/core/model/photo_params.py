@@ -72,9 +72,9 @@ class PhotoParams(BaseModel, validate_assignment=True):
     ## Fixed properties ##
     ######################
 
-    photo_id: str
+    image_id: str
     """The unique identifier for the photo."""
-    original_filename: ProjectPath
+    image_path: ProjectPath
     """The path to the photo file, relative to the project."""
 
     ######################

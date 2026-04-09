@@ -62,8 +62,8 @@ def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: 
     image_id = "path"
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=None,
@@ -98,8 +98,8 @@ def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_p
     image_id = "img"
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=None,
@@ -143,8 +143,8 @@ def test_should_report_transform_failed_and_return_none_when_transform_raises(mo
     image_id = "img2"
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=None,
@@ -174,8 +174,8 @@ def test_should_report_image_save_failed_and_return_none_when_save_raises(
     image_id = "img3"
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=None,

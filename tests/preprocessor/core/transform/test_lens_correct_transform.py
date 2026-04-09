@@ -21,8 +21,8 @@ def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None
     image_id = "img1"
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=None,
         crop=None,
@@ -58,8 +58,8 @@ def test_should_return_transformed_image_when_lens_correction_requested() -> Non
     lens_params = LensCorrectionParams(camera_matrix=None, coefficients=[0.0, 0.0, 0.0, 0.0])
     params = PhotoParams(
         schema_version=1,
-        original_filename=image_path,
-        photo_id=image_id,
+        image_path=image_path,
+        image_id=image_id,
         color_correction=None,
         lens_correction=lens_params,
         crop=None,
@@ -95,8 +95,8 @@ def test_should_return_original_and_error_when_cv2_raises(monkeypatch: MonkeyPat
     lens_params = LensCorrectionParams(camera_matrix=None, coefficients=[0.0, 0.0, 0.0, 0.0])
     params = PhotoParams(
         schema_version=1,
-        photo_id=image_id,
-        original_filename=image_path,
+        image_id=image_id,
+        image_path=image_path,
         color_correction=None,
         lens_correction=lens_params,
         crop=None,
