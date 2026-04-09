@@ -11,7 +11,7 @@ from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_
 # Make local package importable when running tests from repository root
 sys.path.insert(0, "src")
 
-from preprocessor.core.process_image import process_image
+from preprocessor.core.transform.transform_image import transform_image
 from preprocessor.core.message_reporter import CollectingMessageReporter, MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.types import ImageRGB
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem, ImageTransform
@@ -69,7 +69,7 @@ def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: 
     monkeypatch.setattr(ImageRGB, "from_file", staticmethod(_boom))
 
     # Act
-    result = process_image(input_path, params, output_path=None, transforms=[], messages=messages)
+    result = transform_image(input_path, params, output_path=None, transforms=[], messages=messages)
 
     # Assert
     assert result is None
@@ -102,7 +102,7 @@ def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_p
     output_path = tmp_path / "out.jpg"
 
     # Act
-    result = process_image(
+    result = transform_image(
         input_path,
         params,
         output_path=output_path,
@@ -130,7 +130,7 @@ def test_should_report_transform_failed_and_return_none_when_transform_raises(mo
     monkeypatch.setattr(ImageRGB, "from_file", staticmethod(lambda p: image))
 
     # Act
-    result = process_image(input_path, params, output_path=None, transforms=[_BadTransform()], messages=messages)
+    result = transform_image(input_path, params, output_path=None, transforms=[_BadTransform()], messages=messages)
 
     # Assert
     assert result is None
@@ -160,7 +160,7 @@ def test_should_report_image_save_failed_and_return_none_when_save_raises(
     output_path = tmp_path / "out2.jpg"
 
     # Act
-    result = process_image(
+    result = transform_image(
         input_path,
         params,
         output_path=output_path,

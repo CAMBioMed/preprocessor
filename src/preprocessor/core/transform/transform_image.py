@@ -7,7 +7,7 @@ from preprocessor.core.progress_reporter import ProgressReporter, WeightedSubPro
 from preprocessor.core.types import ImageRGB
 
 
-def process_image(
+def transform_image(
     input_path: Path,
     params: PhotoParams,
     output_path: Path | None,
