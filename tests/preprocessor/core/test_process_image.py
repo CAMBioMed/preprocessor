@@ -11,10 +11,10 @@ from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_
 # Make local package importable when running tests from repository root
 sys.path.insert(0, "src")
 
-from preprocessor.core.process_images import process_image
+from preprocessor.core.process_image import process_image
 from preprocessor.core.message_reporter import CollectingMessageReporter, MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.types import ImageRGB
-from preprocessor.core.image_transform import ImageTransformWorkItem, ImageTransform
+from preprocessor.core.transform.image_transform import ImageTransformWorkItem, ImageTransform
 from preprocessor.core.photo_params import PhotoParams
 
 

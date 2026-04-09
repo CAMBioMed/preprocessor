@@ -9,8 +9,8 @@ from preprocessor.core.message_reporter import CollectingMessageReporter, Messag
 # Make local package importable when running tests from repository root
 sys.path.insert(0, "src")
 
-from preprocessor.core.perspective_crop_transform import PerspectiveCropTransform
-from preprocessor.core.image_transform import ImageTransformWorkItem
+from preprocessor.core.transform.perspective_crop_transform import PerspectiveCropTransform
+from preprocessor.core.transform.image_transform import ImageTransformWorkItem
 from preprocessor.core.photo_params import PhotoParams, CropParams
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import ImageRGB

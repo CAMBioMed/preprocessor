@@ -4,8 +4,8 @@ from pathlib import Path
 
 from _pytest.monkeypatch import MonkeyPatch
 
-from preprocessor.core.lens_correct_transform import LensCorrectTransform
-from preprocessor.core.image_transform import ImageTransformWorkItem
+from preprocessor.core.transform.lens_correct_transform import LensCorrectTransform
+from preprocessor.core.transform.image_transform import ImageTransformWorkItem
 from preprocessor.core.message_reporter import CollectingMessageReporter
 from preprocessor.core.types import ImageRGB
 from preprocessor.core.photo_params import PhotoParams, LensCorrectionParams
@@ -94,7 +94,7 @@ def test_should_return_original_and_error_when_cv2_raises(monkeypatch: MonkeyPat
     messages = CollectingMessageReporter()
 
     # Force cv2.getOptimalNewCameraMatrix to raise
-    import preprocessor.core.lens_correct_transform as lct_mod
+    import preprocessor.core.transform.lens_correct_transform as lct_mod
 
     def _boom(*args: object, **kwargs: object) -> None:
         raise RuntimeError("boom")
