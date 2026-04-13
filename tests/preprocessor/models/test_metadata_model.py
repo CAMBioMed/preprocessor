@@ -11,7 +11,7 @@ from tests.preprocessor.models.qmodel_fixture import (
     assert_has_a_property_for_each_data_field,
 )
 
-
+# Deprecated
 class TestMetadataModel:
     """Unit tests for MetadataModel and MetadataData."""
 

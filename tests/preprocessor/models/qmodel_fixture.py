@@ -7,7 +7,7 @@ from preprocessor.model.qmodel import QModel
 
 T = TypeVar("T", bound=QModel)
 
-
+# Deprecated
 def assert_model_property_signals_on_mutation(
     qtbot: QtBot,
     model: T,
@@ -51,7 +51,7 @@ def assert_model_property_signals_on_mutation(
     # Act: clean the model
     model.mark_clean()
 
-
+# Deprecated
 def assert_model_property_getter_setter_and_signal(
     qtbot: QtBot,
     model: QModel,
@@ -84,7 +84,7 @@ def assert_model_property_getter_setter_and_signal(
     # Assert: the value is updated
     assert getattr(model, prop_name) == new_value
 
-
+# Deprecated
 def assert_has_a_property_for_each_data_field(
     model_class: type[QModel],
     data_model_class: type[BaseModel],

@@ -28,7 +28,7 @@ from preprocessor.model.photo_model import PhotoModel, PhotoData
 from preprocessor.core.model import MetadataData
 from preprocessor.model.qlistmodel import QListModel
 
-
+# Deprecated
 class TestProjectModel:
     def test_photos(self, tmp_path: Path) -> None:
         # Arrange

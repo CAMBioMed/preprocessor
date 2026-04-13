@@ -11,7 +11,7 @@ from tests.preprocessor.models.qmodel_fixture import (
     assert_model_property_signals_on_mutation,
 )
 
-
+# Deprecated
 class TestPhotoModel:
     """Unit tests for PhotoModel and PhotoData."""
 

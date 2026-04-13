@@ -7,14 +7,14 @@ from pydantic import BaseModel
 from preprocessor.model.project_path import ProjectPath
 from preprocessor.model.qmodel import QModel
 
-
+# Deprecated
 class ExampleData(BaseModel, validate_assignment=True):
     """A simple Pydantic model for testing."""
 
     name: str
     path: ProjectPath | None
 
-
+# Deprecated
 class ExampleQModel(QModel[ExampleData]):
     """A simple QModel subclass for testing."""
 

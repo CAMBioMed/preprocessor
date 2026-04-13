@@ -9,17 +9,17 @@ from preprocessor.model.qlistmodel import QListModel
 
 from preprocessor.model.qmodel import QModel
 
-# Deprecated
-# Ensure a Qt application context exists for QObject usage in tests. Rely on pytest-qt's qapp.
-@pytest.fixture(autouse=True)
-def _ensure_qapp(qapp: QApplication) -> QApplication:
-    return qapp
+#
+# # Ensure a Qt application context exists for QObject usage in tests. Rely on pytest-qt's qapp.
+# @pytest.fixture(autouse=True)
+# def _ensure_qapp(qapp: QApplication) -> QApplication:
+#     return qapp
 
-# Deprecated
+
 class ItemData(BaseModel):
     name: str
 
-# Deprecated
+
 class Item(QModel[ItemData]):
     def __init__(self, data: ItemData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=ItemData, data=data)
