@@ -7,6 +7,70 @@ from preprocessor.core.type_corners import Corners
 
 
 class Test_PhotoData:
+    fields_and_values: dict[str, tuple[object | None, list[object], list[tuple[object, object]], list[object]]] = {
+        "color_correction": (
+            # Initial
+            None,
+            # Valid
+            [
+                ColorCorrectionParams(),
+            ],
+            # Normalized
+            [],
+            # Invalid
+            [
+                "foo",
+            ],
+        ),
+        "lens_correction": (
+            # Initial
+            None,
+            # Valid
+            [
+                LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
+            ],
+            # Normalized
+            [],
+            # Invalid
+            [
+                "foo"
+            ],
+        ),
+        "crop": (
+            # Initial
+            None,
+            # Valid
+            [
+                CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
+            ],
+            # Normalized
+            [],
+            # Invalid
+            [
+                "foo"
+            ],
+        ),
+        "metadata": (
+            # Initial
+            MetadataData(),
+            # Valid
+            [
+                MetadataData(partner="SZN", camera="EOS R5"),
+            ],
+            # Normalized
+            [],
+            # Invalid
+            [
+                "foo"
+            ],
+        ),
+    }
+    """Map for each field name to:
+    - the default value,
+    - a list of valid values,
+    - a list of pairs: unnormalized value to normalized value,
+    - a list of invalid values
+    """
 
     fields_initial_new = [
         ("color_correction", None, ColorCorrectionParams()),
