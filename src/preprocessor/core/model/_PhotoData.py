@@ -1,0 +1,56 @@
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from preprocessor.core.model._MetadataData import MetadataData
+from preprocessor.core.model._ColorCorrectionParams import ColorCorrectionParams
+from preprocessor.core.model._LensCorrectionParams import LensCorrectionParams
+from preprocessor.core.model._CropParams import CropParams
+from preprocessor.core.type_corners import Corners
+from preprocessor.core.types import LensVector, CameraMatrix
+from preprocessor.model.project_path import ProjectPath
+
+
+
+
+class PhotoData(BaseModel, validate_assignment=True):
+    """Parameters for photo processing."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    #######################
+    ## Schema properties ##
+    #######################
+
+    schema_version: int = Field(1, ge=1)
+    """The schema version."""
+
+    ######################
+    ## Fixed properties ##
+    ######################
+
+    image_id: str
+    """The unique identifier for the photo."""
+    image_path: ProjectPath
+    """The path to the photo file, relative to the project."""
+
+    ######################
+    ## Photo correction ##
+    ######################
+
+    color_correction: ColorCorrectionParams | None = None
+    """The parameters for color correction, or None to not perform color correction."""
+    lens_correction: LensCorrectionParams | None = None
+    """The parameters for lens correction, or None to not perform lens correction."""
+    crop: CropParams | None = None
+    """The parameters for cropping the photo, or None to not crop the photo."""
+
+    ##############
+    ## Metadata ##
+    ##############
+
+    metadata: MetadataData = MetadataData()
+    """The metadata for the photo."""
+

@@ -8,10 +8,12 @@ from pydantic import BaseModel, field_validator, Field
 class MetadataData(BaseModel, validate_assignment=True):
     """The metadata for a single photo in the project."""
 
-    # model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(
+        extra="forbid",
+    )
 
     filename: str | None = Field(max_length=200, default=None)
-    """The filename of the photo, or None if not set."""
+    """The export filename of the photo, or None if not set."""
     date: datetime | None = Field(default=None)
     """The date the photo was taken, or None if not set."""
     partner: str | None = Field(max_length=50, default=None)

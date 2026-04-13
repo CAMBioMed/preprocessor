@@ -24,11 +24,14 @@ def assert_model_property_signals_on_mutation(
     :param fn_set_new: a function that sets the property to a different value (should emit signals)
     """
 
-    on_field_signal = getattr(model, f"on_{prop_name}_changed")
+    try:
+        on_field_signal = getattr(model, f"on_{prop_name}_changed")
+    except AttributeError:
+        raise AssertionError(f"Model {type(model).__name__} does not have a signal named on_{prop_name}_changed") from None
     on_changed_signal = model.on_changed
 
     # Assert: model is not dirty
-    assert not model.dirty
+    assert not model.dirty, "Model should not be dirty before mutation, but it is."
 
     # Assert: setting the same value should not emit any signals
     # noinspection PyTypeChecker
@@ -36,14 +39,14 @@ def assert_model_property_signals_on_mutation(
         fn_set_same(model, prop_name)
 
     # Assert: model is still not dirty
-    assert not model.dirty
+    assert not model.dirty, "Model should not be dirty after setting the same value, but it is."
 
     # Assert: setting a different value should emit signals
     with qtbot.waitSignals([on_changed_signal, on_field_signal], timeout=1000):
         fn_set_new(model, prop_name)
 
     # Assert: model is now dirty
-    assert model.dirty
+    assert model.dirty, "Model should be dirty after setting a new value, but it is not."
 
     # Act: clean the model
     model.mark_clean()
@@ -66,7 +69,9 @@ def assert_model_property_getter_setter_and_signal(
     """
 
     # Assert: initial value is as expected
-    assert getattr(model, prop_name) == initial_value
+    actual_value = getattr(model, prop_name)
+    assert getattr(model, prop_name) == initial_value,\
+        f"Expected initial value of {prop_name} to be {initial_value}, but got {actual_value}"
 
     assert_model_property_signals_on_mutation(
         qtbot,
