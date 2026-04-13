@@ -1,21 +1,25 @@
+from pathlib import Path
+
 import pytest
 
-from preprocessor.core.model import LensCorrectionParams
+from preprocessor.core.model import PhotoData, ColorCorrectionParams, LensCorrectionParams, CropParams, MetadataData
+from preprocessor.core.type_corners import Corners
 
-class Test_LensCorrectionParams:
+
+class Test_PhotoData:
 
     fields_initial_new = [
-        ("camera_matrix", None, ((1000.0, 0.0, 512.0), (0.0, 1000.0, 384.0), (0.0, 0.0, 1.0))),
-        ("coefficients", None, [0.01, -0.02, 0.0, 0.0]),
+        ("color_correction", None, ColorCorrectionParams()),
+        ("lens_correction", None, LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005])),
+        ("crop", None, CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0))))),
+        ("metadata", MetadataData(), MetadataData(partner="SZN", camera="EOS R5")),
     ]
 
     fields_invalid_errormsg = [
-        ("camera_matrix", "foo", "should be a valid tuple"),
-        ("camera_matrix", ((1000.0, 0.0), (0.0, 1000.0)), "Field required"),
-        ("coefficients", "foo", "should be a valid list"),
-        ("coefficients", [0.01, -0.02], "should have at least 4 items"),
-        ("coefficients", [0.01] * 15, "should have at most 14 items"),
-        ("coefficients", [0.01, float("nan"), 0.0, 0.0], "must not contain NaN"),
+        ("color_correction", "foo", "instance of ColorCorrectionParams"),
+        ("lens_correction", "foo", "instance of LensCorrectionParams"),
+        ("crop", "foo", "instance of CropParams"),
+        ("metadata", "foo", "instance of MetadataData"),
     ]
 
     @pytest.mark.parametrize("field_name, initial_value, new_value", fields_initial_new)
@@ -24,7 +28,10 @@ class Test_LensCorrectionParams:
     ) -> None:
         """Model properties should have working getters, setters, and change signals."""
         # Arrange: empty MetadataModel
-        model = LensCorrectionParams()
+        model = PhotoData(
+            image_id="test_photo",
+            image_path=Path("photos/test_photo.jpg").resolve(),
+        )
 
         # Assert: the initial value is as expected
         actual_value = getattr(model, field_name)
@@ -32,11 +39,10 @@ class Test_LensCorrectionParams:
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
 
         # Act: update the model
-        # We cannot use model_copy() here because it doesn't validate
-        new_model = LensCorrectionParams.model_validate({**model.model_dump(), field_name: new_value})
+        setattr(model, field_name, new_value)
 
         # Assert: the value is updated
-        actual_value = getattr(new_model, field_name)
+        actual_value = getattr(model, field_name)
         assert actual_value == new_value, \
             f"After setting, value of {field_name} should be {new_value}, but got {actual_value}"
 
@@ -44,10 +50,12 @@ class Test_LensCorrectionParams:
     def test_properties_validation(self, field_name: str, invalid_value: object, error_desc: str) -> None:
         """Model properties should enforce type validation and constraints when set."""
         # Arrange
-        model = LensCorrectionParams()
+        model = PhotoData(
+            image_id="test_photo",
+            image_path=Path("photos/test_photo.jpg").resolve(),
+        )
 
         # Assert: updating the model with an invalid value should fail
         with pytest.raises(ValueError, match=error_desc):
-            # We cannot use model_copy() here because it doesn't validate
-            LensCorrectionParams.model_validate({**model.model_dump(), field_name: invalid_value})
+            setattr(model, field_name, invalid_value)
 

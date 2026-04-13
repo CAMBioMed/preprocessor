@@ -10,7 +10,7 @@ class Test_CropParams:
         ("corners", Corners(()), Corners(((0.1, 0.2), (1.1, 0.2), (1.1, 1.2), (0.1, 1.2)))),
     ]
 
-    fields_name_invalid = [
+    fields_invalid_errormsg = [
         ("corners", "foo", "should be a valid tuple"),
         ("corners", None, "should be a valid tuple"),
     ]
@@ -21,30 +21,30 @@ class Test_CropParams:
     ) -> None:
         """Model properties should have working getters, setters, and change signals."""
         # Arrange: empty MetadataModel
-        params = CropParams()
+        model = CropParams()
 
         # Assert: the initial value is as expected
-        actual_value = getattr(params, field_name)
+        actual_value = getattr(model, field_name)
         assert actual_value == initial_value, \
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
 
         # Act: update the model
         # We cannot use model_copy() here because it doesn't validate
-        new_params = CropParams.model_validate({**params.model_dump(), field_name: new_value})
+        new_model = CropParams.model_validate({**model.model_dump(), field_name: new_value})
 
         # Assert: the value is updated
-        actual_value = getattr(new_params, field_name)
+        actual_value = getattr(new_model, field_name)
         assert actual_value == new_value, \
             f"After setting, value of {field_name} should be {new_value}, but got {actual_value}"
 
-    @pytest.mark.parametrize("field_name, invalid_value, error_desc", fields_name_invalid)
+    @pytest.mark.parametrize("field_name, invalid_value, error_desc", fields_invalid_errormsg)
     def test_properties_validation(self, field_name: str, invalid_value: object, error_desc: str) -> None:
         """Model properties should enforce type validation and constraints when set."""
         # Arrange
-        params = CropParams()
+        model = CropParams()
 
         # Assert: updating the model with an invalid value should fail
         with pytest.raises(ValueError, match=error_desc):
             # We cannot use model_copy() here because it doesn't validate
-            CropParams.model_validate({**params.model_dump(), field_name: invalid_value})
+            CropParams.model_validate({**model.model_dump(), field_name: invalid_value})
 
