@@ -1,4 +1,5 @@
 import textwrap
+from datetime import datetime
 from pathlib import Path
 from typing import override, ClassVar
 
@@ -258,3 +259,64 @@ class Test_ProjectData(PydanticModelTestBase):
         expected_value: object,
     ) -> None:
         self.assert_property_normalization(field_name, initial_value, input_value, expected_value)
+
+    def test_write_to_csv_file(self, tmp_path: Path) -> None:
+        # Arrange
+        project_dir = tmp_path / "project"
+        photos_dir = project_dir / "photos"  # Inside project dir
+        export_dir = tmp_path / "export"  # Outside project dir
+        project = ProjectData(
+            photos=[
+                PhotoData(
+                    image_id="photo1",
+                    image_path=photos_dir / "photo1.jpg",
+                    metadata=MetadataData(
+                        filename="testfile1.jpg",
+                        partner="SZN",
+                        camera="EOS R5",
+                    ),
+                ),
+                PhotoData(
+                    image_id="photo2",
+                    image_path=photos_dir / "photo2.jpg",
+                    metadata=MetadataData(
+                        filename="testfile2.jpg",
+                        date=datetime.fromisoformat("2023-09-01T12:00:00Z"),
+                        partner="Aegean",
+                        area="Crete",
+                        site="Site1",
+                        season="Fall",
+                        transect="Transect1",
+                        height=100,
+                        latitude=35.0,
+                        longitude=25.0,
+                        depth="10m",
+                        camera="Nikon D850",
+                        photographer="John Doe",
+                        water_quality="Clear",
+                        strobes="Strobe1",
+                        framing="Framing1",
+                        white_balance_card="Card1",
+                        comments="No comments",
+                    )
+                )
+            ],
+            photos_path=photos_dir,
+            export_path=export_dir,
+        )
+
+        # Act
+        csv_file = tmp_path / "output.csv"
+        project.write_to_csv_file(csv_file)
+
+        # Assert
+        assert csv_file.exists(), "CSV file should be created"
+        with csv_file.open("r", encoding="utf-8") as f:
+            content = f.read()
+        expected_content = textwrap.dedent("""\
+        Name,Date,Partner,Area,Site,Season,Transect,Height (cm),Latitude,Longitude,Depth,Camera,Photographer,Water quality,Strobes,Framing gear used,White balance card,Comments
+        testfile1.jpg,,SZN,,,,,,,,,EOS R5,,,,,,
+        testfile2.jpg,2023-09-01,Aegean,Crete,Site1,Fall,Transect1,100,35.0,25.0,10m,Nikon D850,John Doe,Clear,Strobe1,Framing1,Card1,No comments
+        """)
+        assert content == expected_content
+

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic import BaseModel, ConfigDict
 
 from datetime import datetime
@@ -57,3 +59,52 @@ class MetadataData(BaseModel, validate_assignment=True):
                 return None
             return v.strip()
         return v
+
+    @staticmethod
+    def csv_headers() -> list[str]:
+        """Return the CSV headers for the metadata fields."""
+        return [
+            'Name',
+            "Date",
+            # Aux fields:
+            'Partner',
+            'Area',
+            'Site',
+            'Season',
+            'Transect',
+            # Fixed fields:
+            'Height (cm)',
+            'Latitude',
+            'Longitude',
+            'Depth',
+            'Camera',
+            'Photographer',
+            'Water quality',
+            'Strobes',
+            'Framing gear used',
+            'White balance card',
+            'Comments',
+        ]
+
+    def csv_row(self) -> list[str]:
+        """Return the CSV row for this metadata."""
+        return [
+            self.filename or "", # TODO: This should depend on the metadata fields and where this photo is in the list
+            self.date.date().isoformat() if self.date else "",
+            self.partner or "",
+            self.area or "",
+            self.site or "",
+            self.season or "",
+            self.transect or "",
+            str(self.height) if self.height is not None else "",
+            str(self.latitude) if self.latitude is not None else "",
+            str(self.longitude) if self.longitude is not None else "",
+            self.depth or "",
+            self.camera or "",
+            self.photographer or "",
+            self.water_quality or "",
+            self.strobes or "",
+            self.framing or "",
+            self.white_balance_card or "",
+            self.comments or "",
+        ]

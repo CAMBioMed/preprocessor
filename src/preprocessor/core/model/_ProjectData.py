@@ -1,8 +1,9 @@
+import csv
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from preprocessor.core.model import PhotoData
+from preprocessor.core.model import PhotoData, MetadataData
 from preprocessor.model.project_path import ProjectPath
 
 
@@ -94,3 +95,14 @@ class ProjectData(BaseModel, validate_assignment=True):
         json_str = self.to_json(project_dir=project_dir)
         with p.open("w", encoding="utf-8") as fh:
             fh.write(json_str)
+
+
+    def write_to_csv_file(self, file: Path) -> None:
+        """Write the metadata to a CSV file."""
+        file.parent.mkdir(parents=True, exist_ok=True)
+        with open(file, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, dialect="excel")
+            writer.writerow(MetadataData.csv_headers())
+            for photo in self.photos:
+                md = photo.metadata
+                writer.writerow(md.csv_row())
