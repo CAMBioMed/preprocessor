@@ -62,3 +62,35 @@ class ProjectData(BaseModel, validate_assignment=True):
             context=context,
         )
         return ProjectData.model_validate(new_data)
+
+    @classmethod
+    def load_from_file(cls: type["ProjectData"], project_file: str | Path) -> "ProjectData":
+        """
+        Load project JSON from the given file path and apply via deserialize().
+
+        :param project_file: The file path to read the project JSON from.
+        :raises FileNotFoundError: If the specified file does not exist.
+        """
+        p = Path(project_file)
+        project_dir = p.parent.resolve() if p.parent else None
+        if not p.exists():
+            raise FileNotFoundError(str(p))
+        with p.open("r", encoding="utf-8") as fh:
+            json_str = fh.read()
+        return cls.from_json(json_str, project_dir = project_dir)
+
+    def save_to_file(self, project_file: str | Path) -> None:
+        """
+        Save the serialized project JSON to the given file path.
+        Parent directories will be created if necessary.
+
+        :param project_file: The file path to write the project JSON to.
+        """
+        p = Path(project_file)
+        project_dir = p.parent.resolve() if p.parent else None
+        if project_dir:
+            project_dir.mkdir(parents=True, exist_ok=True)
+        # Only then do we write out the changes
+        json_str = self.to_json(project_dir=project_dir)
+        with p.open("w", encoding="utf-8") as fh:
+            fh.write(json_str)
