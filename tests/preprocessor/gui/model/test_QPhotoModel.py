@@ -2,12 +2,18 @@ from pathlib import Path
 from typing import override
 
 import pytest
+from PySide6.QtWidgets import QApplication
 from pytestqt.qtbot import QtBot
 
 from preprocessor.core.model import PhotoData
 from preprocessor.gui.model import QPhotoModel
 from tests.preprocessor.core.model.test_PhotoData import Test_PhotoData
 from tests.preprocessor.gui.model.cls_QModelTestBase import QModelTestBase
+
+@pytest.fixture(autouse=True)
+def ensure_qapp(qapp: QApplication) -> QApplication:
+    # ensure a QApplication exists for tests that rely on it
+    return qapp
 
 
 class Test_QPhotoModel(QModelTestBase):
