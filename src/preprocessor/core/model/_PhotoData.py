@@ -20,13 +20,6 @@ class PhotoData(BaseModel, validate_assignment=True):
         extra="forbid",
     )
 
-    #######################
-    ## Schema properties ##
-    #######################
-
-    schema_version: int = Field(1, ge=1)
-    """The schema version."""
-
     ######################
     ## Fixed properties ##
     ######################

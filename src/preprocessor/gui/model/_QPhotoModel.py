@@ -10,7 +10,6 @@ from preprocessor.model.qmodel import QModel
 class QPhotoModel(QModel[PhotoData]):
     """The model for a single photo in the project, used for the GUI."""
 
-    on_schema_version_changed: Signal = Signal(int)
     on_image_id_changed: Signal = Signal(str)
     on_image_path_changed: Signal = Signal(Path)
     on_color_correction_changed: Signal = Signal(object)  # Emits ColorCorrectionParams | None
@@ -24,15 +23,6 @@ class QPhotoModel(QModel[PhotoData]):
     ######################
     ## Fixed properties ##
     ######################
-
-    @property
-    def schema_version(self) -> int:
-        """The schema version of the photo data."""
-        return self._data.schema_version
-
-    @schema_version.setter
-    def schema_version(self, value: int) -> None:
-        self._set_field("schema_version", value)
 
     @property
     def image_id(self) -> str:

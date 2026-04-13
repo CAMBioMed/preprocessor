@@ -41,7 +41,6 @@ def test_should_crop_successfully() -> None:
     br = (90.0, 90.0)
     corners = Corners((tl, tr, bl, br))
     params = PhotoData(
-        schema_version=1,
         image_path=image_path,
         image_id=image_id,
         color_correction=None,
@@ -82,7 +81,6 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
     image_path = Path("/tmp/img.jpg")
     image_id = "id"
     params = PhotoData(
-        schema_version=1,
         image_path=image_path,
         image_id=image_id,
         color_correction=None,
@@ -117,7 +115,6 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
     image_path = Path("/tmp/img2.jpg")
     image_id = "id2"
     params = PhotoData(
-        schema_version=1,
         image_path=image_path,
         image_id=image_id,
         color_correction=None,
@@ -154,7 +151,6 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     # Create 4 corners but with a negative coordinate to make them invalid per Corners.ordered()
     bad_corners = Corners(((-1.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
     params = PhotoData(
-        schema_version=1,
         image_path=image_path,
         image_id=image_id,
         color_correction=None,
@@ -196,7 +192,6 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
     br = (45.0, 45.0)
     corners = Corners((tl, tr, bl, br))
     params = PhotoData(
-        schema_version=1,
         image_path=image_path,
         image_id=image_id,
         color_correction=None,
