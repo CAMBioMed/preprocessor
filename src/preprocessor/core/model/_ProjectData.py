@@ -1,17 +1,9 @@
-from typing import Annotated
+from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 from preprocessor.core.model import PhotoData
-from preprocessor.core.model._MetadataData import MetadataData
-from preprocessor.core.model._ColorCorrectionParams import ColorCorrectionParams
-from preprocessor.core.model._LensCorrectionParams import LensCorrectionParams
-from preprocessor.core.model._CropParams import CropParams
-from preprocessor.core.type_corners import Corners
-from preprocessor.core.types import LensVector, CameraMatrix
 from preprocessor.model.project_path import ProjectPath
-
-
 
 
 class ProjectData(BaseModel, validate_assignment=True):
@@ -20,13 +12,6 @@ class ProjectData(BaseModel, validate_assignment=True):
     model_config = ConfigDict(
         extra="forbid",
     )
-
-    #######################
-    ## Schema properties ##
-    #######################
-
-    schema_version: int = Field(default=2, ge=2)
-    """The schema version."""
 
     ######################
     ## Fixed properties ##
@@ -38,3 +23,39 @@ class ProjectData(BaseModel, validate_assignment=True):
     """The file path from which photos were last added, or None if not set."""
     export_path: ProjectPath | None = None
     """The file path where the photos will be exported to, or None if not set."""
+
+    ##################
+    ## IO functions ##
+    ##################
+
+    def to_json(self, project_dir: str | Path | None) -> str:
+        """
+        Save model data to a JSON string representation of the model.
+
+        :param project_dir: The project directory used to resolve relative paths in the model.
+        If None, relative paths are not resolved.
+        """
+        context = {"project_dir": Path(project_dir).resolve()} if project_dir is not None else {}
+        return self.model_dump_json(
+            context=context,
+            indent=2,
+            exclude_unset=True,
+            exclude_defaults=True,
+        )
+
+    @classmethod
+    def from_json(cls: type["ProjectData"], json_str: str, project_dir: str | Path | None) -> "ProjectData":
+        """
+        Load model data from a JSON string representation of the model.
+
+        :param json_str: The JSON string to parse into the model.
+        :param project_dir: The project directory used to resolve relative paths in the model.
+        If None, relative paths are not resolved.
+        :raises ValidationError: If the JSON data is invalid or incompatible with the model.
+        """
+        context = {"project_dir": Path(project_dir).resolve()} if project_dir is not None else {}
+        new_data = ProjectData.model_validate_json(
+            json_str,
+            context=context,
+        )
+        return ProjectData.model_validate(new_data)

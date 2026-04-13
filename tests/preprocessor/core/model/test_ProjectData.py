@@ -1,3 +1,4 @@
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,134 @@ class Test_ProjectData:
 
         # Assert: the photos property is updated correctly
         assert new_model.photos == new_photos, f"After setting, photos should be {new_photos}, but got {new_model.photos}"
+
+    def test_to_json(self, tmp_path: Path) -> None:
+        """to_json() should return a JSON string representation of the model.
+
+        It should make absolute paths relative to the project directory.
+        """
+        # Arrange
+        project_dir = tmp_path / "project"
+        photos_dir = project_dir / "photos"  # Inside project dir
+        export_dir = tmp_path / "export"  # Outside project dir
+        model = ProjectData(
+            photos=[
+                PhotoData(
+                    image_id="photo1",
+                    image_path=photos_dir / "photo1.jpg",
+                    color_correction=ColorCorrectionParams(),
+                    lens_correction=LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
+                    crop=CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
+                    metadata=MetadataData(partner="SZN", camera="EOS R5"),
+                ),
+            ],
+            photos_path=photos_dir,
+            export_path=export_dir,
+        )
+
+        # Act
+        json_str = model.to_json(project_dir=project_dir)
+
+        # Assert: the JSON string is not empty and contains expected keys
+        assert json_str == textwrap.dedent(f"""\
+        {{
+          "photos": [
+            {{
+              "image_id": "photo1",
+              "image_path": "photos/photo1.jpg",
+              "color_correction": {{}},
+              "lens_correction": {{
+                "coefficients": [
+                  0.01,
+                  -0.02,
+                  0.001,
+                  0.0005
+                ]
+              }},
+              "crop": {{
+                "corners": [
+                  [
+                    1.0,
+                    2.0
+                  ],
+                  [
+                    3.0,
+                    4.0
+                  ]
+                ]
+              }},
+              "metadata": {{
+                "partner": "SZN",
+                "camera": "EOS R5"
+              }}
+            }}
+          ],
+          "photos_path": "photos",
+          "export_path": "{str(export_dir)}"
+        }}""")
+
+    def test_from_json(self, tmp_path: Path) -> None:
+        """from_json() should create a model instance from a JSON string representation of the model."""
+        # Arrange
+        project_dir = tmp_path / "project"
+        photos_dir = project_dir / "photos"  # Inside project dir
+        export_dir = tmp_path / "export"  # Outside project dir
+        json_str = textwrap.dedent(f"""\
+        {{
+          "photos": [
+            {{
+              "image_id": "photo1",
+              "image_path": "photos/photo1.jpg",
+              "color_correction": {{}},
+              "lens_correction": {{
+                "coefficients": [
+                  0.01,
+                  -0.02,
+                  0.001,
+                  0.0005
+                ]
+              }},
+              "crop": {{
+                "corners": [
+                  [
+                    1.0,
+                    2.0
+                  ],
+                  [
+                    3.0,
+                    4.0
+                  ]
+                ]
+              }},
+              "metadata": {{
+                "partner": "SZN",
+                "camera": "EOS R5"
+              }}
+            }}
+          ],
+          "photos_path": "photos",
+          "export_path": "{str(export_dir)}"
+        }}""")
+
+        # Act
+        model = ProjectData.from_json(json_str=json_str, project_dir=project_dir)
+
+        # Assert
+        assert model == ProjectData(
+            photos=[
+                PhotoData(
+                    image_id="photo1",
+                    image_path=photos_dir / "photo1.jpg",
+                    color_correction=ColorCorrectionParams(),
+                    lens_correction=LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
+                    crop=CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
+                    metadata=MetadataData(partner="SZN", camera="EOS R5"),
+                ),
+            ],
+            photos_path=photos_dir,
+            export_path=export_dir,
+        )
+
 
     fields_initial_new = [
         ("photos_path", None, Path("photos").resolve()),
