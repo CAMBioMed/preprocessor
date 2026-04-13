@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import override
+from typing import override, ClassVar
 
 import pytest
 
@@ -9,12 +9,12 @@ from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticMode
 
 class Test_PhotoData(PydanticModelTestBase):
 
-    fields_and_values: dict[str, tuple[
+    fields_and_values: ClassVar[dict[str, tuple[
         object | None,
         list[object],
         list[tuple[object, object]],
         list[object],
-    ]] = {
+    ]]] = {
         "color_correction": (
             # Initial
             None,

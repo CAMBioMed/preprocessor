@@ -3,11 +3,11 @@ import pytest
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, ClassVar
 
-from preprocessor.core.model import MetadataData
+from pydantic import BaseModel
 
 
 # Make this base test generic over the pydantic model type being tested.
-ModelT = TypeVar("ModelT", bound=MetadataData)
+ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 class PydanticModelTestBase(ABC, Generic[ModelT]):

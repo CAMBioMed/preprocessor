@@ -1,6 +1,6 @@
 import textwrap
 from pathlib import Path
-from typing import override
+from typing import override, ClassVar
 
 import pytest
 
@@ -166,12 +166,12 @@ class Test_ProjectData(PydanticModelTestBase):
             export_path=export_dir,
         )
 
-    fields_and_values: dict[str, tuple[
+    fields_and_values: ClassVar[dict[str, tuple[
         object | None,
         list[object],
         list[tuple[object, object]],
         list[object],
-    ]] = {
+    ]]] = {
         "photos_path": (
             # Initial
             None,
