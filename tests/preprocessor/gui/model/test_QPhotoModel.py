@@ -15,7 +15,7 @@ class Test_QPhotoModel(QModelTestBase):
 
     @override
     def create_model(self) -> QPhotoModel:
-        """Helper to create a test PhotoModel with default values."""
+        """Helper to create a test QPhotoModel with default values."""
         return QPhotoModel(
             PhotoData(
                 image_path=Path("img_001.jpg").resolve(),
