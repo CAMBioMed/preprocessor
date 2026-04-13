@@ -1,14 +1,21 @@
 from datetime import datetime, timezone, timedelta
+from typing import ClassVar, override
 
 import pytest
 
 from preprocessor.core.model import MetadataData
 from preprocessor.core.type_corners import Corners
+from tests.preprocessor.core.model.cls_ModelTestBase import ModelBaseTest
 
 
-class Test_MetadataData:
+class Test_MetadataData(ModelBaseTest):
 
-    fields_and_values: dict[str, tuple[object | None, list[object], list[tuple[object, object]], list[object]]] = {
+    fields_and_values: dict[str, tuple[
+        object | None,
+        list[object],
+        list[tuple[object, object]],
+        list[object],
+    ]] = {
         "filename": (
             # Initial
             None,
@@ -359,15 +366,16 @@ class Test_MetadataData:
     - a list of invalid values
     """
 
+    @override
     def create_model(self) -> MetadataData:
         return MetadataData()
 
+    @override
     def update_model(self, model: MetadataData, field_name: str, new_value: object) -> MetadataData:
-        """Updates the specified field of the specified model and returns the new model
-        (or the same model if the update was in-place)."""
         # We cannot use model_copy() here because it doesn't validate
         new_model = MetadataData.model_validate({**model.model_dump(), field_name: new_value})
         return new_model
+
 
     @pytest.mark.parametrize(
         "field_name, initial_value, new_value",
@@ -379,22 +387,7 @@ class Test_MetadataData:
         initial_value: object,
         new_value: object,
     ) -> None:
-        """Model properties can be set to a valid value."""
-        # Arrange: empty model
-        model = self.create_model()
-
-        # Assert: the initial value is as expected
-        actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
-            f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
-
-        # Act: update the model
-        new_model = self.update_model(model, field_name, new_value)
-
-        # Assert: the value is updated
-        actual_value = getattr(new_model, field_name)
-        assert actual_value == new_value, \
-            f"After setting, value of {field_name} should be {new_value}, but got {actual_value}"
+        self.assert_property_valid_value(field_name, initial_value, new_value)
 
     @pytest.mark.parametrize(
         "field_name, initial_value, invalid_value",
@@ -406,18 +399,7 @@ class Test_MetadataData:
         initial_value: object,
         invalid_value: object,
     ) -> None:
-        """Model properties should enforce type validation and constraints when set."""
-        # Arrange: empty model
-        model = self.create_model()
-
-        # Assert: the initial value is as expected
-        actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
-            f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
-
-        # Assert: updating the model with an invalid value should fail
-        with pytest.raises(ValueError):
-            self.update_model(model, field_name, invalid_value)
+        self.assert_property_invalid_value(field_name, initial_value, invalid_value)
 
     @pytest.mark.parametrize(
         "field_name, initial_value, input_value, expected_value",
@@ -430,17 +412,4 @@ class Test_MetadataData:
         input_value: object,
         expected_value: object,
     ) -> None:
-        """Model properties should normalize (trimming, empty to None) on assignment."""
-        # Arrange: empty model
-        model = self.create_model()
-
-        # Assert: the initial value is as expected
-        actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
-            f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
-
-        # Act: set the value
-        new_model = self.update_model(model, field_name, input_value)
-
-        # Assert: the value is normalized as expected
-        assert getattr(new_model, field_name) == expected_value
+        self.assert_property_normalization(field_name, initial_value, input_value, expected_value)

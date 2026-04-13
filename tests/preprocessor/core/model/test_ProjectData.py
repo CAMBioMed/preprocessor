@@ -1,13 +1,15 @@
 import textwrap
 from pathlib import Path
+from typing import override
 
 import pytest
 
 from preprocessor.core.model import ProjectData, PhotoData, ColorCorrectionParams, LensCorrectionParams, CropParams, MetadataData
 from preprocessor.core.type_corners import Corners
+from tests.preprocessor.core.model.cls_ModelTestBase import ModelBaseTest
 
 
-class Test_ProjectData:
+class Test_ProjectData(ModelBaseTest):
 
     def test_photos_property(self) -> None:
         """The photos property should be a list of PhotoData objects."""
@@ -164,45 +166,95 @@ class Test_ProjectData:
             export_path=export_dir,
         )
 
+    fields_and_values: dict[str, tuple[
+        object | None,
+        list[object],
+        list[tuple[object, object]],
+        list[object],
+    ]] = {
+        "photos_path": (
+            # Initial
+            None,
+            # Valid
+            [
+                Path("photos").resolve(),  # Absolute path
+            ],
+            # Normalized
+            [
+                (Path("photos/subdir"), Path("photos/subdir").resolve()),  # Relative path to absolute path
+            ],
+            # Invalid
+            [
+                3,  # Not a path
+            ]
+        ),
+        "export_path": (
+            # Initial
+            None,
+            # Valid
+            [
+                Path("export").resolve(),  # Absolute path
+            ],
+            # Normalized
+            [
+                (Path("export/subdir"), Path("export/subdir").resolve()),  # Relative path to absolute path
+            ],
+            # Invalid
+            [
+                6,  # Not a path
+            ]
+        ),
+    }
+    """Map for each field name to:
+    - the default value,
+    - a list of valid values,
+    - a list of pairs: unnormalized value to normalized value,
+    - a list of invalid values
+    """
 
-    fields_initial_new = [
-        ("photos_path", None, Path("photos").resolve()),
-        ("export_path", None, Path("export").resolve()),
-    ]
+    @override
+    def create_model(self) -> ProjectData:
+        return ProjectData()
 
-    fields_invalid_errormsg = [
-        ("photos_path", 3, "not a valid path"),
-        ("export_path", 6, "not a valid path"),
-    ]
-
-    @pytest.mark.parametrize("field_name, initial_value, new_value", fields_initial_new)
-    def test_properties_getter_setter_and_signals(
-        self, field_name: str, initial_value: object, new_value: object
-    ) -> None:
-        """Model properties should have working getters, setters, and change signals."""
-        # Arrange: empty MetadataModel
-        model = ProjectData()
-
-        # Assert: the initial value is as expected
-        actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
-            f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
-
-        # Act: update the model
+    @override
+    def update_model(self, model: ProjectData, field_name: str, new_value: object) -> ProjectData:
         setattr(model, field_name, new_value)
+        return model
 
-        # Assert: the value is updated
-        actual_value = getattr(model, field_name)
-        assert actual_value == new_value, \
-            f"After setting, value of {field_name} should be {new_value}, but got {actual_value}"
 
-    @pytest.mark.parametrize("field_name, invalid_value, error_desc", fields_invalid_errormsg)
-    def test_properties_validation(self, field_name: str, invalid_value: object, error_desc: str) -> None:
-        """Model properties should enforce type validation and constraints when set."""
-        # Arrange
-        model = ProjectData()
+    @pytest.mark.parametrize(
+        "field_name, initial_value, new_value",
+        [(n, v, vv) for n, (v, vvs, _, _) in fields_and_values.items() for vv in vvs],
+    )
+    def test_property_valid_value(
+        self,
+        field_name: str,
+        initial_value: object,
+        new_value: object,
+    ) -> None:
+        self.assert_property_valid_value(field_name, initial_value, new_value)
 
-        # Assert: updating the model with an invalid value should fail
-        with pytest.raises(ValueError, match=error_desc):
-            setattr(model, field_name, invalid_value)
+    @pytest.mark.parametrize(
+        "field_name, initial_value, invalid_value",
+        [(n, v, iv) for n, (v, _, _, ivs) in fields_and_values.items() for iv in ivs],
+    )
+    def test_property_invalid_value(
+        self,
+        field_name: str,
+        initial_value: object,
+        invalid_value: object,
+    ) -> None:
+        self.assert_property_invalid_value(field_name, initial_value, invalid_value)
 
+    @pytest.mark.parametrize(
+        "field_name, initial_value, input_value, expected_value",
+        [(n, v, lv, rv) for n, (v, _, nvs, _) in fields_and_values.items() for (lv, rv) in nvs],
+    )
+    def test_property_normalization(
+        self,
+        field_name: str,
+        initial_value: object,
+        input_value: object,
+        expected_value: object,
+    ) -> None:
+        self.assert_property_normalization(field_name, initial_value, input_value, expected_value)

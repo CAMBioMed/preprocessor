@@ -11,24 +11,6 @@ ModelT = TypeVar("ModelT", bound=MetadataData)
 
 
 class ModelBaseTest(ABC, Generic[ModelT]):
-    fields_and_values: ClassVar[dict[str, tuple[
-        object | None,
-        list[object],
-        list[tuple[object, object]],
-        list[object],
-    ]]]
-    """Subclasses must provide this mapping. For each field name the tuple contains:
-    - the default value,
-    - a list of valid values,
-    - a list of pairs: unnormalized value to normalized value,
-    - a list of invalid values
-    """
-
-    def __init_subclass__(cls, **kwargs) -> None:
-        super().__init_subclass__(**kwargs)
-        # Ensure subclass provided the required mapping as a class attribute
-        if "fields_and_values" not in cls.__dict__:
-            raise TypeError("Subclasses of ModelBaseTest must define a class-level 'fields_and_values' mapping")
 
     @abstractmethod
     def create_model(self) -> ModelT:
@@ -40,11 +22,7 @@ class ModelBaseTest(ABC, Generic[ModelT]):
         (or the same model if the update was in-place). Implementations are responsible
         for performing validation as the concrete model would."""
 
-    @pytest.mark.parametrize(
-        "field_name, initial_value, new_value",
-        [(n, v, vv) for n, (v, vvs, _, _) in fields_and_values.items() for vv in vvs],
-    )
-    def test_property_valid_value(
+    def assert_property_valid_value(
         self,
         field_name: str,
         initial_value: object,
@@ -67,11 +45,7 @@ class ModelBaseTest(ABC, Generic[ModelT]):
         assert actual_value == new_value, \
             f"After setting, value of {field_name} should be {new_value}, but got {actual_value}"
 
-    @pytest.mark.parametrize(
-        "field_name, initial_value, invalid_value",
-        [(n, v, iv) for n, (v, _, _, ivs) in fields_and_values.items() for iv in ivs],
-    )
-    def test_property_invalid_value(
+    def assert_property_invalid_value(
         self,
         field_name: str,
         initial_value: object,
@@ -90,11 +64,7 @@ class ModelBaseTest(ABC, Generic[ModelT]):
         with pytest.raises(ValueError):
             self.update_model(model, field_name, invalid_value)
 
-    @pytest.mark.parametrize(
-        "field_name, initial_value, input_value, expected_value",
-        [(n, v, lv, rv) for n, (v, _, nvs, _) in fields_and_values.items() for (lv, rv) in nvs],
-    )
-    def test_property_normalization(
+    def assert_property_normalization(
         self,
         field_name: str,
         initial_value: object,
