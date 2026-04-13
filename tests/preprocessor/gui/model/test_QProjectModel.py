@@ -18,8 +18,7 @@ class Test_QProjectModel(QModelTestBase):
     def create_model(self) -> QProjectModel:
         """Helper to create a test QProjectModel with default values."""
         return QProjectModel(
-            project_file=Path("project/proj.json").resolve(),
-            data=ProjectData(),
+            ProjectData(),
         )
 
     def test_project_file_property_getter_setter_and_signal(self, qtbot: QtBot, tmp_path: Path) -> None:
@@ -27,7 +26,7 @@ class Test_QProjectModel(QModelTestBase):
             # Arrange
             project_dir = tmp_path / "project"
             project_file = project_dir / "proj.json"
-            model = QProjectModel(project_file=project_file)
+            model = QProjectModel(ProjectData(project_file=project_file))
 
             # Act
             self.assert_model_property_getter_setter_and_signal(
@@ -43,7 +42,7 @@ class Test_QProjectModel(QModelTestBase):
             # Arrange
             project_dir = tmp_path / "project"
             project_file = project_dir / "proj.json"
-            project_model = QProjectModel(project_file=project_file)
+            project_model = QProjectModel()
 
             # Assert initial state
             assert isinstance(project_model.photos, QListModel)

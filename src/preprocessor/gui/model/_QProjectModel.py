@@ -18,14 +18,12 @@ class QProjectModel(QModel[ProjectData]):
     on_photos_path_changed: Signal = Signal(object)  # Emits Path | None
     on_export_path_changed: Signal = Signal(object)  # Emits Path | None
 
-    _project_file: Path
     _photos: QListModel[QPhotoModel]
     _connected_photos: set[QPhotoModel]
 
-    def __init__(self, project_file: Path, data: ProjectData | dict[str, Any] | None = None) -> None:
+    def __init__(self, data: ProjectData | dict[str, Any] | None = None) -> None:
         super().__init__(model_cls=ProjectData, data=data)
 
-        self._project_file = project_file
         # Create QListModel containers for interactive use
         self._photos = QListModel[QPhotoModel](parent=self)
         # Track which model instances we've connected signal handlers to
@@ -40,21 +38,15 @@ class QProjectModel(QModel[ProjectData]):
     ################
 
     @property
-    def project_file(self) -> Path:
-        """
-        The file path where the project is or will be saved.
-
+    def project_file(self) -> Path | None:
+        """The file path where the project is or will be saved, or None if not set.
         This property is not serialized/deserialized.
         """
-        return self._project_file
+        return self._data.project_file
 
     @project_file.setter
-    def project_file(self, path: Path) -> None:
-        if self._project_file != path:
-            self._project_file = path
-            self._set_dirty(True)
-            self.on_project_file_changed.emit(path)
-            self.on_changed.emit()
+    def project_file(self, path: Path | None) -> None:
+        self._set_field("project_file", path)
 
     @property
     def photos(self) -> QListModel[QPhotoModel]:

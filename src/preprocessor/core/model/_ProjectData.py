@@ -13,9 +13,12 @@ class ProjectData(BaseModel, validate_assignment=True):
         extra="forbid",
     )
 
-    ######################
-    ## Fixed properties ##
-    ######################
+    project_file: Path | None = Field(default=None, exclude=True)
+    """The file path where the project is or will be saved, or None. This field is not serialized/deserialized."""
+
+    ################
+    ## Properties ##
+    ################
 
     photos: list[PhotoData] = []
     """The list of photos in the project."""
