@@ -6,10 +6,10 @@ import pytest
 
 from preprocessor.core.model import ProjectData, PhotoData, ColorCorrectionParams, LensCorrectionParams, CropParams, MetadataData
 from preprocessor.core.type_corners import Corners
-from tests.preprocessor.core.model.cls_ModelTestBase import ModelBaseTest
+from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
-class Test_ProjectData(ModelBaseTest):
+class Test_ProjectData(PydanticModelTestBase):
 
     def test_photos_property(self) -> None:
         """The photos property should be a list of PhotoData objects."""

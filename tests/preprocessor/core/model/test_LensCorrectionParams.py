@@ -3,10 +3,10 @@ from typing import override
 import pytest
 
 from preprocessor.core.model import LensCorrectionParams
-from tests.preprocessor.core.model.cls_ModelTestBase import ModelBaseTest
+from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
-class Test_LensCorrectionParams(ModelBaseTest):
+class Test_LensCorrectionParams(PydanticModelTestBase):
 
     fields_and_values: dict[str, tuple[
         object | None,

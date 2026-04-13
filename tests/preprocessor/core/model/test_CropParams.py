@@ -4,10 +4,10 @@ import pytest
 
 from preprocessor.core.model import LensCorrectionParams, CropParams
 from preprocessor.core.type_corners import Corners
-from tests.preprocessor.core.model.cls_ModelTestBase import ModelBaseTest
+from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
-class Test_CropParams(ModelBaseTest):
+class Test_CropParams(PydanticModelTestBase):
 
 
     fields_and_values: dict[str, tuple[

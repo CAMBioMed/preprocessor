@@ -10,7 +10,7 @@ from preprocessor.core.model import MetadataData
 ModelT = TypeVar("ModelT", bound=MetadataData)
 
 
-class ModelBaseTest(ABC, Generic[ModelT]):
+class PydanticModelTestBase(ABC, Generic[ModelT]):
 
     @abstractmethod
     def create_model(self) -> ModelT:
