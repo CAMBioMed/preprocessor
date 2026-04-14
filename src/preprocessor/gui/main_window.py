@@ -24,7 +24,7 @@ from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.ui_main_window import Ui_MainWindow
 from preprocessor.gui.utils import icon_from_resource
 from preprocessor.gui.model._QApplicationState import QApplicationState
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.detect_quadrat import detect_quadrat
 from preprocessor.processing.load_image import load_image
@@ -298,7 +298,7 @@ class MainWindow(QMainWindow):
         if paths:
             project.photos_path = Path(paths[0]).parent
 
-        # Use the shared AddPhotoJob implementation to create PhotoModel and extract EXIF in the background.
+        # Use the shared AddPhotoJob implementation to create QPhotoModel and extract EXIF in the background.
 
         # Helper QObject to perform the actual append on the main thread
         class _AppendHelper(QObject):
@@ -309,9 +309,9 @@ class MainWindow(QMainWindow):
                     return
                 photo_data = job.result
                 if photo_data is not None:
-                    # Note that we create the PhotoModel (a QObject) on the main thread,
+                    # Note that we create the QPhotoModel (a QObject) on the main thread,
                     # using the data produced by the background job. This is required.
-                    photo_model = PhotoModel(photo_data)
+                    photo_model = QPhotoModel(photo_data)
                     project.photos.append(photo_model)
 
         jobs: list[QJob] = []
@@ -326,19 +326,19 @@ class MainWindow(QMainWindow):
         dlg = ProgressDialog("Adding Photos", jobs, parent=self, run_in_thread=True)
         dlg.exec()
 
-    def _handle_remove_photos_action(self, selected: list[PhotoModel]) -> None:
+    def _handle_remove_photos_action(self, selected: list[QPhotoModel]) -> None:
         assert self.model.current_project is not None
         for photo in selected:
             self.model.current_project.photos.remove(photo)
 
-    def _handle_apply_to_selected_action(self, selected: list[PhotoModel]) -> None:
+    def _handle_apply_to_selected_action(self, selected: list[QPhotoModel]) -> None:
         """Handle the 'Apply to all' context menu action."""
         if not selected:
             return
         dialog = ApplyParametersDialog(self.model, selected, self)
         dialog.exec()
 
-    def _handle_edit_selected_metadata_action(self, selected: list[PhotoModel]) -> None:
+    def _handle_edit_selected_metadata_action(self, selected: list[QPhotoModel]) -> None:
         """Handle the 'Edit Metadata' context menu action."""
         if not selected:
             # No photos selected
@@ -362,7 +362,7 @@ class MainWindow(QMainWindow):
         self._update_window_title()
         self._update_thumbnails()
 
-    def _handle_photo_opened(self, item: PhotoModel | None) -> None:
+    def _handle_photo_opened(self, item: QPhotoModel | None) -> None:
         """Handle when the selected photo changes."""
         self.model.current_photo = item
 
@@ -373,7 +373,7 @@ class MainWindow(QMainWindow):
         self._update_thumbnails()
         self._handle_current_photo_changed(self.model.current_photo)
 
-    def _handle_current_photo_changed(self, photo: PhotoModel | None) -> None:
+    def _handle_current_photo_changed(self, photo: QPhotoModel | None) -> None:
         """Handle when the current photo changes."""
         self.central_widget.show_photo(photo, self.model.current_project)
         self.editor_dock.update_with_photo(photo)

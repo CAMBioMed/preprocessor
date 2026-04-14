@@ -61,8 +61,8 @@ def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: 
     image_path = Path("/nonexistent/path.jpg")
     image_id = "path"
     params = PhotoData(
-        original_filename=image_path,
         image_id=image_id,
+        original_filename=image_path,
     )
     messages = CollectingMessageReporter()
 
@@ -93,8 +93,8 @@ def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_p
     image_path = Path("/tmp/img.jpg")
     image_id = "img"
     params = PhotoData(
-        original_filename=image_path,
         image_id=image_id,
+        original_filename=image_path,
     )
     messages = CollectingMessageReporter()
 
@@ -134,8 +134,8 @@ def test_should_report_transform_failed_and_return_none_when_transform_raises(mo
     image_path = Path("/tmp/img2.jpg")
     image_id = "img2"
     params = PhotoData(
-        original_filename=image_path,
         image_id=image_id,
+        original_filename=image_path,
     )
     messages = CollectingMessageReporter()
 
@@ -161,8 +161,8 @@ def test_should_report_image_save_failed_and_return_none_when_save_raises(
     image_path = Path("/tmp/img3.jpg")
     image_id = "img3"
     params = PhotoData(
-        original_filename=image_path,
         image_id=image_id,
+        original_filename=image_path,
     )
     messages = CollectingMessageReporter()
 

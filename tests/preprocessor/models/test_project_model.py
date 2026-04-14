@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from PySide6.QtWidgets import QApplication
 
+from preprocessor.core.type_corners import Corners
 from preprocessor.gui.model import QModel
 
 
@@ -23,7 +24,8 @@ from pathlib import Path
 from pytestqt.qtbot import QtBot
 
 from preprocessor.model.project_model import ProjectModel, ProjectData
-from preprocessor.model.photo_model import PhotoModel, PhotoData
+from preprocessor.core.model import PhotoData, CropParams
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.core.model import MetadataData
 from preprocessor.gui.model import QListModel
 
@@ -39,11 +41,10 @@ class TestProjectModel:
         assert project_model.photos.parent() == project_model
 
         # Act: add a photo
-        photo0 = PhotoModel(
+        photo0 = QPhotoModel(
             PhotoData(
+                image_id="photo0",
                 original_filename=project_dir / "photo0.jpg",
-                width=1024,
-                height=768,
             )
         )
         assert photo0.parent() is None
@@ -65,12 +66,11 @@ class TestProjectModel:
         # Arrange
         project_dir = tmp_path / "project"
         project = ProjectModel(file=project_dir / "test1.pbproj")
-        p = PhotoModel(
+        p = QPhotoModel(
             PhotoData(
+                image_id="picA",
                 original_filename=project_dir / "picA.jpg",
-                width=1024,
-                height=768,
-                red_shift=(1.0, 2.0),
+                crop=CropParams(corners=Corners(((1.0, 2.0),))),
             )
         )
         project.photos.append(p)
@@ -80,18 +80,18 @@ class TestProjectModel:
 
         # Assert
         assert len(project.photos) == 1
-        assert isinstance(project.photos[0], PhotoModel)
+        assert isinstance(project.photos[0], QPhotoModel)
         assert project.photos[0].original_filename == project_dir / "picA.jpg"
-        assert project.photos[0].red_shift == (1.0, 2.0)
+        assert project.photos[0].crop.corners == Corners(((1.0, 2.0),))
 
         # Act: deserialize (valid version included)
         new_project1 = ProjectModel.read_from_json(project_dir / "test.pbproj", json_str)
 
         # Assert: one photo restored with properties
         assert len(new_project1.photos) == 1
-        assert isinstance(new_project1.photos[0], PhotoModel)
+        assert isinstance(new_project1.photos[0], QPhotoModel)
         assert new_project1.photos[0].original_filename == project_dir / "picA.jpg"
-        assert new_project1.photos[0].red_shift == (1.0, 2.0)
+        assert new_project1.photos[0].crop.corners == Corners(((1.0, 2.0),))
 
         # Act: clear photos via deserialize with None (include version)
         # fmt: off
@@ -109,12 +109,11 @@ class TestProjectModel:
         project_dir = tmp_path / "project"
         project_file = project_dir / "test.pbproj"
         project = ProjectModel(file=project_file)
-        p = PhotoModel(
+        p = QPhotoModel(
             PhotoData(
+                image_id="fileX",
                 original_filename=project_dir / "fileX.jpg",
-                width=1024,
-                height=768,
-                red_shift=(3.0, 4.0),
+                crop=CropParams(corners=Corners(((3.0, 4.0),))),
             )
         )
         project.photos.append(p)
@@ -133,9 +132,9 @@ class TestProjectModel:
         # Assert: loaded project restored and on_changed fired
         assert len(new_project2.photos) == 1
         loaded = new_project2.photos[0]
-        assert isinstance(loaded, PhotoModel)
+        assert isinstance(loaded, QPhotoModel)
         assert loaded.original_filename == project_dir / "fileX.jpg"
-        assert loaded.red_shift == (3.0, 4.0)
+        assert loaded.crop.corners == Corners(((3.0, 4.0),))
 
     def test_load_missing_file_raises(self) -> None:
         missing = Path("/nonexistent/path/does_not_exist.json")
@@ -161,11 +160,10 @@ class TestProjectModel:
         assert not project.dirty
 
         # Act: append a photo -> project becomes dirty
-        p = PhotoModel(
+        p = QPhotoModel(
             PhotoData(
+                image_id="original",
                 original_filename=project_dir / "original.jpg",
-                width=1024,
-                height=768,
             )
         )
         project.photos.append(p)
@@ -222,8 +220,11 @@ class TestProjectModel:
             model = ProjectModel(file=project_dir / "proj.json")
             assert len(model.photos) == 0
 
-            # Act / Assert: appending a PhotoModel should emit on_photos_changed and update serialized data
-            photo = PhotoModel(data={"original_filename": project_dir / "img.jpg", "width": 10, "height": 5})
+            # Act / Assert: appending a QPhotoModel should emit on_photos_changed and update serialized data
+            photo = QPhotoModel(data={
+                "image_id": "img",
+                "original_filename": project_dir / "img.jpg",
+            })
             with qtbot.waitSignal(model.on_photos_changed, timeout=1000) as blocker:
                 model.photos.append(photo)
 
@@ -233,10 +234,11 @@ class TestProjectModel:
 
             # Validator: a photo with invalid distortion_coefficients length should fail when reading from JSON
             bad_photo = {
+                "image_id": "a",
                 "original_filename": "a.jpg",
-                "width": 1,
-                "height": 1,
-                "distortion_coefficients": [1.0, 2.0, 3.0],
+                "lens_correction": {
+                    "coefficients": [1.0, 2.0, 3.0],
+                },
             }
             bad = {"model_version": ProjectData.SERIAL_VERSION, "photos": [bad_photo]}
             json_str = json.dumps(bad)

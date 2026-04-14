@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from preprocessor.gui.qjobs import QJob
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.processing.fix_perspective import fix_perspective
 from preprocessor.processing.load_image import load_image
 from preprocessor.processing.save_image import save_image
@@ -9,11 +9,11 @@ from preprocessor.processing.undistort import undistort_photo
 
 
 class ExportPhotoJob(QJob):
-    photo: PhotoModel
+    photo: QPhotoModel
     idx: int
     export_path: Path
 
-    def __init__(self, photo: PhotoModel, idx: int, export_path: Path) -> None:
+    def __init__(self, photo: QPhotoModel, idx: int, export_path: Path) -> None:
         super().__init__(name=photo.original_filename.name)
         self.photo = photo
         self.idx = idx
@@ -21,7 +21,8 @@ class ExportPhotoJob(QJob):
 
     def process(self) -> None:
         # Prepare names/paths
-        output_name = self.photo.output_filename(self.idx)
+        # TODO: Group first, then determine index
+        output_name = self.photo._data.determine_filename(self.idx)
         output_path = self.export_path / output_name
         original_name = self.photo.original_filename.name
         self.update_status(f"Exporting to {output_name}...")

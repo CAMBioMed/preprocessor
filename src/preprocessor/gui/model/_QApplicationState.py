@@ -3,7 +3,7 @@ from typing import cast
 
 from PySide6.QtCore import QObject, Signal, QSettings, QByteArray
 
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.model.project_model import ProjectModel
 
 
@@ -40,16 +40,16 @@ class QApplicationState(QObject):
             self.on_current_project_changed.emit(project)
             self.on_changed.emit()
 
-    _current_photo: PhotoModel | None = None
+    _current_photo: QPhotoModel | None = None
     on_current_photo_changed: Signal = Signal(object)  # https://stackoverflow.com/a/57810835/146622
 
     @property
-    def current_photo(self) -> PhotoModel | None:
+    def current_photo(self) -> QPhotoModel | None:
         """The current project model, or None if no project is open."""
         return self._current_photo
 
     @current_photo.setter
-    def current_photo(self, photo: PhotoModel | None) -> None:
+    def current_photo(self, photo: QPhotoModel | None) -> None:
         old_photo = self._current_photo
         if old_photo != photo:
             self._current_photo = photo

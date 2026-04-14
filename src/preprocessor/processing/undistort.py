@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from cv2.typing import MatLike
 
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.processing.load_image import load_image
 
 logger = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Deprecated: use LensCorrectTransform instead, which also returns a debug image with the distortion grid.
 def undistort_photo(
-    photo: PhotoModel,
+    photo: QPhotoModel,
     progress_callback: Callable[[float], None] | None = None,
     stop_checker: Callable[[], bool] | None = None,
 ) -> MatLike | None:

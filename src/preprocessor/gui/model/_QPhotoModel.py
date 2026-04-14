@@ -6,7 +6,7 @@ from PySide6.QtCore import Signal
 from preprocessor.core.model import PhotoData, MetadataData, ColorCorrectionParams, LensCorrectionParams, CropParams
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import Point2D, CameraMatrix
-from preprocessor.gui.model import QModel
+from preprocessor.gui.model._QModel import QModel
 
 
 class QPhotoModel(QModel[PhotoData]):
@@ -49,30 +49,30 @@ class QPhotoModel(QModel[PhotoData]):
     ######################
 
     @property
-    def color_correction(self) -> ColorCorrectionParams | None:
+    def color_correction(self) -> ColorCorrectionParams:
         """The parameters for color correction, or None to not perform color correction."""
         return self._data.color_correction
 
     @color_correction.setter
-    def color_correction(self, value: ColorCorrectionParams | None) -> None:
+    def color_correction(self, value: ColorCorrectionParams) -> None:
         self._set_field("color_correction", value)
 
     @property
-    def lens_correction(self) -> LensCorrectionParams | None:
+    def lens_correction(self) -> LensCorrectionParams:
         """The parameters for lens correction, or None to not perform lens correction."""
         return self._data.lens_correction
 
     @lens_correction.setter
-    def lens_correction(self, value: LensCorrectionParams | None) -> None:
+    def lens_correction(self, value: LensCorrectionParams) -> None:
         self._set_field("lens_correction", value)
 
     @property
-    def crop(self) -> CropParams | None:
+    def crop(self) -> CropParams:
         """The parameters for cropping the photo, or None to not crop the photo."""
         return self._data.crop
 
     @crop.setter
-    def crop(self, value: CropParams | None) -> None:
+    def crop(self, value: CropParams) -> None:
         self._set_field("crop", value)
 
     ##############

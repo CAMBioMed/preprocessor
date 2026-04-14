@@ -1,11 +1,11 @@
 from pathlib import Path
 
 from preprocessor.gui.qjobs import QJob
-from preprocessor.model.photo_model import PhotoData
+from preprocessor.core.model import PhotoData
 
 
 class AddPhotoJob(QJob):
-    """Background job that creates a PhotoModel from a file and extracts EXIF metadata.
+    """Background job that creates a QPhotoModel from a file and extracts EXIF metadata.
 
     This core logic is shared by the GUI and tests to avoid duplication.
     """
@@ -37,7 +37,10 @@ class AddPhotoJob(QJob):
             width, height = img.size
 
         # Create PhotoData (a pydantic BaseModel) which is safe to pass across threads
-        data = PhotoData(original_filename=self._filepath, width=width, height=height)
+        data = PhotoData(
+            image_id=self._filepath.stem,
+            original_filename=self._filepath,
+        )
 
         self.assert_not_cancelled()
 
@@ -52,7 +55,7 @@ class AddPhotoJob(QJob):
         md.latitude = exif_data.get("Latitude")
         md.longitude = exif_data.get("Longitude")
 
-        # Return the data object; the main thread will create the PhotoModel QObject
+        # Return the data object; the main thread will create the QPhotoModel QObject
         self.result = data
         # Report trivial progress/status
         self.update_progress(1, 1)

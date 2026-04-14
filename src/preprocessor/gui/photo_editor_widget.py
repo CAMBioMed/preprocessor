@@ -8,7 +8,7 @@ from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
 from PySide6.QtWidgets import QWidget
 from cv2.typing import MatLike
 
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.undistort import undistort_photo
 from preprocessor.processing.load_image import load_image
@@ -22,7 +22,7 @@ class PhotoEditorWidget(QWidget):
     """Current mouse position over the photo."""
     _pixmap: QPixmap | None
     """Current photo pixmap."""
-    _photo: PhotoModel | None
+    _photo: QPhotoModel | None
     """Current photo model."""
     _drag_index: int | None
     """Index of corner being dragged (None when not dragging)."""
@@ -60,7 +60,7 @@ class PhotoEditorWidget(QWidget):
         self._current_project = None
         self._current_undistort_worker = None
 
-    def show_photo(self, photo: PhotoModel | None, project: ProjectModel) -> None:
+    def show_photo(self, photo: QPhotoModel | None, project: ProjectModel) -> None:
         if photo is not None:
             original_path = photo.original_filename
             # Load a QPixmap for fast rendering and also attempt to load a cv image
@@ -184,7 +184,7 @@ class PhotoEditorWidget(QWidget):
 
     def _widget_points(self) -> list[QPoint]:
         """Return quadrat corners as widget QPoint instances (empty list if none).
-        The stored PhotoModel.quadrat_corners are interpreted as image coordinates
+        The stored QPhotoModel.quadrat_corners are interpreted as image coordinates
         and are scaled to match the rendered (scaled) pixmap.
         If an edit is in progress, return the working copy instead.
         """
@@ -195,7 +195,7 @@ class PhotoEditorWidget(QWidget):
         return [self._image_to_widget_point(x, y) for x, y in self._photo.quadrat_corners]
 
     def _write_widget_points(self, pts: list[QPoint] | None) -> None:
-        """Write a list of QPoint (or None) back into the PhotoModel as list of floats (image coords) or None.
+        """Write a list of QPoint (or None) back into the QPhotoModel as list of floats (image coords) or None.
         Converts the widget coordinates (mouse positions) into image coordinates using the current scale.
         """
         if self._photo is None:
@@ -384,7 +384,7 @@ class PhotoEditorWidget(QWidget):
         cy = sum(p.y() for p in pts) / len(pts)
         return sorted(pts, key=lambda p: math.atan2(p.y() - cy, p.x() - cx))
 
-    def undistort_photo_async(self, photo: PhotoModel, result_callback: Callable[[object], None] | None = None) -> None:
+    def undistort_photo_async(self, photo: QPhotoModel, result_callback: Callable[[object], None] | None = None) -> None:
         """Start an asynchronous undistortion for the specified photo/project.
 
         The result_callback (if provided) will be called with one argument:

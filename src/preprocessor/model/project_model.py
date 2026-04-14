@@ -5,7 +5,8 @@ from preprocessor.gui.model._QMetadataModel import MetadataModel
 from preprocessor.core.model import MetadataData
 from preprocessor.core.model import ProjectPath
 from preprocessor.gui.model._QListModel import QListModel
-from preprocessor.model.photo_model import PhotoModel, PhotoData
+from preprocessor.core.model import PhotoData
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 
 from pathlib import Path
 from typing import ClassVar, Any
@@ -69,7 +70,7 @@ class ProjectModel(QModel[ProjectData]):
     on_default_metadata_changed: Signal = Signal()
 
     _file: Path
-    _photos: QListModel[PhotoModel]
+    _photos: QListModel[QPhotoModel]
     _default_metadata: MetadataModel
 
     def __init__(self, file: Path, data: ProjectData | dict[str, Any] | None = None) -> None:
@@ -78,11 +79,11 @@ class ProjectModel(QModel[ProjectData]):
         self._file = file
 
         # Create QListModel containers for interactive use
-        self._photos = QListModel[PhotoModel](parent=self)
+        self._photos = QListModel[QPhotoModel](parent=self)
         self._default_metadata = MetadataModel(data=self._data.default_metadata)
 
         # Track which model instances we've connected to
-        self._connected_photos: set[PhotoModel] = set()
+        self._connected_photos: set[QPhotoModel] = set()
 
         # wire photos list changes to mark dirty and (re)wire photo handlers
         self._photos.bind_to_model(self, "photos", self._handle_photos_changed)
@@ -103,7 +104,6 @@ class ProjectModel(QModel[ProjectData]):
     def file(self, path: Path) -> None:
         if self._file != path:
             self._file = path
-            self.set_project_dir(path.parent)
             self.on_file_changed.emit(path)
             self.on_changed.emit()
 
@@ -126,7 +126,7 @@ class ProjectModel(QModel[ProjectData]):
         self._set_field("export_path", path)
 
     @property
-    def photos(self) -> QListModel[PhotoModel]:
+    def photos(self) -> QListModel[QPhotoModel]:
         """The list of photos in the project."""
         return self._photos
 
@@ -140,7 +140,7 @@ class ProjectModel(QModel[ProjectData]):
         Populate the QListModels from the current self._data (ProjectData).
         Uses the QListModel helper to reduce boilerplate.
         """
-        self._photos.populate_from_data(self._data.photos, PhotoModel)
+        self._photos.populate_from_data(self._data.photos, QPhotoModel)
 
     def _handle_photos_changed(self) -> None:
         """Handle a change in the photo models."""
@@ -157,10 +157,6 @@ class ProjectModel(QModel[ProjectData]):
             self.on_default_metadata_changed.emit()
         with contextlib.suppress(Exception):
             self.on_changed.emit()
-
-    def set_project_dir(self, project_dir: Path | None) -> None:
-        for photo in self._photos:
-            photo.set_project_dir(project_dir)
 
     def write_to_file(self, path: str | Path) -> None:
         """
