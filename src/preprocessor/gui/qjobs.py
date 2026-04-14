@@ -1,3 +1,5 @@
+from typing import override
+
 from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool, QTimer
 
 
@@ -5,6 +7,10 @@ from threading import Event
 from collections.abc import Iterable
 
 from PySide6.QtGui import QIcon
+from rich.progress import Progress
+
+from preprocessor.core.message_reporter import MessageReporter, Message
+from preprocessor.core.progress_reporter import ProgressReporter
 
 
 class CancelToken:
@@ -18,6 +24,24 @@ class CancelToken:
 
     def is_cancelled(self) -> bool:
         return self._event.is_set()
+
+class QJobReporter(MessageReporter, ProgressReporter):
+
+    job: "QJob"
+    signals: "QJobSignals"
+
+    # noinspection PyProtocol
+    def __init__(self, job: "QJob", signals: "QJobSignals") -> None:
+        self.job = job
+        self.signals = signals
+
+    @override
+    def report_msg(self, message: Message) -> None:
+        self.signals.on_job_status.emit(self.job, message.text, message.level)
+
+    @override
+    def __call__(self, progress: float, detail: str | None = None, /) -> None:
+        self.signals.on_job_progress.emit(self.job, round(progress * 100.0), 100)
 
 
 class QJobSignals(QObject):
@@ -42,6 +66,7 @@ class QJob(QRunnable):
     """The signals used to communicate with the UI."""
     cancel_token: CancelToken
     """A cancellation token that can be used to signal the job to stop."""
+    reporter: QJobReporter
 
     def __init__(self, name: str) -> None:
         super().__init__()
@@ -49,6 +74,7 @@ class QJob(QRunnable):
         self.signals = QJobSignals()
         # Default token; the processor will replace this with a shared token
         self.cancel_token = CancelToken()
+        self.reporter = QJobReporter(self, self.signals)
 
     @Slot()
     def run(self) -> None:
