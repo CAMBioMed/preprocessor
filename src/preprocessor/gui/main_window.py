@@ -10,7 +10,7 @@ from preprocessor.core.model import PhotoData
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
-from preprocessor.gui.export_photo_job import ExportPhotoJob
+from preprocessor.gui.jobs.export_photo_job import ExportPhotoJob
 from preprocessor.gui.metadata_dialog import MetadataDialog
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
@@ -24,9 +24,9 @@ from preprocessor.gui.model._QProjectModel import QProjectModel
 from preprocessor.processing.detect_quadrat import detect_quadrat
 from preprocessor.processing.load_image import load_image
 from preprocessor.processing.params import defaultParams
-from preprocessor.gui.qjobs import QJob
+from preprocessor.gui.jobs.qjobs import QJob
 from preprocessor.gui.progress_dialog import ProgressDialog
-from preprocessor.gui.add_photo_job import AddPhotoJob
+from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
 from PySide6.QtCore import QObject, Slot
 
 

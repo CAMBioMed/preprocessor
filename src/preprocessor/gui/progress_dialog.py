@@ -5,7 +5,7 @@ import contextlib
 
 from collections.abc import Iterable
 
-from preprocessor.gui.qjobs import QJobProcessor, QJob
+from preprocessor.gui.jobs.qjobs import QJobProcessor, QJob
 from preprocessor.gui.ui_progress_dialog import Ui_ProgressDialog
 
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from preprocessor.gui.qjobs import QJob
+from preprocessor.gui.jobs.qjobs import QJob
 from preprocessor.core.model import PhotoData
 
 
