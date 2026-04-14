@@ -7,7 +7,7 @@ from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
 
 
-class ApplicationModel(QObject):
+class QApplicationState(QObject):
     """
     The model for the entire application.
 

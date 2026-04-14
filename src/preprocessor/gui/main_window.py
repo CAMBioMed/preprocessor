@@ -23,7 +23,7 @@ from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.ui_main_window import Ui_MainWindow
 from preprocessor.gui.utils import icon_from_resource
-from preprocessor.model.application_model import ApplicationModel
+from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.model.photo_model import PhotoModel
 from preprocessor.model.project_model import ProjectModel
 from preprocessor.processing.detect_quadrat import detect_quadrat
@@ -37,7 +37,7 @@ from PySide6.QtCore import QObject, Slot
 
 class MainWindow(QMainWindow):
     ui: Ui_MainWindow
-    model: ApplicationModel
+    model: QApplicationState
 
     properties_dock: PropertiesDockWidget
     """The dock widget showing properties."""
@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
     """The central widget showing the image."""
     _bound_project: ProjectModel | None = None
 
-    def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
+    def __init__(self, model: QApplicationState, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)

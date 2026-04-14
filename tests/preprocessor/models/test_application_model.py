@@ -4,7 +4,7 @@ import pytest
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication
 
-from preprocessor.model.application_model import ApplicationModel
+from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.model.project_model import ProjectModel
 
 
@@ -17,7 +17,7 @@ def _ensure_qapp(qapp: QApplication) -> QApplication:
 class TestApplicationModel:
     def test_current_project(self) -> None:
         # Arrange
-        app_model = ApplicationModel()
+        app_model = QApplicationState()
 
         raised_on_changed = False
 

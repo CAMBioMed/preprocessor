@@ -19,7 +19,7 @@ def test_integration_new_project_add_images_save_and_quit(
         # Local imports (import under test-time Qt app context)
         from preprocessor.gui.launch_dialog import LaunchDialog
         from preprocessor.gui.main_window import MainWindow
-        from preprocessor.model.application_model import ApplicationModel
+        from preprocessor.gui.model._QApplicationState import QApplicationState
 
         # Prepare project file path in a temporary directory
         project_file = tmp_path / "test_project.pbproj"
@@ -32,7 +32,7 @@ def test_integration_new_project_add_images_save_and_quit(
         )
 
         # Create the application model and show the launch dialog
-        model = ApplicationModel()
+        model = QApplicationState()
         model.read_settings()
 
         launch = LaunchDialog(model)

@@ -1,17 +1,17 @@
 from PySide6.QtWidgets import QDialog, QWidget
 
 from preprocessor.gui.ui_apply_parameters_dialog import Ui_ApplyParametersDialog
-from preprocessor.model.application_model import ApplicationModel
+from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.model.photo_model import PhotoModel
 
 
 class ApplyParametersDialog(QDialog):
-    application_model: ApplicationModel
+    application_model: QApplicationState
     selected_photos: list[PhotoModel]
     ui: Ui_ApplyParametersDialog
 
     def __init__(
-        self, application_model: ApplicationModel, selected_photos: list[PhotoModel], parent: QWidget | None = None
+        self, application_model: QApplicationState, selected_photos: list[PhotoModel], parent: QWidget | None = None
     ) -> None:
         super().__init__(parent)
         self.application_model = application_model

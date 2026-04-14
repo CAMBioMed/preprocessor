@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QFileDialog
 from _pytest.monkeypatch import MonkeyPatch
 from pytestqt.qtbot import QtBot
 
-from preprocessor.model.application_model import ApplicationModel
+from preprocessor.gui.model._QApplicationState import QApplicationState
 
 
 class TestLaunchDialog:
@@ -14,7 +14,7 @@ class TestLaunchDialog:
         from preprocessor.gui.launch_dialog import LaunchDialog
 
         # Create an empty application model
-        model = ApplicationModel()
+        model = QApplicationState()
 
         # Show the launch dialog
         launch_dialog = LaunchDialog(model)
@@ -49,7 +49,7 @@ class TestLaunchDialog:
         project_file.write_text("""{ "model_version": 1 }""")
 
         # Create an empty application model
-        model = ApplicationModel()
+        model = QApplicationState()
 
         # Show the launch dialog
         launch_dialog = LaunchDialog(model)

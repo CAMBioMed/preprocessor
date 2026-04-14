@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox, QAppli
 
 from preprocessor import app_formal_name
 from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
-from preprocessor.model.application_model import ApplicationModel
+from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.model.project_model import ProjectModel
 
 logger = logging.getLogger(__name__)
@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 class LaunchDialog(QDialog):
     ui: Ui_LaunchDialog
-    application_model: ApplicationModel
+    application_model: QApplicationState
     project_model: ProjectModel | None = None
 
-    def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
+    def __init__(self, model: QApplicationState, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.ui = Ui_LaunchDialog()
         self.ui.setupUi(self)

@@ -4,7 +4,7 @@ from typing import Any
 from PySide6.QtCore import Signal
 
 from preprocessor.core.model import MetadataData
-from preprocessor.gui.model import QModel
+from preprocessor.gui.model._QModel import QModel
 
 
 
