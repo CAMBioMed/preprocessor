@@ -3,9 +3,10 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from datetime import datetime
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Iterable
 
 from pydantic import BaseModel, field_validator, Field
+
 
 class MetadataData(BaseModel, validate_assignment=True):
     """The metadata for a single photo in the project."""

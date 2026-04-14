@@ -115,19 +115,26 @@ class Test_QProjectModel(QModelTestBase):
         self.assert_property_invalid_value_and_signals(field_name, initial_value, invalid_value, qtbot)
 
     @pytest.mark.parametrize(
-        "field_name, initial_value, input_value, expected_value",
-        [(n, v, lv, rv) for n, (v, _, nvs, _) in Test_ProjectData.fields_and_values.items() for (lv, rv) in nvs],
+        "field_name, initial_value, valid_value, input_value, expected_value",
+        [(n, v, vvs[0], lv, rv) for n, (v, vvs, nvs, _) in Test_ProjectData.fields_and_values.items() for (lv, rv) in nvs],
     )
     def test_property_normalization_and_signals(
         self,
         field_name: str,
         initial_value: object,
+        valid_value: object,
         input_value: object,
         expected_value: object,
         qtbot: QtBot,
     ) -> None:
-        self.assert_property_normalization_and_signals(field_name, initial_value, input_value, expected_value, qtbot)
-
+        self.assert_property_normalization_and_signals(
+            field_name,
+            initial_value,
+            valid_value,
+            input_value,
+            expected_value,
+            qtbot,
+        )
 
 class TestQProjectModelIO:
     def test_new_project_when_no_old_project_returns_model(self) -> None:

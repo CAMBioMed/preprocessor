@@ -76,6 +76,7 @@ class QModelTestBase(ABC, Generic[QModelT]):
         self,
         field_name: str,
         initial_value: object,
+        valid_value: object,
         input_value: object,
         expected_value: object,
         qtbot: QtBot,
@@ -89,12 +90,19 @@ class QModelTestBase(ABC, Generic[QModelT]):
         assert actual_value == initial_value, \
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
 
+        # Arrange: set to another valid value
+        setattr(model, field_name, valid_value)
+        assert getattr(model, field_name) == valid_value, \
+            f"Value of {field_name} should be {valid_value} after setting, but got {getattr(model, field_name)}"
+
+        model.mark_clean()  # reset dirty state before testing normalization
+
         # Act: set the value
         new_model = self.assert_model_property_signals_on_mutation(
             qtbot,
             model,
             field_name,
-            fn_set_same=lambda m, p: setattr(m, p, initial_value),
+            fn_set_same=lambda m, p: setattr(m, p, valid_value),
             fn_set_new=lambda m, p: setattr(m, p, input_value),
         )
 

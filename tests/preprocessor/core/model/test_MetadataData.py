@@ -1,10 +1,11 @@
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 from typing import ClassVar, override
 
 import pytest
 
 from preprocessor.core.model import MetadataData
-from preprocessor.core.type_corners import Corners
+
 from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
@@ -27,7 +28,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                ("  Test-Name.jpg  ", "Test-Name.jpg"),  # Trims whitespace
+                ("  Other-Name.jpg  ", "Other-Name.jpg"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -41,6 +42,7 @@ class Test_MetadataData(PydanticModelTestBase):
             [
                 datetime(2026, 3, 24, 14, 0, 0),
             ],
+            # Normalized
             [
                 ("", None),  # Empty string becomes None
                 ("2016-05-30", datetime(2016, 5, 30, 0, 0, 0)),
@@ -54,7 +56,7 @@ class Test_MetadataData(PydanticModelTestBase):
                     datetime(2025, 5, 4, 13, 17, 58, tzinfo=timezone(timedelta(seconds=3600))),
                 ),
                 ("2025-12-15T10:30:00Z", datetime(2025, 12, 15, 10, 30, 0, tzinfo=timezone.utc)),
-                ("  2026-03-24T14:00:00  ", datetime(2026, 3, 24, 14, 0, 0)),  # Trims whitespace
+                ("  2026-04-26T14:00:00  ", datetime(2026, 4, 26, 14, 0, 0)),  # Trims whitespace
             ],
             # Invalid
             [
@@ -72,7 +74,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                ("  Acme Corp  ", "Acme Corp"),  # Trims whitespace
+                ("  A113  ", "A113"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -90,7 +92,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                ("  Coral Reef  ", "Coral Reef"),  # Trims whitespace
+                ("  Coral Bay  ", "Coral Bay"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -102,13 +104,13 @@ class Test_MetadataData(PydanticModelTestBase):
             None,
             # Valid
             [
-                "Site A",
+                "Isla Nublar",
                 "x" * 50,  # Max length
             ],
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                ("  Site A  ", "Site A"),  # Trims whitespace
+                ("  Isla Sorna  ", "Isla Sorna"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -126,7 +128,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                ("  Spring  ", "Spring"),  # Trims whitespace
+                ("  Summer  ", "Summer"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -144,7 +146,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                ("  Transect 1  ", "Transect 1"),  # Trims whitespace
+                ("  T2  ", "T2"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -183,7 +185,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" 34.0522 ", 34.0522),  # Trims whitespace and converts to float
+                (" 45.03 ", 45.03),  # Trims whitespace and converts to float
             ],
             # Invalid
             [
@@ -205,7 +207,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" -118.2437 ", -118.2437),  # Trims whitespace and converts to float
+                (" -109.25 ", -109.25),  # Trims whitespace and converts to float
             ],
             # Invalid
             [
@@ -225,7 +227,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" 20m ", "20m"),  # Trims whitespace
+                (" 25m ", "25m"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -243,7 +245,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" Canon EOS R5 ", "Canon EOS R5"),  # Trims whitespace
+                (" Nikon D7000 ", "Nikon D7000"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -261,7 +263,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" Jane Doe ", "Jane Doe"),  # Trims whitespace
+                (" John Cleese ", "John Cleese"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -279,7 +281,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" Clear ", "Clear"),  # Trims whitespace
+                (" Troubled ", "Troubled"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -297,7 +299,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" Yes ", "Yes"),  # Trims whitespace
+                (" No ", "No"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -315,7 +317,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" Tight ", "Tight"),  # Trims whitespace
+                (" Wide ", "Wide"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -333,7 +335,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" Yes ", "Yes"),  # Trims whitespace
+                (" No ", "No"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -351,7 +353,7 @@ class Test_MetadataData(PydanticModelTestBase):
             # Normalized
             [
                 ("", None),  # Empty string becomes None
-                (" No issues ", "No issues"),  # Trims whitespace
+                (" Many issues ", "Many issues"),  # Trims whitespace
             ],
             # Invalid
             [
@@ -372,9 +374,8 @@ class Test_MetadataData(PydanticModelTestBase):
 
     @override
     def update_model(self, model: MetadataData, field_name: str, new_value: object) -> MetadataData:
-        # We cannot use model_copy() here because it doesn't validate
-        new_model = MetadataData.model_validate({**model.model_dump(), field_name: new_value})
-        return new_model
+        setattr(model, field_name, new_value)
+        return model
 
 
     @pytest.mark.parametrize(

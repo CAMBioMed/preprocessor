@@ -10,6 +10,8 @@ from preprocessor.gui.model._QModel import QModel
 
 
 class MetadataModel(QModel[MetadataData]):
+    """The model for the metadata of a photo."""
+
     on_filename_changed: Signal = Signal(object)
     on_date_changed: Signal = Signal(object)
     on_partner_changed: Signal = Signal(object)
