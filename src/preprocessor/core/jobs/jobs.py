@@ -209,11 +209,16 @@ class JobProcessor(ABC):
     """A class responsible for processing jobs."""
 
     @abstractmethod
-    def submit_job[R](self, job: Job[R]) -> JobHandle[R]:
+    def submit[R](self, job: Job[R]) -> JobHandle[R]:
         """Submit a job for processing.
 
         :param job: The job to process.
         :return: A handle to the submitted job, which can be used to track its progress,
         cancel the job, and get its result.
         """
+        ...
+
+    @abstractmethod
+    def cancel_all(self) -> None:
+        """Reqquest cancellation of all jobs."""
         ...
