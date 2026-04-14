@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import override, ClassVar
 
@@ -128,4 +129,132 @@ class Test_PhotoData(PydanticModelTestBase):
         expected_value: object,
     ) -> None:
         self.assert_property_normalization(field_name, initial_value, input_value, expected_value)
+
+    photos = [
+        ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
+            image_id="img_001",
+            image_path=Path("img_001.jpg").resolve(),
+            metadata=MetadataData(
+                date=datetime(2025, 8, 27),
+                partner="CSIC",
+                area="Montgri",
+                site="Dui",
+                season="Summer",
+                transect="1",
+                depth="5",
+                camera="NIKON D7000",
+            )
+        )),
+        ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
+            image_id="img_002",
+            image_path=Path("img_002.jpg").resolve(),
+            metadata=MetadataData(
+                date=datetime(2025, 8, 27),
+                partner="CSIC",
+                area="Montgri",
+                site="Dui",
+                season="Summer",
+                transect="1",
+                depth="5",
+                camera="NIKON D7000",
+            )
+        )),
+        ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-28_003.jpg", PhotoData(
+            image_id="img_003",
+            image_path=Path("img_003.jpg").resolve(),
+            metadata=MetadataData(
+                date=datetime(2025, 8, 28),
+                partner="CSIC",
+                area="Montgri",
+                site="Dui",
+                season="Summer",
+                transect="1",
+                depth="5",
+                camera="NIKON D7000",
+            )
+        )),
+        ("CSIC_Montgri_Falaguer_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
+            image_id="img_004",
+            image_path=Path("img_004.jpg").resolve(),
+            metadata=MetadataData(
+                date=datetime(2025, 8, 27),
+                partner="CSIC",
+                area="Montgri",
+                site="Falaguer",
+                season="Summer",
+                transect="1",
+                depth="5",
+                camera="NIKON D7000",
+            )
+        )),
+        ("CSIC_Medes_Portixol_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
+            image_id="img_005",
+            image_path=Path("img_005.jpg").resolve(),
+            metadata=MetadataData(
+                date=datetime(2025, 8, 27),
+                partner="CSIC",
+                area="Medes",
+                site="Portixol",
+                season="Summer",
+                transect="1",
+                depth="5",
+                camera="NIKON D7000",
+            )
+        )),
+        ("CSIC_Montgri_Falaguer_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
+            image_id="img_006",
+            image_path=Path("img_006.jpg").resolve(),
+            metadata=MetadataData(
+                date=datetime(2025, 8, 27),
+                partner="CSIC",
+                area="Montgri",
+                site="Falaguer",
+                season="Summer",
+                transect="1",
+                depth="5",
+                camera="NIKON D7000",
+            )
+        )),
+        ("CSIC_Medes_Portixol_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
+            image_id="img_007",
+            image_path=Path("img_007.jpg").resolve(),
+            metadata=MetadataData(
+                date=datetime(2025, 8, 27),
+                partner="CSIC",
+                area="Medes",
+                site="Portixol",
+                season="Summer",
+                transect="1",
+                depth="5",
+                camera="NIKON D7000",
+            )
+        )),
+        ("custom_filename.jpg", PhotoData(
+            image_id="img_008",
+            image_path=Path("img_008.jpg").resolve(),
+            metadata=MetadataData(
+                filename="custom_filename.jpg",
+                date=datetime(2025, 8, 27),
+                partner="CSIC",
+                area="Medes",
+                site="Portixol",
+                season="Summer",
+                transect="1",
+                depth="5",
+                camera="NIKON D7000",
+            )
+        )),
+    ]
+
+    def test_determine_filename(self) -> None:
+        """Tests the group_photos() and determine_filename() function."""
+
+        # Group the photos
+        groups = PhotoData.group_photos(photo for _, photo in self.photos)
+
+        # Check the expected filenames
+        for group in groups:
+            for idx, photo in enumerate(group):
+                expected_filename = next(expected for expected, p in self.photos if p == photo)
+                assert photo.determine_filename(idx + 1) == expected_filename
 
