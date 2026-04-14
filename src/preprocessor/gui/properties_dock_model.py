@@ -1,6 +1,6 @@
 from PySide6.QtCore import QObject, Signal
 
-from preprocessor.processing.params import (
+from preprocessor.core.transform.detect_quadrat_analysis import (
     ThresholdingMethod,
     QuadratDetectionParams,
     DownscaleParams,

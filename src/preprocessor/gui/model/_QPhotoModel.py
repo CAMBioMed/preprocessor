@@ -111,7 +111,7 @@ class QPhotoModel(QModel[PhotoData]):
         old_model = self.crop
         new_model = CropParams.model_validate({
             **(old_model.model_dump() if old_model is not None else {}),
-            "enabled": value is None,
+            "enabled": value is not None,
             "corners": Corners(tuple(value)) if value is not None else Corners(()),
         })
         self.crop = new_model

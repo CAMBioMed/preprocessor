@@ -33,6 +33,7 @@ class ImageTransform(Protocol):
         item: ImageTransformWorkItem,
         /,
         *,
+        # TODO: Support cancel token
         messages: MessageReporter = NOOP_MESSAGE_REPORTER,
         progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
     ) -> ImageTransformWorkItem:

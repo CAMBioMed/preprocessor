@@ -21,8 +21,8 @@ class Message:
     """A human-readable message to be displayed to the user."""
     step: str | None = None
     """The name of the processing step that generated this message, e.g. 'color_correction'."""
-    image_id: str | None = None
-    """The stable image ID that this message pertains to, if applicable."""
+    subject: str | None = None
+    """The subject that this message pertains to, if applicable. For example, an image ID or path."""
     details: dict[str, Any] | None = None
     """Optional additional details about the message, for debugging or display purposes."""
 

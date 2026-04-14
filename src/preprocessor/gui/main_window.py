@@ -7,6 +7,7 @@ from pathlib import Path
 
 from preprocessor import app_formal_name
 from preprocessor.core.model import PhotoData
+from preprocessor.core.types import ImageRGB
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
@@ -21,9 +22,7 @@ from preprocessor.gui.utils import icon_from_resource
 from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.gui.model._QProjectModel import QProjectModel
-from preprocessor.processing.detect_quadrat import detect_quadrat
-from preprocessor.processing.load_image import load_image
-from preprocessor.processing.params import defaultParams
+from preprocessor.core.transform.detect_quadrat_analysis import defaultParams, DetectQuadratAnalysisJob
 from preprocessor.gui.jobs.qjobs import QJob
 from preprocessor.gui.progress_dialog import ProgressDialog
 from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
@@ -252,31 +251,19 @@ class MainWindow(QMainWindow):
         if self.model.current_photo is None:
             return
 
-        # Prefer using the undistorted image currently shown in the editor (if available)
-        img = None
         original_path = self.model.current_photo.original_filename
-        try:
-            img = self.central_widget.get_processing_image()
-        except Exception:
-            img = None
-        if img is None:
-            img = load_image(str(original_path))
-        if img is None:
-            QMessageBox.critical(
-                self,
-                "Load Image Failed",
-                f"Failed to load image:\n{original_path}",
-            )
-            return
 
-        params = defaultParams
-
-        result = detect_quadrat(img, params)
-        if result is None or result.corners is None:
+        # TODO: Do this in a separate thread!
+        job = DetectQuadratAnalysisJob(
+            ImageRGB.from_file(original_path),
+            defaultParams,
+        )
+        result = job()
+        if result is None:
             # No corners detected
             return
 
-        self.model.current_photo.quadrat_corners = result.corners  # type: ignore[assignment]
+        self.model.current_photo.quadrat_corners = list(result.as_tuple())
         # Trigger updating the opened editor
         self._handle_current_photo_changed(self.model.current_photo)
 
