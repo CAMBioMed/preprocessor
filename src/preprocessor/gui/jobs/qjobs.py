@@ -49,8 +49,10 @@ class QJobSignals(QObject):
 
     on_job_start: Signal = Signal(object)
     """Raised when the job starts. Emits: (self: QJob)"""
-    on_job_end: Signal = Signal(object, bool)
-    """Raised when the job ends. Emits: (self: QJob, aborted: bool)"""
+    on_job_success: Signal = Signal(object, object)
+    """Raised when the job ends. Emits: (self: QJob, result: object)"""
+    on_job_failed: Signal = Signal(object, object, object)
+    """Raised when the job ends. Emits: (self: QJob, aborted: bool, exc: Exception | None)"""
     on_job_progress: Signal = Signal(object, int, int)
     """Raised to report job progress. Emits: (self: QJob, steps: int, total: int)"""
     on_job_status: Signal = Signal(object, str, object)
@@ -80,22 +82,23 @@ class QJob(QRunnable):
     def run(self) -> None:
         try:
             self.signals.on_job_start.emit(self)
-            self.process()
-            self.signals.on_job_end.emit(self, False)
+            result = self.process()
+            self.signals.on_job_success.emit(self, result)
         except JobCancelledException:
             self.update_status("Cancelled")
-            self.signals.on_job_end.emit(self, True)
+            self.signals.on_job_failed.emit(self, True, None)
         except Exception as e:
             self.update_status(f"Error: {e!s}")
-            self.signals.on_job_end.emit(self, True)
+            self.signals.on_job_failed.emit(self, False, e)
 
-    def process(self) -> None:
+    def process(self) -> object:
         """Override this method with the job's task.
         This method will be called in the background thread.
 
+        :return: The result of the job, which will be emitted in the on_job_success signal.
         :raises JobCancelledException: If cancellation is requested during processing.
         """
-        return
+        return None
 
     def update_progress(self, steps: int, total_steps: int) -> None:
         """Call this method to update the job's progress."""
@@ -141,8 +144,10 @@ class QJobProcessor(QObject):
 
     on_job_start: Signal = Signal(object)
     """Raised when the job starts. Emits the QJob instance."""
-    on_job_end: Signal = Signal(object, bool)
-    """Raised when the job ends. Emits (QJob, aborted: bool)."""
+    on_job_success: Signal = Signal(object, object)
+    """Raised when the job successfully finished. Emits (QJob, result)"""
+    on_job_failed: Signal = Signal(object, bool)
+    """Raised when the job failed or was aborted. Emits (QJob, aborted: bool, exception)."""
     on_job_status: Signal = Signal(object, str, object)
     """Signal a job status update: QJob, new item status, new item icon (QIcon | str | None)"""
     on_job_progress: Signal = Signal(object, int, int)
@@ -171,7 +176,8 @@ class QJobProcessor(QObject):
 
         # Connect signals in a way that is tolerant to different signal signatures
         job.signals.on_job_start.connect(self._handle_job_start)
-        job.signals.on_job_end.connect(self._handle_job_end)
+        job.signals.on_job_success.connect(self._handle_job_success)
+        job.signals.on_job_failed.connect(self._handle_job_failed)
         job.signals.on_job_status.connect(self._handle_job_status)
         job.signals.on_job_progress.connect(self._handle_job_progress)
 
@@ -192,10 +198,17 @@ class QJobProcessor(QObject):
     def _handle_job_start(self, job: QJob) -> None:
         self.on_job_start.emit(job)
 
-    def _handle_job_end(self, job: QJob, aborted: bool) -> None:
+    def _handle_job_success(self, job: QJob, result: object) -> None:
+        self._finished += 1
+        self.on_job_success.emit(job, result)
+        self.update_progress()
+        if self._finished == self.total:
+            self.on_finished.emit(self._any_aborted)
+
+    def _handle_job_failed(self, job: QJob, aborted: bool, exc: Exception | None) -> None:
         self._finished += 1
         self._any_aborted = self._any_aborted or aborted
-        self.on_job_end.emit(job, aborted)
+        self.on_job_failed.emit(job, aborted, exc)
         self.update_progress()
         if self._finished == self.total:
             self.on_finished.emit(self._any_aborted)

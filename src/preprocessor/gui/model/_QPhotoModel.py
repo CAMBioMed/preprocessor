@@ -101,50 +101,55 @@ class QPhotoModel(QModel[PhotoData]):
     @property
     def quadrat_corners(self) -> list[Point2D] | None:
         """The corners of the quadrat in the photo, if set."""
-        if self._data.crop is None:
+        if not self._data.crop.enabled:
             return None
         return list(self._data.crop.corners.as_tuple())
 
     # TODO: Replace by direct submodel access:
     @quadrat_corners.setter
     def quadrat_corners(self, value: list[Point2D] | None) -> None:
-        if value is None:
-            self.crop = None
-        else:
-            self.crop = CropParams(corners=Corners(tuple(value)))
+        old_model = self.crop
+        new_model = CropParams.model_validate({
+            **(old_model.model_dump() if old_model is not None else {}),
+            "enabled": value is None,
+            "corners": Corners(tuple(value)) if value is not None else Corners(()),
+        })
+        self.crop = new_model
 
     # TODO: Replace by direct submodel access:
     @property
     def camera_matrix(self) -> CameraMatrix | None:
         """3x3 camera matrix or None."""
-        if self._data.lens_correction is None:
+        if not self.lens_correction.enabled:
             return None
-        return self._data.lens_correction.camera_matrix
+        return self.lens_correction.camera_matrix
 
     # TODO: Replace by direct submodel access:
     @camera_matrix.setter
     def camera_matrix(self, value: CameraMatrix | None) -> None:
-        old_model = self._data.lens_correction
+        old_model = self.lens_correction
         new_model = LensCorrectionParams.model_validate({
             **(old_model.model_dump() if old_model is not None else {}),
+            "enabled": value is not None,
             "camera_matrix": value,
         })
-        self._data.lens_correction = new_model
+        self.lens_correction = new_model
 
     # TODO: Replace by direct submodel access:
     @property
     def distortion_coefficients(self) -> list[float] | None:
         """Sequence of distortion coefficients as Point2 or None."""
-        if self._data.lens_correction is None:
+        if not self.lens_correction.enabled:
             return None
-        return self._data.lens_correction.coefficients
+        return self.lens_correction.coefficients
 
     # TODO: Replace by direct submodel access:
     @distortion_coefficients.setter
     def distortion_coefficients(self, value: list[float] | None) -> None:
-        old_model = self._data.lens_correction
+        old_model = self.lens_correction
         new_model = LensCorrectionParams.model_validate({
             **(old_model.model_dump() if old_model is not None else {}),
+            "enabled": value is not None,
             "coefficients": value,
         })
-        self._data.lens_correction = new_model
+        self.lens_correction = new_model

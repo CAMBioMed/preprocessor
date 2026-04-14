@@ -302,10 +302,8 @@ class MainWindow(QMainWindow):
         # Helper QObject to perform the actual append on the main thread
         class _AppendHelper(QObject):
             @Slot(object, bool)
-            def handle_job_end(self, job: AddPhotoJob, aborted: bool) -> None:
+            def handle_job_success(self, job: AddPhotoJob, result: None) -> None:
                 # Only append if the job completed successfully and produced a photo
-                if aborted:
-                    return
                 photo_data = job.result
                 if photo_data is not None:
                     # Note that we create the QPhotoModel (a QObject) on the main thread,
@@ -318,7 +316,7 @@ class MainWindow(QMainWindow):
         for p in paths:
             job = AddPhotoJob(p)
             # Connect the job end signal to the helper so append happens on the main thread
-            job.signals.on_job_end.connect(helper.handle_job_end)
+            job.signals.on_job_success.connect(helper.handle_job_success)
             jobs.append(job)
 
         # Show progress dialog and run jobs; dialog is modal and will block until done
