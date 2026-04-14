@@ -11,7 +11,7 @@ class QPhotoModel(QModel[PhotoData]):
     """The model for a single photo in the project, used for the GUI."""
 
     on_image_id_changed: Signal = Signal(str)
-    on_image_path_changed: Signal = Signal(Path)
+    on_original_filename_changed: Signal = Signal(Path)
     on_color_correction_changed: Signal = Signal(object)  # Emits ColorCorrectionParams | None
     on_lens_correction_changed: Signal = Signal(object)  # Emits LensCorrectionParams | None
     on_crop_changed: Signal = Signal(object)  # Emits CropParams | None
@@ -34,13 +34,13 @@ class QPhotoModel(QModel[PhotoData]):
         self._set_field("image_id", value)
 
     @property
-    def image_path(self) -> Path:
+    def original_filename(self) -> Path:
         """The path to the photo file, as an absolute path."""
-        return self._data.image_path
+        return self._data.original_filename
 
-    @image_path.setter
-    def image_path(self, value: Path) -> None:
-        self._set_field("image_path", value)
+    @original_filename.setter
+    def original_filename(self, value: Path) -> None:
+        self._set_field("original_filename", value)
 
     ######################
     ## Photo correction ##
@@ -93,4 +93,4 @@ class QPhotoModel(QModel[PhotoData]):
     @property
     def name(self) -> str:
         """The name of the photo, derived from the original path."""
-        return self.image_path.name
+        return self.original_filename.name

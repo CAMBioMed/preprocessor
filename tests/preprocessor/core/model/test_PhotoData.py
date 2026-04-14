@@ -84,7 +84,7 @@ class Test_PhotoData(PydanticModelTestBase):
     def create_model(self) -> PhotoData:
         return PhotoData(
             image_id="test_photo",
-            image_path=Path("photos/test_photo.jpg").resolve(),
+            original_filename=Path("photos/test_photo.jpg").resolve(),
         )
 
     @override
@@ -133,7 +133,7 @@ class Test_PhotoData(PydanticModelTestBase):
     photos = [
         ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
             image_id="img_001",
-            image_path=Path("img_001.jpg").resolve(),
+            original_filename=Path("img_001.jpg").resolve(),
             metadata=MetadataData(
                 date=datetime(2025, 8, 27),
                 partner="CSIC",
@@ -147,7 +147,7 @@ class Test_PhotoData(PydanticModelTestBase):
         )),
         ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
             image_id="img_002",
-            image_path=Path("img_002.jpg").resolve(),
+            original_filename=Path("img_002.jpg").resolve(),
             metadata=MetadataData(
                 date=datetime(2025, 8, 27),
                 partner="CSIC",
@@ -161,7 +161,7 @@ class Test_PhotoData(PydanticModelTestBase):
         )),
         ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-28_003.jpg", PhotoData(
             image_id="img_003",
-            image_path=Path("img_003.jpg").resolve(),
+            original_filename=Path("img_003.jpg").resolve(),
             metadata=MetadataData(
                 date=datetime(2025, 8, 28),
                 partner="CSIC",
@@ -175,7 +175,7 @@ class Test_PhotoData(PydanticModelTestBase):
         )),
         ("CSIC_Montgri_Falaguer_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
             image_id="img_004",
-            image_path=Path("img_004.jpg").resolve(),
+            original_filename=Path("img_004.jpg").resolve(),
             metadata=MetadataData(
                 date=datetime(2025, 8, 27),
                 partner="CSIC",
@@ -189,7 +189,7 @@ class Test_PhotoData(PydanticModelTestBase):
         )),
         ("CSIC_Medes_Portixol_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
             image_id="img_005",
-            image_path=Path("img_005.jpg").resolve(),
+            original_filename=Path("img_005.jpg").resolve(),
             metadata=MetadataData(
                 date=datetime(2025, 8, 27),
                 partner="CSIC",
@@ -203,7 +203,7 @@ class Test_PhotoData(PydanticModelTestBase):
         )),
         ("CSIC_Montgri_Falaguer_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
             image_id="img_006",
-            image_path=Path("img_006.jpg").resolve(),
+            original_filename=Path("img_006.jpg").resolve(),
             metadata=MetadataData(
                 date=datetime(2025, 8, 27),
                 partner="CSIC",
@@ -217,7 +217,7 @@ class Test_PhotoData(PydanticModelTestBase):
         )),
         ("CSIC_Medes_Portixol_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
             image_id="img_007",
-            image_path=Path("img_007.jpg").resolve(),
+            original_filename=Path("img_007.jpg").resolve(),
             metadata=MetadataData(
                 date=datetime(2025, 8, 27),
                 partner="CSIC",
@@ -231,7 +231,7 @@ class Test_PhotoData(PydanticModelTestBase):
         )),
         ("custom_filename.jpg", PhotoData(
             image_id="img_008",
-            image_path=Path("img_008.jpg").resolve(),
+            original_filename=Path("img_008.jpg").resolve(),
             metadata=MetadataData(
                 filename="custom_filename.jpg",
                 date=datetime(2025, 8, 27),

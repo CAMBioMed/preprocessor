@@ -24,7 +24,7 @@ class Test_ProjectData(PydanticModelTestBase):
         new_photos = [
             PhotoData(
                 image_id="photo1",
-                image_path=Path("photos/photo1.jpg").resolve(),
+                original_filename=Path("photos/photo1.jpg").resolve(),
                 color_correction=ColorCorrectionParams(),
                 lens_correction=LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
                 crop=CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
@@ -32,7 +32,7 @@ class Test_ProjectData(PydanticModelTestBase):
             ),
             PhotoData(
                 image_id="photo2",
-                image_path=Path("photos/photo2.jpg").resolve(),
+                original_filename=Path("photos/photo2.jpg").resolve(),
             ),
         ]
         new_model = ProjectData.model_validate({**model.model_dump(), "photos": new_photos})
@@ -53,7 +53,7 @@ class Test_ProjectData(PydanticModelTestBase):
             photos=[
                 PhotoData(
                     image_id="photo1",
-                    image_path=photos_dir / "photo1.jpg",
+                    original_filename=photos_dir / "photo1.jpg",
                     color_correction=ColorCorrectionParams(),
                     lens_correction=LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
                     crop=CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
@@ -73,7 +73,7 @@ class Test_ProjectData(PydanticModelTestBase):
           "photos": [
             {{
               "image_id": "photo1",
-              "image_path": "photos/photo1.jpg",
+              "original_filename": "photos/photo1.jpg",
               "color_correction": {{}},
               "lens_correction": {{
                 "coefficients": [
@@ -116,7 +116,7 @@ class Test_ProjectData(PydanticModelTestBase):
           "photos": [
             {{
               "image_id": "photo1",
-              "image_path": "photos/photo1.jpg",
+              "original_filename": "photos/photo1.jpg",
               "color_correction": {{}},
               "lens_correction": {{
                 "coefficients": [
@@ -156,7 +156,7 @@ class Test_ProjectData(PydanticModelTestBase):
             photos=[
                 PhotoData(
                     image_id="photo1",
-                    image_path=photos_dir / "photo1.jpg",
+                    original_filename=photos_dir / "photo1.jpg",
                     color_correction=ColorCorrectionParams(),
                     lens_correction=LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
                     crop=CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
@@ -269,7 +269,7 @@ class Test_ProjectData(PydanticModelTestBase):
             photos=[
                 PhotoData(
                     image_id="photo1",
-                    image_path=photos_dir / "photo1.jpg",
+                    original_filename=photos_dir / "photo1.jpg",
                     metadata=MetadataData(
                         filename="testfile1.jpg",
                         partner="SZN",
@@ -278,7 +278,7 @@ class Test_ProjectData(PydanticModelTestBase):
                 ),
                 PhotoData(
                     image_id="photo2",
-                    image_path=photos_dir / "photo2.jpg",
+                    original_filename=photos_dir / "photo2.jpg",
                     metadata=MetadataData(
                         filename="testfile2.jpg",
                         date=datetime.fromisoformat("2023-09-01T12:00:00Z"),

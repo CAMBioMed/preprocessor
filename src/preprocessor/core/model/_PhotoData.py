@@ -24,7 +24,8 @@ class PhotoData(BaseModel, validate_assignment=True):
 
     image_id: str
     """The unique identifier for the photo."""
-    image_path: ProjectPath
+    # TODO: Rename to image_path
+    original_filename: ProjectPath
     """The path to the photo file, relative to the project."""
 
     ######################
@@ -76,7 +77,7 @@ class PhotoData(BaseModel, validate_assignment=True):
         transect: str | None = self.metadata.transect
         date: str | None = self.metadata.date.date().isoformat() if self.metadata.date is not None else None
         idx: str | None = f"{group_idx:03d}"
-        ext: str = self.image_path.suffix.lower() if self.image_path.suffix else ".jpg"
+        ext: str = self.original_filename.suffix.lower() if self.original_filename.suffix else ".jpg"
 
         # Generate _ separated string of all the parts that are not None
         parts = [p for p in [partner, area, site, year, season, transect, date, idx] if p is not None]

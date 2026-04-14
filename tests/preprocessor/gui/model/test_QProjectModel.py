@@ -62,7 +62,7 @@ class Test_QProjectModel(QModelTestBase):
             photo0 = QPhotoModel(
                 PhotoData(
                     image_id="photo0",
-                    image_path=project_dir / "photo0.jpg",
+                    original_filename=project_dir / "photo0.jpg",
                 )
             )
             assert photo0.parent() is None

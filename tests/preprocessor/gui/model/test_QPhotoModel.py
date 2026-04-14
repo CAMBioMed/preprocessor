@@ -24,7 +24,7 @@ class Test_QPhotoModel(QModelTestBase):
         """Helper to create a test QPhotoModel with default values."""
         return QPhotoModel(
             PhotoData(
-                image_path=Path("img_001.jpg").resolve(),
+                original_filename=Path("img_001.jpg").resolve(),
                 image_id="img_001",
             )
         )
