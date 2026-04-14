@@ -32,10 +32,13 @@ class PhotoData(BaseModel, validate_assignment=True):
     ## Photo correction ##
     ######################
 
+    ## TODO: Make this not None, but add an "enabled" fields to the params instead
     color_correction: ColorCorrectionParams | None = None
     """The parameters for color correction, or None to not perform color correction."""
+    ## TODO: Make this not None, but add an "enabled" fields to the params instead
     lens_correction: LensCorrectionParams | None = None
     """The parameters for lens correction, or None to not perform lens correction."""
+    ## TODO: Make this not None, but add an "enabled" fields to the params instead
     crop: CropParams | None = None
     """The parameters for cropping the photo, or None to not crop the photo."""
 

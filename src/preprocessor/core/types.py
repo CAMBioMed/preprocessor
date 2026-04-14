@@ -17,7 +17,12 @@ This is also an OpenCV2 MatLike."""
 LensVector = list[float]
 """Defines the LensVector type as a list of floats, representing distortion coefficients for lens correction."""
 
-CameraMatrix = tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]
+# TODO: Rename to Matrix3x3
+CameraMatrix = tuple[
+    tuple[float, float, float],
+    tuple[float, float, float],
+    tuple[float, float, float],
+]
 """Defines the CameraMatrix type as a 3x3 tuple of floats,
 representing the camera intrinsic matrix for lens correction."""
 
