@@ -23,6 +23,7 @@ class QModel[M: BaseModel](QObject):
     """Signal emitted when the dirty state changes."""
     _model_cls: type[M]
     _model_version: int
+    # TODO: Remove the underscore prefix
     _data: M
     _dirty: bool
 

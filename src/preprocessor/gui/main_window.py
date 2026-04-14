@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
 from pathlib import Path
 
 from preprocessor import app_formal_name
+from preprocessor.core.model import PhotoData
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
@@ -233,11 +234,15 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Error", "The output path exists and is not a directory.")
             return
 
+        # Group the photos
+        groups = PhotoData.group_photos(photo._data for photo in self.model.current_project.photos)
+
         # Show the progress UI and start export
         jobs: list[QJob] = []
-        for idx, p in enumerate(self.model.current_project.photos):
-            job = ExportPhotoJob(p, idx, export_path)
-            jobs.append(job)
+        for group in groups:
+            for idx, p in enumerate(group):
+                job = ExportPhotoJob(p, idx, export_path)
+                jobs.append(job)
 
         # Show progress dialog and run jobs; dialog is modal and will block until done
         dlg = ProgressDialog("Exporting Photos", jobs, parent=self, run_in_thread=True)
@@ -249,12 +254,12 @@ class MainWindow(QMainWindow):
 
         # Prefer using the undistorted image currently shown in the editor (if available)
         img = None
+        original_path = self.model.current_photo.original_filename
         try:
             img = self.central_widget.get_processing_image()
         except Exception:
             img = None
         if img is None:
-            original_path = self.model.current_photo.original_filename
             img = load_image(str(original_path))
         if img is None:
             QMessageBox.critical(
