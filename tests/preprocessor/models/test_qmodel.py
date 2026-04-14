@@ -1,11 +1,10 @@
 from pathlib import Path
 
-import pytest
 from PySide6.QtCore import Signal
 from pydantic import BaseModel
 
 from preprocessor.model.project_path import ProjectPath
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QModel
 
 # Deprecated
 class ExampleData(BaseModel, validate_assignment=True):

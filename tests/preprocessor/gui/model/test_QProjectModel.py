@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QFileDialog, QApplication
 from preprocessor.core.model import ProjectData, PhotoData
 from preprocessor.gui.model import QProjectModel, QPhotoModel
 from preprocessor.gui.model import _QProjectModel as qpm_mod
-from preprocessor.model.qlistmodel import QListModel
+from preprocessor.gui.model import QListModel
 from tests.preprocessor.core.model.test_ProjectData import Test_ProjectData
 from tests.preprocessor.gui.cls_FakeMsgBox import _FakeMsgBox
 from tests.preprocessor.gui.model.cls_QModelTestBase import QModelTestBase

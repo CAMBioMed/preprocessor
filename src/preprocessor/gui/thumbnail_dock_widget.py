@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem
 
 from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
 from preprocessor.gui.utils import icon_from_resource
-from preprocessor.model.qlistmodel import QListModel
+from preprocessor.gui.model import QListModel
 from preprocessor.model.photo_model import PhotoModel
 
 

@@ -6,10 +6,10 @@ from typing import Any
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QFileDialog, QApplication, QMessageBox
 
-from preprocessor.core.model import ProjectData, MetadataData, ColorCorrectionParams, LensCorrectionParams, CropParams
+from preprocessor.core.model import ProjectData
 from preprocessor.gui.model import QPhotoModel
-from preprocessor.model.qlistmodel import QListModel
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QListModel
+from preprocessor.gui.model import QModel
 
 logger = logging.getLogger(__name__)
 

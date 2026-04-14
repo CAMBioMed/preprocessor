@@ -3,7 +3,7 @@ from typing import Callable, TypeVar
 from pydantic import BaseModel
 from pytestqt.qtbot import QtBot
 
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QModel
 
 T = TypeVar("T", bound=QModel)
 

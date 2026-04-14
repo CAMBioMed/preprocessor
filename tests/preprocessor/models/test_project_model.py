@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QModel
 
 
 @pytest.fixture(autouse=True)
@@ -19,14 +19,13 @@ def _ensure_qapp(qapp: QApplication) -> QApplication:
 
 
 import json
-import tempfile
 from pathlib import Path
 from pytestqt.qtbot import QtBot
 
 from preprocessor.model.project_model import ProjectModel, ProjectData
 from preprocessor.model.photo_model import PhotoModel, PhotoData
 from preprocessor.core.model import MetadataData
-from preprocessor.model.qlistmodel import QListModel
+from preprocessor.gui.model import QListModel
 
 # Deprecated
 class TestProjectModel:

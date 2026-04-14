@@ -9,7 +9,7 @@ from preprocessor.model import Point2, Matrix3x3
 from preprocessor.model.metadata_model import MetadataModel
 from preprocessor.core.model import MetadataData
 from preprocessor.model.project_path import ProjectPath
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QModel
 
 
 class PhotoData(BaseModel, validate_assignment=True):

@@ -4,7 +4,7 @@ from typing import Any
 from PySide6.QtCore import Signal
 
 from preprocessor.core.model import PhotoData, MetadataData, ColorCorrectionParams, LensCorrectionParams, CropParams
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QModel
 
 
 class QPhotoModel(QModel[PhotoData]):

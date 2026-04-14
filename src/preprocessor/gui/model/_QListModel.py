@@ -4,7 +4,7 @@ from collections.abc import Iterable, Iterator, Callable
 from PySide6.QtCore import QObject, Signal
 from pydantic import BaseModel
 
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model._QModel import QModel
 import contextlib
 
 E = TypeVar("E", bound=QModel)

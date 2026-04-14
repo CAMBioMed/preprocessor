@@ -4,13 +4,13 @@ from pydantic import BaseModel, field_validator
 from preprocessor.model.metadata_model import MetadataModel
 from preprocessor.core.model import MetadataData
 from preprocessor.model.project_path import ProjectPath
-from preprocessor.model.qlistmodel import QListModel
+from preprocessor.gui.model import QListModel
 from preprocessor.model.photo_model import PhotoModel, PhotoData
 
 from pathlib import Path
 from typing import ClassVar, Any
 
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QModel
 import contextlib
 
 

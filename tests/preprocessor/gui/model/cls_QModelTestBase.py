@@ -5,7 +5,7 @@ import pytest
 from pydantic import BaseModel
 from pytestqt.qtbot import QtBot
 
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QModel
 
 # Make this base test generic over the pydantic model type being tested.
 QModelT = TypeVar("QModelT", bound=QModel)

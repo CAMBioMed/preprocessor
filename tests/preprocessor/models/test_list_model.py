@@ -5,9 +5,9 @@ from PySide6.QtWidgets import QApplication
 
 from pydantic import BaseModel
 
-from preprocessor.model.qlistmodel import QListModel
+from preprocessor.gui.model import QListModel
 
-from preprocessor.model.qmodel import QModel
+from preprocessor.gui.model import QModel
 
 # Deprecated
 # Ensure a Qt application context exists for QObject usage in tests. Rely on pytest-qt's qapp.
