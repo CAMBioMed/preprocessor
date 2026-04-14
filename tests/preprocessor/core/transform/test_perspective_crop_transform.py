@@ -45,7 +45,10 @@ def test_should_crop_successfully() -> None:
         image_id=image_id,
         color_correction=None,
         lens_correction=None,
-        crop=CropParams(corners=corners),
+        crop=CropParams(
+            enabled=True,
+            corners=corners,
+        ),
     )
 
     item = ImageTransformWorkItem(
@@ -119,7 +122,7 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
         image_id=image_id,
         color_correction=None,
         lens_correction=None,
-        crop=CropParams(),
+        crop=CropParams(enabled=True),
     )
     item = ImageTransformWorkItem(
         image_id=image_id,
@@ -155,7 +158,10 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
         image_id=image_id,
         color_correction=None,
         lens_correction=None,
-        crop=CropParams(corners=bad_corners),
+        crop=CropParams(
+            enabled=True,
+            corners=bad_corners,
+        ),
     )
     item = ImageTransformWorkItem(
         image_id=image_id,
@@ -196,7 +202,10 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
         image_id=image_id,
         color_correction=None,
         lens_correction=None,
-        crop=CropParams(corners=corners),
+        crop=CropParams(
+            enabled=True,
+            corners=corners,
+        ),
     )
     item = ImageTransformWorkItem(
         image_id=image_id,

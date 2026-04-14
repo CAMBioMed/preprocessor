@@ -9,6 +9,9 @@ class ColorCorrectionParams(BaseModel, validate_assignment=True):
         extra="forbid",
     )
 
+    enabled: bool = False
+    """Whether to perform color correction. If False, the other parameters are ignored."""
+
     # TODO: To be replaced
     gain_r: float = 1.0
     gain_g: float = 1.0

@@ -18,7 +18,7 @@ class LensCorrectTransform:
         messages: MessageReporter = NOOP_MESSAGE_REPORTER,
         progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
     ) -> ImageTransformWorkItem:
-        if not item.params.lens_correction:
+        if not item.params.lens_correction or not item.params.lens_correction.enabled:
             messages.info(
                 "no_lens_correction_requested",
                 "Lens correction skipped: no lens correction requested",

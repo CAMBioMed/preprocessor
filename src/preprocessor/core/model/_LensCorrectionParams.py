@@ -13,6 +13,9 @@ class LensCorrectionParams(BaseModel, validate_assignment=True):
         extra="forbid",
     )
 
+    enabled: bool = False
+    """Whether to perform lens correction. If False, the other parameters are ignored."""
+
     camera_matrix: CameraMatrix | None = None
     """The 3x3 camera intrinsic matrix, or None to use the default
     (focal lengths = image width, principal point = image center)."""

@@ -54,7 +54,11 @@ def test_should_return_transformed_image_when_lens_correction_requested() -> Non
     image = ImageRGB.from_rgb_array(rgb)
     image_path = Path("/tmp/img2.jpg")
     image_id = "img2"
-    lens_params = LensCorrectionParams(camera_matrix=None, coefficients=[0.0, 0.0, 0.0, 0.0])
+    lens_params = LensCorrectionParams(
+        enabled=True,
+        camera_matrix=None,
+        coefficients=[0.0, 0.0, 0.0, 0.0],
+    )
     params = PhotoData(
         original_filename=image_path,
         image_id=image_id,
@@ -90,7 +94,11 @@ def test_should_return_original_and_error_when_cv2_raises(monkeypatch: MonkeyPat
     image = ImageRGB.from_rgb_array(arr)
     image_path = Path("/tmp/img3.jpg")
     image_id = "img3"
-    lens_params = LensCorrectionParams(camera_matrix=None, coefficients=[0.0, 0.0, 0.0, 0.0])
+    lens_params = LensCorrectionParams(
+        enabled=True,
+        camera_matrix=None,
+        coefficients=[0.0, 0.0, 0.0, 0.0],
+    )
     params = PhotoData(
         image_id=image_id,
         original_filename=image_path,

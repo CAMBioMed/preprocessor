@@ -18,7 +18,7 @@ class PerspectiveCropTransform:
         messages: MessageReporter = NOOP_MESSAGE_REPORTER,
         progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
     ) -> ImageTransformWorkItem:
-        if not item.params.crop:
+        if not item.params.crop or not item.params.crop.enabled:
             messages.info(
                 "no_crop_requested",
                 "Perspective crop skipped: no crop requested",
