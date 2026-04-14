@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field
 
 from preprocessor.core.model import PhotoData, MetadataData
-from preprocessor.model.project_path import ProjectPath
+from preprocessor.core.model._ProjectPath import ProjectPath
 
 
 class ProjectData(BaseModel, validate_assignment=True):

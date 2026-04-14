@@ -1,14 +1,10 @@
-from typing import Annotated
-
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict
 
 from preprocessor.core.model._MetadataData import MetadataData
 from preprocessor.core.model._ColorCorrectionParams import ColorCorrectionParams
 from preprocessor.core.model._LensCorrectionParams import LensCorrectionParams
 from preprocessor.core.model._CropParams import CropParams
-from preprocessor.core.type_corners import Corners
-from preprocessor.core.types import LensVector, CameraMatrix
-from preprocessor.model.project_path import ProjectPath
+from preprocessor.core.model._ProjectPath import ProjectPath
 
 
 

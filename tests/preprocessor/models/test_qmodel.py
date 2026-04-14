@@ -3,7 +3,7 @@ from pathlib import Path
 from PySide6.QtCore import Signal
 from pydantic import BaseModel
 
-from preprocessor.model.project_path import ProjectPath
+from preprocessor.core.model import ProjectPath
 from preprocessor.gui.model import QModel
 
 # Deprecated

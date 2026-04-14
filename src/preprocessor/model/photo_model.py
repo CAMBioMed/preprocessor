@@ -8,7 +8,7 @@ from pydantic import BaseModel, field_validator
 from preprocessor.model import Point2, Matrix3x3
 from preprocessor.model.metadata_model import MetadataModel
 from preprocessor.core.model import MetadataData
-from preprocessor.model.project_path import ProjectPath
+from preprocessor.core.model import ProjectPath
 from preprocessor.gui.model import QModel
 
 
