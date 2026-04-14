@@ -1,14 +1,14 @@
 from PySide6.QtWidgets import QDialog, QWidget
 
 from preprocessor.gui.ui_project_settings_dialog import Ui_ProjectSettingsDialog
-from preprocessor.model.project_model import ProjectModel
+from preprocessor.gui.model._QProjectModel import QProjectModel
 
 
 class ProjectSettingsDialog(QDialog):
     ui: Ui_ProjectSettingsDialog
-    model: ProjectModel
+    model: QProjectModel
 
-    def __init__(self, model: ProjectModel, parent: QWidget | None = None) -> None:
+    def __init__(self, model: QProjectModel, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.model = model
         self.ui = Ui_ProjectSettingsDialog()

@@ -10,12 +10,6 @@ from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
 from preprocessor.gui.export_photo_job import ExportPhotoJob
-from preprocessor.gui.launch_dialog import (
-    new_project_dialog,
-    open_project_dialog,
-    save_project,
-    save_project_as_dialog,
-)
 from preprocessor.gui.metadata_dialog import MetadataDialog
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
@@ -25,7 +19,7 @@ from preprocessor.gui.ui_main_window import Ui_MainWindow
 from preprocessor.gui.utils import icon_from_resource
 from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
-from preprocessor.model.project_model import ProjectModel
+from preprocessor.gui.model._QProjectModel import QProjectModel
 from preprocessor.processing.detect_quadrat import detect_quadrat
 from preprocessor.processing.load_image import load_image
 from preprocessor.processing.params import defaultParams
@@ -47,7 +41,7 @@ class MainWindow(QMainWindow):
     """The dock widget with edit controls."""
     central_widget: PhotoEditorWidget
     """The central widget showing the image."""
-    _bound_project: ProjectModel | None = None
+    _bound_project: QProjectModel | None = None
 
     def __init__(self, model: QApplicationState, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -66,7 +60,7 @@ class MainWindow(QMainWindow):
         self.read_settings()
         self._handle_current_project_changed(self.model.current_project)
 
-    def _bind_project_signals(self, project: ProjectModel) -> None:
+    def _bind_project_signals(self, project: QProjectModel) -> None:
         """Connect/disconnect signals for the currently bound project."""
         # Disconnect previous project
         old_project = self._bound_project
@@ -74,14 +68,14 @@ class MainWindow(QMainWindow):
             with warnings.catch_warnings():
                 # Raises a RuntimeWarning when the old project was never connected (i.e. the initial empty project)
                 warnings.filterwarnings("ignore", category=RuntimeWarning)
-                old_project.on_file_changed.disconnect(self._handle_project_file_changed)
+                old_project.on_project_file_changed.disconnect(self._handle_project_file_changed)
                 old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
                 old_project.photos.on_changed.disconnect(self._handle_photos_changed)
 
         self._bound_project = project
         # Connect new project
         if project is not None:
-            project.on_file_changed.connect(self._handle_project_file_changed)
+            project.on_project_file_changed.connect(self._handle_project_file_changed)
             project.on_dirty_changed.connect(self._handle_dirty_changed)
             project.photos.on_changed.connect(self._handle_photos_changed)
 
@@ -96,7 +90,7 @@ class MainWindow(QMainWindow):
         if proj is None:
             self.setWindowTitle(base_title)
             return
-        fp = proj.file
+        fp = proj.project_file
         name = Path(fp).name if fp else "Untitled Project"
         photo_count = len(proj.photos)
         dirty_marker = "*" if proj.dirty else ""
@@ -197,24 +191,24 @@ class MainWindow(QMainWindow):
         self.model.on_current_photo_changed.connect(self._handle_current_photo_changed)
 
     def _handle_new_project_action(self) -> None:
-        new_project = new_project_dialog(self, self.model.current_project, self.model.projects_path)
+        new_project = QProjectModel.new_project(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
             self.model.current_photo = None
-            self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
+            self.model.projects_path = new_project.project_file.parent if new_project.project_file else self.model.projects_path
             self.model.current_project = new_project
 
     def _handle_open_project_action(self) -> None:
-        new_project = open_project_dialog(self, self.model.current_project, self.model.projects_path)
+        new_project = QProjectModel.open_project(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
             self.model.current_photo = None
-            self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
+            self.model.projects_path = new_project.project_file.parent if new_project.project_file else self.model.projects_path
             self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:
-        save_project(self, self.model.current_project, self.model.current_project.file)
+        QProjectModel.save_project(self, self.model.current_project, self.model.current_project.project_file)
 
     def _handle_save_project_as_action(self) -> None:
-        save_project_as_dialog(self, self.model.current_project, self.model.projects_path)
+        QProjectModel.save_project_as(self, self.model.current_project, self.model.projects_path)
 
     def _handle_project_settings_action(self) -> None:
         dialog = ProjectSettingsDialog(self.model.current_project, self)
@@ -366,7 +360,7 @@ class MainWindow(QMainWindow):
         """Handle when the selected photo changes."""
         self.model.current_photo = item
 
-    def _handle_current_project_changed(self, project: ProjectModel) -> None:
+    def _handle_current_project_changed(self, project: QProjectModel) -> None:
         """Handle when the current project changes."""
         self._bind_project_signals(project)
         self._update_window_title()

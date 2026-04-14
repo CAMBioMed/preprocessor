@@ -10,6 +10,7 @@ from preprocessor.core.model import ProjectData, PhotoData
 from preprocessor.gui.model import QProjectModel, QPhotoModel
 from preprocessor.gui.model import _QProjectModel as qpm_mod
 from preprocessor.gui.model import QListModel
+from preprocessor.gui.utils import patch_getOpenFileName_dialog, patch_getSaveFileName_dialog
 from tests.preprocessor.core.model.test_ProjectData import Test_ProjectData
 from tests.preprocessor.gui.cls_FakeMsgBox import _FakeMsgBox
 from tests.preprocessor.gui.model.cls_QModelTestBase import QModelTestBase
@@ -194,7 +195,7 @@ class TestQProjectModelIO:
         project_file = tmp_path / "proj.pbproj"
         pd = ProjectData()
         pd.save_to_file(project_file)
-        monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *args, **kwargs: (str(project_file), ""))
+        patch_getOpenFileName_dialog(str(project_file), monkeypatch)
 
         # Act
         result = QProjectModel.open_project(parent=None, old_project=None, initial_dir=tmp_path)
@@ -213,7 +214,7 @@ class TestQProjectModelIO:
         project_file = tmp_path / "proj.pbproj"
         pd = ProjectData()
         pd.save_to_file(project_file)
-        monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *args, **kwargs: (str(project_file), ""))
+        patch_getOpenFileName_dialog(str(project_file), monkeypatch)
 
         # Act
         result = QProjectModel.open_project(parent=None, old_project=old_project, initial_dir=tmp_path)
@@ -234,7 +235,7 @@ class TestQProjectModelIO:
         project_file = tmp_path / "proj.pbproj"
         pd = ProjectData()
         pd.save_to_file(project_file)
-        monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *args, **kwargs: (str(project_file), ""))
+        patch_getOpenFileName_dialog(str(project_file), monkeypatch)
 
         # Act
         result = QProjectModel.open_project(parent=None, old_project=old_project, initial_dir=tmp_path)
@@ -255,7 +256,7 @@ class TestQProjectModelIO:
         project_file = tmp_path / "proj.pbproj"
         pd = ProjectData()
         pd.save_to_file(project_file)
-        monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *args, **kwargs: (str(project_file), ""))
+        patch_getOpenFileName_dialog(str(project_file), monkeypatch)
 
         # Act
         result = QProjectModel.open_project(parent=None, old_project=old_project, initial_dir=tmp_path)
@@ -266,7 +267,7 @@ class TestQProjectModelIO:
     def test_open_project_dialog_canceled_returns_none(self, monkeypatch: MonkeyPatch) -> None:
         """open_project() should return None if the user cancels the open file dialog."""
         # Arrange
-        monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *args, **kwargs: ("", ""))
+        patch_getOpenFileName_dialog("", monkeypatch)
 
         # Act
         result = QProjectModel.open_project(parent=None, old_project=None, initial_dir=None)
@@ -348,7 +349,7 @@ class TestQProjectModelIO:
     def test_save_project_calls_save_as_when_no_project_file(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
         project = QProjectModel(ProjectData())
         save_path = tmp_path / "saved.pbproj"
-        monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *args, **kwargs: (str(save_path), ""))
+        patch_getSaveFileName_dialog(str(save_path), monkeypatch)
 
         ok = QProjectModel.save_project(parent=None, project=project, initial_dir=tmp_path)
 

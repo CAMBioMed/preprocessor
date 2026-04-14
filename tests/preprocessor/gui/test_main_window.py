@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QFileDialog
 from _pytest.monkeypatch import MonkeyPatch
 from pytestqt.qtbot import QtBot
 
-from preprocessor.gui.launch_dialog import new_project, open_project
+from preprocessor.gui.model import QProjectModel
 
 
 class TestMainWindow:
@@ -32,11 +32,12 @@ class TestMainWindow:
 
         # Create a new project
         model = QApplicationState()
+        project_model = QProjectModel.new_project(None, None, None)
+        assert project_model is not None
         project_dir = tmp_path / "project_dir"
         project_dir.mkdir()
         project_file = project_dir / "test_project.pbproj"
-        project_model = new_project(None, project_file)
-        assert project_model is not None
+        project_model.project_file = project_file
         model.current_project = project_model
 
         # Open the main window
@@ -75,7 +76,7 @@ class TestMainWindow:
         main_win.close()
 
         # Open the project file again and assert the photos are still there
-        reopened_project_model = open_project(None, project_file)
+        reopened_project_model = QProjectModel.open_project_from_path(None, None, project_file, None)
         assert reopened_project_model is not None
         assert reopened_project_model.photos_path == photos_dir
         assert len(reopened_project_model.photos) == 2

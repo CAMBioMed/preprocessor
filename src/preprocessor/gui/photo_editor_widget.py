@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QWidget
 from cv2.typing import MatLike
 
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
-from preprocessor.model.project_model import ProjectModel
+from preprocessor.gui.model._QProjectModel import QProjectModel
 from preprocessor.processing.undistort import undistort_photo
 from preprocessor.processing.load_image import load_image
 from preprocessor.gui.worker import Worker, start_worker
@@ -36,7 +36,7 @@ class PhotoEditorWidget(QWidget):
     """Last undistorted cv image (cached)."""
     _photo_signals_connected: bool
     """Whether we've connected model signals for the current photo."""
-    _current_project: ProjectModel | None
+    _current_project: QProjectModel | None
     _current_undistort_worker: Worker | None
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -60,7 +60,7 @@ class PhotoEditorWidget(QWidget):
         self._current_project = None
         self._current_undistort_worker = None
 
-    def show_photo(self, photo: QPhotoModel | None, project: ProjectModel) -> None:
+    def show_photo(self, photo: QPhotoModel | None, project: QProjectModel) -> None:
         if photo is not None:
             original_path = photo.original_filename
             # Load a QPixmap for fast rendering and also attempt to load a cv image

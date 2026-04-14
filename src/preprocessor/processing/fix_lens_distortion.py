@@ -1,12 +1,12 @@
 from cv2.typing import MatLike
 
-from preprocessor.model import Matrix3x3
+from preprocessor.core.types import CameraMatrix
 
 
 # Deprecated: use LensCorrectTransform instead, which also returns a debug image with the distortion grid.
 def undistort(
     img: MatLike,
-    camera_matrix: Matrix3x3,
+    camera_matrix: CameraMatrix,
     dist_coeffs: list[float],
 ) -> MatLike:
     """Correct lens distortion in the given image using the specified parameters."""

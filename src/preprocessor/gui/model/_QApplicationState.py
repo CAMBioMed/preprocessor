@@ -3,8 +3,9 @@ from typing import cast
 
 from PySide6.QtCore import QObject, Signal, QSettings, QByteArray
 
+from preprocessor.core.model import ProjectData
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
-from preprocessor.model.project_model import ProjectModel
+from preprocessor.gui.model._QProjectModel import QProjectModel
 
 
 class QApplicationState(QObject):
@@ -22,16 +23,16 @@ class QApplicationState(QObject):
         super().__init__()
         self.settings = QSettings()
 
-    _current_project: ProjectModel = ProjectModel(file=Path("empty"))  # placeholder empty project model
+    _current_project: QProjectModel = QProjectModel(ProjectData(project_file=Path("empty")))  # placeholder empty project model
     on_current_project_changed: Signal = Signal(object)  # https://stackoverflow.com/a/57810835/146622
 
     @property
-    def current_project(self) -> ProjectModel:
+    def current_project(self) -> QProjectModel:
         """The current project model, or None if no project is open."""
         return self._current_project
 
     @current_project.setter
-    def current_project(self, project: ProjectModel) -> None:
+    def current_project(self, project: QProjectModel) -> None:
         old_project = self._current_project
         if old_project != project:
             old_project.setParent(None)

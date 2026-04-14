@@ -7,9 +7,9 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QFileDialog, QApplication, QMessageBox
 
 from preprocessor.core.model import ProjectData
-from preprocessor.gui.model import QPhotoModel
-from preprocessor.gui.model import QListModel
-from preprocessor.gui.model import QModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
+from preprocessor.gui.model._QListModel import QListModel
+from preprocessor.gui.model._QModel import QModel
 
 logger = logging.getLogger(__name__)
 
