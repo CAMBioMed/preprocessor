@@ -43,8 +43,6 @@ def test_should_crop_successfully() -> None:
     params = PhotoData(
         original_filename=image_path,
         image_id=image_id,
-        color_correction=None,
-        lens_correction=None,
         crop=CropParams(
             enabled=True,
             corners=corners,
@@ -86,9 +84,7 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
     params = PhotoData(
         original_filename=image_path,
         image_id=image_id,
-        color_correction=None,
-        lens_correction=None,
-        crop=None,
+        crop=CropParams(enabled=False),
     )
     item = ImageTransformWorkItem(
         image_id=image_id,
@@ -120,9 +116,10 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
     params = PhotoData(
         original_filename=image_path,
         image_id=image_id,
-        color_correction=None,
-        lens_correction=None,
-        crop=CropParams(enabled=True),
+        crop=CropParams(
+            enabled=True,
+            corners=Corners(()),
+        ),
     )
     item = ImageTransformWorkItem(
         image_id=image_id,
@@ -156,8 +153,6 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     params = PhotoData(
         original_filename=image_path,
         image_id=image_id,
-        color_correction=None,
-        lens_correction=None,
         crop=CropParams(
             enabled=True,
             corners=bad_corners,
@@ -200,8 +195,6 @@ def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPa
     params = PhotoData(
         original_filename=image_path,
         image_id=image_id,
-        color_correction=None,
-        lens_correction=None,
         crop=CropParams(
             enabled=True,
             corners=corners,

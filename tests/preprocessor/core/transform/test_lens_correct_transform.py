@@ -22,9 +22,7 @@ def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None
     params = PhotoData(
         original_filename=image_path,
         image_id=image_id,
-        color_correction=None,
-        lens_correction=None,
-        crop=None,
+        lens_correction=LensCorrectionParams(enabled=False),
     )
     item = ImageTransformWorkItem(
         image_id=image_id,
@@ -62,9 +60,7 @@ def test_should_return_transformed_image_when_lens_correction_requested() -> Non
     params = PhotoData(
         original_filename=image_path,
         image_id=image_id,
-        color_correction=None,
         lens_correction=lens_params,
-        crop=None,
     )
     item = ImageTransformWorkItem(
         image_id=image_id,
@@ -102,9 +98,7 @@ def test_should_return_original_and_error_when_cv2_raises(monkeypatch: MonkeyPat
     params = PhotoData(
         image_id=image_id,
         original_filename=image_path,
-        color_correction=None,
         lens_correction=lens_params,
-        crop=None,
     )
     item = ImageTransformWorkItem(
         image_id=image_id,

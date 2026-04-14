@@ -74,7 +74,6 @@ class Test_ProjectData(PydanticModelTestBase):
             {{
               "image_id": "photo1",
               "original_filename": "photos/photo1.jpg",
-              "color_correction": {{}},
               "lens_correction": {{
                 "coefficients": [
                   0.01,

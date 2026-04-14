@@ -18,10 +18,14 @@ class Test_PhotoData(PydanticModelTestBase):
     ]]] = {
         "color_correction": (
             # Initial
-            None,
+            ColorCorrectionParams(),
             # Valid
             [
-                ColorCorrectionParams(),
+                ColorCorrectionParams(
+                    enabled=True,
+                    gain_r=0.1,
+                    gain_g=-0.1,
+                ),
             ],
             # Normalized
             [],
@@ -32,10 +36,13 @@ class Test_PhotoData(PydanticModelTestBase):
         ),
         "lens_correction": (
             # Initial
-            None,
+            LensCorrectionParams(),
             # Valid
             [
-                LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
+                LensCorrectionParams(
+                    enabled=True,
+                    coefficients=[0.01, -0.02, 0.001, 0.0005],
+                ),
             ],
             # Normalized
             [],
@@ -46,10 +53,13 @@ class Test_PhotoData(PydanticModelTestBase):
         ),
         "crop": (
             # Initial
-            None,
+            CropParams(),
             # Valid
             [
-                CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
+                CropParams(
+                    enabled=True,
+                    corners=Corners(((1.0, 2.0), (3.0, 4.0))),
+                ),
             ],
             # Normalized
             [],
@@ -63,7 +73,10 @@ class Test_PhotoData(PydanticModelTestBase):
             MetadataData(),
             # Valid
             [
-                MetadataData(partner="SZN", camera="EOS R5"),
+                MetadataData(
+                    partner="SZN",
+                    camera="EOS R5",
+                ),
             ],
             # Normalized
             [],
