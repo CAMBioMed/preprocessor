@@ -8,7 +8,7 @@ from pathlib import Path
 import PySide6
 
 from preprocessor import app_version, app_organisation, app_domain, app_name, app_formal_name
-from preprocessor.gui.launch_dialog import LaunchDialog, open_project
+from preprocessor.gui.launch_dialog import LaunchDialog
 from preprocessor.gui.main_window import MainWindow
 from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.gui.model._QProjectModel import QProjectModel
@@ -54,7 +54,7 @@ def main_gui(project_path: str | None = None) -> None:
         # Open the existing path or show the launch dialog to create/open a project
         project_model: QProjectModel | None = None
         if project_path is not None:
-            project_model = open_project(None, Path(project_path))
+            project_model = QProjectModel.open_project_from_path(None, None, Path(project_path), None)
         else:
             launch_dialog = LaunchDialog(model)
             if launch_dialog.exec() == QDialog.DialogCode.Accepted:
