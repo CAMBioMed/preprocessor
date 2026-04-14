@@ -61,22 +61,32 @@ class PhotoEditorWidget(QWidget):
         self._current_undistort_worker = None
 
     def show_photo(self, photo: QPhotoModel | None, project: QProjectModel) -> None:
+        # Disconnect any previous signals and clear state
+        try:
+            if self._photo_signals_connected and self._photo is not None:
+                with contextlib.suppress(Exception):
+                    self._photo.on_color_correction_changed.disconnect(self._on_photo_params_changed)
+                with contextlib.suppress(Exception):
+                    self._photo.on_lens_correction_changed.disconnect(self._on_photo_params_changed)
+                with contextlib.suppress(Exception):
+                    self._photo.on_crop_changed.disconnect(self._on_photo_params_changed)
+                self._photo_signals_connected = False
+        except Exception:
+            pass
+        self._pixmap = None
+        self._photo = None
+        # Clear any stored cv images & signal flags
+        self._original_cv_img = None
+        self._undistorted_cv_img = None
+        # Stop any active dragging when switching photos
+        self._drag_index = None
+        # Discard any unfinished edit when switching photos
+        self._edit_points = None
+
         if photo is not None:
             original_path = photo.original_filename
             # Load a QPixmap for fast rendering and also attempt to load a cv image
             self._pixmap = QPixmap(str(original_path))
-            # Disconnect signals from previous photo (if any)
-            try:
-                if self._photo_signals_connected and self._photo is not None:
-                    with contextlib.suppress(Exception):
-                        self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
-                    with contextlib.suppress(Exception):
-                        self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
-                    self._photo_signals_connected = False
-            except Exception:
-                # ignore disconnect errors
-                pass
-
             self._photo = photo
             self._current_project = project
 
@@ -90,46 +100,28 @@ class PhotoEditorWidget(QWidget):
             # First disconnect any previous connections
             try:
                 # Connect to the new photo signals
-                self._photo.on_camera_matrix_changed.connect(self._on_camera_or_distortion_changed)
-                self._photo.on_distortion_coefficients_changed.connect(self._on_camera_or_distortion_changed)
+                self._photo.on_color_correction_changed.connect(self._on_photo_params_changed)
+                self._photo.on_lens_correction_changed.connect(self._on_photo_params_changed)
+                self._photo.on_crop_changed.connect(self._on_photo_params_changed)
                 self._photo_signals_connected = True
             except Exception:
                 # If connecting fails, ignore silently (signals may be different in tests)
                 self._photo_signals_connected = False
 
-            # Immediately apply undistortion if possible (async)
-            self._apply_undistort_and_update()
-        else:
-            # Disconnect any previous signals and clear state
-            try:
-                if self._photo_signals_connected and self._photo is not None:
-                    with contextlib.suppress(Exception):
-                        self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
-                    with contextlib.suppress(Exception):
-                        self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
-            except Exception:
-                pass
-            self._pixmap = None
-            self._photo = None
-            # Clear any stored cv images & signal flags
-            self._original_cv_img = None
-            self._undistorted_cv_img = None
-            self._photo_signals_connected = False
-        # Stop any active dragging when switching photos
-        self._drag_index = None
-        # discard any unfinished edit when switching photos
-        self._edit_points = None
+            # Immediately apply transformations if possible (async)
+            self._apply_transformations_and_update()
+
         self.update()
 
-    def _on_camera_or_distortion_changed(self) -> None:
-        """Handler called when the photo camera matrix or distortion coefficients change.
-        Applies undistortion to the currently displayed image and updates the pixmap.
+    def _on_photo_params_changed(self, *args: object, **kwargs: object) -> None:
+        """Handler called when the photo transformation parameters change.
+        Applies the transformation to the currently displayed image and updates the pixmap.
         """
-        self._apply_undistort_and_update()
+        self._apply_transformations_and_update()
 
-    def _apply_undistort_and_update(self) -> None:
-        """Apply undistort() to the loaded CV image and update the displayed QPixmap.
-        Falls back to the original QPixmap if undistortion isn't possible.
+    def _apply_transformations_and_update(self) -> None:
+        """Apply the transformations to the loaded CV image and update the displayed QPixmap.
+        Falls back to the original QPixmap if the transformation fails.
         """
         if self._photo is None:
             return
