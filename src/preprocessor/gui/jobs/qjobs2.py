@@ -1,3 +1,5 @@
+import threading
+from threading import Event
 from typing import override
 
 from PySide6.QtCore import QThreadPool, QObject, Signal, QRunnable, Slot, QTimer
@@ -61,15 +63,27 @@ class QJob[R](QRunnable):
             self._state = JobState.FAILED
             self._signals.on_finished.emit(self, JobState.FAILED, e)
 
-class QJobContext[R](JobContext, JobHandle):
+class QJobContext[E](JobContext, JobHandle):
     """A JobContext implementation for QJob, providing cancellation and status update functionality."""
 
     _job: QJob
-    _result: R | None
+    _result: E | None
     _progress: float
+
+    _finished_event: Event
+    _finished_state: JobState | None
+    _finished_result: object | None
 
     def __init__(self, job: QJob) -> None:
         self._job = job
+
+        # synchronization primitives to wait for job completion
+        self._finished_event = threading.Event()
+        self._finished_state = None
+        self._finished_result = None
+        # connect to the job's finished signal so we are notified when it's done
+        # signature: on_finished(job, state, result)
+        self._job._signals.on_finished.connect(self._on_finished)
 
     @override
     def is_cancelled(self) -> bool:
@@ -89,7 +103,7 @@ class QJobContext[R](JobContext, JobHandle):
         self._job._signals.on_message.emit(self._job, message)
 
     @override
-    def run_subjob(self, job: "Job[R]", weight: float = 1.0) -> R:
+    def run_subjob[R](self, job: "Job[R]", weight: float = 1.0) -> R:
         # TODO Implement
         pass
 
@@ -102,9 +116,33 @@ class QJobContext[R](JobContext, JobHandle):
         self._job._cancel_token.cancel()
 
     @override
-    def result(self, timeout: float | None = None) -> R:
-        # TODO: Implement. Should this be blocking?
-        pass
+    def result(self, timeout: float | None = None) -> E:
+        finished = self._finished_event.wait(timeout)
+        if not finished:
+            raise TimeoutError("Timed out waiting for job result")
+
+        # At this point _finished_state/_finished_result are set by _on_finished.
+        if self._finished_state == JobState.COMPLETED:
+            # type: ignore[return-value]
+            return self._finished_result  # type: ignore
+        elif self._finished_state == JobState.CANCELLED:
+            # Signal cancellation to caller
+            raise JobCancelledException()
+        elif self._finished_state == JobState.FAILED:
+            # the job emitted the exception object as the result in your run() implementation
+            if isinstance(self._finished_result, Exception):
+                raise self._finished_result
+            else:
+                raise RuntimeError("Job failed with non-exception result")
+        else:
+            # fallback — shouldn't happen
+            raise RuntimeError("Job finished in unexpected state")
+
+    def _on_finished(self, job: QJob, state: JobState, result: object) -> None:
+        # Capture final state and result, and wake waiters
+        self._finished_state = state
+        self._finished_result = result
+        self._finished_event.set()
 
 class QJobProcessor(QObject, JobProcessor):
 
