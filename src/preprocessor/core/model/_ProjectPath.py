@@ -25,14 +25,16 @@ def _dump_project_path(v: Path, info: SerializationInfo) -> str:
 
     project_dir = cast(Path | None, (info.context or {}).get("project_dir"))
     if project_dir is None:
-        return p.as_posix()
+        return str(p)
     project_dir = Path(project_dir).resolve()
 
     try:
         relative_path = p.relative_to(project_dir, walk_up=False)
-        return relative_path.as_posix()
+        # NOTE: We use str() here to preserve backslashes on Windows,
+        # which Path.as_posix() would convert to forward slashes.
+        return str(relative_path)
     except ValueError:
-        return p.as_posix()
+        return str(p)
 
 
 ProjectPath = Annotated[
