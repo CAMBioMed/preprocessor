@@ -193,13 +193,23 @@ class JobHandle(ABC, Generic[R]):
         ...
 
     @abstractmethod
-    def result(self, timeout: float | None = None) -> R:
-        """Wait for the job to complete and return its result.
+    def await_result(self, timeout: float | None = None) -> R:
+        """Blocks the thread waiting for the job to complete and return its result.
 
         :param timeout: Optional timeout in seconds to wait for the job to complete.
         If None, wait indefinitely.
         :return: The result of the job.
         :raises TimeoutError: If the timeout is reached before the job completes.
+        :raises JobCancelledException: If the job was canceled before completion.
+        :raises Exception: If the job failed with an exception during execution.
+        """
+        ...
+
+    @abstractmethod
+    def try_result(self) -> R | None:
+        """Try to get the result of the job without blocking.
+
+        :return: The result of the job if it is completed, or None if the job is still running.
         :raises JobCancelledException: If the job was canceled before completion.
         :raises Exception: If the job failed with an exception during execution.
         """

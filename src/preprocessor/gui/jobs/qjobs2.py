@@ -1,6 +1,6 @@
 import threading
 from threading import Event
-from typing import override
+from typing import override, cast
 
 from PySide6.QtCore import QThreadPool, QObject, Signal, QRunnable, Slot, QTimer
 
@@ -63,6 +63,8 @@ class QJob[R](QRunnable):
             self._state = JobState.FAILED
             self._signals.on_finished.emit(self, JobState.FAILED, e)
 
+
+# noinspection PyProtectedMember
 class QJobContext[E](JobContext, JobHandle):
     """A JobContext implementation for QJob, providing cancellation and status update functionality."""
 
@@ -116,10 +118,17 @@ class QJobContext[E](JobContext, JobHandle):
         self._job._cancel_token.cancel()
 
     @override
-    def result(self, timeout: float | None = None) -> E:
+    def await_result(self, timeout: float | None = None) -> E:
         finished = self._finished_event.wait(timeout)
         if not finished:
             raise TimeoutError("Timed out waiting for job result")
+
+        return cast(E, self.try_result())
+
+    @override
+    def try_result(self) -> E | None:
+        if not self._finished_event.is_set():
+            return None
 
         # At this point _finished_state/_finished_result are set by _on_finished.
         if self._finished_state == JobState.COMPLETED:
@@ -144,6 +153,8 @@ class QJobContext[E](JobContext, JobHandle):
         self._finished_result = result
         self._finished_event.set()
 
+
+# noinspection PyProtectedMember
 class QJobProcessor(QObject, JobProcessor):
 
     _pool: QThreadPool
