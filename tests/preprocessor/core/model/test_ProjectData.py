@@ -1,3 +1,5 @@
+import json
+import os
 import textwrap
 from datetime import datetime
 from pathlib import Path
@@ -81,7 +83,7 @@ class Test_ProjectData(PydanticModelTestBase):
           "photos": [
             {{
               "image_id": "photo1",
-              "original_filename": "photos/photo1.jpg",
+              "original_filename": {json.dumps(os.path.join("photos", "photo1.jpg"))},
               "lens_correction": {{
                 "coefficients": [
                   0.01,
@@ -109,7 +111,7 @@ class Test_ProjectData(PydanticModelTestBase):
             }}
           ],
           "photos_path": "photos",
-          "export_path": "{str(export_dir)}"
+          "export_path": {json.dumps(str(export_dir))}
         }}""")
 
     def test_from_json(self, tmp_path: Path) -> None:
@@ -123,7 +125,7 @@ class Test_ProjectData(PydanticModelTestBase):
           "photos": [
             {{
               "image_id": "photo1",
-              "original_filename": "photos/photo1.jpg",
+              "original_filename": {json.dumps(os.path.join("photos", "photo1.jpg"))},
               "color_correction": {{}},
               "lens_correction": {{
                 "coefficients": [
@@ -152,7 +154,7 @@ class Test_ProjectData(PydanticModelTestBase):
             }}
           ],
           "photos_path": "photos",
-          "export_path": "{str(export_dir)}"
+          "export_path": {json.dumps(str(export_dir))}
         }}""")
 
         # Act

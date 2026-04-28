@@ -202,7 +202,6 @@ class QJobProcessorMeta(type(QObject), type(JobProcessor)):
     """Metaclass to allow QJobProcessor to inherit from both QObject and JobProcessor."""
 
 
-
 # noinspection PyProtectedMember
 class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):
     _pool: QThreadPool

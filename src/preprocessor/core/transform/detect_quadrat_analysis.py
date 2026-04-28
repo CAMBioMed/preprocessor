@@ -1,4 +1,3 @@
-
 from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.type_corners import Corners

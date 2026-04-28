@@ -1,4 +1,3 @@
-
 from preprocessor.core.model import PhotoData
 from preprocessor.core.transform.lens_correct_transform import LensCorrectTransform
 from preprocessor.core.transform.transform_image import transform_image
