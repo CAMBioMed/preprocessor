@@ -23,7 +23,9 @@ class QApplicationState(QObject):
         super().__init__()
         self.settings = QSettings()
 
-    _current_project: QProjectModel = QProjectModel(ProjectData(project_file=Path("empty")))  # placeholder empty project model
+    _current_project: QProjectModel = QProjectModel(
+        ProjectData(project_file=Path("empty"))
+    )  # placeholder empty project model
     on_current_project_changed: Signal = Signal(object)  # https://stackoverflow.com/a/57810835/146622
 
     @property

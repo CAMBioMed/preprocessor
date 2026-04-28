@@ -15,6 +15,7 @@ def ensure_qapp(qapp: QApplication) -> QApplication:
     # ensure a QApplication exists for tests that rely on it
     return qapp
 
+
 class SimpleJob(Job[str]):
     def run(self, ctx: JobContext) -> str:
         # Emit three progress updates: 0.0, 0.5, 1.0
@@ -44,6 +45,7 @@ def test_qjobprocessor_runs_job_and_emits_signals() -> None:
 
     assert seen == ["start", "finished:JobState.COMPLETED:ok"]
 
+
 def test_qjob_runs_and_context_reports_result() -> None:
     job = SimpleJob()
     qjob = QJob(job)
@@ -57,7 +59,6 @@ def test_qjob_runs_and_context_reports_result() -> None:
 
     # Now await_result should return the value produced by the job
     assert ctx.await_result() == "ok"
-
 
 
 def test_run_subjob_maps_progress_to_parent_slice() -> None:
@@ -109,5 +110,3 @@ def test_qjobprocessor_cancel_all() -> None:
 
     assert qjobs[-1]._cancel_token.is_cancelled()
     assert qjobs[-2]._cancel_token.is_cancelled()
-
-

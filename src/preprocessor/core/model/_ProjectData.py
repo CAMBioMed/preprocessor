@@ -78,7 +78,7 @@ class ProjectData(BaseModel, validate_assignment=True):
             raise FileNotFoundError(str(p))
         with p.open("r", encoding="utf-8") as fh:
             json_str = fh.read()
-        return cls.from_json(json_str, project_dir = project_dir)
+        return cls.from_json(json_str, project_dir=project_dir)
 
     def save_to_file(self, project_file: str | Path) -> None:
         """
@@ -96,11 +96,10 @@ class ProjectData(BaseModel, validate_assignment=True):
         with p.open("w", encoding="utf-8") as fh:
             fh.write(json_str)
 
-
     def write_to_csv_file(self, file: Path) -> None:
         """Write the metadata to a CSV file."""
         file.parent.mkdir(parents=True, exist_ok=True)
-        with open(file, 'w', newline='') as csvfile:
+        with open(file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile, dialect="excel")
             writer.writerow(MetadataData.csv_headers())
             for photo in self.photos:

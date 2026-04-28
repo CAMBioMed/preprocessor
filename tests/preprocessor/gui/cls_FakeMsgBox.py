@@ -52,4 +52,3 @@ class _FakeMsgBox:
     def critical(parent: object, title: object, msg: object) -> None:
         # emulate QMessageBox.critical (no-op for tests)
         return None
-

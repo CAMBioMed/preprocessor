@@ -1,6 +1,5 @@
 import contextlib
 import math
-from collections.abc import Callable
 
 from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
@@ -13,8 +12,7 @@ from preprocessor.gui.jobs.display_photo_job import DisplayPhotoJob
 from preprocessor.gui.jobs.qjobs import QJobProcessor
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.gui.model._QProjectModel import QProjectModel
-from preprocessor.processing.load_image import load_image
-from preprocessor.gui.worker import Worker, start_worker
+from preprocessor.gui.worker import Worker
 
 
 class PhotoEditorWidget(QWidget):
@@ -384,7 +382,8 @@ class PhotoEditorWidget(QWidget):
         cy = sum(p.y() for p in pts) / len(pts)
         return sorted(pts, key=lambda p: math.atan2(p.y() - cy, p.x() - cx))
 
-    # def undistort_photo_async(self, photo: QPhotoModel, result_callback: Callable[[object], None] | None = None) -> None:
+    # def undistort_photo_async(self, photo: QPhotoModel, result_callback: Callable[[object], None] | None = None)
+    #   -> None:
     #     """Start an asynchronous undistortion for the specified photo/project.
     #
     #     The result_callback (if provided) will be called with one argument:
@@ -432,7 +431,6 @@ class PhotoEditorWidget(QWidget):
 
                         # und = result
                         # Result is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
-                        import cv2
 
                         # if und.ndim == 3 and und.shape[2] == 3:
                         #     rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()

@@ -2,7 +2,7 @@ import threading
 from threading import Event
 from typing import override, cast
 
-from PySide6.QtCore import QThreadPool, QObject, Signal, QRunnable, Slot, QTimer
+from PySide6.QtCore import QThreadPool, QObject, Signal, QRunnable, Slot
 
 from preprocessor.core.jobs.jobs import JobProcessor, Job, JobHandle, R, JobState, JobContext
 from preprocessor.core.message_reporter import Message
@@ -166,7 +166,8 @@ class QJobContext[E](JobContext, JobHandle):
     def await_result(self, timeout: float | None = None) -> E:
         finished = self._finished_event.wait(timeout)
         if not finished:
-            raise TimeoutError("Timed out waiting for job result")
+            msg = "Timed out waiting for job result"
+            raise TimeoutError(msg)
 
         return cast(E, self.try_result())
 
@@ -178,16 +179,16 @@ class QJobContext[E](JobContext, JobHandle):
         if self._finished_state == JobState.COMPLETED:
             # type: ignore[return-value]
             return self._finished_result  # type: ignore
-        elif self._finished_state == JobState.CANCELLED:
+        if self._finished_state == JobState.CANCELLED:
             raise JobCancelledException()
-        elif self._finished_state == JobState.FAILED:
+        if self._finished_state == JobState.FAILED:
             if isinstance(self._finished_result, Exception):
                 raise self._finished_result
-            else:
-                raise RuntimeError("Job failed with non-exception result")
-        else:
-            # fallback — shouldn't happen
-            raise RuntimeError("Job finished in unexpected state")
+            msg = "Job failed with non-exception result"
+            raise RuntimeError(msg)
+        # fallback — shouldn't happen
+        msg = "Job finished in unexpected state"
+        raise RuntimeError(msg)
 
     def _on_finished(self, job: QJob, state: JobState, result: object) -> None:
         # Capture final state and result, and wake waiters
@@ -195,15 +196,15 @@ class QJobContext[E](JobContext, JobHandle):
         self._finished_result = result
         self._finished_event.set()
 
+
 # Create a metaclass that is compatible with both QObject (from PySide6) and JobProcessor (ABC)
 class QJobProcessorMeta(type(QObject), type(JobProcessor)):
     """Metaclass to allow QJobProcessor to inherit from both QObject and JobProcessor."""
-    pass
+
 
 
 # noinspection PyProtectedMember
 class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):
-
     _pool: QThreadPool
     """The thread pool used to run the jobs."""
     _cancel_token: CancelToken
@@ -226,7 +227,7 @@ class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):
     on_job_message: Signal = Signal(object, object)
     """Raised when a job reports a message. Emits (job: QJob, message: Message)"""
 
-    def __init__(self, parent: QObject | None = None, run_in_thread: bool = True):
+    def __init__(self, parent: QObject | None = None, run_in_thread: bool = True) -> None:
         """
         Creates a QJobProcessor.
 

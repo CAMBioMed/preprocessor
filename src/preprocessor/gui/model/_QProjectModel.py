@@ -13,6 +13,7 @@ from preprocessor.gui.model._QModel import QModel
 
 logger = logging.getLogger(__name__)
 
+
 class QProjectModel(QModel[ProjectData]):
     """The model for a project, used for the GUI."""
 
@@ -99,8 +100,10 @@ class QProjectModel(QModel[ProjectData]):
         before creating a new project; if they choose to cancel, this function will return None.
 
         :param parent: The parent widget for the dialog.
-        :param old_project: The existing project model that may have unsaved changes; can be None if no project is open.
-        :param initial_dir: An optional initial directory for the save dialog; can be None to use the default.
+        :param old_project: The existing project model that may have unsaved changes;
+        can be None if no project is open.
+        :param initial_dir: An optional initial directory for the save dialog;
+        can be None to use the default.
         :return: A new QProjectModel if a project was created, or None if the operation was canceled or failed.
         """
         if not QProjectModel.save_project_if_dirty(parent, old_project, initial_dir):
@@ -121,8 +124,10 @@ class QProjectModel(QModel[ProjectData]):
         before opening a new project; if they choose to cancel, this function will return None.
 
         :param parent: The parent widget for the dialog.
-        :param old_project: The existing project model that may have unsaved changes; can be None if no project is open.
-        :param initial_dir: An optional initial directory to open the file dialog in; can be None to use the default.
+        :param old_project: The existing project model that may have unsaved changes;
+        can be None if no project is open.
+        :param initial_dir: An optional initial directory to open the file dialog in;
+        can be None to use the default.
         :return: A loaded QProjectModel if a project was opened, or None if the operation was canceled or failed.
         """
         path, _ = QFileDialog.getOpenFileName(
@@ -146,7 +151,8 @@ class QProjectModel(QModel[ProjectData]):
 
         :param parent: The parent widget for any dialogs; can be None if not needed.
         :param project: The project model to save; must not be None.
-        :param initial_dir: An optional initial directory to open the file save dialog in; can be None to use the default.
+        :param initial_dir: An optional initial directory to open the file save dialog in;
+        can be None to use the default.
         :return: True if the project was successfully saved, or False if the operation was canceled or failed.
         """
         if project.project_file is not None:
@@ -164,9 +170,10 @@ class QProjectModel(QModel[ProjectData]):
 
         :param parent: The parent widget for the dialog.
         :param project: The project model to save; must not be None.
-        :param initial_dir: An optional initial directory to open the file dialog in; can be None to use the default.
+        :param initial_dir: An optional initial directory to open the file dialog in;
+        can be None to use the default.
         :return: True if the project was successfully saved, or False if the operation was canceled or failed.
-.       """
+        """
         path, _ = QFileDialog.getSaveFileName(
             parent,
             "Save Project",
@@ -225,7 +232,8 @@ class QProjectModel(QModel[ProjectData]):
         :param parent: The parent widget for the dialog.
         :param old_project: The existing project model that may have unsaved changes; can be None if no project is open.
         :param new_project_file: The file path to the project file to open.
-        :param initial_dir: An optional initial directory to open the file save dialog in; can be None to use the default.
+        :param initial_dir: An optional initial directory to open the file save dialog in;
+        can be None to use the default.
         :return: A loaded QProjectModel if a project was opened, or None if the operation was canceled or failed.
         """
         if not QProjectModel.save_project_if_dirty(parent, old_project, initial_dir):

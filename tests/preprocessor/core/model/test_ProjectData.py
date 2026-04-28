@@ -5,13 +5,19 @@ from typing import override, ClassVar
 
 import pytest
 
-from preprocessor.core.model import ProjectData, PhotoData, ColorCorrectionParams, LensCorrectionParams, CropParams, MetadataData
+from preprocessor.core.model import (
+    ProjectData,
+    PhotoData,
+    ColorCorrectionParams,
+    LensCorrectionParams,
+    CropParams,
+    MetadataData,
+)
 from preprocessor.core.type_corners import Corners
 from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
 class Test_ProjectData(PydanticModelTestBase):
-
     def test_photos_property(self) -> None:
         """The photos property should be a list of PhotoData objects."""
         # Arrange
@@ -38,7 +44,9 @@ class Test_ProjectData(PydanticModelTestBase):
         new_model = ProjectData.model_validate({**model.model_dump(), "photos": new_photos})
 
         # Assert: the photos property is updated correctly
-        assert new_model.photos == new_photos, f"After setting, photos should be {new_photos}, but got {new_model.photos}"
+        assert new_model.photos == new_photos, (
+            f"After setting, photos should be {new_photos}, but got {new_model.photos}"
+        )
 
     def test_to_json(self, tmp_path: Path) -> None:
         """to_json() should return a JSON string representation of the model.
@@ -166,12 +174,17 @@ class Test_ProjectData(PydanticModelTestBase):
             export_path=export_dir,
         )
 
-    fields_and_values: ClassVar[dict[str, tuple[
-        object | None,
-        list[object],
-        list[tuple[object, object]],
-        list[object],
-    ]]] = {
+    fields_and_values: ClassVar[
+        dict[
+            str,
+            tuple[
+                object | None,
+                list[object],
+                list[tuple[object, object]],
+                list[object],
+            ],
+        ]
+    ] = {
         "photos_path": (
             # Initial
             None,
@@ -186,7 +199,7 @@ class Test_ProjectData(PydanticModelTestBase):
             # Invalid
             [
                 3,  # Not a path
-            ]
+            ],
         ),
         "export_path": (
             # Initial
@@ -202,7 +215,7 @@ class Test_ProjectData(PydanticModelTestBase):
             # Invalid
             [
                 6,  # Not a path
-            ]
+            ],
         ),
     }
     """Map for each field name to:
@@ -220,7 +233,6 @@ class Test_ProjectData(PydanticModelTestBase):
     def update_model(self, model: ProjectData, field_name: str, new_value: object) -> ProjectData:
         setattr(model, field_name, new_value)
         return model
-
 
     @pytest.mark.parametrize(
         "field_name, initial_value, new_value",
@@ -297,8 +309,8 @@ class Test_ProjectData(PydanticModelTestBase):
                         framing="Framing1",
                         white_balance_card="Card1",
                         comments="No comments",
-                    )
-                )
+                    ),
+                ),
             ],
             photos_path=photos_dir,
             export_path=export_dir,
@@ -318,4 +330,3 @@ class Test_ProjectData(PydanticModelTestBase):
         testfile2.jpg,2023-09-01,Aegean,Crete,Site1,Fall,Transect1,100,35.0,25.0,10m,Nikon D850,John Doe,Clear,Strobe1,Framing1,Card1,No comments
         """)
         assert content == expected_content
-

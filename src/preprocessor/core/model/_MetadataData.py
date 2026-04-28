@@ -1,11 +1,10 @@
-from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
 from datetime import datetime
-from typing import Any, ClassVar, Iterable
+from typing import Any
 
-from pydantic import BaseModel, field_validator, Field
+from pydantic import field_validator, Field
 
 
 class MetadataData(BaseModel, validate_assignment=True):
@@ -65,32 +64,32 @@ class MetadataData(BaseModel, validate_assignment=True):
     def csv_headers() -> list[str]:
         """Return the CSV headers for the metadata fields."""
         return [
-            'Name',
+            "Name",
             "Date",
             # Aux fields:
-            'Partner',
-            'Area',
-            'Site',
-            'Season',
-            'Transect',
+            "Partner",
+            "Area",
+            "Site",
+            "Season",
+            "Transect",
             # Fixed fields:
-            'Height (cm)',
-            'Latitude',
-            'Longitude',
-            'Depth',
-            'Camera',
-            'Photographer',
-            'Water quality',
-            'Strobes',
-            'Framing gear used',
-            'White balance card',
-            'Comments',
+            "Height (cm)",
+            "Latitude",
+            "Longitude",
+            "Depth",
+            "Camera",
+            "Photographer",
+            "Water quality",
+            "Strobes",
+            "Framing gear used",
+            "White balance card",
+            "Comments",
         ]
 
     def csv_row(self) -> list[str]:
         """Return the CSV row for this metadata."""
         return [
-            self.filename or "", # TODO: This should depend on the metadata fields and where this photo is in the list
+            self.filename or "",  # TODO: This should depend on the metadata fields and where this photo is in the list
             self.date.date().isoformat() if self.date else "",
             self.partner or "",
             self.area or "",

@@ -1,4 +1,4 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 from pydantic import BaseModel, ConfigDict
 
@@ -7,8 +7,6 @@ from preprocessor.core.model._ColorCorrectionParams import ColorCorrectionParams
 from preprocessor.core.model._LensCorrectionParams import LensCorrectionParams
 from preprocessor.core.model._CropParams import CropParams
 from preprocessor.core.model._ProjectPath import ProjectPath
-
-
 
 
 class PhotoData(BaseModel, validate_assignment=True):
@@ -52,7 +50,13 @@ class PhotoData(BaseModel, validate_assignment=True):
         groups: dict[tuple[str | None, str | None, str | None, str | None, str | None], list[PhotoData]] = {}
         for photo in photos:
             metadata = photo.metadata
-            key = (metadata.site, metadata.area, str(metadata.date.year) if metadata.date else None, metadata.season, metadata.transect)
+            key = (
+                metadata.site,
+                metadata.area,
+                str(metadata.date.year) if metadata.date else None,
+                metadata.season,
+                metadata.transect,
+            )
             if key not in groups:
                 groups[key] = []
             groups[key].append(photo)

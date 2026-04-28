@@ -10,13 +10,17 @@ from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticMode
 
 
 class Test_MetadataData(PydanticModelTestBase):
-
-    fields_and_values: ClassVar[dict[str, tuple[
-        object | None,
-        list[object],
-        list[tuple[object, object]],
-        list[object],
-    ]]] = {
+    fields_and_values: ClassVar[
+        dict[
+            str,
+            tuple[
+                object | None,
+                list[object],
+                list[tuple[object, object]],
+                list[object],
+            ],
+        ]
+    ] = {
         "filename": (
             # Initial
             None,
@@ -376,7 +380,6 @@ class Test_MetadataData(PydanticModelTestBase):
     def update_model(self, model: MetadataData, field_name: str, new_value: object) -> MetadataData:
         setattr(model, field_name, new_value)
         return model
-
 
     @pytest.mark.parametrize(
         "field_name, initial_value, new_value",

@@ -109,11 +109,13 @@ class QPhotoModel(QModel[PhotoData]):
     @quadrat_corners.setter
     def quadrat_corners(self, value: list[Point2D] | None) -> None:
         old_model = self.crop
-        new_model = CropParams.model_validate({
-            **(old_model.model_dump() if old_model is not None else {}),
-            "enabled": value is not None,
-            "corners": Corners(tuple(value)) if value is not None else Corners(()),
-        })
+        new_model = CropParams.model_validate(
+            {
+                **(old_model.model_dump() if old_model is not None else {}),
+                "enabled": value is not None,
+                "corners": Corners(tuple(value)) if value is not None else Corners(()),
+            }
+        )
         self.crop = new_model
 
     # TODO: Replace by direct submodel access:
@@ -128,11 +130,13 @@ class QPhotoModel(QModel[PhotoData]):
     @camera_matrix.setter
     def camera_matrix(self, value: CameraMatrix | None) -> None:
         old_model = self.lens_correction
-        new_model = LensCorrectionParams.model_validate({
-            **(old_model.model_dump() if old_model is not None else {}),
-            "enabled": value is not None,
-            "camera_matrix": value,
-        })
+        new_model = LensCorrectionParams.model_validate(
+            {
+                **(old_model.model_dump() if old_model is not None else {}),
+                "enabled": value is not None,
+                "camera_matrix": value,
+            }
+        )
         self.lens_correction = new_model
 
     # TODO: Replace by direct submodel access:
@@ -147,9 +151,11 @@ class QPhotoModel(QModel[PhotoData]):
     @distortion_coefficients.setter
     def distortion_coefficients(self, value: list[float] | None) -> None:
         old_model = self.lens_correction
-        new_model = LensCorrectionParams.model_validate({
-            **(old_model.model_dump() if old_model is not None else {}),
-            "enabled": value is not None,
-            "coefficients": value,
-        })
+        new_model = LensCorrectionParams.model_validate(
+            {
+                **(old_model.model_dump() if old_model is not None else {}),
+                "enabled": value is not None,
+                "coefficients": value,
+            }
+        )
         self.lens_correction = new_model

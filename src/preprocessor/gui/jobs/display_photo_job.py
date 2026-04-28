@@ -1,8 +1,6 @@
-from pathlib import Path
 
 from preprocessor.core.model import PhotoData
 from preprocessor.core.transform.lens_correct_transform import LensCorrectTransform
-from preprocessor.core.transform.perspective_crop_transform import PerspectiveCropTransform
 from preprocessor.core.transform.transform_image import transform_image
 from preprocessor.core.types import ImageRGB
 from preprocessor.gui.jobs.qjobs import QJob
@@ -18,7 +16,7 @@ class DisplayPhotoJob(QJob):
         self.photo = photo
 
     def process(self) -> ImageRGB | None:
-        self.update_status(f"Displaying...")
+        self.update_status("Displaying...")
 
         new_img = transform_image(
             self.photo.original_filename,

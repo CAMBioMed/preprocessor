@@ -24,8 +24,8 @@ class CancelToken:
     def is_cancelled(self) -> bool:
         return self._event.is_set()
 
-class QJobReporter(MessageReporter, ProgressReporter):
 
+class QJobReporter(MessageReporter, ProgressReporter):
     job: "QJob"
     signals: "QJobSignals"
 

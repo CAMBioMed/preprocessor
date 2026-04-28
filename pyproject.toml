@@ -255,6 +255,10 @@ ignore = [
   # For now:
   # logging-f-string
   "G004",
+  # unused-method-argument
+  "ARG002",
+  # unused-lambda-argument
+  "ARG005",
 ]
 pydocstyle.convention = "pep257"
 

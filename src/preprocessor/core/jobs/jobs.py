@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar, Generic
+from typing import Any, TypeVar
 
 from preprocessor.core.message_reporter import Message, MessageLevel
 from preprocessor.gui.jobs.qjobs import JobCancelledException
 from enum import Enum, auto
 
 R = TypeVar("R")
+
 
 class JobContext(ABC):
     """Context for running a job, providing necessary services and information.
@@ -141,7 +142,7 @@ class JobContext(ABC):
         ...
 
 
-class Job(ABC, Generic[R]):
+class Job[R](ABC):
     """Base class for jobs.
 
     Each job should implement the run method to perform the job's action and return results.
@@ -154,7 +155,7 @@ class Job(ABC, Generic[R]):
     def run(
         self,
         ctx: JobContext,
-     ) -> R:
+    ) -> R:
         """Run the job and return its result.
 
         :param ctx: The context for running the job, providing necessary services
@@ -172,8 +173,8 @@ class JobState(Enum):
     FAILED = auto()
     CANCELLED = auto()
 
-class JobHandle(ABC, Generic[R]):
 
+class JobHandle[R](ABC):
     @abstractmethod
     def state(self) -> JobState:
         """Get the current state of the job."""
@@ -214,6 +215,7 @@ class JobHandle(ABC, Generic[R]):
         :raises Exception: If the job failed with an exception during execution.
         """
         ...
+
 
 class JobProcessor(ABC):
     """A class responsible for processing jobs."""

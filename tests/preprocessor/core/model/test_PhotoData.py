@@ -8,14 +8,19 @@ from preprocessor.core.model import PhotoData, ColorCorrectionParams, LensCorrec
 from preprocessor.core.type_corners import Corners
 from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
-class Test_PhotoData(PydanticModelTestBase):
 
-    fields_and_values: ClassVar[dict[str, tuple[
-        object | None,
-        list[object],
-        list[tuple[object, object]],
-        list[object],
-    ]]] = {
+class Test_PhotoData(PydanticModelTestBase):
+    fields_and_values: ClassVar[
+        dict[
+            str,
+            tuple[
+                object | None,
+                list[object],
+                list[tuple[object, object]],
+                list[object],
+            ],
+        ]
+    ] = {
         "color_correction": (
             # Initial
             ColorCorrectionParams(),
@@ -47,9 +52,7 @@ class Test_PhotoData(PydanticModelTestBase):
             # Normalized
             [],
             # Invalid
-            [
-                "foo"
-            ],
+            ["foo"],
         ),
         "crop": (
             # Initial
@@ -64,9 +67,7 @@ class Test_PhotoData(PydanticModelTestBase):
             # Normalized
             [],
             # Invalid
-            [
-                "foo"
-            ],
+            ["foo"],
         ),
         "metadata": (
             # Initial
@@ -81,9 +82,7 @@ class Test_PhotoData(PydanticModelTestBase):
             # Normalized
             [],
             # Invalid
-            [
-                "foo"
-            ],
+            ["foo"],
         ),
     }
     """Map for each field name to:
@@ -104,7 +103,6 @@ class Test_PhotoData(PydanticModelTestBase):
     def update_model(self, model: PhotoData, field_name: str, new_value: object) -> PhotoData:
         setattr(model, field_name, new_value)
         return model
-
 
     @pytest.mark.parametrize(
         "field_name, initial_value, new_value",
@@ -144,119 +142,143 @@ class Test_PhotoData(PydanticModelTestBase):
         self.assert_property_normalization(field_name, initial_value, input_value, expected_value)
 
     photos = [
-        ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
-            image_id="img_001",
-            original_filename=Path("img_001.jpg").resolve(),
-            metadata=MetadataData(
-                date=datetime(2025, 8, 27),
-                partner="CSIC",
-                area="Montgri",
-                site="Dui",
-                season="Summer",
-                transect="1",
-                depth="5",
-                camera="NIKON D7000",
-            )
-        )),
-        ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
-            image_id="img_002",
-            original_filename=Path("img_002.jpg").resolve(),
-            metadata=MetadataData(
-                date=datetime(2025, 8, 27),
-                partner="CSIC",
-                area="Montgri",
-                site="Dui",
-                season="Summer",
-                transect="1",
-                depth="5",
-                camera="NIKON D7000",
-            )
-        )),
-        ("CSIC_Montgri_Dui_2025_Summer_1_2025-08-28_003.jpg", PhotoData(
-            image_id="img_003",
-            original_filename=Path("img_003.jpg").resolve(),
-            metadata=MetadataData(
-                date=datetime(2025, 8, 28),
-                partner="CSIC",
-                area="Montgri",
-                site="Dui",
-                season="Summer",
-                transect="1",
-                depth="5",
-                camera="NIKON D7000",
-            )
-        )),
-        ("CSIC_Montgri_Falaguer_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
-            image_id="img_004",
-            original_filename=Path("img_004.jpg").resolve(),
-            metadata=MetadataData(
-                date=datetime(2025, 8, 27),
-                partner="CSIC",
-                area="Montgri",
-                site="Falaguer",
-                season="Summer",
-                transect="1",
-                depth="5",
-                camera="NIKON D7000",
-            )
-        )),
-        ("CSIC_Medes_Portixol_2025_Summer_1_2025-08-27_001.jpg", PhotoData(
-            image_id="img_005",
-            original_filename=Path("img_005.jpg").resolve(),
-            metadata=MetadataData(
-                date=datetime(2025, 8, 27),
-                partner="CSIC",
-                area="Medes",
-                site="Portixol",
-                season="Summer",
-                transect="1",
-                depth="5",
-                camera="NIKON D7000",
-            )
-        )),
-        ("CSIC_Montgri_Falaguer_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
-            image_id="img_006",
-            original_filename=Path("img_006.jpg").resolve(),
-            metadata=MetadataData(
-                date=datetime(2025, 8, 27),
-                partner="CSIC",
-                area="Montgri",
-                site="Falaguer",
-                season="Summer",
-                transect="1",
-                depth="5",
-                camera="NIKON D7000",
-            )
-        )),
-        ("CSIC_Medes_Portixol_2025_Summer_1_2025-08-27_002.jpg", PhotoData(
-            image_id="img_007",
-            original_filename=Path("img_007.jpg").resolve(),
-            metadata=MetadataData(
-                date=datetime(2025, 8, 27),
-                partner="CSIC",
-                area="Medes",
-                site="Portixol",
-                season="Summer",
-                transect="1",
-                depth="5",
-                camera="NIKON D7000",
-            )
-        )),
-        ("custom_filename.jpg", PhotoData(
-            image_id="img_008",
-            original_filename=Path("img_008.jpg").resolve(),
-            metadata=MetadataData(
-                filename="custom_filename.jpg",
-                date=datetime(2025, 8, 27),
-                partner="CSIC",
-                area="Medes",
-                site="Portixol",
-                season="Summer",
-                transect="1",
-                depth="5",
-                camera="NIKON D7000",
-            )
-        )),
+        (
+            "CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_001.jpg",
+            PhotoData(
+                image_id="img_001",
+                original_filename=Path("img_001.jpg").resolve(),
+                metadata=MetadataData(
+                    date=datetime(2025, 8, 27),
+                    partner="CSIC",
+                    area="Montgri",
+                    site="Dui",
+                    season="Summer",
+                    transect="1",
+                    depth="5",
+                    camera="NIKON D7000",
+                ),
+            ),
+        ),
+        (
+            "CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_002.jpg",
+            PhotoData(
+                image_id="img_002",
+                original_filename=Path("img_002.jpg").resolve(),
+                metadata=MetadataData(
+                    date=datetime(2025, 8, 27),
+                    partner="CSIC",
+                    area="Montgri",
+                    site="Dui",
+                    season="Summer",
+                    transect="1",
+                    depth="5",
+                    camera="NIKON D7000",
+                ),
+            ),
+        ),
+        (
+            "CSIC_Montgri_Dui_2025_Summer_1_2025-08-28_003.jpg",
+            PhotoData(
+                image_id="img_003",
+                original_filename=Path("img_003.jpg").resolve(),
+                metadata=MetadataData(
+                    date=datetime(2025, 8, 28),
+                    partner="CSIC",
+                    area="Montgri",
+                    site="Dui",
+                    season="Summer",
+                    transect="1",
+                    depth="5",
+                    camera="NIKON D7000",
+                ),
+            ),
+        ),
+        (
+            "CSIC_Montgri_Falaguer_2025_Summer_1_2025-08-27_001.jpg",
+            PhotoData(
+                image_id="img_004",
+                original_filename=Path("img_004.jpg").resolve(),
+                metadata=MetadataData(
+                    date=datetime(2025, 8, 27),
+                    partner="CSIC",
+                    area="Montgri",
+                    site="Falaguer",
+                    season="Summer",
+                    transect="1",
+                    depth="5",
+                    camera="NIKON D7000",
+                ),
+            ),
+        ),
+        (
+            "CSIC_Medes_Portixol_2025_Summer_1_2025-08-27_001.jpg",
+            PhotoData(
+                image_id="img_005",
+                original_filename=Path("img_005.jpg").resolve(),
+                metadata=MetadataData(
+                    date=datetime(2025, 8, 27),
+                    partner="CSIC",
+                    area="Medes",
+                    site="Portixol",
+                    season="Summer",
+                    transect="1",
+                    depth="5",
+                    camera="NIKON D7000",
+                ),
+            ),
+        ),
+        (
+            "CSIC_Montgri_Falaguer_2025_Summer_1_2025-08-27_002.jpg",
+            PhotoData(
+                image_id="img_006",
+                original_filename=Path("img_006.jpg").resolve(),
+                metadata=MetadataData(
+                    date=datetime(2025, 8, 27),
+                    partner="CSIC",
+                    area="Montgri",
+                    site="Falaguer",
+                    season="Summer",
+                    transect="1",
+                    depth="5",
+                    camera="NIKON D7000",
+                ),
+            ),
+        ),
+        (
+            "CSIC_Medes_Portixol_2025_Summer_1_2025-08-27_002.jpg",
+            PhotoData(
+                image_id="img_007",
+                original_filename=Path("img_007.jpg").resolve(),
+                metadata=MetadataData(
+                    date=datetime(2025, 8, 27),
+                    partner="CSIC",
+                    area="Medes",
+                    site="Portixol",
+                    season="Summer",
+                    transect="1",
+                    depth="5",
+                    camera="NIKON D7000",
+                ),
+            ),
+        ),
+        (
+            "custom_filename.jpg",
+            PhotoData(
+                image_id="img_008",
+                original_filename=Path("img_008.jpg").resolve(),
+                metadata=MetadataData(
+                    filename="custom_filename.jpg",
+                    date=datetime(2025, 8, 27),
+                    partner="CSIC",
+                    area="Medes",
+                    site="Portixol",
+                    season="Summer",
+                    transect="1",
+                    depth="5",
+                    camera="NIKON D7000",
+                ),
+            ),
+        ),
     ]
 
     def test_determine_filename(self) -> None:
@@ -270,4 +292,3 @@ class Test_PhotoData(PydanticModelTestBase):
             for idx, photo in enumerate(group):
                 expected_filename = next(expected for expected, p in self.photos if p == photo)
                 assert photo.determine_filename(idx + 1) == expected_filename
-

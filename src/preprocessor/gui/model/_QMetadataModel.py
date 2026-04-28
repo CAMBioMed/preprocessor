@@ -7,8 +7,6 @@ from preprocessor.core.model import MetadataData
 from preprocessor.gui.model._QModel import QModel
 
 
-
-
 class MetadataModel(QModel[MetadataData]):
     """The model for the metadata of a photo."""
 

@@ -10,6 +10,7 @@ from preprocessor.gui.model import QPhotoModel
 from tests.preprocessor.core.model.test_PhotoData import Test_PhotoData
 from tests.preprocessor.gui.model.cls_QModelTestBase import QModelTestBase
 
+
 @pytest.fixture(autouse=True)
 def ensure_qapp(qapp: QApplication) -> QApplication:
     # ensure a QApplication exists for tests that rely on it
@@ -61,7 +62,11 @@ class Test_QPhotoModel(QModelTestBase):
 
     @pytest.mark.parametrize(
         "field_name, initial_value, valid_value, input_value, expected_value",
-        [(n, v, vvs[0], lv, rv) for n, (v, vvs, nvs, _) in Test_PhotoData.fields_and_values.items() for (lv, rv) in nvs],
+        [
+            (n, v, vvs[0], lv, rv)
+            for n, (v, vvs, nvs, _) in Test_PhotoData.fields_and_values.items()
+            for (lv, rv) in nvs
+        ],
     )
     def test_property_normalization_and_signals(
         self,

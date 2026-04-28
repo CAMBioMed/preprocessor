@@ -16,7 +16,6 @@ from preprocessor.gui.model import QModel
 #     return qapp
 
 
-
 class ItemData(BaseModel):
     name: str
 
@@ -41,6 +40,7 @@ class Item(QModel[ItemData]):
 def ensure_qapp(qapp: QApplication) -> QApplication:
     # ensure a QApplication exists for tests that rely on it
     return qapp
+
 
 @pytest.fixture
 def model() -> QListModel[Item]:

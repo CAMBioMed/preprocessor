@@ -1,5 +1,3 @@
-from abc import ABC
-from typing import overload, override
 
 from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
@@ -9,16 +7,16 @@ from preprocessor.gui.jobs.qjobs import CancelToken
 import logging
 import math
 from dataclasses import dataclass
-from dataclasses import dataclass
 from enum import Enum
 
 import cv2
 import numpy as np
-from cv2.typing import MatLike, Point2f
+from cv2.typing import MatLike
 from sklearn.cluster import KMeans
 
 
 logger = logging.getLogger(__name__)
+
 
 class ThresholdingMethod(Enum):
     NONE = "None"
@@ -170,8 +168,8 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
     ),
 )
 
-    
-class DetectQuadratAnalysisJob():
+
+class DetectQuadratAnalysisJob:
     """Detect quadrat corners from an image using the specified parameters."""
 
     name: str = "Detect Quadrat Analysis"
@@ -189,10 +187,11 @@ class DetectQuadratAnalysisJob():
     # @override
     def __call__(
         self,
-        cancel_token: CancelToken = CancelToken(),
+        cancel_token: CancelToken | None = None,
         messages: MessageReporter = NOOP_MESSAGE_REPORTER,
         progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
     ) -> Corners:
+        cancel_token = cancel_token or CancelToken()
         params = self._params
         original_img = self._image.data.copy()
 
@@ -315,7 +314,6 @@ class DetectQuadratAnalysisJob():
         img = cv2.Canny(img, threshold1, threshold2, apertureSize=params.aperture_size)
         logger.debug("Cannied image.")
         return img
-
 
     @staticmethod
     def _hough(img: MatLike, debug_img: MatLike, params: HoughParams) -> tuple[MatLike, list[Line]]:

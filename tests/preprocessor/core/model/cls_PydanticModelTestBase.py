@@ -11,7 +11,6 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 class PydanticModelTestBase(ABC, Generic[ModelT]):
-
     @abstractmethod
     def create_model(self) -> ModelT:
         """Return an empty/new instance of the model under test."""
@@ -34,16 +33,18 @@ class PydanticModelTestBase(ABC, Generic[ModelT]):
 
         # Assert: the initial value is as expected
         actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
+        assert actual_value == initial_value, (
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
+        )
 
         # Act: update the model
         new_model = self.update_model(model, field_name, new_value)
 
         # Assert: the value is updated
         actual_value = getattr(new_model, field_name)
-        assert actual_value == new_value, \
+        assert actual_value == new_value, (
             f"After setting, value of {field_name} should be {new_value}, but got {actual_value}"
+        )
 
     def assert_property_invalid_value(
         self,
@@ -57,8 +58,9 @@ class PydanticModelTestBase(ABC, Generic[ModelT]):
 
         # Assert: the initial value is as expected
         actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
+        assert actual_value == initial_value, (
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
+        )
 
         # Assert: updating the model with an invalid value should fail
         with pytest.raises(ValueError):
@@ -77,8 +79,9 @@ class PydanticModelTestBase(ABC, Generic[ModelT]):
 
         # Assert: the initial value is as expected
         actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
+        assert actual_value == initial_value, (
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
+        )
 
         # Act: set the value
         new_model = self.update_model(model, field_name, input_value)

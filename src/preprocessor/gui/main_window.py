@@ -194,14 +194,18 @@ class MainWindow(QMainWindow):
         new_project = QProjectModel.new_project(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
             self.model.current_photo = None
-            self.model.projects_path = new_project.project_file.parent if new_project.project_file else self.model.projects_path
+            self.model.projects_path = (
+                new_project.project_file.parent if new_project.project_file else self.model.projects_path
+            )
             self.model.current_project = new_project
 
     def _handle_open_project_action(self) -> None:
         new_project = QProjectModel.open_project(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
             self.model.current_photo = None
-            self.model.projects_path = new_project.project_file.parent if new_project.project_file else self.model.projects_path
+            self.model.projects_path = (
+                new_project.project_file.parent if new_project.project_file else self.model.projects_path
+            )
             self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:

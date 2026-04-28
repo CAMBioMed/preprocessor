@@ -16,6 +16,7 @@ def ensure_qapp(qapp: QApplication) -> QApplication:
     # ensure a QApplication exists for tests that rely on it
     return qapp
 
+
 class Test_QMetadataModel(QModelTestBase):
     """Unit tests for QMetadataModel."""
 
@@ -56,7 +57,11 @@ class Test_QMetadataModel(QModelTestBase):
 
     @pytest.mark.parametrize(
         "field_name, initial_value, valid_value, input_value, expected_value",
-        [(n, v, vvs[0], lv, rv) for n, (v, vvs, nvs, _) in Test_MetadataData.fields_and_values.items() for (lv, rv) in nvs],
+        [
+            (n, v, vvs[0], lv, rv)
+            for n, (v, vvs, nvs, _) in Test_MetadataData.fields_and_values.items()
+            for (lv, rv) in nvs
+        ],
     )
     def test_property_normalization_and_signals(
         self,

@@ -84,7 +84,6 @@ class Test_QProjectModel(QModelTestBase):
             assert len(project_model.photos) == 0
             assert photo0.parent() is None
 
-
     def test_has_a_property_for_each_data_field(self) -> None:
         """Model should have a property for each field in the data model."""
         self.assert_has_a_property_for_each_data_field(QProjectModel, ProjectData)
@@ -117,7 +116,11 @@ class Test_QProjectModel(QModelTestBase):
 
     @pytest.mark.parametrize(
         "field_name, initial_value, valid_value, input_value, expected_value",
-        [(n, v, vvs[0], lv, rv) for n, (v, vvs, nvs, _) in Test_ProjectData.fields_and_values.items() for (lv, rv) in nvs],
+        [
+            (n, v, vvs[0], lv, rv)
+            for n, (v, vvs, nvs, _) in Test_ProjectData.fields_and_values.items()
+            for (lv, rv) in nvs
+        ],
     )
     def test_property_normalization_and_signals(
         self,
@@ -136,6 +139,7 @@ class Test_QProjectModel(QModelTestBase):
             expected_value,
             qtbot,
         )
+
 
 class TestQProjectModelIO:
     def test_new_project_when_no_old_project_returns_model(self) -> None:
@@ -189,7 +193,9 @@ class TestQProjectModelIO:
         # Assert
         assert model is None
 
-    def test_open_project_from_path_when_no_old_project_returns_model(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    def test_open_project_from_path_when_no_old_project_returns_model(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """open_project() should return a QProjectModel when given a valid project file path and no old project is provided."""
         # Arrange
         project_file = tmp_path / "proj.pbproj"
@@ -205,7 +211,9 @@ class TestQProjectModelIO:
         assert isinstance(result, QProjectModel)
         assert result.project_file == project_file
 
-    def test_open_project_from_path_when_old_project_is_not_dirty_returns_model(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    def test_open_project_from_path_when_old_project_is_not_dirty_returns_model(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """open_project() should return a new QProjectModel when old project is not dirty."""
         # Arrange
         old_project = QProjectModel(ProjectData())
@@ -224,7 +232,9 @@ class TestQProjectModelIO:
         assert isinstance(result, QProjectModel)
         assert result.project_file == project_file
 
-    def test_open_project_from_path_when_old_project_is_dirty_and_user_discards_returns_model(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    def test_open_project_from_path_when_old_project_is_dirty_and_user_discards_returns_model(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """open_project() should return a new QProjectModel when old project is dirty but user chooses to discard changes."""
         # Arrange
         old_project = QProjectModel(ProjectData())
@@ -245,7 +255,9 @@ class TestQProjectModelIO:
         assert isinstance(result, QProjectModel)
         assert result.project_file == project_file
 
-    def test_open_project_from_path_when_old_project_is_dirty_and_user_cancels_returns_none(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    def test_open_project_from_path_when_old_project_is_dirty_and_user_cancels_returns_none(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """open_project() should return None when old project is dirty and user cancels the action."""
         # Arrange
         old_project = QProjectModel(ProjectData())
@@ -297,7 +309,7 @@ class TestQProjectModelIO:
         called = {}
 
         def _fake_save_as(parent: object, project: object, initial_dir: object) -> bool:
-            called['ok'] = True
+            called["ok"] = True
             return True
 
         monkeypatch.setattr(QProjectModel, "save_project_as", staticmethod(_fake_save_as))
@@ -307,7 +319,7 @@ class TestQProjectModelIO:
 
         # Assert
         assert ok is True
-        assert called.get('ok') is True
+        assert called.get("ok") is True
 
     def test_save_project_to_path_failure_shows_error_message(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
         """save_project_to_path() should show an error message and return False if saving fails."""
@@ -388,7 +400,7 @@ class TestQProjectModelIO:
         called = {}
 
         def _fake_save(parent: object, project: object, initial_dir: object) -> bool:
-            called['ok'] = True
+            called["ok"] = True
             return True
 
         monkeypatch.setattr(QProjectModel, "save_project", staticmethod(_fake_save))
@@ -396,13 +408,13 @@ class TestQProjectModelIO:
         monkeypatch.setattr(qpm_mod, "QMessageBox", _FakeMsgBox)
 
         assert QProjectModel.save_project_if_dirty(parent=None, project=dirty_project3, initial_dir=None) is True
-        assert called.get('ok') is True
+        assert called.get("ok") is True
 
     def test_open_project_from_path_respects_save_if_dirty(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
         monkeypatch.setattr(QProjectModel, "save_project_if_dirty", staticmethod(lambda *args, **kwargs: False))
 
-        result = QProjectModel.open_project_from_path(parent=None, old_project=None, new_project_file=tmp_path / "nope.pbproj", initial_dir=None)
+        result = QProjectModel.open_project_from_path(
+            parent=None, old_project=None, new_project_file=tmp_path / "nope.pbproj", initial_dir=None
+        )
 
         assert result is None
-
-

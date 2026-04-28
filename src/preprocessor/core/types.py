@@ -8,10 +8,12 @@ import numpy.typing as npt
 Point2D = tuple[float, float]
 """A 2D point represented as a tuple of (x, y) coordinates."""
 
+
 @dataclass
 class Line:
     rho: float
     theta: float  # radians
+
 
 ImageArray = npt.NDArray[np.uint8]
 """Defines the Image type as a numpy array of 8-bit integers,

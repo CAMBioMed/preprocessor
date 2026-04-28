@@ -1,10 +1,8 @@
 import logging
-from pathlib import Path
 
-from PySide6.QtWidgets import QDialog, QWidget, QFileDialog, QMessageBox, QApplication
+from PySide6.QtWidgets import QDialog, QWidget
 
 from preprocessor import app_formal_name
-from preprocessor.core.model import ProjectData
 from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
 from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.gui.model._QProjectModel import QProjectModel
@@ -58,4 +56,3 @@ class LaunchDialog(QDialog):
         # self.project_model = project
         # self.accept()
         self.reject()
-

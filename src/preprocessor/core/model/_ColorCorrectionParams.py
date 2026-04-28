@@ -18,4 +18,3 @@ class ColorCorrectionParams(BaseModel, validate_assignment=True):
     gain_b: float = 1.0
 
     # TODO: Implement validation
-

@@ -34,7 +34,7 @@ class AddPhotoJob(QJob):
         from PIL import Image
 
         with Image.open(self._filepath) as img:
-            width, height = img.size
+            _width, _height = img.size
 
         # Create PhotoData (a pydantic BaseModel) which is safe to pass across threads
         data = PhotoData(

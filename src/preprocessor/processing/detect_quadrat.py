@@ -228,7 +228,8 @@
 #     return (debug_img, result)
 #
 #
-# def _find_corners(lines: list[Line], debug_img: MatLike, scale: float = 1.0, draw_debug: bool = True) -> list[Point2f]:
+# def _find_corners(lines: list[Line], debug_img: MatLike, scale: float = 1.0, draw_debug: bool = True)
+#   -> list[Point2f]:
 #     """Find corners from the detected lines."""
 #     logger.debug("Finding corners from lines...")
 #     corners: list[Point2f] = []

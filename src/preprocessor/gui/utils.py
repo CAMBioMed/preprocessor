@@ -32,12 +32,14 @@ def patch_getOpenFileName_dialog(result: str, monkeypatch: MonkeyPatch) -> None:
         lambda parent, title, directory, filter: (result, "Stub (*.stub)"),
     )
 
+
 def patch_getOpenFileNames_dialog(result: list[str], monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr(
         QFileDialog,
         "getOpenFileNames",
         lambda parent, title, directory, filter: (result, "Stub (*.stub)"),
     )
+
 
 def patch_getSaveFileName_dialog(result: str, monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr(

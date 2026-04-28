@@ -10,8 +10,8 @@ from preprocessor.gui.model import QModel
 # Make this base test generic over the pydantic model type being tested.
 QModelT = TypeVar("QModelT", bound=QModel)
 
-class QModelTestBase(ABC, Generic[QModelT]):
 
+class QModelTestBase(ABC, Generic[QModelT]):
     @abstractmethod
     def create_model(self) -> QModelT:
         """Return an empty/new instance of the model under test."""
@@ -29,8 +29,9 @@ class QModelTestBase(ABC, Generic[QModelT]):
 
         # Assert: the initial value is as expected
         actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
+        assert actual_value == initial_value, (
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
+        )
 
         # Act: update the model
         new_model = self.assert_model_property_signals_on_mutation(
@@ -43,8 +44,9 @@ class QModelTestBase(ABC, Generic[QModelT]):
 
         # Assert: the value is updated
         actual_value = getattr(new_model, field_name)
-        assert actual_value == new_value, \
+        assert actual_value == new_value, (
             f"After setting, value of {field_name} should be {new_value}, but got {actual_value}"
+        )
 
     def assert_property_invalid_value_and_signals(
         self,
@@ -59,8 +61,9 @@ class QModelTestBase(ABC, Generic[QModelT]):
 
         # Assert: the initial value is as expected
         actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
+        assert actual_value == initial_value, (
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
+        )
 
         # Assert: updating the model with an invalid value should fail
         with pytest.raises(ValueError):
@@ -87,13 +90,15 @@ class QModelTestBase(ABC, Generic[QModelT]):
 
         # Assert: the initial value is as expected
         actual_value = getattr(model, field_name)
-        assert actual_value == initial_value, \
+        assert actual_value == initial_value, (
             f"Initial value of {field_name} should be {initial_value}, but got {actual_value}"
+        )
 
         # Arrange: set to another valid value
         setattr(model, field_name, valid_value)
-        assert getattr(model, field_name) == valid_value, \
+        assert getattr(model, field_name) == valid_value, (
             f"Value of {field_name} should be {valid_value} after setting, but got {getattr(model, field_name)}"
+        )
 
         model.mark_clean()  # reset dirty state before testing normalization
 
@@ -130,7 +135,8 @@ class QModelTestBase(ABC, Generic[QModelT]):
             on_field_signal = getattr(model, f"on_{prop_name}_changed")
         except AttributeError:
             raise AssertionError(
-                f"Model {type(model).__name__} does not have a signal named on_{prop_name}_changed") from None
+                f"Model {type(model).__name__} does not have a signal named on_{prop_name}_changed"
+            ) from None
         on_changed_signal = model.on_changed
 
         # Assert: model is not dirty
@@ -175,8 +181,9 @@ class QModelTestBase(ABC, Generic[QModelT]):
 
         # Assert: initial value is as expected
         actual_value = getattr(model, prop_name)
-        assert getattr(model, prop_name) == initial_value, \
+        assert getattr(model, prop_name) == initial_value, (
             f"Expected initial value of {prop_name} to be {initial_value}, but got {actual_value}"
+        )
 
         self.assert_model_property_signals_on_mutation(
             qtbot,
