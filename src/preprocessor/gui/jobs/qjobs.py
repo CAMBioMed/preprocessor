@@ -7,7 +7,6 @@ from threading import Event
 from collections.abc import Iterable
 
 from PySide6.QtGui import QIcon
-from rich.progress import Progress
 
 from preprocessor.core.message_reporter import MessageReporter, Message
 from preprocessor.core.progress_reporter import ProgressReporter
