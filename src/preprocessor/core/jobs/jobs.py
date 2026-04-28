@@ -1,11 +1,28 @@
 from abc import ABC, abstractmethod
+from threading import Event
 from typing import Any, TypeVar, Generic
 
 from preprocessor.core.message_reporter import Message, MessageLevel
-from preprocessor.gui.jobs.qjobs import JobCancelledException
 from enum import Enum, auto
 
 R = TypeVar("R")
+
+class JobCancelledException(Exception):
+    """An exception that can be raised by a QJob to indicate it was canceled."""
+
+
+class CancelToken:
+    """A simple cancellation token that can be shared between threads to signal when a job should be canceled."""
+
+    def __init__(self) -> None:
+        self._event = Event()
+
+    def cancel(self) -> None:
+        self._event.set()
+
+    def is_cancelled(self) -> bool:
+        return self._event.is_set()
+
 
 class JobContext(ABC):
     """Context for running a job, providing necessary services and information.
@@ -151,10 +168,7 @@ class Job(ABC, Generic[R]):
     """Name of the job, displayed to the user and used for logging."""
 
     @abstractmethod
-    def run(
-        self,
-        ctx: JobContext,
-     ) -> R:
+    def execute(self, ctx: JobContext) -> R:
         """Run the job and return its result.
 
         :param ctx: The context for running the job, providing necessary services
@@ -219,7 +233,7 @@ class JobProcessor(ABC):
     """A class responsible for processing jobs."""
 
     @abstractmethod
-    def submit[R](self, job: Job[R]) -> JobHandle[R]:
+    def submit_job[R](self, job: Job[R]) -> JobHandle[R]:
         """Submit a job for processing.
 
         :param job: The job to process.

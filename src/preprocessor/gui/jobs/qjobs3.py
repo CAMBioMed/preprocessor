@@ -28,17 +28,10 @@ class QJobSignals(QObject):
     """Raised when a job reports a message. Emits (job: QJob, message: Message)"""
 
 
-class QJob[R](QRunnable):
-    """Wraps a Job to communicate with the UI via signals."""
+class QJob[R](QRunnable, ABC):
 
-    _job: Job[R]
-    """The wrapped job."""
     signals: QJobSignals
     """The signals used to communicate with the UI."""
-    _state: JobState
-    """The current state of the job."""
-    _cancel_token: CancelToken
-    """The cancellation token used to signal the job to stop."""
     _ctx: "QJobContext[R]"
     """The context passed to the job when running, providing cancellation and status update functionality."""
 
@@ -46,8 +39,50 @@ class QJob[R](QRunnable):
         super().__init__()
         self._job = job
         self.signals = QJobSignals()
-        self._state = JobState.PENDING
-        self._cancel_token = CancelToken()
+        self._ctx = QJobContext(self)
+
+    @abstractmethod
+    def execute(self, ctx: "QJobContext[R]") -> R:
+        """Run the job and return its result.
+
+        :param ctx: The context for running the job, providing necessary services
+        and information such as cancellation status, progress reporting, and message reporting.
+        :return: The result of the job, which can be any object depending on the job.
+        :raises JobCancelledException: If cancellation is requested during the job.
+        """
+        ...
+
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            self._state = JobState.RUNNING
+            self.signals.on_start.emit(self)
+            result = self.execute(self._ctx)
+            self._state = JobState.COMPLETED
+            self.signals.on_finished.emit(self, JobState.COMPLETED, result)
+        except JobCancelledException:
+            self._state = JobState.CANCELLED
+            self.signals.on_finished.emit(self, JobState.CANCELLED, None)
+        except Exception as e:
+            self._state = JobState.FAILED
+            self.signals.on_finished.emit(self, JobState.FAILED, e)
+
+
+class QJobOfJob[R](QJob[R]):
+    """Wraps a Job to communicate with the UI via signals."""
+
+    _job: Job[R]
+    """The wrapped job."""
+    signals: QJobSignals
+    """The signals used to communicate with the UI."""
+    _ctx: "QJobContext[R]"
+    """The context passed to the job when running, providing cancellation and status update functionality."""
+
+    def __init__(self, job: Job[R]) -> None:
+        super().__init__()
+        self._job = job
+        self.signals = QJobSignals()
         self._ctx = QJobContext(self)
 
     @Slot()
@@ -81,25 +116,29 @@ class QJobHandle[E](JobHandle[E], ABC):
         ...
 
 # noinspection PyProtectedMember
-class QJobContext[E](JobContext, QJobHandle):
+class QJobContext[R](JobContext, QJobHandle):
     """A JobContext implementation for QJob, providing cancellation and status update functionality."""
 
     _job: QJob
-    _result: E | None
+    """The QJob being run."""
+    _result: R | Exception | None
+    """The current result of the job, if available. Only set when the job finishes successfully."""
     _progress: float
-
+    """The current progress of the job, as a value between 0.0 and 1.0."""
+    _state: JobState
+    """The current state of the job."""
+    _cancel_token: CancelToken
+    """The cancellation token used to signal the job to stop."""
     _finished_event: Event
-    _finished_state: JobState | None
-    _finished_result: object | None
+    """An event that is set when the job finishes, allowing await_result to wait for completion."""
 
     def __init__(self, job: QJob) -> None:
         self._job = job
         self._result = None
         self._progress = 0.0
-
+        self._state = JobState.PENDING
+        self._cancel_token = CancelToken()
         self._finished_event = threading.Event()
-        self._finished_state = None
-        self._finished_result = None
 
         self._job.signals.on_finished.connect(self._on_finished)
 
@@ -117,7 +156,7 @@ class QJobContext[E](JobContext, QJobHandle):
 
     @override
     def is_cancelled(self) -> bool:
-        return self._job._cancel_token.is_cancelled()
+        return self._cancel_token.is_cancelled()
 
     @override
     def update_status(self, message: str) -> None:
@@ -133,7 +172,7 @@ class QJobContext[E](JobContext, QJobHandle):
         self._job.signals.on_message.emit(self._job, message)
 
     @override
-    def run_subjob[R](self, job: "Job[R]", weight: float = 1.0) -> R:
+    def run_subjob[R2](self, job: "Job[R2]", weight: float = 1.0) -> R2:
         # Clamp weight to a sensible range
         weight = max(0.0, min(1.0, float(weight)))
 
@@ -164,7 +203,7 @@ class QJobContext[E](JobContext, QJobHandle):
             def log_msg(self, message: Message) -> None:
                 outer.log_msg(message)
 
-            def run_subjob[R2](self, job2: "Job[R2]", weight2: float = 1.0) -> R2:
+            def run_subjob[R3](self, job2: "Job[R3]", weight2: float = 1.0) -> R3:
                 # nested subjob: multiply weights so child progress is mapped correctly
                 return outer.run_subjob(job2, weight * weight2)
 
@@ -174,7 +213,7 @@ class QJobContext[E](JobContext, QJobHandle):
         # Run sub-job synchronously in this thread, letting exceptions propagate
         result = job.execute(_SubContext())
 
-        # Check cancellation after completion too (sub-job may have been cancelled)
+        # Check cancellation after completion too (sub-job may have been canceled)
         outer.check_cancelled()
 
         # When subjob completes, ensure parent's progress reaches the end of the slice
@@ -184,33 +223,33 @@ class QJobContext[E](JobContext, QJobHandle):
 
     @override
     def state(self) -> JobState:
-        return self._job._state
+        return self._state
 
     @override
     def cancel(self) -> None:
-        self._job._cancel_token.cancel()
+        self._cancel_token.cancel()
 
     @override
-    def await_result(self, timeout: float | None = None) -> E:
+    def await_result(self, timeout: float | None = None) -> R:
         finished = self._finished_event.wait(timeout)
         if not finished:
             raise TimeoutError("Timed out waiting for job result")
 
-        return cast(E, self.try_result())
+        return cast(R, self.try_result())
 
     @override
-    def try_result(self) -> E | None:
+    def try_result(self) -> R | None:
         if not self._finished_event.is_set():
             return None
 
-        if self._finished_state == JobState.COMPLETED:
+        if self._state == JobState.COMPLETED:
             # type: ignore[return-value]
-            return self._finished_result  # type: ignore
-        elif self._finished_state == JobState.CANCELLED:
+            return self._result  # type: ignore
+        elif self._state == JobState.CANCELLED:
             raise JobCancelledException()
-        elif self._finished_state == JobState.FAILED:
-            if isinstance(self._finished_result, Exception):
-                raise self._finished_result
+        elif self._state == JobState.FAILED:
+            if isinstance(self._result, Exception):
+                raise self._result
             else:
                 raise RuntimeError("Job failed with non-exception result")
         else:
@@ -219,8 +258,8 @@ class QJobContext[E](JobContext, QJobHandle):
 
     def _on_finished(self, job: QJob, state: JobState, result: object) -> None:
         # Capture final state and result, and wake waiters
-        self._finished_state = state
-        self._finished_result = result
+        self._state = state
+        self._result = result
         self._finished_event.set()
 
 # Create a metaclass that is compatible with both QObject (from PySide6) and JobProcessor (ABC)
@@ -239,7 +278,8 @@ class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):
     _run_in_thread: bool
     """Whether to run jobs on a separate thread instead of on the Qt event loop."""
 
-    _qjobs: list[QJob]
+    _qjobs: list[tuple[QJob, QJobHandle]]
+    """The currently running QJobs and their associated handles, so they can be cancelled if needed."""
 
     on_job_start: Signal = Signal(object)
     """Raised when a job starts. Emits (job: QJob)."""
@@ -266,7 +306,7 @@ class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):
         self._cancel_token = CancelToken()
         self._run_in_thread = run_in_thread
         self._qjobs = []
-        # ensure a thread pool is available when running in threads
+        # Ensure a thread pool is available when running in threads
         self._pool = QThreadPool.globalInstance()
 
         # Prepare job signal forwarding helpers
@@ -305,9 +345,12 @@ class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):
 
     @override
     def submit_job(self, job: Job[R]) -> QJobHandle[R]:
-        qjob = QJob(job)
+        qjob = QJobOfJob(job)
+        return self.submit_qjob(qjob)
+
+    def submit_qjob(self, qjob: QJob[R]) -> QJobHandle[R]:
+        """Submit a QJob directly, without wrapping it in a Job. This is used when the caller already has a QJob instance."""
         self._qjobs.append(qjob)
-        # connect signals so the processor re-emits them
         self._connect_job_signals(qjob)
         if self._run_in_thread:
             self._pool.start(qjob)

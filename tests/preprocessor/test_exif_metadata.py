@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 
-from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
+from preprocessor.gui.jobs.add_photo_qjob import AddPhotoJob
 
 
 def test_append_photo_model_populates_photo_metadata(tmp_path: Path) -> None:

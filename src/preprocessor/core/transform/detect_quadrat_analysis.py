@@ -1,11 +1,11 @@
 from abc import ABC
 from typing import overload, override
 
+from preprocessor.core.jobs.jobs import CancelToken
 from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
 from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import ImageRGB, Line, Point2D
-from preprocessor.gui.jobs.qjobs import CancelToken
 import logging
 import math
 from dataclasses import dataclass
@@ -171,7 +171,7 @@ defaultParams: QuadratDetectionParams = QuadratDetectionParams(
 )
 
     
-class DetectQuadratAnalysisJob():
+class DetectQuadratAnalysisJob:
     """Detect quadrat corners from an image using the specified parameters."""
 
     name: str = "Detect Quadrat Analysis"

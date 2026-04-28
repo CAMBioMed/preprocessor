@@ -1,4 +1,5 @@
 import warnings
+from typing import cast
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
@@ -6,12 +7,14 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
 from pathlib import Path
 
 from preprocessor import app_formal_name
+from preprocessor.core.jobs.jobs import JobState
 from preprocessor.core.model import PhotoData
 from preprocessor.core.types import ImageRGB
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
-from preprocessor.gui.jobs.export_photo_job import ExportPhotoJob
+from preprocessor.gui.jobs.export_photo_qjob import ExportPhotoJob
+from preprocessor.gui.jobs.qjobs2 import QJobProcessor
 from preprocessor.gui.metadata_dialog import MetadataDialog
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
@@ -43,6 +46,9 @@ class MainWindow(QMainWindow):
     """The central widget showing the image."""
     _bound_project: QProjectModel | None = None
 
+    _job_processor: QJobProcessor
+    """The shared QJobProcessor for running background jobs."""
+
     def __init__(self, model: QApplicationState, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.ui = Ui_MainWindow()
@@ -53,6 +59,8 @@ class MainWindow(QMainWindow):
         self._create_thumbnail_dock()
         self._create_editor_dock()
         self._create_photo_editor()
+
+        self._job_processor = QJobProcessor()
 
         self.model = model
         self._connect_signals()
@@ -134,6 +142,10 @@ class MainWindow(QMainWindow):
 
         # Help menu
         self.ui.menuHelp_About.setShortcut(QKeySequence.StandardKey.HelpContents)
+
+    def _setup_status_bar(self) -> None:
+        """Set up the status bar."""
+        self.statusBar().showMessage("Ready")
 
     def _create_thumbnail_dock(self) -> None:
         """Create the thumbnail list dock widget."""
@@ -289,26 +301,29 @@ class MainWindow(QMainWindow):
         # Helper QObject to perform the actual append on the main thread
         class _AppendHelper(QObject):
             @Slot(object, bool)
-            def handle_job_success(self, job: AddPhotoJob, result: None) -> None:
+            def handle_job_finished(self, job: AddPhotoJob, state: JobState, result: PhotoData | Exception | None) -> None:
                 # Only append if the job completed successfully and produced a photo
-                photo_data = job.result
-                if photo_data is not None:
-                    # Note that we create the QPhotoModel (a QObject) on the main thread,
-                    # using the data produced by the background job. This is required.
-                    photo_model = QPhotoModel(photo_data)
-                    project.photos.append(photo_model)
+                if state != JobState.COMPLETED or result is None:
+                    return
+                photo_data = cast(PhotoData, result)
+                # Note that we create the QPhotoModel (a QObject) on the main thread,
+                # using the data produced by the background job. This is required.
+                photo_model = QPhotoModel(photo_data)
+                project.photos.append(photo_model)
 
-        jobs: list[QJob] = []
+        # jobs: list[QJob] = []
         helper = _AppendHelper(self)
         for p in paths:
             job = AddPhotoJob(p)
+            handle = self._job_processor.submit_job(job)
             # Connect the job end signal to the helper so append happens on the main thread
-            job.signals.on_job_success.connect(helper.handle_job_success)
-            jobs.append(job)
+            handle.signals.on_finished.connect(helper.handle_job_finished)
+            # jobs.append(job)
 
         # Show progress dialog and run jobs; dialog is modal and will block until done
-        dlg = ProgressDialog("Adding Photos", jobs, parent=self, run_in_thread=True)
-        dlg.exec()
+        # TODO
+        # dlg = ProgressDialog("Adding Photos", jobs, parent=self, run_in_thread=True)
+        # dlg.exec()
 
     def _handle_remove_photos_action(self, selected: list[QPhotoModel]) -> None:
         assert self.model.current_project is not None

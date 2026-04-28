@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QWidget
 from cv2.typing import MatLike
 
 from preprocessor.core.types import ImageRGB
-from preprocessor.gui.jobs.display_photo_job import DisplayPhotoJob
+from preprocessor.gui.jobs.display_photo_qjob import DisplayPhotoJob
 from preprocessor.gui.jobs.qjobs import QJobProcessor
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.gui.model._QProjectModel import QProjectModel
@@ -463,8 +463,8 @@ class PhotoEditorWidget(QWidget):
             self.update()
 
         job = DisplayPhotoJob(self._photo._data)
-        job.signals.on_job_success.connect(_on_result)
-        job.signals.on_job_failed.connect(_on_error)
+        job.signals.on_success.connect(_on_result)
+        job.signals.on_failed.connect(_on_error)
 
         self._processor = QJobProcessor(
             jobs=[job],

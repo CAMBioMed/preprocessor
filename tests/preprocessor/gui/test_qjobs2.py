@@ -16,7 +16,7 @@ def ensure_qapp(qapp: QApplication) -> QApplication:
     return qapp
 
 class SimpleJob(Job[str]):
-    def run(self, ctx: JobContext) -> str:
+    def execute(self, ctx: JobContext) -> str:
         # Emit three progress updates: 0.0, 0.5, 1.0
         ctx.update_progress(0.0)
         ctx.update_progress(0.5)
@@ -39,7 +39,7 @@ def test_qjobprocessor_runs_job_and_emits_signals() -> None:
     processor.on_job_finished.connect(_on_finished)
 
     job = SimpleJob()
-    h = processor.submit(job)
+    h = processor.submit_job(job)
     h.await_result(1.0)  # Wait for completion
 
     assert seen == ["start", "finished:JobState.COMPLETED:ok"]
@@ -74,7 +74,7 @@ def test_run_subjob_maps_progress_to_parent_slice() -> None:
     def _collector(job, progress: float) -> None:
         seen.append(progress)
 
-    qjob._signals.on_progress.connect(_collector)
+    qjob.signals.on_progress.connect(_collector)
 
     # Run a subjob with weight 0.4. Expect mapped progress values in [0.2, 0.6]
     child = SimpleJob()
@@ -94,8 +94,8 @@ def test_qjobprocessor_cancel_all() -> None:
     processor = QJobProcessor(run_in_thread=False)
 
     # Submit two simple jobs
-    h1 = processor.submit(SimpleJob())
-    h2 = processor.submit(SimpleJob())
+    h1 = processor.submit_job(SimpleJob())
+    h2 = processor.submit_job(SimpleJob())
 
     # Access the underlying qjobs to verify cancel token behavior
     qjobs = processor._qjobs
