@@ -294,7 +294,6 @@ files = [
     "src/preprocessor/__main__.py",
     "src/preprocessor/gui/apply_parameters_dialog.ui",
     "src/preprocessor/gui/editor_dock.ui",
-    "src/preprocessor/gui/export_dialog.ui",
     "src/preprocessor/gui/hsv_threshold.ui",
     "src/preprocessor/gui/launch_dialog.ui",
     "src/preprocessor/gui/main_window.ui",

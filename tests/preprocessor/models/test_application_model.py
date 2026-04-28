@@ -4,8 +4,9 @@ import pytest
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication
 
-from preprocessor.model.application_model import ApplicationModel
-from preprocessor.model.project_model import ProjectModel
+from preprocessor.core.model import ProjectData
+from preprocessor.gui.model._QApplicationState import QApplicationState
+from preprocessor.gui.model._QProjectModel import QProjectModel
 
 
 # Ensure a Qt application context exists for QObject usage in tests. Rely on pytest-qt's qapp.
@@ -17,7 +18,7 @@ def _ensure_qapp(qapp: QApplication) -> QApplication:
 class TestApplicationModel:
     def test_current_project(self) -> None:
         # Arrange
-        app_model = ApplicationModel()
+        app_model = QApplicationState()
 
         raised_on_changed = False
 
@@ -31,13 +32,13 @@ class TestApplicationModel:
         raised_on_current_project_changed = None
 
         @Slot(object)
-        def handle_on_current_project_changed(project: ProjectModel) -> None:
+        def handle_on_current_project_changed(project: QProjectModel) -> None:
             nonlocal raised_on_current_project_changed
             raised_on_current_project_changed = project
 
         app_model.on_current_project_changed.connect(handle_on_current_project_changed)
 
-        project_model0 = ProjectModel(file=Path("test_project0.json"))
+        project_model0 = QProjectModel(ProjectData(project_file=Path("test_project0.json")))
 
         # Assert
         assert project_model0.parent() is None
@@ -56,7 +57,7 @@ class TestApplicationModel:
 
         # Act: Set current_project to project_model1
         raised_on_changed = False
-        project_model1 = ProjectModel(file=Path("test_project1.json"))
+        project_model1 = QProjectModel(ProjectData(project_file=Path("test_project1.json")))
         app_model.current_project = project_model1
 
         # Assert

@@ -4,8 +4,8 @@ from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem
 
 from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
 from preprocessor.gui.utils import icon_from_resource
-from preprocessor.model.qlistmodel import QListModel
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.gui.model import QListModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 
 
 class ThumbnailDockWidget(QDockWidget):
@@ -13,10 +13,10 @@ class ThumbnailDockWidget(QDockWidget):
 
     on_add_photos_action: Signal = Signal()
     on_remove_photos_action: Signal = Signal(object)
-    on_selection_changed: Signal = Signal(object)  # Signal(list[PhotoModel])
-    on_item_double_clicked: Signal = Signal(object)  # Signal(PhotoModel | None)
-    on_apply_parameters_to_selected: Signal = Signal(object)  # Signal(list[PhotoModel])
-    on_set_metadata_to_selected: Signal = Signal(object)  # Signal(list[PhotoModel])
+    on_selection_changed: Signal = Signal(object)  # Signal(list[QPhotoModel])
+    on_item_double_clicked: Signal = Signal(object)  # Signal(QPhotoModel | None)
+    on_apply_parameters_to_selected: Signal = Signal(object)  # Signal(list[QPhotoModel])
+    on_set_metadata_to_selected: Signal = Signal(object)  # Signal(list[QPhotoModel])
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QDockWidget.__init__(self, parent)
@@ -74,7 +74,7 @@ class ThumbnailDockWidget(QDockWidget):
         self.on_selection_changed.emit(selected_photos)
 
     def _handle_item_double_clicked(self, item: QListWidgetItem) -> None:
-        model: PhotoModel | None = item.data(Qt.ItemDataRole.UserRole)
+        model: QPhotoModel | None = item.data(Qt.ItemDataRole.UserRole)
         self.on_item_double_clicked.emit(model)
 
     def _handle_context_menu(self, pos: QPoint) -> None:
@@ -109,15 +109,15 @@ class ThumbnailDockWidget(QDockWidget):
         global_pos = self.ui.thumbnailListWidget.mapToGlobal(pos)
         menu.exec(global_pos)
 
-    def _handle_apply_parameters_to_selected_action(self, selected_photos: list[PhotoModel]) -> None:
+    def _handle_apply_parameters_to_selected_action(self, selected_photos: list[QPhotoModel]) -> None:
         """Emit signal to indicate user requested 'Apply to all' for the selected photos."""
         self.on_apply_parameters_to_selected.emit(selected_photos)
 
-    def _handle_set_metadata_to_selected_action(self, selected_photos: list[PhotoModel]) -> None:
+    def _handle_set_metadata_to_selected_action(self, selected_photos: list[QPhotoModel]) -> None:
         """Emit signal to indicate user requested 'Set metadata to all' for the selected photos."""
         self.on_set_metadata_to_selected.emit(selected_photos)
 
-    def update_thumbnails(self, photos: QListModel[PhotoModel]) -> None:
+    def update_thumbnails(self, photos: QListModel[QPhotoModel]) -> None:
         """Update the thumbnails to match the given list of photos."""
         thumbnail_list: QListWidget = self.ui.thumbnailListWidget
 
@@ -129,9 +129,9 @@ class ThumbnailDockWidget(QDockWidget):
         removed = current_photos_set - new_photos_set
         added = new_photos_set - current_photos_set
 
-        # Remove items corresponding to removed PhotoModel instances
+        # Remove items corresponding to removed QPhotoModel instances
         for photo in removed:
-            # Find by stored PhotoModel in UserRole or fallback to matching filename
+            # Find by stored QPhotoModel in UserRole or fallback to matching filename
             found_index = None
             for i in range(thumbnail_list.count()):
                 item = thumbnail_list.item(i)
@@ -144,7 +144,7 @@ class ThumbnailDockWidget(QDockWidget):
                 # takeItem returns the removed QListWidgetItem; Qt will handle deletion by parent
                 thumbnail_list.takeItem(found_index)
 
-        # Insert items for added PhotoModel instances at the correct index to preserve order
+        # Insert items for added QPhotoModel instances at the correct index to preserve order
         for photo in added:
             try:
                 insert_index = photos.index(photo)

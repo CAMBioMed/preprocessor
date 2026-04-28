@@ -2,30 +2,29 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLineEdit, QPlainTextEdit, QDateTimeEdit, QDoubleSpinBox, QSpinBox
+from PySide6.QtWidgets import QLineEdit, QDateTimeEdit, QDoubleSpinBox, QSpinBox
 from pytestqt.qtbot import QtBot
 
 from preprocessor.gui.metadata_dialog import MetadataDialog
-from preprocessor.model.application_model import ApplicationModel
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.gui.model._QApplicationState import QApplicationState
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 
 
-def _make_photo(metadata: dict[str, Any] | None = None) -> PhotoModel:
-    # Create a minimal PhotoModel with a given metadata dict
+def _make_photo(metadata: dict[str, Any] | None = None) -> QPhotoModel:
+    # Create a minimal QPhotoModel with a given metadata dict
     data = {
+        "image_id": "test_photo",
         "original_filename": Path("IMG_TEST.JPG").resolve(),
-        "width": 10,
-        "height": 10,
     }
     if metadata is not None:
         data["metadata"] = metadata
-    return PhotoModel(data=data)
+    return QPhotoModel(data=data)
 
 
 def test_metadata_dialog_copy_from_current_and_apply(qtbot: QtBot) -> None:
     """Copy metadata from the current photo into the dialog and apply to selected photos."""
     with qtbot.capture_exceptions():
-        app_model: ApplicationModel = ApplicationModel()
+        app_model: QApplicationState = QApplicationState()
 
         # Create a current photo with metadata
         current_meta: dict[str, object] = {
@@ -47,11 +46,11 @@ def test_metadata_dialog_copy_from_current_and_apply(qtbot: QtBot) -> None:
             "white_balance_card": "Yes",
             "comments": "A sample comment",
         }
-        current_photo: PhotoModel = _make_photo(metadata=current_meta)
+        current_photo: QPhotoModel = _make_photo(metadata=current_meta)
         app_model.current_photo = current_photo
 
         # Create a target photo with empty metadata
-        target_photo: PhotoModel = _make_photo(metadata={})
+        target_photo: QPhotoModel = _make_photo(metadata={})
 
         dlg: MetadataDialog = MetadataDialog(app_model, [target_photo])
         qtbot.addWidget(dlg)
@@ -123,10 +122,10 @@ def test_metadata_dialog_copy_from_current_and_apply(qtbot: QtBot) -> None:
 def test_metadata_dialog_apply_all_checked_to_multiple_photos(qtbot: QtBot) -> None:
     """Apply common metadata to multiple selected photos."""
     with qtbot.capture_exceptions():
-        app_model: ApplicationModel = ApplicationModel()
+        app_model: QApplicationState = QApplicationState()
 
         # No current photo needed here
-        photo1: PhotoModel = _make_photo(
+        photo1: QPhotoModel = _make_photo(
             metadata={
                 "date": datetime.fromisoformat("2024-06-01T12:00:00"),
                 "partner": "PartnerA",
@@ -147,7 +146,7 @@ def test_metadata_dialog_apply_all_checked_to_multiple_photos(qtbot: QtBot) -> N
                 "comments": "A sample comment",
             }
         )
-        photo2: PhotoModel = _make_photo(
+        photo2: QPhotoModel = _make_photo(
             metadata={
                 "date": datetime.fromisoformat("2026-01-02T01:23:45"),
                 "partner": "PartnerB",
@@ -253,10 +252,10 @@ def test_metadata_dialog_apply_all_checked_to_multiple_photos(qtbot: QtBot) -> N
 def test_metadata_dialog_apply_checked_to_multiple_photos_1(qtbot: QtBot) -> None:
     """Apply common metadata to multiple selected photos."""
     with qtbot.capture_exceptions():
-        app_model: ApplicationModel = ApplicationModel()
+        app_model: QApplicationState = QApplicationState()
 
         # No current photo needed here
-        photo1: PhotoModel = _make_photo(
+        photo1: QPhotoModel = _make_photo(
             metadata={
                 "date": datetime.fromisoformat("2024-06-01T12:00:00"),
                 "partner": "PartnerA",
@@ -277,7 +276,7 @@ def test_metadata_dialog_apply_checked_to_multiple_photos_1(qtbot: QtBot) -> Non
                 "comments": "A sample comment",
             }
         )
-        photo2: PhotoModel = _make_photo(
+        photo2: QPhotoModel = _make_photo(
             metadata={
                 "date": datetime.fromisoformat("2026-01-02T01:23:45"),
                 "partner": "PartnerB",
@@ -383,10 +382,10 @@ def test_metadata_dialog_apply_checked_to_multiple_photos_1(qtbot: QtBot) -> Non
 def test_metadata_dialog_apply_checked_to_multiple_photos_2(qtbot: QtBot) -> None:
     """Apply common metadata to multiple selected photos."""
     with qtbot.capture_exceptions():
-        app_model: ApplicationModel = ApplicationModel()
+        app_model: QApplicationState = QApplicationState()
 
         # No current photo needed here
-        photo1: PhotoModel = _make_photo(
+        photo1: QPhotoModel = _make_photo(
             metadata={
                 "date": datetime.fromisoformat("2024-06-01T12:00:00"),
                 "partner": "PartnerA",
@@ -407,7 +406,7 @@ def test_metadata_dialog_apply_checked_to_multiple_photos_2(qtbot: QtBot) -> Non
                 "comments": "A sample comment",
             }
         )
-        photo2: PhotoModel = _make_photo(
+        photo2: QPhotoModel = _make_photo(
             metadata={
                 "date": datetime.fromisoformat("2026-01-02T01:23:45"),
                 "partner": "PartnerB",

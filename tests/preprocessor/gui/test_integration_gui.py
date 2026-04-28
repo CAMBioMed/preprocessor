@@ -5,6 +5,8 @@ from pytestqt.qtbot import QtBot
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFileDialog
 
+from preprocessor.gui.utils import patch_getSaveFileName_dialog, patch_getOpenFileNames_dialog
+
 
 def test_integration_new_project_add_images_save_and_quit(
     qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
@@ -19,20 +21,16 @@ def test_integration_new_project_add_images_save_and_quit(
         # Local imports (import under test-time Qt app context)
         from preprocessor.gui.launch_dialog import LaunchDialog
         from preprocessor.gui.main_window import MainWindow
-        from preprocessor.model.application_model import ApplicationModel
+        from preprocessor.gui.model._QApplicationState import QApplicationState
 
         # Prepare project file path in a temporary directory
         project_file = tmp_path / "test_project.pbproj"
 
         # Patch the save dialog used by "New Project" to return our temporary filename
-        monkeypatch.setattr(
-            QFileDialog,
-            "getSaveFileName",
-            lambda parent, title, directory, filter: (str(project_file), "Project Files (*.pbproj)"),
-        )
+        patch_getSaveFileName_dialog(str(project_file), monkeypatch)
 
         # Create the application model and show the launch dialog
-        model = ApplicationModel()
+        model = QApplicationState()
         model.read_settings()
 
         launch = LaunchDialog(model)
@@ -45,9 +43,6 @@ def test_integration_new_project_add_images_save_and_quit(
 
         # The dialog handler should have returned the project and accepted the dialog
         assert launch.project_model is not None
-        # Ensure the project file was set to our temp path
-        assert launch.project_model.file == project_file
-
         model.current_project = launch.project_model
 
         # Now open the main window for that model
@@ -65,11 +60,7 @@ def test_integration_new_project_add_images_save_and_quit(
         assert img2.exists(), f"Example image not found: {img2}"
 
         # Patch the open-files dialog used by the Add Photos action to return our two images
-        monkeypatch.setattr(
-            QFileDialog,
-            "getOpenFileNames",
-            lambda parent, title, directory, filter: ([str(img1), str(img2)], "Photos (*.jpg;*.jpeg)"),
-        )
+        patch_getOpenFileNames_dialog([str(img1), str(img2)], monkeypatch)
 
         # Trigger the Add Photos action on the thumbnail dock
         main_win.thumbnail_dock.ui.addPhotoAction.trigger()

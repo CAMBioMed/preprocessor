@@ -2,20 +2,16 @@ import warnings
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox, QDialog
+from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
 from pathlib import Path
 
 from preprocessor import app_formal_name
+from preprocessor.core.model import PhotoData
+from preprocessor.core.types import ImageRGB
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
-from preprocessor.gui.export_dialog import ExportDialog
-from preprocessor.gui.launch_dialog import (
-    new_project_dialog,
-    open_project_dialog,
-    save_project,
-    save_project_as_dialog,
-)
+from preprocessor.gui.jobs.export_photo_job import ExportPhotoJob
 from preprocessor.gui.metadata_dialog import MetadataDialog
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
@@ -23,21 +19,19 @@ from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.ui_main_window import Ui_MainWindow
 from preprocessor.gui.utils import icon_from_resource
-from preprocessor.model.application_model import ApplicationModel
-from preprocessor.model.photo_model import PhotoModel
-from preprocessor.model.project_model import ProjectModel
-from preprocessor.processing.detect_quadrat import detect_quadrat
-from preprocessor.processing.load_image import load_image
-from preprocessor.processing.params import defaultParams
-from preprocessor.gui.qjobs import QJob
+from preprocessor.gui.model._QApplicationState import QApplicationState
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
+from preprocessor.gui.model._QProjectModel import QProjectModel
+from preprocessor.core.transform.detect_quadrat_analysis import defaultParams, DetectQuadratAnalysisJob
+from preprocessor.gui.jobs.qjobs import QJob
 from preprocessor.gui.progress_dialog import ProgressDialog
-from preprocessor.gui.add_photo_job import AddPhotoJob
+from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
 from PySide6.QtCore import QObject, Slot
 
 
 class MainWindow(QMainWindow):
     ui: Ui_MainWindow
-    model: ApplicationModel
+    model: QApplicationState
 
     properties_dock: PropertiesDockWidget
     """The dock widget showing properties."""
@@ -47,9 +41,9 @@ class MainWindow(QMainWindow):
     """The dock widget with edit controls."""
     central_widget: PhotoEditorWidget
     """The central widget showing the image."""
-    _bound_project: ProjectModel | None = None
+    _bound_project: QProjectModel | None = None
 
-    def __init__(self, model: ApplicationModel, parent: QWidget | None = None) -> None:
+    def __init__(self, model: QApplicationState, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -66,7 +60,7 @@ class MainWindow(QMainWindow):
         self.read_settings()
         self._handle_current_project_changed(self.model.current_project)
 
-    def _bind_project_signals(self, project: ProjectModel) -> None:
+    def _bind_project_signals(self, project: QProjectModel) -> None:
         """Connect/disconnect signals for the currently bound project."""
         # Disconnect previous project
         old_project = self._bound_project
@@ -74,14 +68,14 @@ class MainWindow(QMainWindow):
             with warnings.catch_warnings():
                 # Raises a RuntimeWarning when the old project was never connected (i.e. the initial empty project)
                 warnings.filterwarnings("ignore", category=RuntimeWarning)
-                old_project.on_file_changed.disconnect(self._handle_project_file_changed)
+                old_project.on_project_file_changed.disconnect(self._handle_project_file_changed)
                 old_project.on_dirty_changed.disconnect(self._handle_dirty_changed)
                 old_project.photos.on_changed.disconnect(self._handle_photos_changed)
 
         self._bound_project = project
         # Connect new project
         if project is not None:
-            project.on_file_changed.connect(self._handle_project_file_changed)
+            project.on_project_file_changed.connect(self._handle_project_file_changed)
             project.on_dirty_changed.connect(self._handle_dirty_changed)
             project.photos.on_changed.connect(self._handle_photos_changed)
 
@@ -96,7 +90,7 @@ class MainWindow(QMainWindow):
         if proj is None:
             self.setWindowTitle(base_title)
             return
-        fp = proj.file
+        fp = proj.project_file
         name = Path(fp).name if fp else "Untitled Project"
         photo_count = len(proj.photos)
         dirty_marker = "*" if proj.dirty else ""
@@ -197,63 +191,79 @@ class MainWindow(QMainWindow):
         self.model.on_current_photo_changed.connect(self._handle_current_photo_changed)
 
     def _handle_new_project_action(self) -> None:
-        new_project = new_project_dialog(self, self.model.current_project, self.model.projects_path)
+        new_project = QProjectModel.new_project(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
             self.model.current_photo = None
-            self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
+            self.model.projects_path = new_project.project_file.parent if new_project.project_file else self.model.projects_path
             self.model.current_project = new_project
 
     def _handle_open_project_action(self) -> None:
-        new_project = open_project_dialog(self, self.model.current_project, self.model.projects_path)
+        new_project = QProjectModel.open_project(self, self.model.current_project, self.model.projects_path)
         if new_project is not None:
             self.model.current_photo = None
-            self.model.projects_path = new_project.file.parent if new_project.file else self.model.projects_path
+            self.model.projects_path = new_project.project_file.parent if new_project.project_file else self.model.projects_path
             self.model.current_project = new_project
 
     def _handle_save_project_action(self) -> None:
-        save_project(self, self.model.current_project, self.model.current_project.file)
+        QProjectModel.save_project(self, self.model.current_project, self.model.current_project.project_file)
 
     def _handle_save_project_as_action(self) -> None:
-        save_project_as_dialog(self, self.model.current_project, self.model.projects_path)
+        QProjectModel.save_project_as(self, self.model.current_project, self.model.projects_path)
 
     def _handle_project_settings_action(self) -> None:
         dialog = ProjectSettingsDialog(self.model.current_project, self)
         dialog.exec()
 
     def _handle_export_all_action(self) -> None:
-        dialog = ExportDialog(self.model.current_project, self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            pass
+        assert self.model.current_project is not None
+        project = self.model.current_project
+        # If the path is not valid (anymore), the dialog still works and defaults to the current working directory
+        initial_path = str(project.export_path or "")
+        export_dir = QFileDialog.getExistingDirectory(self, "Export photos", initial_path)
+        if not export_dir:
+            return
+        export_path = Path(export_dir)
+
+        # Save the settings
+        self.model.current_project.export_path = export_path
+
+        try:
+            export_path.mkdir(parents=True, exist_ok=True)
+        except FileExistsError:
+            QMessageBox.warning(self, "Error", "The output path exists and is not a directory.")
+            return
+
+        # Group the photos
+        groups = PhotoData.group_photos(photo._data for photo in self.model.current_project.photos)
+
+        # Show the progress UI and start export
+        jobs: list[QJob] = []
+        for group in groups:
+            for idx, p in enumerate(group):
+                job = ExportPhotoJob(p, idx, export_path)
+                jobs.append(job)
+
+        # Show progress dialog and run jobs; dialog is modal and will block until done
+        dlg = ProgressDialog("Exporting Photos", jobs, parent=self, run_in_thread=True)
+        dlg.exec()
 
     def _handle_detect_quadrat_action(self) -> None:
         if self.model.current_photo is None:
             return
 
-        # Prefer using the undistorted image currently shown in the editor (if available)
-        img = None
-        try:
-            img = self.central_widget.get_processing_image()
-        except Exception:
-            img = None
-        if img is None:
-            original_path = self.model.current_photo.original_filename
-            img = load_image(str(original_path))
-        if img is None:
-            QMessageBox.critical(
-                self,
-                "Load Image Failed",
-                f"Failed to load image:\n{original_path}",
-            )
-            return
+        original_path = self.model.current_photo.original_filename
 
-        params = defaultParams
-
-        result = detect_quadrat(img, params)
-        if result is None or result.corners is None:
+        # TODO: Do this in a separate thread!
+        job = DetectQuadratAnalysisJob(
+            ImageRGB.from_file(original_path),
+            defaultParams,
+        )
+        result = job()
+        if result is None:
             # No corners detected
             return
 
-        self.model.current_photo.quadrat_corners = result.corners  # type: ignore[assignment]
+        self.model.current_photo.quadrat_corners = list(result.as_tuple())
         # Trigger updating the opened editor
         self._handle_current_photo_changed(self.model.current_photo)
 
@@ -274,20 +284,18 @@ class MainWindow(QMainWindow):
         if paths:
             project.photos_path = Path(paths[0]).parent
 
-        # Use the shared AddPhotoJob implementation to create PhotoModel and extract EXIF in the background.
+        # Use the shared AddPhotoJob implementation to create QPhotoModel and extract EXIF in the background.
 
         # Helper QObject to perform the actual append on the main thread
         class _AppendHelper(QObject):
             @Slot(object, bool)
-            def handle_job_end(self, job: AddPhotoJob, aborted: bool) -> None:
+            def handle_job_success(self, job: AddPhotoJob, result: None) -> None:
                 # Only append if the job completed successfully and produced a photo
-                if aborted:
-                    return
                 photo_data = job.result
                 if photo_data is not None:
-                    # Note that we create the PhotoModel (a QObject) on the main thread,
+                    # Note that we create the QPhotoModel (a QObject) on the main thread,
                     # using the data produced by the background job. This is required.
-                    photo_model = PhotoModel(photo_data)
+                    photo_model = QPhotoModel(photo_data)
                     project.photos.append(photo_model)
 
         jobs: list[QJob] = []
@@ -295,26 +303,26 @@ class MainWindow(QMainWindow):
         for p in paths:
             job = AddPhotoJob(p)
             # Connect the job end signal to the helper so append happens on the main thread
-            job.signals.on_job_end.connect(helper.handle_job_end)
+            job.signals.on_job_success.connect(helper.handle_job_success)
             jobs.append(job)
 
         # Show progress dialog and run jobs; dialog is modal and will block until done
         dlg = ProgressDialog("Adding Photos", jobs, parent=self, run_in_thread=True)
         dlg.exec()
 
-    def _handle_remove_photos_action(self, selected: list[PhotoModel]) -> None:
+    def _handle_remove_photos_action(self, selected: list[QPhotoModel]) -> None:
         assert self.model.current_project is not None
         for photo in selected:
             self.model.current_project.photos.remove(photo)
 
-    def _handle_apply_to_selected_action(self, selected: list[PhotoModel]) -> None:
+    def _handle_apply_to_selected_action(self, selected: list[QPhotoModel]) -> None:
         """Handle the 'Apply to all' context menu action."""
         if not selected:
             return
         dialog = ApplyParametersDialog(self.model, selected, self)
         dialog.exec()
 
-    def _handle_edit_selected_metadata_action(self, selected: list[PhotoModel]) -> None:
+    def _handle_edit_selected_metadata_action(self, selected: list[QPhotoModel]) -> None:
         """Handle the 'Edit Metadata' context menu action."""
         if not selected:
             # No photos selected
@@ -338,18 +346,18 @@ class MainWindow(QMainWindow):
         self._update_window_title()
         self._update_thumbnails()
 
-    def _handle_photo_opened(self, item: PhotoModel | None) -> None:
+    def _handle_photo_opened(self, item: QPhotoModel | None) -> None:
         """Handle when the selected photo changes."""
         self.model.current_photo = item
 
-    def _handle_current_project_changed(self, project: ProjectModel) -> None:
+    def _handle_current_project_changed(self, project: QProjectModel) -> None:
         """Handle when the current project changes."""
         self._bind_project_signals(project)
         self._update_window_title()
         self._update_thumbnails()
         self._handle_current_photo_changed(self.model.current_photo)
 
-    def _handle_current_photo_changed(self, photo: PhotoModel | None) -> None:
+    def _handle_current_photo_changed(self, photo: QPhotoModel | None) -> None:
         """Handle when the current photo changes."""
         self.central_widget.show_photo(photo, self.model.current_project)
         self.editor_dock.update_with_photo(photo)

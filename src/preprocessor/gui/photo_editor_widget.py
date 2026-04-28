@@ -8,9 +8,11 @@ from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
 from PySide6.QtWidgets import QWidget
 from cv2.typing import MatLike
 
-from preprocessor.model.photo_model import PhotoModel
-from preprocessor.model.project_model import ProjectModel
-from preprocessor.processing.undistort import undistort_photo
+from preprocessor.core.types import ImageRGB
+from preprocessor.gui.jobs.display_photo_job import DisplayPhotoJob
+from preprocessor.gui.jobs.qjobs import QJobProcessor
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
+from preprocessor.gui.model._QProjectModel import QProjectModel
 from preprocessor.processing.load_image import load_image
 from preprocessor.gui.worker import Worker, start_worker
 
@@ -18,11 +20,13 @@ from preprocessor.gui.worker import Worker, start_worker
 class PhotoEditorWidget(QWidget):
     """Widget for viewing and editing photos."""
 
+    _processor: QJobProcessor | None
+    """Job processor"""
     _mouse_position: QPoint | None
     """Current mouse position over the photo."""
     _pixmap: QPixmap | None
     """Current photo pixmap."""
-    _photo: PhotoModel | None
+    _photo: QPhotoModel | None
     """Current photo model."""
     _drag_index: int | None
     """Index of corner being dragged (None when not dragging)."""
@@ -30,17 +34,20 @@ class PhotoEditorWidget(QWidget):
     """Visual radius for handles (in widget pixels)."""
     _edit_points: list[QPoint] | None
     """Working copy of points in widget coordinates while the user is editing."""
-    _original_cv_img: MatLike | None
+    _original_img: MatLike | None
     """The original image loaded as an OpenCV/numpy array (if available)."""
-    _undistorted_cv_img: MatLike | None
-    """Last undistorted cv image (cached)."""
+    _transformed_img: MatLike | None
+    """Last transformed image (cached)."""
     _photo_signals_connected: bool
     """Whether we've connected model signals for the current photo."""
-    _current_project: ProjectModel | None
+    _current_project: QProjectModel | None
     _current_undistort_worker: Worker | None
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
+
+        self._processor = None
+
         self._mouse_position = None
         self._pixmap = None
         self._photo = None
@@ -52,90 +59,83 @@ class PhotoEditorWidget(QWidget):
         self._edit_points = None
 
         # CV images (numpy arrays) used for undistortion
-        self._original_cv_img = None
-        self._undistorted_cv_img = None
+        self._original_img = None
+        self._transformed_img = None
         self._photo_signals_connected = False
 
         self.setMouseTracking(True)
         self._current_project = None
         self._current_undistort_worker = None
 
-    def show_photo(self, photo: PhotoModel | None, project: ProjectModel) -> None:
+    def show_photo(self, photo: QPhotoModel | None, project: QProjectModel) -> None:
+        # Disconnect any previous signals and clear state
+        try:
+            if self._photo_signals_connected and self._photo is not None:
+                with contextlib.suppress(Exception):
+                    self._photo.on_color_correction_changed.disconnect(self._on_photo_params_changed)
+                with contextlib.suppress(Exception):
+                    self._photo.on_lens_correction_changed.disconnect(self._on_photo_params_changed)
+                with contextlib.suppress(Exception):
+                    self._photo.on_crop_changed.disconnect(self._on_photo_params_changed)
+                self._photo_signals_connected = False
+        except Exception:
+            pass
+        self._pixmap = None
+        self._photo = None
+        # Clear any stored cv images & signal flags
+        self._original_img = None
+        self._transformed_img = None
+        # Stop any active dragging when switching photos
+        self._drag_index = None
+        # Discard any unfinished edit when switching photos
+        self._edit_points = None
+
         if photo is not None:
             original_path = photo.original_filename
             # Load a QPixmap for fast rendering and also attempt to load a cv image
             self._pixmap = QPixmap(str(original_path))
-            # Disconnect signals from previous photo (if any)
-            try:
-                if self._photo_signals_connected and self._photo is not None:
-                    with contextlib.suppress(Exception):
-                        self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
-                    with contextlib.suppress(Exception):
-                        self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
-                    self._photo_signals_connected = False
-            except Exception:
-                # ignore disconnect errors
-                pass
-
             self._photo = photo
             self._current_project = project
 
             # Try to load the CV image lazily (used for undistortion) using the project's loader
             try:
-                self._original_cv_img = load_image(str(original_path))
+                self._original_img = ImageRGB.from_file(original_path).data
             except Exception:
-                self._original_cv_img = None
+                self._original_img = None
 
             # Connect signals from the model so we can react when camera or distortion change
             # First disconnect any previous connections
             try:
                 # Connect to the new photo signals
-                self._photo.on_camera_matrix_changed.connect(self._on_camera_or_distortion_changed)
-                self._photo.on_distortion_coefficients_changed.connect(self._on_camera_or_distortion_changed)
+                self._photo.on_color_correction_changed.connect(self._on_photo_params_changed)
+                self._photo.on_lens_correction_changed.connect(self._on_photo_params_changed)
+                self._photo.on_crop_changed.connect(self._on_photo_params_changed)
                 self._photo_signals_connected = True
             except Exception:
+                # TODO: Log this
                 # If connecting fails, ignore silently (signals may be different in tests)
                 self._photo_signals_connected = False
 
-            # Immediately apply undistortion if possible (async)
-            self._apply_undistort_and_update()
-        else:
-            # Disconnect any previous signals and clear state
-            try:
-                if self._photo_signals_connected and self._photo is not None:
-                    with contextlib.suppress(Exception):
-                        self._photo.on_camera_matrix_changed.disconnect(self._on_camera_or_distortion_changed)
-                    with contextlib.suppress(Exception):
-                        self._photo.on_distortion_coefficients_changed.disconnect(self._on_camera_or_distortion_changed)
-            except Exception:
-                pass
-            self._pixmap = None
-            self._photo = None
-            # Clear any stored cv images & signal flags
-            self._original_cv_img = None
-            self._undistorted_cv_img = None
-            self._photo_signals_connected = False
-        # Stop any active dragging when switching photos
-        self._drag_index = None
-        # discard any unfinished edit when switching photos
-        self._edit_points = None
+            # Immediately apply transformations if possible (async)
+            self._apply_transformations_and_update()
+
         self.update()
 
-    def _on_camera_or_distortion_changed(self) -> None:
-        """Handler called when the photo camera matrix or distortion coefficients change.
-        Applies undistortion to the currently displayed image and updates the pixmap.
+    def _on_photo_params_changed(self, *args: object, **kwargs: object) -> None:
+        """Handler called when the photo transformation parameters change.
+        Applies the transformation to the currently displayed image and updates the pixmap.
         """
-        self._apply_undistort_and_update()
+        self._apply_transformations_and_update()
 
-    def _apply_undistort_and_update(self) -> None:
-        """Apply undistort() to the loaded CV image and update the displayed QPixmap.
-        Falls back to the original QPixmap if undistortion isn't possible.
+    def _apply_transformations_and_update(self) -> None:
+        """Apply the transformations to the loaded CV image and update the displayed QPixmap.
+        Falls back to the original QPixmap if the transformation fails.
         """
         if self._photo is None:
             return
 
         # Need an original CV image and camera/distortion parameters
-        if self._original_cv_img is None:
+        if self._original_img is None:
             # Nothing to do; keep existing pixmap
             self.update()
             return
@@ -149,9 +149,9 @@ class PhotoEditorWidget(QWidget):
         Returns the undistorted image if we've successfully computed it, otherwise
         returns the original cv image if available, otherwise None.
         """
-        if self._undistorted_cv_img is not None:
-            return self._undistorted_cv_img
-        return self._original_cv_img
+        if self._transformed_img is not None:
+            return self._transformed_img
+        return self._original_img
 
     def _current_pixmap_info(self) -> tuple[float, QPoint, QSize]:
         """
@@ -184,7 +184,7 @@ class PhotoEditorWidget(QWidget):
 
     def _widget_points(self) -> list[QPoint]:
         """Return quadrat corners as widget QPoint instances (empty list if none).
-        The stored PhotoModel.quadrat_corners are interpreted as image coordinates
+        The stored QPhotoModel.quadrat_corners are interpreted as image coordinates
         and are scaled to match the rendered (scaled) pixmap.
         If an edit is in progress, return the working copy instead.
         """
@@ -195,7 +195,7 @@ class PhotoEditorWidget(QWidget):
         return [self._image_to_widget_point(x, y) for x, y in self._photo.quadrat_corners]
 
     def _write_widget_points(self, pts: list[QPoint] | None) -> None:
-        """Write a list of QPoint (or None) back into the PhotoModel as list of floats (image coords) or None.
+        """Write a list of QPoint (or None) back into the QPhotoModel as list of floats (image coords) or None.
         Converts the widget coordinates (mouse positions) into image coordinates using the current scale.
         """
         if self._photo is None:
@@ -384,68 +384,70 @@ class PhotoEditorWidget(QWidget):
         cy = sum(p.y() for p in pts) / len(pts)
         return sorted(pts, key=lambda p: math.atan2(p.y() - cy, p.x() - cx))
 
-    def undistort_photo_async(self, photo: PhotoModel, result_callback: Callable[[object], None] | None = None) -> None:
-        """Start an asynchronous undistortion for the specified photo/project.
-
-        The result_callback (if provided) will be called with one argument:
-        the undistorted cv image (or None on failure).
-        This method can be used to batch undistort photos that are not currently displayed.
-        """
-        # Create a worker to run the undistort in background
-        worker = Worker(undistort_photo, photo)
-
-        def _on_result(result: object) -> None:
-            if result_callback is not None:
-                with contextlib.suppress(Exception):
-                    result_callback(result)
-
-        def _on_error() -> None:
-            # Pass None to callback on error
-            if result_callback is not None:
-                with contextlib.suppress(Exception):
-                    result_callback(None)
-
-        worker.signals.result.connect(_on_result)
-        worker.signals.error.connect(_on_error)
-        start_worker(worker)
+    # def undistort_photo_async(self, photo: QPhotoModel, result_callback: Callable[[object], None] | None = None) -> None:
+    #     """Start an asynchronous undistortion for the specified photo/project.
+    #
+    #     The result_callback (if provided) will be called with one argument:
+    #     the undistorted cv image (or None on failure).
+    #     This method can be used to batch undistort photos that are not currently displayed.
+    #     """
+    #     # Create a worker to run the undistort in background
+    #     worker = Worker(undistort_photo, photo)
+    #
+    #     def _on_result(result: object) -> None:
+    #         if result_callback is not None:
+    #             with contextlib.suppress(Exception):
+    #                 result_callback(result)
+    #
+    #     def _on_error() -> None:
+    #         # Pass None to callback on error
+    #         if result_callback is not None:
+    #             with contextlib.suppress(Exception):
+    #                 result_callback(None)
+    #
+    #     worker.signals.result.connect(_on_result)
+    #     worker.signals.error.connect(_on_error)
+    #     start_worker(worker)
 
     def _start_undistort_for_current(self) -> None:
         """Internal: start async undistort for the currently shown photo and update the widget when done."""
         if self._photo is None or self._current_project is None:
             return
 
-        # If a previous worker is running, we won't cancel it here; just start another
-        worker = Worker(undistort_photo, self._photo)
-        self._current_undistort_worker = worker
+        # If a previous processor is running, cancel it
+        if self._processor is not None:
+            self._processor.cancel()
+            self._processor = None
 
-        def _on_result(result: MatLike | None) -> None:
+        def _on_result(_job: DisplayPhotoJob, result: ImageRGB | None) -> None:
             try:
                 if result is None:
-                    self._undistorted_cv_img = None
+                    self._transformed_img = None
                 else:
-                    self._undistorted_cv_img = result
+                    rgb = result.data
+                    self._transformed_img = rgb
                     # update pixmap from result on the main thread
                     try:
                         from PySide6.QtGui import QImage
 
-                        und = result
+                        # und = result
                         # Result is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
                         import cv2
 
-                        if und.ndim == 3 and und.shape[2] == 3:
-                            rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
-                            h, w, ch = rgb.shape
-                            bytes_per_line = ch * w
-                            qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
-                        elif und.ndim == 3 and und.shape[2] == 4:
-                            rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
-                            h, w, ch = rgba.shape
-                            bytes_per_line = ch * w
-                            qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
-                        else:
-                            gray = und.copy()
-                            h, w = gray.shape
-                            qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
+                        # if und.ndim == 3 and und.shape[2] == 3:
+                        #     rgb = cv2.cvtColor(und, cv2.COLOR_BGR2RGB).copy()
+                        h, w, ch = rgb.shape
+                        bytes_per_line = ch * w
+                        qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888).copy()
+                        # elif und.ndim == 3 and und.shape[2] == 4:
+                        #     rgba = cv2.cvtColor(und, cv2.COLOR_BGRA2RGBA).copy()
+                        #     h, w, ch = rgba.shape
+                        #     bytes_per_line = ch * w
+                        #     qimg = QImage(rgba.data, w, h, bytes_per_line, QImage.Format.Format_RGBA8888).copy()
+                        # else:
+                        #     gray = und.copy()
+                        #     h, w = gray.shape
+                        #     qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
                         self._pixmap = QPixmap.fromImage(qimg)
                     except Exception:
                         # if conversion fails, leave pixmap as-is
@@ -455,11 +457,18 @@ class PhotoEditorWidget(QWidget):
                 self._current_undistort_worker = None
                 self.update()
 
-        def _on_error() -> None:
-            self._undistorted_cv_img = None
+        def _on_error(_job: DisplayPhotoJob, _aborted: bool, _exc: Exception) -> None:
+            self._transformed_img = None
             self._current_undistort_worker = None
             self.update()
 
-        worker.signals.result.connect(_on_result)
-        worker.signals.error.connect(_on_error)
-        start_worker(worker)
+        job = DisplayPhotoJob(self._photo._data)
+        job.signals.on_job_success.connect(_on_result)
+        job.signals.on_job_failed.connect(_on_error)
+
+        self._processor = QJobProcessor(
+            jobs=[job],
+            parent=self,
+            run_in_thread=True,
+        )
+        self._processor.start()

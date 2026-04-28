@@ -8,10 +8,10 @@ from pathlib import Path
 import PySide6
 
 from preprocessor import app_version, app_organisation, app_domain, app_name, app_formal_name
-from preprocessor.gui.launch_dialog import LaunchDialog, open_project
+from preprocessor.gui.launch_dialog import LaunchDialog
 from preprocessor.gui.main_window import MainWindow
-from preprocessor.model.application_model import ApplicationModel
-from preprocessor.model.project_model import ProjectModel
+from preprocessor.gui.model._QApplicationState import QApplicationState
+from preprocessor.gui.model._QProjectModel import QProjectModel
 from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (
@@ -46,15 +46,15 @@ def main_gui(project_path: str | None = None) -> None:
         app.setApplicationVersion(app_version)
 
         # Setup application model
-        model = ApplicationModel()
+        model = QApplicationState()
         model.read_settings()
 
         _setup_sigint_handler()
 
         # Open the existing path or show the launch dialog to create/open a project
-        project_model: ProjectModel | None = None
+        project_model: QProjectModel | None = None
         if project_path is not None:
-            project_model = open_project(None, Path(project_path))
+            project_model = QProjectModel.open_project_from_path(None, None, Path(project_path), None)
         else:
             launch_dialog = LaunchDialog(model)
             if launch_dialog.exec() == QDialog.DialogCode.Accepted:
@@ -75,7 +75,7 @@ def main_gui(project_path: str | None = None) -> None:
         raise
 
 
-def _show_main_window(model: ApplicationModel) -> None:
+def _show_main_window(model: QApplicationState) -> None:
     window = MainWindow(model)
     window.show()
     _setup_sigint_handler()

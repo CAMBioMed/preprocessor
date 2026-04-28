@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QDockWidget, QWidget, QLineEdit, QLabel, QPlainTex
 
 from preprocessor.gui.ui_editor_dock import Ui_EditorDock
 from preprocessor.gui.utils import _dt_to_qdatetime
-from preprocessor.model.photo_model import PhotoModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.utils import to_upper_camel_case
 
 
@@ -15,7 +15,7 @@ class EditorDockWidget(QDockWidget):
     on_autodetect_quadrat_clicked: Signal = Signal()
     on_edit_metadata_clicked: Signal = Signal()
 
-    current_photo: PhotoModel | None = None
+    current_photo: QPhotoModel | None = None
 
     fields: ClassVar[list[str]] = [
         "date",
@@ -48,7 +48,7 @@ class EditorDockWidget(QDockWidget):
         self.ui.sldLensCorrection_Distortion.valueChanged.connect(self._handle_distortion_changed)
         self.ui.btnMetadataEdit.clicked.connect(self.on_edit_metadata_clicked.emit)
 
-    def update_with_photo(self, photo: PhotoModel | None) -> None:
+    def update_with_photo(self, photo: QPhotoModel | None) -> None:
         """Update the editor fields with the data from the given photo model."""
         self.current_photo.on_metadata_changed.disconnect(self._handle_metadata_changed) if self.current_photo else None
         self.current_photo = photo

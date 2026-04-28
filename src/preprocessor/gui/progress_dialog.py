@@ -5,7 +5,7 @@ import contextlib
 
 from collections.abc import Iterable
 
-from preprocessor.gui.qjobs import QJobProcessor, QJob
+from preprocessor.gui.jobs.qjobs import QJobProcessor, QJob
 from preprocessor.gui.ui_progress_dialog import Ui_ProgressDialog
 
 
@@ -74,7 +74,8 @@ class ProgressDialog(QDialog):
         self._processor.on_finished.connect(self._handle_finished)
         self._processor.on_status.connect(self._handle_status)
         self._processor.on_job_start.connect(self._handle_job_start)
-        self._processor.on_job_end.connect(self._handle_job_end)
+        self._processor.on_job_success.connect(self._handle_job_success)
+        self._processor.on_job_failed.connect(self._handle_job_failed)
         self._processor.on_job_status.connect(self._handle_job_status)
         self._processor.on_job_progress.connect(self._handle_job_progress)
 
@@ -115,9 +116,14 @@ class ProgressDialog(QDialog):
     def _handle_job_start(self, job: QJob) -> None:
         self._update_item(job, "Processing...", "file")
 
-    def _handle_job_end(self, job: QJob, aborted: bool) -> None:
-        status = "Aborted" if aborted else "Done"
-        icon = "error" if aborted else "file"
+    def _handle_job_success(self, job: QJob, _result: object) -> None:
+        status = "Done"
+        icon = "file"
+        self._update_item(job, status, icon)
+
+    def _handle_job_failed(self, job: QJob, aborted: bool) -> None:
+        status = "Aborted" if aborted else "Errored"
+        icon = "error"
         self._update_item(job, status, icon)
 
     def _handle_job_status(self, job: QJob, status: str, icon: QIcon | str | None) -> None:

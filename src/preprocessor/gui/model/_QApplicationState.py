@@ -1,0 +1,104 @@
+from pathlib import Path
+from typing import cast
+
+from PySide6.QtCore import QObject, Signal, QSettings, QByteArray
+
+from preprocessor.core.model import ProjectData
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
+from preprocessor.gui.model._QProjectModel import QProjectModel
+
+
+class QApplicationState(QObject):
+    """
+    The model for the entire application.
+
+    This includes application-wide settings and the current project.
+    """
+
+    on_changed: Signal = Signal()
+
+    settings: QSettings
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.settings = QSettings()
+
+    _current_project: QProjectModel = QProjectModel(ProjectData(project_file=Path("empty")))  # placeholder empty project model
+    on_current_project_changed: Signal = Signal(object)  # https://stackoverflow.com/a/57810835/146622
+
+    @property
+    def current_project(self) -> QProjectModel:
+        """The current project model, or None if no project is open."""
+        return self._current_project
+
+    @current_project.setter
+    def current_project(self, project: QProjectModel) -> None:
+        old_project = self._current_project
+        if old_project != project:
+            old_project.setParent(None)
+            self._current_project = project
+            project.setParent(self)
+            self.on_current_project_changed.emit(project)
+            self.on_changed.emit()
+
+    _current_photo: QPhotoModel | None = None
+    on_current_photo_changed: Signal = Signal(object)  # https://stackoverflow.com/a/57810835/146622
+
+    @property
+    def current_photo(self) -> QPhotoModel | None:
+        """The current project model, or None if no project is open."""
+        return self._current_photo
+
+    @current_photo.setter
+    def current_photo(self, photo: QPhotoModel | None) -> None:
+        old_photo = self._current_photo
+        if old_photo != photo:
+            self._current_photo = photo
+            self.on_current_photo_changed.emit(photo)
+            self.on_changed.emit()
+
+    _main_window_geometry: QByteArray = QByteArray()
+
+    @property
+    def main_window_geometry(self) -> QByteArray:
+        """The geometry of the main window."""
+        return self._main_window_geometry
+
+    @main_window_geometry.setter
+    def main_window_geometry(self, geometry: QByteArray) -> None:
+        self._main_window_geometry = geometry
+
+    _main_window_state: QByteArray = QByteArray()
+
+    @property
+    def main_window_state(self) -> QByteArray:
+        """The state of the main window."""
+        return self._main_window_state
+
+    @main_window_state.setter
+    def main_window_state(self, state: QByteArray) -> None:
+        self._main_window_state = state
+
+    _projects_path: Path | None = None
+
+    @property
+    def projects_path(self) -> Path | None:
+        """The path to the default directory for opening projects, or None if not set."""
+        return self._projects_path
+
+    @projects_path.setter
+    def projects_path(self, path: Path | None) -> None:
+        self._projects_path = path
+
+    def write_settings(self) -> None:
+        """Write window settings to persistent storage."""
+        self.settings.setValue("geometry", self._main_window_geometry)
+        self.settings.setValue("windowState", self._main_window_state)
+        self.settings.setValue("projectsPath", str(self._projects_path) if self._projects_path is not None else "")
+
+    def read_settings(self) -> None:
+        """Read window settings from persistent storage."""
+        self._main_window_geometry = cast(QByteArray, self.settings.value("geometry", QByteArray()))
+        self._main_window_state = cast(QByteArray, self.settings.value("windowState", QByteArray()))
+        projects_path_str = cast(str, self.settings.value("projectsPath", ""))
+        self._projects_path = Path(projects_path_str) if projects_path_str else None
