@@ -78,13 +78,13 @@ class QJobContext[E](JobContext, JobHandle):
 
     def __init__(self, job: QJob) -> None:
         self._job = job
+        self._result = None
+        self._progress = 0.0
 
-        # synchronization primitives to wait for job completion
         self._finished_event = threading.Event()
         self._finished_state = None
         self._finished_result = None
-        # connect to the job's finished signal so we are notified when it's done
-        # signature: on_finished(job, state, result)
+
         self._job._signals.on_finished.connect(self._on_finished)
 
     @override
@@ -106,8 +106,53 @@ class QJobContext[E](JobContext, JobHandle):
 
     @override
     def run_subjob[R](self, job: "Job[R]", weight: float = 1.0) -> R:
-        # TODO Implement
-        pass
+        # Clamp weight to a sensible range
+        weight = max(0.0, min(1.0, float(weight)))
+
+        outer = self
+
+        # Capture the parent's progress at the start so the child's progress is
+        # reported in the range [parent_start, parent_start + weight].
+        parent_start = outer._progress
+
+        # The subcontext delegates to the outer context but maps progress into
+        # the slice [parent_start .. parent_start + weight].
+        class _SubContext(JobContext):
+            def is_cancelled(self) -> bool:
+                return outer.is_cancelled()
+
+            def update_status(self, message: str) -> None:
+                outer.update_status(message)
+
+            def update_progress(self, progress: float) -> None:
+                p = max(0.0, min(1.0, float(progress)))
+
+                # Map child progress p into parent range [parent_start, parent_start + weight]
+                scaled = parent_start + p * weight
+                # Ensure we don't exceed the end of the allocated slice
+                scaled = max(parent_start, min(parent_start + weight, scaled))
+                outer.update_progress(scaled)
+
+            def log_msg(self, message: Message) -> None:
+                outer.log_msg(message)
+
+            def run_subjob[R2](self, job2: "Job[R2]", weight2: float = 1.0) -> R2:
+                # nested subjob: multiply weights so child progress is mapped correctly
+                return outer.run_subjob(job2, weight * weight2)
+
+        # Respect any cancellation requested before starting
+        outer.check_cancelled()
+
+        # Run sub-job synchronously in this thread, letting exceptions propagate
+        result = job.run(_SubContext())
+
+        # Check cancellation after completion too (sub-job may have been cancelled)
+        outer.check_cancelled()
+
+        # When subjob completes, ensure parent's progress reaches the end of the slice
+        outer.update_progress(parent_start + weight)
+
+        return result
 
     @override
     def state(self) -> JobState:
@@ -130,15 +175,12 @@ class QJobContext[E](JobContext, JobHandle):
         if not self._finished_event.is_set():
             return None
 
-        # At this point _finished_state/_finished_result are set by _on_finished.
         if self._finished_state == JobState.COMPLETED:
             # type: ignore[return-value]
             return self._finished_result  # type: ignore
         elif self._finished_state == JobState.CANCELLED:
-            # Signal cancellation to caller
             raise JobCancelledException()
         elif self._finished_state == JobState.FAILED:
-            # the job emitted the exception object as the result in your run() implementation
             if isinstance(self._finished_result, Exception):
                 raise self._finished_result
             else:
