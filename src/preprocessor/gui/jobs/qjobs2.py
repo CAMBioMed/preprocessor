@@ -14,7 +14,7 @@ class QJobSignals(QObject):
 
     on_start: Signal = Signal(object)
     """Raised when a job starts. Emits (job: QJob)."""
-    on_finished: Signal = Signal(object, object)
+    on_finished: Signal = Signal(object, object, object)
     """Raised when a job finishes. Emits (job: QJob, state: JobState, result: R | Exception | None)"""
     on_status: Signal = Signal(object, str)
     """Raised when a job updates its status. Emits (job: QJob, msg: str)"""
@@ -195,9 +195,14 @@ class QJobContext[E](JobContext, JobHandle):
         self._finished_result = result
         self._finished_event.set()
 
+# Create a metaclass that is compatible with both QObject (from PySide6) and JobProcessor (ABC)
+class QJobProcessorMeta(type(QObject), type(JobProcessor)):
+    """Metaclass to allow QJobProcessor to inherit from both QObject and JobProcessor."""
+    pass
+
 
 # noinspection PyProtectedMember
-class QJobProcessor(QObject, JobProcessor):
+class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):
 
     _pool: QThreadPool
     """The thread pool used to run the jobs."""
@@ -210,7 +215,7 @@ class QJobProcessor(QObject, JobProcessor):
 
     on_job_start: Signal = Signal(object)
     """Raised when a job starts. Emits (job: QJob)."""
-    on_job_finished: Signal = Signal(object, object)
+    on_job_finished: Signal = Signal(object, object, object)
     """Raised when a job finishes. Emits (job: QJob, state: JobState, result: R | Exception | None)"""
     on_job_status: Signal = Signal(object, str)
     """Raised when a job updates its status. Emits (job: QJob, msg: str)"""
@@ -233,6 +238,36 @@ class QJobProcessor(QObject, JobProcessor):
         self._cancel_token = CancelToken()
         self._run_in_thread = run_in_thread
         self._qjobs = []
+        # ensure a thread pool is available when running in threads
+        self._pool = QThreadPool.globalInstance()
+
+        # Prepare job signal forwarding helpers
+
+    def _connect_job_signals(self, qjob: QJob) -> None:
+        # Ensure the job uses the processor's cancel token
+        qjob._cancel_token = self._cancel_token
+
+        # Forward signals from the QJob to the processor's signals
+        qjob._signals.on_start.connect(self._handle_job_start)
+        qjob._signals.on_finished.connect(self._handle_job_finished)
+        qjob._signals.on_status.connect(self._handle_job_status)
+        qjob._signals.on_progress.connect(self._handle_job_progress)
+        qjob._signals.on_message.connect(self._handle_job_message)
+
+    def _handle_job_start(self, job: QJob) -> None:
+        self.on_job_start.emit(job)
+
+    def _handle_job_finished(self, job: QJob, state: JobState, result: object) -> None:
+        self.on_job_finished.emit(job, state, result)
+
+    def _handle_job_status(self, job: QJob, msg: str) -> None:
+        self.on_job_status.emit(job, msg)
+
+    def _handle_job_progress(self, job: QJob, progress: float) -> None:
+        self.on_job_progress.emit(job, progress)
+
+    def _handle_job_message(self, job: QJob, message: Message) -> None:
+        self.on_job_message.emit(job, message)
 
     @override
     def cancel_all(self) -> None:
@@ -243,9 +278,12 @@ class QJobProcessor(QObject, JobProcessor):
     def submit(self, job: Job[R]) -> JobHandle[R]:
         qjob = QJob(job)
         self._qjobs.append(qjob)
+        # connect signals so the processor re-emits them
+        self._connect_job_signals(qjob)
         if self._run_in_thread:
             self._pool.start(qjob)
         else:
-            # Schedule runnable.run on the Qt event loop for deterministic execution
-            QTimer.singleShot(0, job.run)
+            # Run synchronously on the calling thread for deterministic execution
+            # (tests use this path to avoid depending on the Qt event loop)
+            qjob.run()
         return qjob._ctx
