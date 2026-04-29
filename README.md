@@ -34,4 +34,12 @@ Download the latest nightly (unstable) release:
     uv lock
     ```
     
-3.  Commit.
+3.  Tag, commit, push.
+
+    ```shell
+    VERSION=0.1.0
+    git commit --all -m "Release $VERSION"
+    git tag -a $VERSION -m "Release $VERSION"
+    git push --atomic origin main $VERSION
+    ```
+    
