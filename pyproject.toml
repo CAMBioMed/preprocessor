@@ -1,6 +1,6 @@
 [project]
 name = "preprocessor"
-version = "0.0.2"
+version = "0.1.0"
 description = "Benthic image preprocessor"
 keywords = ["preprocessor"]
 license-expression = "Apache-2.0"

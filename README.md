@@ -26,3 +26,12 @@ Download the latest nightly (unstable) release:
 - Mypy type checking: `uv run mypy src tests` (`make typecheck`)
 - Run briefcase app with app update and updating dependencies: `uvx briefcase run -u -r` (`make app-run`)
 
+## Release
+1.  Update the version number in `pyproject.toml`.
+2.  Regenerate the lock file.
+
+    ```shell
+    uv lock
+    ```
+    
+3.  Commit.
