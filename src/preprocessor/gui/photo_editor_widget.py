@@ -1,5 +1,6 @@
 import contextlib
 import math
+from enum import Enum, auto
 
 from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
@@ -13,6 +14,12 @@ from preprocessor.gui.jobs.qjobs import QJobProcessor
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.gui.model._QProjectModel import QProjectModel
 from preprocessor.gui.worker import Worker
+
+
+class Tool(Enum):
+    Move = auto()
+    DrawQuadrat = auto()
+    Ruler = auto()
 
 
 class PhotoEditorWidget(QWidget):
@@ -40,6 +47,8 @@ class PhotoEditorWidget(QWidget):
     """Whether we've connected model signals for the current photo."""
     _current_project: QProjectModel | None
     _current_undistort_worker: Worker | None
+    _current_tool: Tool
+    """The currently selected tool."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
@@ -64,6 +73,7 @@ class PhotoEditorWidget(QWidget):
         self.setMouseTracking(True)
         self._current_project = None
         self._current_undistort_worker = None
+        self._current_tool = Tool.DrawQuadrat
 
     def show_photo(self, photo: QPhotoModel | None, project: QProjectModel) -> None:
         # Disconnect any previous signals and clear state
@@ -105,6 +115,7 @@ class PhotoEditorWidget(QWidget):
             # First disconnect any previous connections
             try:
                 # Connect to the new photo signals
+                assert self._photo is not None
                 self._photo.on_color_correction_changed.connect(self._on_photo_params_changed)
                 self._photo.on_lens_correction_changed.connect(self._on_photo_params_changed)
                 self._photo.on_crop_changed.connect(self._on_photo_params_changed)
@@ -117,6 +128,11 @@ class PhotoEditorWidget(QWidget):
             # Immediately apply transformations if possible (async)
             self._apply_transformations_and_update()
 
+        self.update()
+
+    def set_tool(self, tool: Tool) -> None:
+        """Set the currently active tool."""
+        self._current_tool = tool
         self.update()
 
     def _on_photo_params_changed(self, *args: object, **kwargs: object) -> None:
@@ -469,4 +485,5 @@ class PhotoEditorWidget(QWidget):
             parent=self,
             run_in_thread=True,
         )
+        assert self._processor is not None
         self._processor.start()
