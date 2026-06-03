@@ -16,5 +16,5 @@ class RulerParams(BaseModel, validate_assignment=True):
 
     start: Point2D = (0.0, 0.0)
     """The (x, y) coordinates of the start point of the ruler."""
-    end: Point2D = (0.0, 0.0)
-    """The (x, y) coordinates of the end point of the ruler."""
+    end: Point2D | None = None
+    """The (x, y) coordinates of the end point of the ruler, or None if only the start has been placed."""

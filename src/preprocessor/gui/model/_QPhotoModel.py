@@ -18,6 +18,7 @@ class QPhotoModel(QModel[PhotoData]):
     on_color_correction_changed: Signal = Signal(object)  # Emits ColorCorrectionParams | None
     on_lens_correction_changed: Signal = Signal(object)  # Emits LensCorrectionParams | None
     on_crop_changed: Signal = Signal(object)  # Emits CropParams | None
+    on_ruler_changed: Signal = Signal(object)  # Emits RulerParams
     on_metadata_changed: Signal = Signal(object)  # Emits MetadataData
 
     def __init__(self, data: PhotoData | dict[str, Any] | None = None) -> None:
@@ -84,6 +85,25 @@ class QPhotoModel(QModel[PhotoData]):
     @ruler.setter
     def ruler(self, value: RulerParams) -> None:
         self._set_field("ruler", value)
+
+    @property
+    def ruler_points(self) -> "list[Point2D]":
+        """The ruler start/end points in image coordinates (0, 1, or 2 items)."""
+        if not self._data.ruler.enabled:
+            return []
+        r = self._data.ruler
+        if r.end is None:
+            return [r.start]
+        return [r.start, r.end]
+
+    @ruler_points.setter
+    def ruler_points(self, value: "list[Point2D] | None") -> None:
+        if not value:
+            self.ruler = RulerParams()
+        elif len(value) == 1:
+            self.ruler = RulerParams(enabled=True, start=value[0])
+        else:
+            self.ruler = RulerParams(enabled=True, start=value[0], end=value[1])
 
     ##############
     ## Metadata ##
