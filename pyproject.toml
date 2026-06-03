@@ -3,8 +3,7 @@ name = "preprocessor"
 version = "0.1.0"
 description = "Benthic image preprocessor"
 keywords = ["preprocessor"]
-license-expression = "Apache-2.0"
-license-file = "LICENSE.md"
+license = "Apache-2.0"
 license-files = ["LICENSE.md"]
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [
@@ -314,7 +313,6 @@ files = [
 [tool.briefcase]
 project_name = "CAMBioMed Preprocessor"
 bundle = "com.cambiomed-biodiversa"
-license.file = "LICENSE.md"
 author = "Daniel A. A. Pelsmaeker"
 author_email = "developer@pelsmaeker.net"
 
