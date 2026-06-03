@@ -2,12 +2,12 @@ from typing import override, ClassVar
 
 import pytest
 
-from preprocessor.core.model import LensCorrectionParams, CropParams
+from preprocessor.core.model import LensCorrectionParams, RulerParams
 from preprocessor.core.type_corners import Corners
 from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
-class Test_CropParams(PydanticModelTestBase):
+class Test_RulerParams(PydanticModelTestBase):
     fields_and_values: ClassVar[
         dict[
             str,
@@ -19,19 +19,34 @@ class Test_CropParams(PydanticModelTestBase):
             ],
         ]
     ] = {
-        "corners": (
+        "start": (
             # Initial
-            Corners(()),
+            None,
             # Valid
             [
-                Corners(((0.1, 0.2), (1.1, 0.2), (1.1, 1.2), (0.1, 1.2))),
+                (0.0, 0.0),
+                (5.0, 8.0),
             ],
             # Normalized
             [],
             # Invalid
             [
-                "foo",  # Not a Corners instance
-                None,  # None is not a valid value for corners
+                "foo",  # Not a Point2D instance
+            ],
+        ),
+        "end": (
+            # Initial
+            None,
+            # Valid
+            [
+                (0.0, 0.0),
+                (7.0, 9.0),
+            ],
+            # Normalized
+            [],
+            # Invalid
+            [
+                "foo",  # Not a Point2D instance
             ],
         ),
     }
@@ -43,13 +58,13 @@ class Test_CropParams(PydanticModelTestBase):
     """
 
     @override
-    def create_model(self) -> CropParams:
-        return CropParams()
+    def create_model(self) -> RulerParams:
+        return RulerParams()
 
     @override
-    def update_model(self, model: CropParams, field_name: str, new_value: object) -> CropParams:
+    def update_model(self, model: RulerParams, field_name: str, new_value: object) -> RulerParams:
         # We cannot use model_copy() here because it doesn't validate
-        new_model = CropParams.model_validate({**model.model_dump(), field_name: new_value})
+        new_model = RulerParams.model_validate({**model.model_dump(), field_name: new_value})
         return new_model
 
     @pytest.mark.parametrize(

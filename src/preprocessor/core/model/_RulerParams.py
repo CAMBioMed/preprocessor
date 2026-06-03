@@ -14,7 +14,7 @@ class RulerParams(BaseModel, validate_assignment=True):
     enabled: bool = False
     """Whether to display the ruler. If False, the other parameters are ignored."""
 
-    start: Point2D = (0.0, 0.0)
+    start: Point2D | None = None
     """The (x, y) coordinates of the start point of the ruler."""
     end: Point2D | None = None
     """The (x, y) coordinates of the end point of the ruler, or None if only the start has been placed."""

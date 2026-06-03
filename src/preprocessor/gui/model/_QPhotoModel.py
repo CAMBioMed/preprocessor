@@ -92,9 +92,14 @@ class QPhotoModel(QModel[PhotoData]):
         if not self._data.ruler.enabled:
             return []
         r = self._data.ruler
-        if r.end is None:
+        if r.start is None and r.end is None:
+            return []
+        elif r.start is None:
+            return [r.end]
+        elif r.end is None:
             return [r.start]
-        return [r.start, r.end]
+        else:
+            return [r.start, r.end]
 
     @ruler_points.setter
     def ruler_points(self, value: "list[Point2D] | None") -> None:
