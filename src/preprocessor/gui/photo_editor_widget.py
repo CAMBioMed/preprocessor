@@ -331,9 +331,9 @@ class PhotoEditorWidget(QWidget):
             for a, b in zip(qcorners, [*qcorners[1:], qcorners[0]], strict=False):
                 painter.drawLine(a, b)
 
-        # Draw handles for each corner (so they are visible and draggable)
+        # Draw crop handles only while editing crop corners.
         pts = qcorners or []
-        if pts:
+        if self._current_tool == Tool.DrawQuadrat and pts:
             for _i, p in enumerate(pts):
                 # outer border
                 painter.setPen(QPen(Qt.GlobalColor.white, 2))
@@ -351,14 +351,15 @@ class PhotoEditorWidget(QWidget):
         if len(rpts) == 2:
             painter.setPen(QPen(_ruler_color, 2, Qt.PenStyle.SolidLine))
             painter.drawLine(rpts[0], rpts[1])
-        for rp in rpts:
-            painter.setPen(QPen(Qt.GlobalColor.white, 2))
-            painter.setBrush(Qt.BrushStyle.NoBrush)
-            r = self._handle_radius
-            painter.drawEllipse(rp, r, r)
-            painter.setPen(QPen(Qt.GlobalColor.black, 1))
-            painter.setBrush(_ruler_color)
-            painter.drawEllipse(rp, r - 3, r - 3)
+        if self._current_tool == Tool.Ruler:
+            for rp in rpts:
+                painter.setPen(QPen(Qt.GlobalColor.white, 2))
+                painter.setBrush(Qt.BrushStyle.NoBrush)
+                r = self._handle_radius
+                painter.drawEllipse(rp, r, r)
+                painter.setPen(QPen(Qt.GlobalColor.black, 1))
+                painter.setBrush(_ruler_color)
+                painter.drawEllipse(rp, r - 3, r - 3)
 
         # Draw a crosshair centered at the mouse position (drawn last so it's visible)
         if self._current_tool in (Tool.DrawQuadrat, Tool.Ruler) and self._mouse_position is not None:
