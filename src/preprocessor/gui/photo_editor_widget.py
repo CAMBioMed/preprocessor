@@ -2,9 +2,9 @@ import contextlib
 import math
 from enum import Enum, auto
 
-from PySide6.QtCore import QPoint, Qt, QRect, QSize, QEvent
+from PySide6.QtCore import QPoint, QPointF, Qt, QRect, QSize, QEvent
 from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
-from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor
+from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor, QWheelEvent
 from PySide6.QtWidgets import QWidget
 from cv2.typing import MatLike
 
@@ -49,6 +49,12 @@ class PhotoEditorWidget(QWidget):
     _current_undistort_worker: Worker | None
     _current_tool: Tool
     """The currently selected tool."""
+    _view_zoom: float
+    """Zoom multiplier used only in Move tool (1.0 == fit-to-widget)."""
+    _view_pan: QPointF
+    """Pan offset in widget pixels used only in Move tool."""
+    _is_panning: bool
+    _last_pan_pos: QPoint | None
 
     def __init__(self, parent: QWidget | None = None) -> None:
         QWidget.__init__(self, parent)
@@ -73,7 +79,11 @@ class PhotoEditorWidget(QWidget):
         self.setMouseTracking(True)
         self._current_project = None
         self._current_undistort_worker = None
-        self._current_tool = Tool.DrawQuadrat
+        self._current_tool = Tool.Move
+        self._view_zoom = 1.0
+        self._view_pan = QPointF(0.0, 0.0)
+        self._is_panning = False
+        self._last_pan_pos = None
 
     def show_photo(self, photo: QPhotoModel | None, project: QProjectModel) -> None:
         # Disconnect any previous signals and clear state
@@ -97,6 +107,10 @@ class PhotoEditorWidget(QWidget):
         self._drag_index = None
         # Discard any unfinished edit when switching photos
         self._edit_points = None
+        self._is_panning = False
+        self._last_pan_pos = None
+        self._view_zoom = 1.0
+        self._view_pan = QPointF(0.0, 0.0)
 
         if photo is not None:
             original_path = photo.original_filename
@@ -132,8 +146,25 @@ class PhotoEditorWidget(QWidget):
 
     def set_tool(self, tool: Tool) -> None:
         """Set the currently active tool."""
+        if tool != Tool.DrawQuadrat and self._edit_points is not None:
+            # Commit an in-progress quadrat edit before leaving DrawQuadrat mode.
+            self._write_widget_points(self._edit_points if self._edit_points else None)
+            self._edit_points = None
+            self._drag_index = None
         self._current_tool = tool
+        self._update_cursor_for_tool()
         self.update()
+
+    def _update_cursor_for_tool(self) -> None:
+        if not self.underMouse():
+            return
+        if self._current_tool == Tool.DrawQuadrat:
+            self.setCursor(Qt.CursorShape.BlankCursor)
+            return
+        if self._current_tool == Tool.Move:
+            self.setCursor(Qt.CursorShape.ClosedHandCursor if self._is_panning else Qt.CursorShape.OpenHandCursor)
+            return
+        self.unsetCursor()
 
     def _on_photo_params_changed(self, *args: object, **kwargs: object) -> None:
         """Handler called when the photo transformation parameters change.
@@ -175,11 +206,18 @@ class PhotoEditorWidget(QWidget):
         """
         if self._pixmap is None or self._pixmap.width() == 0 or self._pixmap.height() == 0:
             return 1.0, QPoint(0, 0), QSize(self.width(), self.height())
-        ratio = min(self.width() / self._pixmap.width(), self.height() / self._pixmap.height())
+
+        fit_ratio = min(self.width() / self._pixmap.width(), self.height() / self._pixmap.height())
+        if self._current_tool != Tool.Move:
+            # Preserve the old DrawQuadrat behavior exactly.
+            ratio = fit_ratio
+            offset = QPoint(0, 0)
+        else:
+            ratio = fit_ratio * self._view_zoom
+            offset = QPoint(round(self._view_pan.x()), round(self._view_pan.y()))
+
         scaled_w = round(self._pixmap.width() * ratio)
         scaled_h = round(self._pixmap.height() * ratio)
-        # keep top-left at (0,0) (same behavior as the painter)
-        offset = QPoint(0, 0)
         return ratio, offset, QSize(scaled_w, scaled_h)
 
     def _image_to_widget_point(self, x: float, y: float) -> QPoint:
@@ -204,9 +242,12 @@ class PhotoEditorWidget(QWidget):
         """
         if self._edit_points is not None:
             return list(self._edit_points)
-        if self._photo is None or self._photo.quadrat_corners is None:
+        if self._photo is None:
             return []
-        return [self._image_to_widget_point(x, y) for x, y in self._photo.quadrat_corners]
+        corners = self._photo.quadrat_corners
+        if corners is None:
+            return []
+        return [self._image_to_widget_point(x, y) for x, y in corners]
 
     def _write_widget_points(self, pts: list[QPoint] | None) -> None:
         """Write a list of QPoint (or None) back into the QPhotoModel as list of floats (image coords) or None.
@@ -269,7 +310,7 @@ class PhotoEditorWidget(QWidget):
                 painter.drawEllipse(p, r - 3, r - 3)
 
         # Draw a crosshair centered at the mouse position (drawn last so it's visible)
-        if self._mouse_position is not None:
+        if self._current_tool == Tool.DrawQuadrat and self._mouse_position is not None:
             # fmt: off
             length = 10                             # Arm length, in pixels
             gap = 5                                 # Gap size, in pixels
@@ -311,6 +352,15 @@ class PhotoEditorWidget(QWidget):
             self.update()
             return
 
+        if self._current_tool == Tool.Move:
+            self._mouse_position = event.pos()
+            if event.button() == Qt.MouseButton.LeftButton:
+                self._is_panning = True
+                self._last_pan_pos = event.pos()
+                self._update_cursor_for_tool()
+            self.update()
+            return
+
         if event.button() == Qt.MouseButton.LeftButton:
             hit = self._find_handle_index(event.pos())
             if hit is not None:
@@ -325,8 +375,10 @@ class PhotoEditorWidget(QWidget):
                     # initialize working copy if not present
                     if self._edit_points is None:
                         self._edit_points = pts
-                    self._edit_points.append(event.pos())
-                    self._drag_index = len(self._edit_points) - 1
+                    edit_points = self._edit_points
+                    assert edit_points is not None
+                    edit_points.append(event.pos())
+                    self._drag_index = len(edit_points) - 1
             self._mouse_position = event.pos()
             self.update()
         elif event.button() == Qt.MouseButton.RightButton:
@@ -349,17 +401,36 @@ class PhotoEditorWidget(QWidget):
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self._mouse_position = event.pos()
+
+        if self._current_tool == Tool.Move:
+            if self._is_panning and self._last_pan_pos is not None:
+                delta = event.pos() - self._last_pan_pos
+                self._view_pan = QPointF(self._view_pan.x() + delta.x(), self._view_pan.y() + delta.y())
+                self._last_pan_pos = event.pos()
+            self.update()
+            return
+
         if self._drag_index is not None and self._photo is not None:
             # Dragging: update the working copy only (do not persist yet)
             if self._edit_points is None:
                 self._edit_points = self._widget_points()
             pts = self._edit_points
+            assert pts is not None
             if 0 <= self._drag_index < len(pts):
                 pts[self._drag_index] = event.pos()
             # do not call _write_widget_points here
         self.update()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if self._current_tool == Tool.Move:
+            if event.button() == Qt.MouseButton.LeftButton:
+                self._is_panning = False
+                self._last_pan_pos = None
+                self._update_cursor_for_tool()
+            self._mouse_position = event.pos()
+            self.update()
+            return
+
         # Stop dragging and persist any working edits
         if self._edit_points is not None:
             # commit working copy into the model
@@ -370,9 +441,38 @@ class PhotoEditorWidget(QWidget):
         self._mouse_position = event.pos()
         self.update()
 
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        if self._current_tool != Tool.Move or self._pixmap is None:
+            event.ignore()
+            return
+
+        delta_y = event.angleDelta().y()
+        if delta_y == 0:
+            event.accept()
+            return
+
+        old_ratio, old_offset, _ = self._current_pixmap_info()
+        if old_ratio <= 0:
+            event.accept()
+            return
+
+        # Keep the image point under the cursor fixed while zooming.
+        cursor = event.position().toPoint()
+        image_x = (cursor.x() - old_offset.x()) / old_ratio
+        image_y = (cursor.y() - old_offset.y()) / old_ratio
+
+        zoom_factor = 1.15 ** (delta_y / 120.0)
+        self._view_zoom = min(20.0, max(0.2, self._view_zoom * zoom_factor))
+
+        new_ratio, _new_offset, _ = self._current_pixmap_info()
+        self._view_pan = QPointF(cursor.x() - image_x * new_ratio, cursor.y() - image_y * new_ratio)
+
+        self.update()
+        event.accept()
+
     def enterEvent(self, event: QEnterEvent) -> None:
-        """Hide the OS mouse cursor while inside the editor."""
-        self.setCursor(Qt.CursorShape.BlankCursor)
+        """Adjust cursor behavior when entering the editor."""
+        self._update_cursor_for_tool()
         super().enterEvent(event)
 
     def leaveEvent(self, event: QEvent) -> None:
@@ -384,6 +484,8 @@ class PhotoEditorWidget(QWidget):
         self.unsetCursor()
         self._mouse_position = None
         self._drag_index = None  # Stop dragging (if any)
+        self._is_panning = False
+        self._last_pan_pos = None
         self.update()
         super().leaveEvent(event)
 
