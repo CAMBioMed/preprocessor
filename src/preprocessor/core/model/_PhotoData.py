@@ -6,6 +6,7 @@ from preprocessor.core.model._MetadataData import MetadataData
 from preprocessor.core.model._ColorCorrectionParams import ColorCorrectionParams
 from preprocessor.core.model._LensCorrectionParams import LensCorrectionParams
 from preprocessor.core.model._CropParams import CropParams
+from preprocessor.core.model._RulerParams import RulerParams
 from preprocessor.core.model._ProjectPath import ProjectPath
 
 
@@ -31,11 +32,13 @@ class PhotoData(BaseModel, validate_assignment=True):
     ######################
 
     color_correction: ColorCorrectionParams = ColorCorrectionParams()
-    """The parameters for color correction, or None to not perform color correction."""
+    """The parameters for color correction."""
     lens_correction: LensCorrectionParams = LensCorrectionParams()
-    """The parameters for lens correction, or None to not perform lens correction."""
+    """The parameters for lens correction."""
     crop: CropParams = CropParams()
-    """The parameters for cropping the photo, or None to not crop the photo."""
+    """The parameters for cropping the photo."""
+    ruler: RulerParams = RulerParams()
+    """The parameters for displaying a ruler on the photo."""
 
     ##############
     ## Metadata ##

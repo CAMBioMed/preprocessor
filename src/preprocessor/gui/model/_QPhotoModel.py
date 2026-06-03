@@ -3,7 +3,8 @@ from typing import Any
 
 from PySide6.QtCore import Signal
 
-from preprocessor.core.model import PhotoData, MetadataData, ColorCorrectionParams, LensCorrectionParams, CropParams
+from preprocessor.core.model import PhotoData, MetadataData, ColorCorrectionParams, LensCorrectionParams, CropParams, \
+    RulerParams
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import Point2D, CameraMatrix
 from preprocessor.gui.model._QModel import QModel
@@ -50,7 +51,7 @@ class QPhotoModel(QModel[PhotoData]):
 
     @property
     def color_correction(self) -> ColorCorrectionParams:
-        """The parameters for color correction, or None to not perform color correction."""
+        """The parameters for color correction."""
         return self._data.color_correction
 
     @color_correction.setter
@@ -59,7 +60,7 @@ class QPhotoModel(QModel[PhotoData]):
 
     @property
     def lens_correction(self) -> LensCorrectionParams:
-        """The parameters for lens correction, or None to not perform lens correction."""
+        """The parameters for lens correction."""
         return self._data.lens_correction
 
     @lens_correction.setter
@@ -68,12 +69,21 @@ class QPhotoModel(QModel[PhotoData]):
 
     @property
     def crop(self) -> CropParams:
-        """The parameters for cropping the photo, or None to not crop the photo."""
+        """The parameters for cropping the photo."""
         return self._data.crop
 
     @crop.setter
     def crop(self, value: CropParams) -> None:
         self._set_field("crop", value)
+
+    @property
+    def ruler(self) -> RulerParams:
+        """The parameters for displaying a ruler on the photo."""
+        return self._data.ruler
+
+    @ruler.setter
+    def ruler(self, value: RulerParams) -> None:
+        self._set_field("ruler", value)
 
     ##############
     ## Metadata ##
