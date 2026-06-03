@@ -3,7 +3,7 @@ import math
 from enum import Enum, auto
 
 from PySide6.QtCore import QPoint, QPointF, Qt, QRect, QSize, QEvent
-from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen
+from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen, QResizeEvent
 from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor, QWheelEvent
 from PySide6.QtWidgets import QWidget
 from cv2.typing import MatLike
@@ -220,6 +220,29 @@ class PhotoEditorWidget(QWidget):
         scaled_h = round(self._pixmap.height() * ratio)
         return ratio, offset, QSize(scaled_w, scaled_h)
 
+    def _clamp_move_view(self) -> None:
+        """Keep move-mode zoom/pan inside valid viewport bounds."""
+        if self._pixmap is None or self._pixmap.width() <= 0 or self._pixmap.height() <= 0:
+            return
+
+        fit_ratio = min(self.width() / self._pixmap.width(), self.height() / self._pixmap.height())
+        # Do not allow zooming out beyond the viewport fit scale.
+        self._view_zoom = max(1.0, self._view_zoom)
+        ratio = fit_ratio * self._view_zoom
+
+        scaled_w = self._pixmap.width() * ratio
+        scaled_h = self._pixmap.height() * ratio
+
+        min_x = min(0.0, self.width() - scaled_w)
+        max_x = 0.0
+        min_y = min(0.0, self.height() - scaled_h)
+        max_y = 0.0
+
+        self._view_pan = QPointF(
+            min(max(self._view_pan.x(), min_x), max_x),
+            min(max(self._view_pan.y(), min_y), max_y),
+        )
+
     def _image_to_widget_point(self, x: float, y: float) -> QPoint:
         """Map a point from image (model) coordinates to widget coordinates."""
         ratio, offset, _ = self._current_pixmap_info()
@@ -406,6 +429,7 @@ class PhotoEditorWidget(QWidget):
             if self._is_panning and self._last_pan_pos is not None:
                 delta = event.pos() - self._last_pan_pos
                 self._view_pan = QPointF(self._view_pan.x() + delta.x(), self._view_pan.y() + delta.y())
+                self._clamp_move_view()
                 self._last_pan_pos = event.pos()
             self.update()
             return
@@ -462,13 +486,19 @@ class PhotoEditorWidget(QWidget):
         image_y = (cursor.y() - old_offset.y()) / old_ratio
 
         zoom_factor = 1.15 ** (delta_y / 120.0)
-        self._view_zoom = min(20.0, max(0.2, self._view_zoom * zoom_factor))
+        self._view_zoom = min(20.0, max(1.0, self._view_zoom * zoom_factor))
 
         new_ratio, _new_offset, _ = self._current_pixmap_info()
         self._view_pan = QPointF(cursor.x() - image_x * new_ratio, cursor.y() - image_y * new_ratio)
+        self._clamp_move_view()
 
         self.update()
         event.accept()
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        if self._current_tool == Tool.Move:
+            self._clamp_move_view()
+        super().resizeEvent(event)
 
     def enterEvent(self, event: QEnterEvent) -> None:
         """Adjust cursor behavior when entering the editor."""
