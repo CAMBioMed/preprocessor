@@ -208,13 +208,13 @@ class PhotoEditorWidget(QWidget):
             return 1.0, QPoint(0, 0), QSize(self.width(), self.height())
 
         fit_ratio = min(self.width() / self._pixmap.width(), self.height() / self._pixmap.height())
-        if self._current_tool != Tool.Move:
-            # Preserve the old DrawQuadrat behavior exactly.
-            ratio = fit_ratio
-            offset = QPoint(0, 0)
-        else:
+        if self._current_tool in (Tool.Move, Tool.DrawQuadrat):
+            # DrawQuadrat overlays should follow the same transformed view as Move.
             ratio = fit_ratio * self._view_zoom
             offset = QPoint(round(self._view_pan.x()), round(self._view_pan.y()))
+        else:
+            ratio = fit_ratio
+            offset = QPoint(0, 0)
 
         scaled_w = round(self._pixmap.width() * ratio)
         scaled_h = round(self._pixmap.height() * ratio)
@@ -496,7 +496,7 @@ class PhotoEditorWidget(QWidget):
         event.accept()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
-        if self._current_tool == Tool.Move:
+        if self._current_tool in (Tool.Move, Tool.DrawQuadrat):
             self._clamp_move_view()
         super().resizeEvent(event)
 
