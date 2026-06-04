@@ -3,7 +3,14 @@ from typing import Any
 
 from PySide6.QtCore import Signal
 
-from preprocessor.core.model import PhotoData, MetadataData, ColorCorrectionParams, LensCorrectionParams, CropParams
+from preprocessor.core.model import (
+    PhotoData,
+    MetadataData,
+    ColorCorrectionParams,
+    LensCorrectionParams,
+    CropParams,
+    RulerParams,
+)
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import Point2D, CameraMatrix
 from preprocessor.gui.model._QModel import QModel
@@ -17,6 +24,7 @@ class QPhotoModel(QModel[PhotoData]):
     on_color_correction_changed: Signal = Signal(object)  # Emits ColorCorrectionParams | None
     on_lens_correction_changed: Signal = Signal(object)  # Emits LensCorrectionParams | None
     on_crop_changed: Signal = Signal(object)  # Emits CropParams | None
+    on_ruler_changed: Signal = Signal(object)  # Emits RulerParams
     on_metadata_changed: Signal = Signal(object)  # Emits MetadataData
 
     def __init__(self, data: PhotoData | dict[str, Any] | None = None) -> None:
@@ -50,7 +58,7 @@ class QPhotoModel(QModel[PhotoData]):
 
     @property
     def color_correction(self) -> ColorCorrectionParams:
-        """The parameters for color correction, or None to not perform color correction."""
+        """The parameters for color correction."""
         return self._data.color_correction
 
     @color_correction.setter
@@ -59,7 +67,7 @@ class QPhotoModel(QModel[PhotoData]):
 
     @property
     def lens_correction(self) -> LensCorrectionParams:
-        """The parameters for lens correction, or None to not perform lens correction."""
+        """The parameters for lens correction."""
         return self._data.lens_correction
 
     @lens_correction.setter
@@ -68,12 +76,44 @@ class QPhotoModel(QModel[PhotoData]):
 
     @property
     def crop(self) -> CropParams:
-        """The parameters for cropping the photo, or None to not crop the photo."""
+        """The parameters for cropping the photo."""
         return self._data.crop
 
     @crop.setter
     def crop(self, value: CropParams) -> None:
         self._set_field("crop", value)
+
+    @property
+    def ruler(self) -> RulerParams:
+        """The parameters for displaying a ruler on the photo."""
+        return self._data.ruler
+
+    @ruler.setter
+    def ruler(self, value: RulerParams) -> None:
+        self._set_field("ruler", value)
+
+    @property
+    def ruler_points(self) -> "list[Point2D]":
+        """The ruler start/end points in image coordinates (0, 1, or 2 items)."""
+        if not self._data.ruler.enabled:
+            return []
+        r = self._data.ruler
+        if r.start is None and r.end is not None:
+            return [r.end]
+        if r.start is not None and r.end is None:
+            return [r.start]
+        if r.start is not None and r.end is not None:
+            return [r.start, r.end]
+        return []
+
+    @ruler_points.setter
+    def ruler_points(self, value: "list[Point2D] | None") -> None:
+        if not value:
+            self.ruler = RulerParams()
+        elif len(value) == 1:
+            self.ruler = RulerParams(enabled=True, start=value[0])
+        else:
+            self.ruler = RulerParams(enabled=True, start=value[0], end=value[1])
 
     ##############
     ## Metadata ##

@@ -38,7 +38,9 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
         return v
 
-    def __iter__(self) -> Iterator[Point2D]:  # type: ignore[override]
+    # BaseModel defines __iter__ with a different signature (to allow access to the fields)
+    # We should not override it here.
+    def __iter__(self) -> Iterator[Point2D]:  # type: ignore[override, ty:invalid-method-override]
         return iter(self.root)
 
     def __len__(self) -> int:

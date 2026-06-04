@@ -59,7 +59,7 @@ class LensCorrectTransform:
                 new_cam,
                 (w, h),
                 cv2.CV_32FC1,
-            )  # type: ignore[call-overload]
+            )  # type: ignore[call-overload, ty:no-matching-overload]
 
             # Prepare destination image
             dst = np.empty_like(src)

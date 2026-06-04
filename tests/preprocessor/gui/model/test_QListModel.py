@@ -154,18 +154,18 @@ class TestQListModel:
         # Arrange/Act/Assert for append non-QObject
         with pytest.raises(TypeError):
             # Act
-            model.append(object())  # type: ignore[arg-type]
+            model.append(object())  # type: ignore[arg-type, ty:invalid-argument-type]
 
         # Insert non-QObject
         with pytest.raises(TypeError):
-            model.insert(0, object())  # type: ignore[arg-type]
+            model.insert(0, object())  # type: ignore[arg-type, ty:invalid-argument-type]
         # setitem index to non-QObject (need an existing item first)
         model.append(Item(ItemData(name="a")))
         with pytest.raises(TypeError):
-            model[0] = object()  # type: ignore[call-overload]
+            model[0] = object()  # type: ignore[call-overload, ty:invalid-assignment]
         # setitem slice with non-QObject in iterable
         with pytest.raises(TypeError):
-            model[0:1] = [object()]  # type: ignore[list-item]
+            model[0:1] = [object()]  # type: ignore[list-item, ty:invalid-assignment]
 
     def test_on_changed_signal_emitted(self, model: QListModel[Item]) -> None:
         # Arrange

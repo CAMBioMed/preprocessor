@@ -13,7 +13,7 @@ from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
 from preprocessor.gui.jobs.export_photo_job import ExportPhotoJob
 from preprocessor.gui.metadata_dialog import MetadataDialog
-from preprocessor.gui.photo_editor_widget import PhotoEditorWidget
+from preprocessor.gui.photo_editor_widget import PhotoEditorWidget, Tool
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
@@ -114,6 +114,11 @@ class MainWindow(QMainWindow):
         self.ui.menuFile_ExportAll.setIcon(icon_from_resource("icons/fuguex2/disk--arrow.png"))
         self.ui.menuFile_Exit.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)))
 
+        # Tools menu
+        self.ui.menuTools_Move.setIcon(icon_from_resource("icons/fuguex2/cursor.png"))
+        self.ui.menuTools_DrawQuadrat.setIcon(icon_from_resource("icons/fuguex2/zone-select.png"))
+        self.ui.menuTools_Ruler.setIcon(icon_from_resource("icons/fuguex2/ruler.png"))
+
         # Help menu
         self.ui.menuHelp_About.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.HelpAbout)))
 
@@ -131,6 +136,11 @@ class MainWindow(QMainWindow):
         self.ui.menuFile_SaveProject.setShortcut(QKeySequence.StandardKey.Save)
         self.ui.menuFile_SaveProjectAs.setShortcut(QKeySequence.StandardKey.SaveAs)
         self.ui.menuFile_Exit.setShortcut(QKeySequence.StandardKey.Quit)
+
+        # Tools menu
+        self.ui.menuTools_Move.setShortcut(QKeySequence(Qt.Key.Key_V))
+        self.ui.menuTools_DrawQuadrat.setShortcut(QKeySequence(Qt.Key.Key_C))
+        self.ui.menuTools_Ruler.setShortcut(QKeySequence(Qt.Key.Key_R))  # or CTRL+R/Cmd+R?
 
         # Help menu
         self.ui.menuHelp_About.setShortcut(QKeySequence.StandardKey.HelpContents)
@@ -167,6 +177,11 @@ class MainWindow(QMainWindow):
 
         # Edit menu
         self.ui.menuEdit_DetectQuadrat.triggered.connect(self._handle_detect_quadrat_action)
+
+        # Tools menu
+        self.ui.menuTools_Move.triggered.connect(lambda: self._handle_tool_action(Tool.Move))
+        self.ui.menuTools_DrawQuadrat.triggered.connect(lambda: self._handle_tool_action(Tool.DrawQuadrat))
+        self.ui.menuTools_Ruler.triggered.connect(lambda: self._handle_tool_action(Tool.Ruler))
 
         # Window menu
         self.ui.menuWindow_ShowThumbnailsPanel.triggered.connect(lambda: self.thumbnail_dock.setVisible(True))
@@ -270,6 +285,12 @@ class MainWindow(QMainWindow):
         self.model.current_photo.quadrat_corners = list(result.as_tuple())
         # Trigger updating the opened editor
         self._handle_current_photo_changed(self.model.current_photo)
+
+    def _handle_tool_action(self, tool: Tool) -> None:
+        self.ui.menuTools_Move.setChecked(tool == Tool.Move)
+        self.ui.menuTools_DrawQuadrat.setChecked(tool == Tool.DrawQuadrat)
+        self.ui.menuTools_Ruler.setChecked(tool == Tool.Ruler)
+        self.central_widget.set_tool(tool)
 
     def _handle_help_about_action(self) -> None:
         show_about_dialog(self)

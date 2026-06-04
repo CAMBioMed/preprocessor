@@ -59,7 +59,8 @@ class QListModel[E: QModel](QObject):
 
     def __setitem__(self, index: SupportsIndex | slice, value: E | Iterable[E]) -> None:
         if isinstance(index, slice):
-            items = list(value)  # type: ignore[arg-type,call-overload]
+            value2 = cast(Iterable[E], value)
+            items = list(value2)
             for item in items:
                 if not isinstance(item, QObject):
                     msg = "QObjectList only accepts QObjects"
@@ -78,15 +79,16 @@ class QListModel[E: QModel](QObject):
             if not isinstance(value, QObject):
                 msg = "QObjectList only accepts QObjects"
                 raise TypeError(msg)
+            value3 = cast(E, value)
             old = self._items[index]
             old.setParent(None)
             # NOTE: This will fail with a message "Cannot set parent, new parent is in a different thread" when
             # the inserted object was created on a different thread from this object. In practice for this app
             # we need to create all QObjects that will be inserted into QListModel on the main thread.
-            value.setParent(self)
-            self._items[index] = value
+            value3.setParent(self)
+            self._items[index] = value3
             self.mark_dirty()
-            self.on_changed.emit([value], [old])
+            self.on_changed.emit([value3], [old])
 
     @overload
     def __delitem__(self, index: SupportsIndex) -> None:
@@ -174,7 +176,7 @@ class QListModel[E: QModel](QObject):
         items: list[E] = []
         for d in data_list:
             # model_cls is expected to be a QModel subclass (returns a QObject)
-            obj = model_cls(data=d)  # type: ignore[arg-type,call-arg]
+            obj = model_cls(data=d)  # type: ignore[arg-type, call-arg, ty:missing-argument]
             items.append(cast(E, obj))
         self[:] = items
 
@@ -191,14 +193,16 @@ class QListModel[E: QModel](QObject):
         """
         out: list[dict] = []
         for it in self._items:
-            if hasattr(it, "serialize"):
-                out.append(it.serialize())  # type: ignore[arg-type]
-            else:
-                # fallback to raw pydantic dump
-                try:
-                    out.append(it._data.model_dump())  # type: ignore[attr-defined]
-                except Exception:
-                    out.append({})
+            serialize = getattr(it, "serialize", None)
+            if callable(serialize):
+                out.append(cast(Callable[[], dict], serialize)())
+                continue
+
+            # fallback to raw pydantic dump
+            try:
+                out.append(it._data.model_dump())  # type: ignore[attr-defined]
+            except Exception:
+                out.append({})
         return out
 
     def bind_to_model(

@@ -115,36 +115,11 @@ class QJobContext[E](JobContext, JobHandle):
         # reported in the range [parent_start, parent_start + weight].
         parent_start = outer._progress
 
-        # The subcontext delegates to the outer context but maps progress into
-        # the slice [parent_start .. parent_start + weight].
-        class _SubContext(JobContext):
-            def is_cancelled(self) -> bool:
-                return outer.is_cancelled()
-
-            def update_status(self, message: str) -> None:
-                outer.update_status(message)
-
-            def update_progress(self, progress: float) -> None:
-                p = max(0.0, min(1.0, float(progress)))
-
-                # Map child progress p into parent range [parent_start, parent_start + weight]
-                scaled = parent_start + p * weight
-                # Ensure we don't exceed the end of the allocated slice
-                scaled = max(parent_start, min(parent_start + weight, scaled))
-                outer.update_progress(scaled)
-
-            def log_msg(self, message: Message) -> None:
-                outer.log_msg(message)
-
-            def run_subjob[R2](self, job2: "Job[R2]", weight2: float = 1.0) -> R2:
-                # nested subjob: multiply weights so child progress is mapped correctly
-                return outer.run_subjob(job2, weight * weight2)
-
         # Respect any cancellation requested before starting
         outer.check_cancelled()
 
         # Run sub-job synchronously in this thread, letting exceptions propagate
-        result = job.run(_SubContext())
+        result = job.run(_SubContext(outer, weight, parent_start))
 
         # Check cancellation after completion too (sub-job may have been cancelled)
         outer.check_cancelled()
@@ -197,13 +172,48 @@ class QJobContext[E](JobContext, JobHandle):
         self._finished_event.set()
 
 
+# The subcontext delegates to the outer context but maps progress into
+# the slice [parent_start .. parent_start + weight].
+class _SubContext(JobContext):
+    outer: JobContext
+    outer_weight: float
+    parent_start: float
+
+    def __init__(self, outer: QJobContext, outer_weight: float, parent_start: float) -> None:
+        self.outer = outer
+        self.outer_weight = outer_weight
+        self.parent_start = parent_start
+
+    def is_cancelled(self) -> bool:
+        return self.outer.is_cancelled()
+
+    def update_status(self, message: str) -> None:
+        self.outer.update_status(message)
+
+    def update_progress(self, progress: float) -> None:
+        p = max(0.0, min(1.0, float(progress)))
+
+        # Map child progress p into parent range [parent_start, parent_start + weight]
+        scaled = self.parent_start + p * self.outer_weight
+        # Ensure we don't exceed the end of the allocated slice
+        scaled = max(self.parent_start, min(self.parent_start + self.outer_weight, scaled))
+        self.outer.update_progress(scaled)
+
+    def log_msg(self, message: Message) -> None:
+        self.outer.log_msg(message)
+
+    def run_subjob[R](self, job: "Job[R]", weight: float = 1.0) -> R:
+        # nested subjob: multiply weights so child progress is mapped correctly
+        return self.outer.run_subjob(job, self.outer_weight * weight)
+
+
 # Create a metaclass that is compatible with both QObject (from PySide6) and JobProcessor (ABC)
-class QJobProcessorMeta(type(QObject), type(JobProcessor)):
+class QJobProcessorMeta(type(QObject), type(JobProcessor)):  # type: ignore[ty:inconsistent-mro]
     """Metaclass to allow QJobProcessor to inherit from both QObject and JobProcessor."""
 
 
 # noinspection PyProtectedMember
-class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):
+class QJobProcessor(QObject, JobProcessor, metaclass=QJobProcessorMeta):  # type: ignore[ty:conflicting-metaclass]
     _pool: QThreadPool
     """The thread pool used to run the jobs."""
     _cancel_token: CancelToken

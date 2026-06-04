@@ -57,11 +57,11 @@ class Test_LensCorrectionParams(PydanticModelTestBase):
         ),
     }
     """Map for each field name to:
-        - the default value,
-        - a list of valid values,
-        - a list of pairs: unnormalized value to normalized value,
-        - a list of invalid values
-        """
+    - the default value,
+    - a list of valid values,
+    - a list of pairs: unnormalized value to normalized value,
+    - a list of invalid values
+    """
 
     @override
     def create_model(self) -> LensCorrectionParams:

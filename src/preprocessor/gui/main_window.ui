@@ -53,8 +53,17 @@
     <addaction name="menuWindow_ShowThumbnailsPanel"/>
     <addaction name="menuWindow_ShowEditorPanel"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="menuTools_Move"/>
+    <addaction name="menuTools_DrawQuadrat"/>
+    <addaction name="menuTools_Ruler"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
    <addaction name="menuWindow"/>
   </widget>
@@ -73,6 +82,10 @@
    <addaction name="menuFile_SaveProject"/>
    <addaction name="separator"/>
    <addaction name="menuFile_ExportAll"/>
+   <addaction name="separator"/>
+   <addaction name="menuTools_Move"/>
+   <addaction name="menuTools_DrawQuadrat"/>
+   <addaction name="menuTools_Ruler"/>
   </widget>
   <action name="menuFile_OpenProject">
    <property name="icon">
@@ -180,6 +193,33 @@
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="menuTools_Move">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Move</string>
+   </property>
+  </action>
+  <action name="menuTools_DrawQuadrat">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Draw quadrat</string>
+   </property>
+  </action>
+  <action name="menuTools_Ruler">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Ruler</string>
    </property>
   </action>
  </widget>

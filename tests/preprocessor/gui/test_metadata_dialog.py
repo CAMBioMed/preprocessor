@@ -9,10 +9,12 @@ from preprocessor.gui.metadata_dialog import MetadataDialog
 from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
 
+from preprocessor.gui.utils import _dt_to_qdatetime
+
 
 def _make_photo(metadata: dict[str, Any] | None = None) -> QPhotoModel:
     # Create a minimal QPhotoModel with a given metadata dict
-    data = {
+    data: dict[str, Any] = {
         "image_id": "test_photo",
         "original_filename": Path("IMG_TEST.JPG").resolve(),
     }
@@ -172,7 +174,7 @@ def test_metadata_dialog_apply_all_checked_to_multiple_photos(qtbot: QtBot) -> N
         qtbot.addWidget(dlg)
 
         # Manually set values for all fields
-        dlg.ui.dteDate.setDateTime(datetime.fromisoformat("2025-12-31T23:59:59"))
+        dlg.ui.dteDate.setDateTime(_dt_to_qdatetime(datetime.fromisoformat("2025-12-31T23:59:59")))
         dlg.ui.txtPartner.setText("PartnerX")
         dlg.ui.txtArea.setText("AreaY")
         dlg.ui.txtSite.setText("SiteZ")
@@ -302,7 +304,7 @@ def test_metadata_dialog_apply_checked_to_multiple_photos_1(qtbot: QtBot) -> Non
         qtbot.addWidget(dlg)
 
         # Manually set values for all fields
-        dlg.ui.dteDate.setDateTime(datetime.fromisoformat("2025-12-31T23:59:59"))
+        dlg.ui.dteDate.setDateTime(_dt_to_qdatetime(datetime.fromisoformat("2025-12-31T23:59:59")))
         dlg.ui.txtPartner.setText("PartnerX")
         dlg.ui.txtArea.setText("AreaY")
         dlg.ui.txtSite.setText("SiteZ")
@@ -432,7 +434,7 @@ def test_metadata_dialog_apply_checked_to_multiple_photos_2(qtbot: QtBot) -> Non
         qtbot.addWidget(dlg)
 
         # Manually set values for all fields
-        dlg.ui.dteDate.setDateTime(datetime.fromisoformat("2025-12-31T23:59:59"))
+        dlg.ui.dteDate.setDateTime(_dt_to_qdatetime(datetime.fromisoformat("2025-12-31T23:59:59")))
         dlg.ui.txtPartner.setText("PartnerX")
         dlg.ui.txtArea.setText("AreaY")
         dlg.ui.txtSite.setText("SiteZ")

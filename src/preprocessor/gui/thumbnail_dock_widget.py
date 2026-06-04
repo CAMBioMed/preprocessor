@@ -107,7 +107,7 @@ class ThumbnailDockWidget(QDockWidget):
 
         # Show menu at the global position
         global_pos = self.ui.thumbnailListWidget.mapToGlobal(pos)
-        menu.exec(global_pos)
+        menu.exec(global_pos)  # type: ignore[ty:invalid-argument-type]
 
     def _handle_apply_parameters_to_selected_action(self, selected_photos: list[QPhotoModel]) -> None:
         """Emit signal to indicate user requested 'Apply to all' for the selected photos."""
