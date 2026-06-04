@@ -224,7 +224,7 @@ class PhotoEditorWidget(QWidget):
             return 1.0, QPoint(0, 0), QSize(self.width(), self.height())
 
         fit_ratio = min(self.width() / self._pixmap.width(), self.height() / self._pixmap.height())
-        
+
         # All annotating tools follow the same transformed view.
         ratio = fit_ratio * self._view_zoom
         offset = QPoint(round(self._view_pan.x()), round(self._view_pan.y()))

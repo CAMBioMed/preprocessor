@@ -1,4 +1,5 @@
 """Tests for PhotoEditorWidget annotation state machine, tool switching, and persistence."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -61,6 +62,7 @@ def widget_with_photo(qtbot: QtBot) -> tuple[PhotoEditorWidget, QPhotoModel]:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _press_left(widget: PhotoEditorWidget, x: int, y: int) -> None:
     from PySide6.QtGui import QMouseEvent
@@ -167,16 +169,12 @@ class TestWidgetNoPhoto:
 
 
 class TestWidgetPoints:
-    def test_returns_empty_when_no_corners_set(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_returns_empty_when_no_corners_set(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         assert photo.quadrat_corners is None
         assert w._widget_points(Tool.DrawQuadrat) == []
 
-    def test_returns_corners_from_model(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_returns_corners_from_model(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         # Set two corners — with null pixmap, image coords == widget coords.
         photo.quadrat_corners = [(10.0, 20.0), (200.0, 300.0)]
@@ -209,9 +207,7 @@ class TestWidgetPoints:
         assert len(pts) == 1
         assert pts[0] == QPoint(10, 10)
 
-    def test_returns_ruler_points_from_model(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_returns_ruler_points_from_model(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 60.0), (150.0, 160.0)]
         pts = w._widget_points(Tool.Ruler)
@@ -236,9 +232,7 @@ class TestWidgetPoints:
 
 
 class TestFindHandleIndex:
-    def test_hit_within_radius(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_hit_within_radius(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 200.0)]
         r = w._handle_radius  # 8
@@ -247,9 +241,7 @@ class TestFindHandleIndex:
         # On the edge of the radius (distance == r).
         assert w._find_handle_index(QPoint(100 + r, 200), Tool.DrawQuadrat) == 0
 
-    def test_miss_outside_radius(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_miss_outside_radius(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 200.0)]
         r = w._handle_radius
@@ -263,9 +255,7 @@ class TestFindHandleIndex:
         photo.quadrat_corners = [(100.0, 100.0), (200.0, 200.0)]
         assert w._find_handle_index(QPoint(200, 200), Tool.DrawQuadrat) == 1
 
-    def test_ruler_hit(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_ruler_hit(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 50.0), (300.0, 300.0)]
         assert w._find_handle_index(QPoint(50, 50), Tool.Ruler) == 0
@@ -287,25 +277,19 @@ class TestAnnotationCursorVisibility:
         w._mouse_position = None
         assert not w._is_annotation_cursor_visible(Tool.DrawQuadrat)
 
-    def test_not_visible_when_not_over_handle(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_not_visible_when_not_over_handle(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0)]
         w._mouse_position = QPoint(400, 400)
         assert not w._is_annotation_cursor_visible(Tool.DrawQuadrat)
 
-    def test_visible_when_over_handle(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_visible_when_over_handle(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0)]
         w._mouse_position = QPoint(100, 100)
         assert w._is_annotation_cursor_visible(Tool.DrawQuadrat)
 
-    def test_visible_for_ruler_handle(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_visible_for_ruler_handle(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.ruler_points = [(200.0, 200.0)]
         w._mouse_position = QPoint(200, 200)
@@ -367,9 +351,7 @@ class TestToolSwitching:
 
 
 class TestDrawQuadratMouseEvents:
-    def test_left_press_adds_new_point(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_left_press_adds_new_point(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         _press_left(w, 100, 150)
@@ -400,9 +382,7 @@ class TestDrawQuadratMouseEvents:
         assert photo.quadrat_corners is not None
         assert len(photo.quadrat_corners) == 4
 
-    def test_drag_moves_edit_point(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_drag_moves_edit_point(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         _press_left(w, 100, 100)
@@ -412,9 +392,7 @@ class TestDrawQuadratMouseEvents:
         # Model not yet updated while dragging.
         assert photo.quadrat_corners is None
 
-    def test_release_commits_edit_to_model(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_release_commits_edit_to_model(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         _press_left(w, 100, 100)
@@ -428,9 +406,7 @@ class TestDrawQuadratMouseEvents:
         assert len(photo.quadrat_corners) == 1
         assert photo.quadrat_corners[0] == pytest.approx((150.0, 200.0))
 
-    def test_right_press_removes_point(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_right_press_removes_point(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0), (300.0, 300.0)]
         w.set_tool(Tool.DrawQuadrat)
@@ -489,18 +465,14 @@ class TestDrawQuadratMouseEvents:
 
 
 class TestRulerMouseEvents:
-    def test_left_press_adds_ruler_point(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_left_press_adds_ruler_point(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         _press_left(w, 200, 300)
         assert w._edit_points is not None
         assert len(w._edit_points) == 1
 
-    def test_release_commits_ruler_to_model(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_release_commits_ruler_to_model(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         _press_left(w, 200, 300)
@@ -510,9 +482,7 @@ class TestRulerMouseEvents:
         assert len(pts) == 1
         assert pts[0] == pytest.approx((200.0, 300.0))
 
-    def test_left_press_adds_second_ruler_point(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_left_press_adds_second_ruler_point(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         _press_left(w, 10, 10)
@@ -522,9 +492,7 @@ class TestRulerMouseEvents:
         pts = photo.ruler_points
         assert len(pts) == 2
 
-    def test_ruler_max_two_points(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_ruler_max_two_points(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         for x in [10, 200, 400]:
@@ -533,9 +501,7 @@ class TestRulerMouseEvents:
         # Third click should be ignored (max=2).
         assert len(photo.ruler_points) == 2
 
-    def test_right_press_removes_ruler_point(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_right_press_removes_ruler_point(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 50.0), (400.0, 400.0)]
         w.set_tool(Tool.Ruler)
@@ -551,13 +517,11 @@ class TestRulerMouseEvents:
         _press_right(w, 50, 50)
         assert photo.ruler_points == []
 
-    def test_ruler_drag_moves_endpoint(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_ruler_drag_moves_endpoint(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 50.0), (400.0, 400.0)]
         w.set_tool(Tool.Ruler)
-        _press_left(w, 50, 50)   # Hit the first handle.
+        _press_left(w, 50, 50)  # Hit the first handle.
         _move(w, 100, 120)
         assert w._edit_points is not None
         assert w._edit_points[0] == QPoint(100, 120)
@@ -674,11 +638,8 @@ class TestShowPhoto:
         w.show_photo(photo, _make_project())
         assert w._photo is photo
 
-    def test_show_photo_replaces_previous_photo(
-        self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
-    ) -> None:
+    def test_show_photo_replaces_previous_photo(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
         w, _old_photo = widget_with_photo
         new_photo = _make_photo("/nonexistent/other.jpg")
         w.show_photo(new_photo, _make_project())
         assert w._photo is new_photo
-

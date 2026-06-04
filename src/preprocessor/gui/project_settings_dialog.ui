@@ -19,70 +19,37 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tabMetadata">
+     <widget class="QWidget" name="tabSettings">
       <attribute name="title">
-       <string>Metadata</string>
+       <string>Settings</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="lblPartner">
-         <property name="text">
-          <string>Partner:</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="txtPartner"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="lblArea">
+        <widget class="QLabel" name="labelExplanation">
          <property name="text">
-          <string>Area:</string>
+          <string>(no settings available)</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="txtArea"/>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="lblSite">
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelEmpty">
          <property name="text">
-          <string>Site:</string>
+          <string> </string>
          </property>
         </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="txtSite"/>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="lblSeason">
-         <property name="text">
-          <string>Season:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="txtSeason"/>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="lblDepth">
-         <property name="text">
-          <string>Depth:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="txtDepth"/>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="lblTransect">
-         <property name="text">
-          <string>Transect:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QLineEdit" name="txtTransect"/>
        </item>
       </layout>
      </widget>
