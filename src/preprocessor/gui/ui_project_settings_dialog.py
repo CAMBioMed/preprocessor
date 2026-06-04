@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'project_settings_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -16,7 +16,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
-    QFormLayout, QLabel, QLineEdit, QSizePolicy,
+    QFormLayout, QLabel, QSizePolicy, QSpacerItem,
     QTabWidget, QVBoxLayout, QWidget)
 
 class Ui_ProjectSettingsDialog(object):
@@ -28,71 +28,25 @@ class Ui_ProjectSettingsDialog(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.tabs = QTabWidget(ProjectSettingsDialog)
         self.tabs.setObjectName(u"tabs")
-        self.tabMetadata = QWidget()
-        self.tabMetadata.setObjectName(u"tabMetadata")
-        self.formLayout_2 = QFormLayout(self.tabMetadata)
+        self.tabSettings = QWidget()
+        self.tabSettings.setObjectName(u"tabSettings")
+        self.formLayout_2 = QFormLayout(self.tabSettings)
         self.formLayout_2.setObjectName(u"formLayout_2")
-        self.lblPartner = QLabel(self.tabMetadata)
-        self.lblPartner.setObjectName(u"lblPartner")
+        self.labelExplanation = QLabel(self.tabSettings)
+        self.labelExplanation.setObjectName(u"labelExplanation")
 
-        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblPartner)
+        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.FieldRole, self.labelExplanation)
 
-        self.txtPartner = QLineEdit(self.tabMetadata)
-        self.txtPartner.setObjectName(u"txtPartner")
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.FieldRole, self.txtPartner)
+        self.formLayout_2.setItem(1, QFormLayout.ItemRole.FieldRole, self.verticalSpacer)
 
-        self.lblArea = QLabel(self.tabMetadata)
-        self.lblArea.setObjectName(u"lblArea")
+        self.labelEmpty = QLabel(self.tabSettings)
+        self.labelEmpty.setObjectName(u"labelEmpty")
 
-        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.LabelRole, self.lblArea)
+        self.formLayout_2.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelEmpty)
 
-        self.txtArea = QLineEdit(self.tabMetadata)
-        self.txtArea.setObjectName(u"txtArea")
-
-        self.formLayout_2.setWidget(1, QFormLayout.ItemRole.FieldRole, self.txtArea)
-
-        self.lblSite = QLabel(self.tabMetadata)
-        self.lblSite.setObjectName(u"lblSite")
-
-        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.LabelRole, self.lblSite)
-
-        self.txtSite = QLineEdit(self.tabMetadata)
-        self.txtSite.setObjectName(u"txtSite")
-
-        self.formLayout_2.setWidget(2, QFormLayout.ItemRole.FieldRole, self.txtSite)
-
-        self.lblSeason = QLabel(self.tabMetadata)
-        self.lblSeason.setObjectName(u"lblSeason")
-
-        self.formLayout_2.setWidget(3, QFormLayout.ItemRole.LabelRole, self.lblSeason)
-
-        self.txtSeason = QLineEdit(self.tabMetadata)
-        self.txtSeason.setObjectName(u"txtSeason")
-
-        self.formLayout_2.setWidget(3, QFormLayout.ItemRole.FieldRole, self.txtSeason)
-
-        self.lblDepth = QLabel(self.tabMetadata)
-        self.lblDepth.setObjectName(u"lblDepth")
-
-        self.formLayout_2.setWidget(4, QFormLayout.ItemRole.LabelRole, self.lblDepth)
-
-        self.txtDepth = QLineEdit(self.tabMetadata)
-        self.txtDepth.setObjectName(u"txtDepth")
-
-        self.formLayout_2.setWidget(4, QFormLayout.ItemRole.FieldRole, self.txtDepth)
-
-        self.lblTransect = QLabel(self.tabMetadata)
-        self.lblTransect.setObjectName(u"lblTransect")
-
-        self.formLayout_2.setWidget(5, QFormLayout.ItemRole.LabelRole, self.lblTransect)
-
-        self.txtTransect = QLineEdit(self.tabMetadata)
-        self.txtTransect.setObjectName(u"txtTransect")
-
-        self.formLayout_2.setWidget(5, QFormLayout.ItemRole.FieldRole, self.txtTransect)
-
-        self.tabs.addTab(self.tabMetadata, "")
+        self.tabs.addTab(self.tabSettings, "")
 
         self.verticalLayout.addWidget(self.tabs)
 
@@ -116,12 +70,8 @@ class Ui_ProjectSettingsDialog(object):
 
     def retranslateUi(self, ProjectSettingsDialog):
         ProjectSettingsDialog.setWindowTitle(QCoreApplication.translate("ProjectSettingsDialog", u"Dialog", None))
-        self.lblPartner.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Partner:", None))
-        self.lblArea.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Area:", None))
-        self.lblSite.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Site:", None))
-        self.lblSeason.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Season:", None))
-        self.lblDepth.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Depth:", None))
-        self.lblTransect.setText(QCoreApplication.translate("ProjectSettingsDialog", u"Transect:", None))
-        self.tabs.setTabText(self.tabs.indexOf(self.tabMetadata), QCoreApplication.translate("ProjectSettingsDialog", u"Metadata", None))
+        self.labelExplanation.setText(QCoreApplication.translate("ProjectSettingsDialog", u"(no settings available)", None))
+        self.labelEmpty.setText("")
+        self.tabs.setTabText(self.tabs.indexOf(self.tabSettings), QCoreApplication.translate("ProjectSettingsDialog", u"Settings", None))
     # retranslateUi
 
