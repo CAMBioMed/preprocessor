@@ -137,6 +137,8 @@ class ProgressDialog(QDialog):
         # Find the item by name and update it
         for i in range(self.ui.treeItems.topLevelItemCount()):
             item = self.ui.treeItems.topLevelItem(i)
+            if item is None:  # Just in case, but should not happen
+                continue
             if item.text(0) == job.name:
                 item.setText(1, status)
                 actual_icon = self._determine_icon(icon)

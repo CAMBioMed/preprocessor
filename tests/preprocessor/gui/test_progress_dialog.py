@@ -81,6 +81,7 @@ def test_running_worker_and_progress_and_status_and_finish(qtbot: QtBot) -> None
     # The tree item for the job should exist and show final status
     assert dlg.ui.treeItems.topLevelItemCount() == 1
     item = dlg.ui.treeItems.topLevelItem(0)
+    assert item is not None
     assert item.text(0) == "job1"
     # After finished the item may show the last status update from the job
     assert any(x in item.text(1) for x in ("Done", "Aborted", "Processing...", "Step 2", "2 / 2"))

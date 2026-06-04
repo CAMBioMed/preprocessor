@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         # Tools menu
         self.ui.menuTools_Move.setShortcut(QKeySequence(Qt.Key.Key_V))
         self.ui.menuTools_DrawQuadrat.setShortcut(QKeySequence(Qt.Key.Key_C))
-        self.ui.menuTools_Ruler.setShortcut(QKeySequence(Qt.Key.Key_R)) # or CTRL+R/Cmd+R?
+        self.ui.menuTools_Ruler.setShortcut(QKeySequence(Qt.Key.Key_R))  # or CTRL+R/Cmd+R?
 
         # Help menu
         self.ui.menuHelp_About.setShortcut(QKeySequence.StandardKey.HelpContents)

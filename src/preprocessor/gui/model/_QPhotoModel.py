@@ -3,8 +3,14 @@ from typing import Any
 
 from PySide6.QtCore import Signal
 
-from preprocessor.core.model import PhotoData, MetadataData, ColorCorrectionParams, LensCorrectionParams, CropParams, \
-    RulerParams
+from preprocessor.core.model import (
+    PhotoData,
+    MetadataData,
+    ColorCorrectionParams,
+    LensCorrectionParams,
+    CropParams,
+    RulerParams,
+)
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import Point2D, CameraMatrix
 from preprocessor.gui.model._QModel import QModel
@@ -92,14 +98,13 @@ class QPhotoModel(QModel[PhotoData]):
         if not self._data.ruler.enabled:
             return []
         r = self._data.ruler
-        if r.start is None and r.end is None:
-            return []
-        elif r.start is None:
+        if r.start is None and r.end is not None:
             return [r.end]
-        elif r.end is None:
+        if r.start is not None and r.end is None:
             return [r.start]
-        else:
+        if r.start is not None and r.end is not None:
             return [r.start, r.end]
+        return []
 
     @ruler_points.setter
     def ruler_points(self, value: "list[Point2D] | None") -> None:
