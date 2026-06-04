@@ -510,62 +510,65 @@ class PhotoEditorWidget(QWidget):
             points[drag_index] = pos
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
+        pos = event.position().toPoint()
         if self._photo is None:
-            self._mouse_position = event.pos()
+            self._mouse_position = pos
             self.update()
             return
 
         if self._current_tool == Tool.Move:
-            self._mouse_position = event.pos()
+            self._mouse_position = pos
             if event.button() == Qt.MouseButton.LeftButton:
                 self._is_panning = True
-                self._last_pan_pos = event.pos()
+                self._last_pan_pos = pos
                 self._update_cursor_for_tool()
             self.update()
             return
 
         if self._current_tool in (Tool.DrawQuadrat, Tool.Ruler):
             if event.button() == Qt.MouseButton.LeftButton:
-                self._handle_tool_left_press(self._current_tool, event.pos())
+                self._handle_tool_left_press(self._current_tool, pos)
             elif event.button() == Qt.MouseButton.RightButton:
-                self._handle_tool_right_press(self._current_tool, event.pos())
-            self._mouse_position = event.pos()
+                self._handle_tool_right_press(self._current_tool, pos)
+            self._mouse_position = pos
             self._update_cursor_for_tool()
             self.update()
             return
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        self._mouse_position = event.pos()
+        pos = event.position().toPoint()
+        self._mouse_position = pos
 
         if self._current_tool == Tool.Move:
             if self._is_panning and self._last_pan_pos is not None:
-                delta = event.pos() - self._last_pan_pos
+                delta = pos - self._last_pan_pos
                 self._view_pan = QPointF(self._view_pan.x() + delta.x(), self._view_pan.y() + delta.y())
                 self._clamp_move_view()
-                self._last_pan_pos = event.pos()
+                self._last_pan_pos = pos
             self.update()
             return
 
         if self._current_tool in (Tool.DrawQuadrat, Tool.Ruler):
-            self._handle_tool_drag(self._current_tool, event.pos())
+            self._handle_tool_drag(self._current_tool, pos)
             self._update_cursor_for_tool()
             self.update()
             return
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        pos = event.position().toPoint()
         if self._current_tool == Tool.Move:
             if event.button() == Qt.MouseButton.LeftButton:
                 self._is_panning = False
                 self._last_pan_pos = None
                 self._update_cursor_for_tool()
-            self._mouse_position = event.pos()
+            self._mouse_position = pos
             self.update()
             return
 
         if self._current_tool in (Tool.DrawQuadrat, Tool.Ruler):
             if self._current_tool == Tool.DrawQuadrat or event.button() == Qt.MouseButton.LeftButton:
                 self._commit_tool_edits(self._current_tool)
-            self._mouse_position = event.pos()
+            self._mouse_position = pos
             self._update_cursor_for_tool()
             self.update()
             return
