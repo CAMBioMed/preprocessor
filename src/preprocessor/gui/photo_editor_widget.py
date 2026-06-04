@@ -164,9 +164,7 @@ class PhotoEditorWidget(QWidget):
         if not self.underMouse():
             return
         if self._current_tool in (Tool.DrawQuadrat, Tool.Ruler):
-            if self._mouse_position is not None and self._find_tool_handle_index(
-                self._current_tool, self._mouse_position
-            ) is not None:
+            if self._is_annotation_cursor_visible(self._current_tool):
                 self.setCursor(
                     Qt.CursorShape.OpenHandCursor
                     if self._tool_drag_index(self._current_tool) is None
@@ -179,6 +177,10 @@ class PhotoEditorWidget(QWidget):
             self.setCursor(Qt.CursorShape.ClosedHandCursor if self._is_panning else Qt.CursorShape.OpenHandCursor)
             return
         self.unsetCursor()
+
+    def _is_annotation_cursor_visible(self, tool: Tool) -> bool:
+        """Return whether annotation cursor should be visible for `tool`."""
+        return self._mouse_position is not None and self._find_tool_handle_index(tool, self._mouse_position) is not None
 
     def _on_photo_params_changed(self, *args: object, **kwargs: object) -> None:
         """Handler called when the photo transformation parameters change.
@@ -360,7 +362,11 @@ class PhotoEditorWidget(QWidget):
                 painter.drawEllipse(rp, r - 3, r - 3)
 
         # Draw a crosshair centered at the mouse position (drawn last so it's visible)
-        if self._current_tool in (Tool.DrawQuadrat, Tool.Ruler) and self._mouse_position is not None:
+        if (
+            self._current_tool in (Tool.DrawQuadrat, Tool.Ruler)
+            and self._mouse_position is not None
+            and not self._is_annotation_cursor_visible(self._current_tool)
+        ):
             # fmt: off
             length = 10                             # Arm length, in pixels
             gap = 5                                 # Gap size, in pixels
@@ -372,17 +378,17 @@ class PhotoEditorWidget(QWidget):
             x = self._mouse_position.x()
             y = self._mouse_position.y()
 
-            def draw_crosshair() -> None:
+            def draw_crosshair_raw() -> None:
                 painter.drawLine(QPoint(x - gap - length, y), QPoint(x - gap, y))
                 painter.drawLine(QPoint(x + gap, y), QPoint(x + gap + length, y))
                 painter.drawLine(QPoint(x, y - gap - length), QPoint(x, y - gap))
                 painter.drawLine(QPoint(x, y + gap), QPoint(x, y + gap + length))
 
             painter.setPen(QPen(border_color, width + border * 2, Qt.PenStyle.SolidLine))
-            draw_crosshair()
+            draw_crosshair_raw()
 
             painter.setPen(QPen(line_color, width, Qt.PenStyle.SolidLine))
-            draw_crosshair()
+            draw_crosshair_raw()
 
     def _find_handle_index(self, pos: QPoint, tool: Tool = Tool.DrawQuadrat) -> int | None:
         """Return index of annotation handle under pos for the given tool, or None."""
@@ -524,6 +530,7 @@ class PhotoEditorWidget(QWidget):
             elif event.button() == Qt.MouseButton.RightButton:
                 self._handle_tool_right_press(self._current_tool, event.pos())
             self._mouse_position = event.pos()
+            self._update_cursor_for_tool()
             self.update()
             return
 
@@ -541,6 +548,7 @@ class PhotoEditorWidget(QWidget):
 
         if self._current_tool in (Tool.DrawQuadrat, Tool.Ruler):
             self._handle_tool_drag(self._current_tool, event.pos())
+            self._update_cursor_for_tool()
             self.update()
             return
 
@@ -558,6 +566,7 @@ class PhotoEditorWidget(QWidget):
             if self._current_tool == Tool.DrawQuadrat or event.button() == Qt.MouseButton.LeftButton:
                 self._commit_tool_edits(self._current_tool)
             self._mouse_position = event.pos()
+            self._update_cursor_for_tool()
             self.update()
             return
 
