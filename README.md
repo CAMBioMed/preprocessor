@@ -3,15 +3,15 @@
 [Annotation Guide](https://cambiomed-biodiversa.com/guide/)
 
 ## Installation
-Download the latest nightly (unstable) release:
+Download the latest release:
 
-1.  Go to the latest [Package workflow run](https://github.com/CAMBioMed/preprocessor/actions/workflows/package.yaml).
+1.  Go to the latest [release](https://github.com/CAMBioMed/preprocessor/releases/latest).
 2.  Download the appropriate artifact for your system, one of:
 
-    - Windows (`cambiomed-preprocessor-Windows.zip`)
-    - MacOS (`cambiomed-preprocessor-macOS.zip`)
-    - Ubuntu (`cambiomed-preprocessor-Ubuntu-24.04.zip`)
-    - Fedora (`cambiomed-preprocessor-Fedora-40.zip`)
+    - Windows (`CAMBioMed.Preprocessor.msi`)
+    - MacOS (`CAMBioMed.Preprocessor.dmg`)
+    - Ubuntu (`preprocessor.ubuntu-noble_amd64.deb`)
+    - Fedora (`preprocessor.fc40.x86_64.rpm `)
 
 
 ## Developer tasks
@@ -27,6 +27,8 @@ Download the latest nightly (unstable) release:
 - Run briefcase app with app update and updating dependencies: `uvx briefcase run -u -r` (`make app-run`)
 
 ## Release
+To release a version of this project:
+
 1.  Update the version number in `pyproject.toml`.
 2.  Regenerate the lock file.
 
@@ -37,9 +39,10 @@ Download the latest nightly (unstable) release:
 3.  Tag, commit, push.
 
     ```shell
-    VERSION=0.1.0
+    VERSION=<version>
     git commit --all -m "Release $VERSION"
     git tag -a $VERSION -m "Release $VERSION"
     git push --atomic origin main $VERSION
     ```
     
+4.  Publish the draft release on GitHub.
