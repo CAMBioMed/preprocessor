@@ -25,7 +25,7 @@ class SimpleJob(Job[str]):
 def test_qjobprocessor_runs_job_and_emits_signals() -> None:
     processor = QJobProcessor(run_in_thread=False)
 
-    seen: List[str] = []
+    seen: list[str] = []
 
     def _on_start(job: QJob) -> None:
         seen.append("start")
@@ -66,7 +66,7 @@ def test_run_subjob_maps_progress_to_parent_slice() -> None:
     # Simulate parent progress already at 0.2
     ctx._progress = 0.2
 
-    seen: List[float] = []
+    seen: list[float] = []
 
     # collect progress updates emitted by the QJob signals
     def _collector(job, progress: float) -> None:
@@ -92,8 +92,8 @@ def test_qjobprocessor_cancel_all() -> None:
     processor = QJobProcessor(run_in_thread=False)
 
     # Submit two simple jobs
-    h1 = processor.submit(SimpleJob())
-    h2 = processor.submit(SimpleJob())
+    processor.submit(SimpleJob())
+    processor.submit(SimpleJob())
 
     # Access the underlying qjobs to verify cancel token behavior
     qjobs = processor._qjobs

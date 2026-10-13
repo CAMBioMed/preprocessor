@@ -57,7 +57,7 @@ class AsyncTestJob(QJob):
         return aborted
 
 
-def _make_dialog(qtbot: QtBot, jobs: Set[QJob]) -> ProgressDialog:
+def _make_dialog(qtbot: QtBot, jobs: set[QJob]) -> ProgressDialog:
     dlg = ProgressDialog("Test", jobs, run_in_thread=False)
     # let the event loop process the initial scheduling
     qtbot.wait(5)
@@ -93,7 +93,7 @@ def test_cancel_aborts_running_job(qtbot: QtBot) -> None:
     qtbot.waitUntil(lambda: dlg.ui.lblStatus.text() == "Starting..." or True, timeout=200)
 
     # Click the Cancel button to request cancellation
-    btn: Optional[QAbstractButton] = dlg.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel)
+    btn: QAbstractButton | None = dlg.ui.btnDialogButtons.button(QDialogButtonBox.StandardButton.Cancel)
     from PySide6.QtCore import Qt
 
     # btn may be None in some UI setups, guard with an assertion for types

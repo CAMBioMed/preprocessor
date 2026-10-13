@@ -12,7 +12,7 @@ from preprocessor.gui.model import QModel
 QModelT = TypeVar("QModelT", bound=QModel)
 
 
-class QModelTestBase(ABC, Generic[QModelT]):
+class QModelTestBase[QModelT: QModel](ABC):
     @abstractmethod
     def create_model(self) -> QModelT:
         """Return an empty/new instance of the model under test."""

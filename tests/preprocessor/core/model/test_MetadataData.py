@@ -59,7 +59,7 @@ class Test_MetadataData(PydanticModelTestBase):
                     "2025-05-04T13:17:58+01:00",
                     datetime(2025, 5, 4, 13, 17, 58, tzinfo=timezone(timedelta(seconds=3600))),
                 ),
-                ("2025-12-15T10:30:00Z", datetime(2025, 12, 15, 10, 30, 0, tzinfo=timezone.utc)),
+                ("2025-12-15T10:30:00Z", datetime(2025, 12, 15, 10, 30, 0, tzinfo=UTC)),
                 ("  2026-04-26T14:00:00  ", datetime(2026, 4, 26, 14, 0, 0)),  # Trims whitespace
             ],
             # Invalid

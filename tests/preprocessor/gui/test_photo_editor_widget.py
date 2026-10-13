@@ -335,7 +335,7 @@ class TestToolSwitching:
     def test_set_tool_does_not_commit_other_tools_edit(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
-        w, photo = widget_with_photo
+        w, _photo = widget_with_photo
         # Ruler edit active, switch to Ruler itself — quadrat should not be committed.
         w._edit_tool = Tool.Ruler
         w._edit_points = [QPoint(1, 2)]
@@ -351,7 +351,7 @@ class TestToolSwitching:
 
 class TestDrawQuadratMouseEvents:
     def test_left_press_adds_new_point(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
-        w, photo = widget_with_photo
+        w, _photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         _press_left(w, 100, 150)
         assert w._edit_points is not None
@@ -465,7 +465,7 @@ class TestDrawQuadratMouseEvents:
 
 class TestRulerMouseEvents:
     def test_left_press_adds_ruler_point(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
-        w, photo = widget_with_photo
+        w, _photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         _press_left(w, 200, 300)
         assert w._edit_points is not None
@@ -617,7 +617,7 @@ class TestWriteHelpers:
 
 class TestShowPhoto:
     def test_show_photo_none_clears_state(self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]) -> None:
-        w, photo = widget_with_photo
+        w, _photo = widget_with_photo
         # Inject some state.
         w._edit_tool = Tool.DrawQuadrat
         w._edit_points = [QPoint(1, 2)]

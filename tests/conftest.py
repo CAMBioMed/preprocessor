@@ -22,4 +22,4 @@ def auto_close_progress_dialog(monkeypatch: MonkeyPatch) -> Generator[None, Any,
             super().__init__(title, jobs, parent=parent, run_in_thread=False, auto_close_on_finish=True)
 
     monkeypatch.setattr(main_window_mod, "ProgressDialog", TestProgressDialog)
-    yield
+    return

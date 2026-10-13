@@ -8,7 +8,7 @@ from pydantic import BaseModel
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
-class PydanticModelTestBase(ABC, Generic[ModelT]):
+class PydanticModelTestBase[ModelT: BaseModel](ABC):
     @abstractmethod
     def create_model(self) -> ModelT:
         """Return an empty/new instance of the model under test."""
@@ -17,7 +17,8 @@ class PydanticModelTestBase(ABC, Generic[ModelT]):
     def update_model(self, model: ModelT, field_name: str, new_value: object) -> ModelT:
         """Updates the specified field of the specified model and returns the new model
         (or the same model if the update was in-place). Implementations are responsible
-        for performing validation as the concrete model would."""
+        for performing validation as the concrete model would.
+        """
 
     def assert_property_valid_value(
         self,

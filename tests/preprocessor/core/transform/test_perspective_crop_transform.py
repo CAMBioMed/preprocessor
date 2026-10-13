@@ -182,7 +182,8 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     assert msg is not None
     assert msg.level == MessageLevel.warning
     assert msg.step == transform.name
-    assert msg.details is not None and "corners" in msg.details
+    assert msg.details is not None
+    assert "corners" in msg.details
 
 
 def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPatch) -> None:
