@@ -1,6 +1,7 @@
 import os
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -29,7 +30,12 @@ def run_tests() -> None:
         + args
     )
 
-    print(f">>>>>>>>>> EXIT {returncode} <<<<<<<<<<")
+    print("DEBUG: pytest.main() returned", flush=True)
+    print(f"DEBUG: pytest return code: {returncode}", flush=True)
+    print(f">>>>>>>>>> EXIT {returncode} <<<<<<<<<<", flush=True)
+
+    if sys.platform == "darwin":
+        time.sleep(2)
 
 
 if __name__ == "__main__":
