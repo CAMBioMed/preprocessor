@@ -4,7 +4,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from PySide6.QtCore import Qt
 from pytestqt.qtbot import QtBot
 
-from preprocessor.gui.model._QApplicationState import QApplicationState
+from preprocessor.gui.model import QApplicationState
 from preprocessor.gui.utils import patch_getOpenFileName_dialog
 
 

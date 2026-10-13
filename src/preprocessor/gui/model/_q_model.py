@@ -1,8 +1,8 @@
-from typing import TypeVar, Any
-
-from PySide6.QtCore import QObject, Signal
-from pydantic import BaseModel
 import contextlib
+from typing import Any, TypeVar
+
+from pydantic import BaseModel
+from PySide6.QtCore import QObject, Signal
 
 M = TypeVar("M", bound=BaseModel)
 

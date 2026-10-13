@@ -13,7 +13,7 @@ from preprocessor.core.model import (
 )
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import CameraMatrix, Point2D
-from preprocessor.gui.model._QModel import QModel
+from preprocessor.gui.model._q_model import QModel
 
 
 class QPhotoModel(QModel[PhotoData]):

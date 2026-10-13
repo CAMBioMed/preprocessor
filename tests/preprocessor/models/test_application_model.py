@@ -5,8 +5,7 @@ from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication
 
 from preprocessor.core.model import ProjectData
-from preprocessor.gui.model._QApplicationState import QApplicationState
-from preprocessor.gui.model._QProjectModel import QProjectModel
+from preprocessor.gui.model import QApplicationState, QProjectModel
 
 
 # Ensure a Qt application context exists for QObject usage in tests. Rely on pytest-qt's qapp.

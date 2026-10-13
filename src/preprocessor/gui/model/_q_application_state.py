@@ -4,8 +4,8 @@ from typing import cast
 from PySide6.QtCore import QByteArray, QObject, QSettings, Signal
 
 from preprocessor.core.model import ProjectData
-from preprocessor.gui.model._QPhotoModel import QPhotoModel
-from preprocessor.gui.model._QProjectModel import QProjectModel
+from preprocessor.gui.model._q_photo_model import QPhotoModel
+from preprocessor.gui.model._q_project_model import QProjectModel
 
 
 class QApplicationState(QObject):

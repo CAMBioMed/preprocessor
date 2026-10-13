@@ -2,17 +2,27 @@ import contextlib
 import math
 from enum import Enum, auto
 
-from PySide6.QtCore import QPoint, QPointF, Qt, QRect, QSize, QEvent
-from PySide6.QtGui import QPixmap, QMouseEvent, QPainter, QPaintEvent, QPen, QResizeEvent
-from PySide6.QtGui import QEnterEvent, QPainterPath, QPolygonF, QColor, QWheelEvent
-from PySide6.QtWidgets import QWidget
 from cv2.typing import MatLike
+from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, QSize, Qt
+from PySide6.QtGui import (
+    QColor,
+    QEnterEvent,
+    QMouseEvent,
+    QPainter,
+    QPainterPath,
+    QPaintEvent,
+    QPen,
+    QPixmap,
+    QPolygonF,
+    QResizeEvent,
+    QWheelEvent,
+)
+from PySide6.QtWidgets import QWidget
 
 from preprocessor.core.types import ImageRGB
 from preprocessor.gui.jobs.display_photo_job import DisplayPhotoJob
 from preprocessor.gui.jobs.qjobs import QJobProcessor
-from preprocessor.gui.model._QPhotoModel import QPhotoModel
-from preprocessor.gui.model._QProjectModel import QProjectModel
+from preprocessor.gui.model import QPhotoModel, QProjectModel
 from preprocessor.gui.worker import Worker
 
 

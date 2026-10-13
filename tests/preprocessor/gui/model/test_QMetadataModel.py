@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QApplication
 from pytestqt.qtbot import QtBot
 
 from preprocessor.core.model import MetadataData
-from preprocessor.gui.model._QMetadataModel import MetadataModel
+from preprocessor.gui.model import MetadataModel
 from tests.preprocessor.core.model.test_MetadataData import Test_MetadataData
 from tests.preprocessor.gui.model.cls_QModelTestBase import QModelTestBase
 

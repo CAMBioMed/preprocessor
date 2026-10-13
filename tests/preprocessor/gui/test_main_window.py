@@ -15,7 +15,7 @@ class TestMainWindow:
     ) -> None:
         """Test that photos are added and the photos_path is adjusted correctly."""
         from preprocessor.gui.main_window import MainWindow
-        from preprocessor.gui.model._QApplicationState import QApplicationState
+        from preprocessor.gui.model import QApplicationState
 
         # Copy some photos in a temporary directory
         photos_dir = tmp_path / "photos"

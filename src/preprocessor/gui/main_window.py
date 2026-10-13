@@ -19,9 +19,7 @@ from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
 from preprocessor.gui.jobs.export_photo_job import ExportPhotoJob
 from preprocessor.gui.jobs.qjobs import QJob
 from preprocessor.gui.metadata_dialog import MetadataDialog
-from preprocessor.gui.model._QApplicationState import QApplicationState
-from preprocessor.gui.model._QPhotoModel import QPhotoModel
-from preprocessor.gui.model._QProjectModel import QProjectModel
+from preprocessor.gui.model import QApplicationState, QPhotoModel, QProjectModel
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget, Tool
 from preprocessor.gui.progress_dialog import ProgressDialog
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog

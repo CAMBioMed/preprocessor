@@ -8,7 +8,7 @@ from pytestqt.qtbot import QtBot
 
 from preprocessor.core.model import PhotoData, ProjectData
 from preprocessor.gui.model import QListModel, QPhotoModel, QProjectModel
-from preprocessor.gui.model import _QProjectModel as qpm_mod
+import preprocessor.gui.model._q_project_model as qpm_mod
 from preprocessor.gui.utils import (
     patch_getOpenFileName_dialog,
     patch_getSaveFileName_dialog,

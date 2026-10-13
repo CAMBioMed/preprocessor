@@ -25,8 +25,7 @@ from preprocessor import (
 )
 from preprocessor.gui.launch_dialog import LaunchDialog
 from preprocessor.gui.main_window import MainWindow
-from preprocessor.gui.model._QApplicationState import QApplicationState
-from preprocessor.gui.model._QProjectModel import QProjectModel
+from preprocessor.gui.model import QApplicationState, QProjectModel
 
 
 def main_gui(project_path: str | None = None) -> None:

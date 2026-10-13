@@ -6,7 +6,7 @@ from typing import SupportsIndex, TypeVar, cast, overload
 from pydantic import BaseModel
 from PySide6.QtCore import QObject, Signal
 
-from preprocessor.gui.model._QModel import QModel
+from preprocessor.gui.model._q_model import QModel
 
 E = TypeVar("E", bound=QModel)
 

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QDialog, QWidget
 
-from preprocessor.gui.model._QProjectModel import QProjectModel
+from preprocessor.gui.model import QProjectModel
 from preprocessor.gui.ui_project_settings_dialog import Ui_ProjectSettingsDialog
 
 
