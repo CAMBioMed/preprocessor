@@ -1,9 +1,11 @@
+from collections.abc import Iterable
+
 from PySide6.QtCore import QPoint, QSize, Qt, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QPixmap
 from PySide6.QtWidgets import QDockWidget, QListWidget, QListWidgetItem, QMenu, QWidget
 
 from preprocessor.gui.designer.ui_thumbnail_dock import Ui_ThumbnailDock
-from preprocessor.gui.model import QListModel, QPhotoModel
+from preprocessor.gui.model import QPhotoModel
 from preprocessor.gui.utils import icon_from_resource
 
 
@@ -116,15 +118,16 @@ class ThumbnailDockWidget(QDockWidget):
         """Emit signal to indicate user requested 'Set metadata to all' for the selected photos."""
         self.on_set_metadata_to_selected.emit(selected_photos)
 
-    def update_thumbnails(self, photos: QListModel[QPhotoModel]) -> None:
+    def update_thumbnails(self, photos: Iterable[QPhotoModel]) -> None:
         """Update the thumbnails to match the given list of photos."""
+        photo_list = list(photos)
         thumbnail_list: QListWidget = self.ui.thumbnailListWidget
 
         # Go through the list, removing photos that are no longer present and adding new ones,
         # while preserving order and minimizing changes to the list widget
         current_photos = [thumbnail_list.item(i).data(Qt.ItemDataRole.UserRole) for i in range(thumbnail_list.count())]
         current_photos_set = set(current_photos)
-        new_photos_set = set(photos)
+        new_photos_set = set(photo_list)
         removed = current_photos_set - new_photos_set
         added = new_photos_set - current_photos_set
 
@@ -144,9 +147,11 @@ class ThumbnailDockWidget(QDockWidget):
                 thumbnail_list.takeItem(found_index)
 
         # Insert items for added QPhotoModel instances at the correct index to preserve order
-        for photo in added:
+        for photo in photo_list:
+            if photo not in added:
+                continue
             try:
-                insert_index = photos.index(photo)
+                insert_index = photo_list.index(photo)
             except ValueError:
                 insert_index = thumbnail_list.count()
 

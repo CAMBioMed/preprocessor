@@ -26,6 +26,7 @@ from preprocessor.gui.progress_dialog import ProgressDialog
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
+from preprocessor.gui.tree_dock_widget import TreeDockWidget
 from preprocessor.gui.utils import icon_from_resource
 
 
@@ -39,6 +40,8 @@ class MainWindow(QMainWindow):
     """The dock widget showing image thumbnails."""
     editor_dock: EditorDockWidget
     """The dock widget with edit controls."""
+    tree_dock: TreeDockWidget
+    """The dock widget showing directories of project photos."""
     central_widget: PhotoEditorWidget
     """The central widget showing the image."""
     _bound_project: QProjectModel | None = None
@@ -52,6 +55,7 @@ class MainWindow(QMainWindow):
         self._setup_keyboard_shortcuts()
         self._create_thumbnail_dock()
         self._create_editor_dock()
+        self._create_tree_dock()
         self._create_photo_editor()
 
         self.model = model
@@ -81,6 +85,10 @@ class MainWindow(QMainWindow):
 
     def _handle_project_file_changed(self, _path: Path | None) -> None:
         """Handle when the project's file changes."""
+        project = self.model.current_project
+        if project is not None:
+            project_directory = project.project_file.parent.resolve() if project.project_file else None
+            self.tree_dock.set_photos(project.photos, project_directory=project_directory, reset_active=True)
         self._update_window_title()
 
     def _update_window_title(self) -> None:
@@ -98,9 +106,11 @@ class MainWindow(QMainWindow):
         photo_title = f"{self.model.current_photo.name}" if self.model.current_photo else "<none>"
         self.setWindowTitle(f"{base_title} — {project_title} {photo_title}")
 
-    def _update_thumbnails(self) -> None:
+    def _update_thumbnails(self, *_args: object) -> None:
+        """Update the thumbnails to match the active directory of the current project."""
         if self.model.current_project is not None:
-            self.thumbnail_dock.update_thumbnails(self.model.current_project.photos)
+            active_directory = self.tree_dock.model.active_directory
+            self.thumbnail_dock.update_thumbnails(self.tree_dock.model.photos_in_directory(active_directory))
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
@@ -159,6 +169,12 @@ class MainWindow(QMainWindow):
         self.editor_dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.editor_dock)
 
+    def _create_tree_dock(self) -> None:
+        """Create the directories tree dock widget."""
+        self.tree_dock = TreeDockWidget(self)
+        self.tree_dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.tree_dock)
+
     def _create_photo_editor(self) -> None:
         """Create the central photo editor widget."""
         self.central_widget = PhotoEditorWidget(self)
@@ -186,6 +202,7 @@ class MainWindow(QMainWindow):
         # Window menu
         self.ui.menuWindow_ShowThumbnailsPanel.triggered.connect(lambda: self.thumbnail_dock.setVisible(True))
         self.ui.menuWindow_ShowEditorPanel.triggered.connect(lambda: self.editor_dock.setVisible(True))
+        self.ui.menuWindow_ShowDirectoriesPanel.triggered.connect(lambda: self.tree_dock.setVisible(True))
 
         # Help menu
         self.ui.menuHelp_About.triggered.connect(self._handle_help_about_action)
@@ -200,6 +217,9 @@ class MainWindow(QMainWindow):
         self.thumbnail_dock.on_item_double_clicked.connect(self._handle_photo_opened)
         self.thumbnail_dock.on_apply_parameters_to_selected.connect(self._handle_apply_to_selected_action)
         self.thumbnail_dock.on_set_metadata_to_selected.connect(self._handle_edit_selected_metadata_action)
+
+        # Directory tree dock
+        self.tree_dock.model.on_active_directory_changed.connect(self._update_thumbnails)
 
         # Model
         self.model.on_current_project_changed.connect(self._handle_current_project_changed)
@@ -299,8 +319,14 @@ class MainWindow(QMainWindow):
         """Add photos using background jobs."""
         assert self.model.current_project is not None
         project = self.model.current_project
-        # If the path is not valid (anymore), the dialog still works and defaults to the current working directory
-        initial_path = str(project.photos_path or "")
+        # Ensure the project has a file so the directory tree has a defined root before adding photos.
+        if project.project_file is None:
+            if not QProjectModel.save_project(self, project, self.model.projects_path):
+                return
+            assert project.project_file is not None
+            self.model.projects_path = project.project_file.parent
+        # Prefer the project's photo directory, falling back to the project-file parent.
+        initial_path = str(project.photos_path or project.project_file.parent)
         paths, _ = QFileDialog.getOpenFileNames(self, "Add Photo", initial_path, "Photos (*.jpg;*.jpeg);;All Files (*)")
         if not paths:
             return
@@ -368,6 +394,10 @@ class MainWindow(QMainWindow):
 
     def _handle_photos_changed(self) -> None:
         """Handle when the current project's photos change."""
+        project = self.model.current_project
+        if project is not None:
+            project_directory = project.project_file.parent.resolve() if project.project_file else None
+            self.tree_dock.set_photos(project.photos, project_directory=project_directory)
         self._update_window_title()
         self._update_thumbnails()
 
@@ -378,6 +408,8 @@ class MainWindow(QMainWindow):
     def _handle_current_project_changed(self, project: QProjectModel) -> None:
         """Handle when the current project changes."""
         self._bind_project_signals(project)
+        project_directory = project.project_file.parent.resolve() if project.project_file else None
+        self.tree_dock.set_photos(project.photos, project_directory=project_directory, reset_active=True)
         self._update_window_title()
         self._update_thumbnails()
         self._handle_current_photo_changed(self.model.current_photo)

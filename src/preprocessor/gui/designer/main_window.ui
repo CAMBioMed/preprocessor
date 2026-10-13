@@ -52,6 +52,7 @@
     </property>
     <addaction name="menuWindow_ShowThumbnailsPanel"/>
     <addaction name="menuWindow_ShowEditorPanel"/>
+    <addaction name="menuWindow_ShowDirectoriesPanel"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -185,6 +186,11 @@
   <action name="menuWindow_ShowEditorPanel">
    <property name="text">
     <string>Editor panel</string>
+   </property>
+  </action>
+  <action name="menuWindow_ShowDirectoriesPanel">
+   <property name="text">
+    <string>Directories panel</string>
    </property>
   </action>
   <action name="menuFile_ProjectSettings">

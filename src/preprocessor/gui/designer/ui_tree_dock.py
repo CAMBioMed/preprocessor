@@ -18,11 +18,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QDockWidget, QGridLayout, QHeaderView,
     QSizePolicy, QTreeView, QWidget)
 
-class Ui_DockWidget(object):
-    def setupUi(self, DockWidget):
-        if not DockWidget.objectName():
-            DockWidget.setObjectName(u"DockWidget")
-        DockWidget.resize(400, 300)
+class Ui_TreeDock(object):
+    def setupUi(self, TreeDock):
+        if not TreeDock.objectName():
+            TreeDock.setObjectName(u"TreeDock")
+        TreeDock.resize(400, 300)
         self.dockWidgetContents = QWidget()
         self.dockWidgetContents.setObjectName(u"dockWidgetContents")
         self.gridLayout = QGridLayout(self.dockWidgetContents)
@@ -30,17 +30,18 @@ class Ui_DockWidget(object):
         self.gridLayout.setContentsMargins(3, 3, 3, 3)
         self.treeView = QTreeView(self.dockWidgetContents)
         self.treeView.setObjectName(u"treeView")
+        self.treeView.setHeaderHidden(True)
 
         self.gridLayout.addWidget(self.treeView, 0, 0, 1, 1)
 
-        DockWidget.setWidget(self.dockWidgetContents)
+        TreeDock.setWidget(self.dockWidgetContents)
 
-        self.retranslateUi(DockWidget)
+        self.retranslateUi(TreeDock)
 
-        QMetaObject.connectSlotsByName(DockWidget)
+        QMetaObject.connectSlotsByName(TreeDock)
     # setupUi
 
-    def retranslateUi(self, DockWidget):
-        DockWidget.setWindowTitle(QCoreApplication.translate("DockWidget", u"DockWidget", None))
+    def retranslateUi(self, TreeDock):
+        TreeDock.setWindowTitle(QCoreApplication.translate("TreeDock", u"Directories", None))
     # retranslateUi
 
