@@ -15,16 +15,20 @@ Download the latest release:
 
 
 ## Developer tasks
-- Sync dependencies: `uv sync` (`make sync`)
-- Run: `uv run preprocessor` (`make run`)
-- Run tests: `uv run pytest -q` (`make test`)
-- Run tests with coverage: `uv run pytest -q --cov` (`make test-coverage`)
-- Determine version: `uv run hatch version` (`make version`)
-- Format code: `uv run ruff format .` (`make format`)
-- Lint code: `uv run ruff check .` (`make lint`)
-- Build app and UI files: `uv run pyside6-project build` and `uv build` (`make build`)
-- Mypy type checking: `uv run mypy src tests` (`make typecheck`)
-- Run briefcase app with app update and updating dependencies: `uvx briefcase run -u -r` (`make app-run`)
+- Install tools: `mise install`
+- Sync dependencies: `mise run sync`
+- Run: `mise run run`
+- Run the GUI: `mise run gui`
+- Run tests: `mise run test`
+- Run tests with coverage: `mise run test-coverage`
+- Determine version: `mise run version`
+- Format code: `mise run format`
+- Lint code: `mise run lint`
+- Lint code and fix violations: `mise run lint --fix`
+- Type check: `mise run typecheck`
+- Build UI files and package artifacts: `mise run build`
+- Build and test the Briefcase app: `mise run app-check`
+- Run the Briefcase app: `mise run app-run`
 
 ## Release
 To release a version of this project:

@@ -1,0 +1,122 @@
+[tools]
+uv = "0.12.23"
+
+[tasks.run]
+description = "Build and run the application"
+run = [
+  { task = "build" },
+  "uv run preprocessor",
+]
+
+[tasks.gui]
+description = "Build and run the GUI application"
+run = [
+  { task = "build" },
+  "uv run preprocessor-gui",
+]
+
+[tasks.build-ui]
+description = "Build the UI files"
+run = "uv run pyside6-project build"
+
+[tasks.build]
+description = "Build and check the project"
+run = [
+  { task = "build-ui" },
+  { task = "check" },
+  "uv build",
+]
+
+[tasks.test]
+description = "Test the project"
+run = [
+  "uv run pytest tests",
+  "uvx --with tox-uv tox run -e 3.12 -q --",
+]
+
+[tasks.check]
+description = "Run tests, lint, formatting, and type checks"
+usage = 'flag "--fix" help="Fix lint violations"'
+run = [
+  { task = "test" },
+  'mise run lint{% if usage.fix %} --fix{% endif %}',
+  { task = "format" },
+  { task = "typecheck" },
+]
+
+[tasks.test-coverage]
+description = "Test the project with coverage"
+run = "uvx --with tox-uv tox run -e 3.12 -q -- --cov"
+
+[tasks.typecheck]
+description = "Run ty and mypy"
+run = [
+  "uv run ty check",
+  "uv run mypy .",
+]
+
+[tasks.lint]
+description = "Check code with Ruff"
+usage = 'flag "--fix" help="Fix lint violations" env="RUFF_FIX"'
+run = 'uv run ruff check .{% if usage.fix %} --fix{% endif %}'
+
+[tasks.format]
+description = "Format the code files"
+run = "uv run ruff format ."
+
+[tasks.sync]
+description = "Sync dependencies"
+run = "uv sync"
+
+[tasks.upgrade]
+description = "Upgrade locked dependencies"
+run = "uv lock --upgrade"
+
+[tasks.version]
+description = "Print the project version"
+run = "uv run hatch version"
+
+[tasks.clean]
+description = "Clean the build artifacts"
+run = [
+  { task = "app-clean" },
+  "rm -rf .tox/ .venv/ .mypy_cache/ .pytest_cache/ .ruff_cache/ dist/",
+  "rm -f .coverage",
+  "find . -type d -name '__pycache__' -prune -exec rm -rf {} +",
+  "find . -type d -name '*.egg-info' -prune -exec rm -rf {} +",
+]
+
+[tasks.app-update]
+description = "Update the app to match the current project state"
+run = "uvx briefcase update --update-requirements --update-resources"
+
+[tasks.app-build]
+description = "Build the updated app"
+run = "uvx briefcase build --test --no-input --no-update"
+
+[tasks.app-test]
+description = "Test the built app"
+run = "uvx briefcase run --test --no-input"
+
+[tasks.app-run]
+description = "Run the built app"
+run = "uvx briefcase run"
+
+[tasks.app-package]
+description = "Package the built app"
+run = "uvx briefcase package --adhoc-sign"
+
+[tasks.app-clean]
+description = "Clean the app artifacts"
+run = [
+  "rm -rf .briefcase/ build/ logs/",
+  "find . -type d -name '*.dist-info' -prune -exec rm -rf {} +",
+]
+
+[tasks.app-check]
+description = "Check and lint the app"
+run = [
+  { task = "check" },
+  { task = "app-build" },
+  { task = "app-test" },
+]
