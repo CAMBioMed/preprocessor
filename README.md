@@ -17,6 +17,7 @@ Download the latest release:
 ## Developer tasks
 - Install tools: `mise install`
 - Sync dependencies: `mise run sync`
+- Sync the opt-in Linux Torch dependency set for source installs: `uv sync --extra torch`
 - Run: `mise run run`
 - Run the GUI: `mise run gui`
 - Run tests: `mise run test`
