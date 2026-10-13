@@ -13,8 +13,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from preprocessor.gui.designer.ui_metadata_dialog import Ui_MetadataDialog
 from preprocessor.gui.model import QApplicationState, QPhotoModel
-from preprocessor.gui.ui_metadata_dialog import Ui_MetadataDialog
 from preprocessor.gui.utils import _dt_to_qdatetime
 from preprocessor.utils import to_upper_camel_case
 

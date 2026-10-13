@@ -2,8 +2,8 @@ from functools import partial
 
 from PySide6.QtWidgets import QWidget
 
+from preprocessor.gui.designer.ui_hsv_threshold import Ui_HSVThreshold
 from preprocessor.gui.hsv_threshold_model import HSVThresholdModel
-from preprocessor.gui.ui_hsv_threshold import Ui_HSVThreshold
 
 
 class HSVThresholdWidget(QWidget):

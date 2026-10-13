@@ -14,6 +14,7 @@ from preprocessor.core.transform.detect_quadrat_analysis import (
 from preprocessor.core.types import ImageRGB
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
+from preprocessor.gui.designer.ui_main_window import Ui_MainWindow
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
 from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
 from preprocessor.gui.jobs.export_photo_job import ExportPhotoJob
@@ -25,7 +26,6 @@ from preprocessor.gui.progress_dialog import ProgressDialog
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
-from preprocessor.gui.ui_main_window import Ui_MainWindow
 from preprocessor.gui.utils import icon_from_resource
 
 

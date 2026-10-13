@@ -5,8 +5,8 @@ from preprocessor.core.transform.detect_quadrat_analysis import (
     ThresholdingMethod,
     defaultParams,
 )
+from preprocessor.gui.designer.ui_properties_dock import Ui_PropertiesDock
 from preprocessor.gui.properties_dock_model import PropertiesDockModel
-from preprocessor.gui.ui_properties_dock import Ui_PropertiesDock
 
 
 class PropertiesDockWidget(QDockWidget):
