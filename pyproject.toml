@@ -378,7 +378,7 @@ files = [
 # Briefcase #
 #############
 [tool.briefcase]
-project_name = "CAMBioMed Preprocessor"
+project_name = "preprocessor"
 bundle = "com.cambiomed-biodiversa"
 author = "Daniel A. A. Pelsmaeker"
 author_email = "developer@pelsmaeker.net"
