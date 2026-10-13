@@ -1,9 +1,9 @@
 [project]
 name = "preprocessor"
 version = "0.2.0"
-description = "Benthic image preprocessor"
-keywords = ["preprocessor"]
-license = "Apache-2.0"
+description = "CAMBioMed toolbox for benthic images."
+keywords = [ "benthic", "images", "toolbox" ]
+license = "GPL-3.0-or-later"
 license-files = ["LICENSE.md"]
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [
@@ -13,6 +13,7 @@ maintainers = [
   {name = "Daniel A. A. Pelsmaeker", email = "developer@pelsmaeker.net"},
 ]
 requires-python = ">=3.12"
+
 dependencies = [
   "click>=8.3.1",
   "exifread>=3.5.1",
@@ -23,24 +24,10 @@ dependencies = [
   "PySide6-Essentials>=6.10.2",
   "qimage2ndarray>=1.10.0",
   "scikit-learn>=1.8.0",
+  # Not MacOS Intel compatible:
+  "torch>=2.14; sys_platform == 'linux'",
+  "torchvision>=0.29; sys_platform == 'linux'",
 ]
-
-[project.urls]
-Homepage = "https://cambiomed-biodiversa.com/"
-#Documentation = "https://readthedocs.org"
-Repository = "https://github.com/CAMBioMed/preprocessor.git"
-Source = "https://github.com/CAMBioMed/preprocessor/"
-Issues = "https://github.com/CAMBioMed/preprocessor/issues"
-Changelog = "https://github.com/CAMBioMed/preprocessor/blob/main/CHANGELOG.md"
-
-
-# CLI launcher
-[project.scripts]
-preprocessor = "preprocessor.main:main"
-
-# For Windows GUI launcher (no console)
-[project.gui-scripts]
-preprocessor-gui = "preprocessor.main:main_gui"
 
 [dependency-groups]
 # NOTE: This list must be kept in sync with `tool.briefcase.app.preprocessor.test_requires` test dependencies.
@@ -57,8 +44,43 @@ dev = [
   "hatchling>=1.29.0",
   # Development dependencies
   "mypy>=1.19.1",
+  "ruff>=0.15.20",
   "ty>=0.0.43",
 ]
+
+
+######
+# UV #
+######
+
+[tool.uv]
+python-preference = "only-managed"
+default-groups = "all"
+
+
+###########
+# Scripts #
+###########
+# CLI launcher
+[project.scripts]
+preprocessor = "preprocessor.main:main"
+
+# For Windows GUI launcher (no console)
+[project.gui-scripts]
+preprocessor-gui = "preprocessor.main:main_gui"
+
+
+################
+# Project URLs #
+################
+
+[project.urls]
+Homepage = "https://cambiomed-biodiversa.com/"
+#Documentation = "https://readthedocs.org"
+Repository = "https://github.com/CAMBioMed/preprocessor.git"
+Source = "https://github.com/CAMBioMed/preprocessor/"
+Issues = "https://github.com/CAMBioMed/preprocessor/issues"
+Changelog = "https://github.com/CAMBioMed/preprocessor/blob/main/CHANGELOG.md"
 
 
 ################
@@ -75,14 +97,6 @@ packages = [
 ]
 
 
-######
-# UV #
-######
-
-[tool.uv]
-default-groups = "all"
-
-
 ##########
 # PyTest #
 ##########
@@ -94,10 +108,15 @@ addopts = [
   "-ra",                        # Show all outcomes except passed
   "--showlocals",               # Show locals in tracebacks
   "--import-mode=importlib",    # Use importlib to import test modules
+  "--strict",                   # Fail on warnings and unknown markers
+  "--cov=toolbox",              # Measure coverage
+  "--cov-report=term-missing",  # Show missing lines in terminal
 ]
 filterwarnings = [
   "error",  # Warnings as errors
+  "ignore::DeprecationWarning:PySide6",  # Qt internal deprecations — not ours
 ]
+log_cli = true
 log_cli_level = "INFO"
 pythonpath = [
   "src",
@@ -111,9 +130,12 @@ testpaths = [
 # Coverage #
 ############
 
-[tool.coverage]
-run.source = ["preprocessor"]
-port.exclude_lines = [
+[tool.coverage.run]
+source = ["preprocessor"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
   'pragma: no cover',
   '\.\.\.',
   'if typing.TYPE_CHECKING:',
@@ -154,6 +176,16 @@ exclude = [
     '^ui_.*\.py$',
 ]
 
+# PyTorch is intentionally omitted on non-Linux platforms; torchvision does not
+# ship type stubs (no `py.typed` marker).
+[[tool.mypy.overrides]]
+module = ["torch", "torch.*", "torchvision.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["toolbox.gui.ui_main_window"]
+ignore_errors = true
+
 
 #############################
 # Ruff Linting & Formatting #
@@ -162,7 +194,7 @@ exclude = [
 [tool.ruff]
 line-length = 120
 extend-exclude = [
-    "ui_*.py",
+  "ui_*.py",
 ]
 
 [tool.ruff.format]
@@ -173,10 +205,16 @@ exclude = [
     "tests/**",
 ]
 select = [
+  # isort
+  "I",
   # flake8-2020
   "YTT",
   # flake8-annotations
   "ANN",
+  # flake8-bandit
+  "S",
+  # flake8-no-pep420 (require __init__.py)
+  "INP",
   # flake8-bugbear
   "B",
   # flake8-comprehensions
@@ -221,9 +259,11 @@ ignore = [
   "PLR",
   # unnecessary-assign
   "RET504",
+
   # Ensure formatter compatibility
   # whitespace-before-punctuation
   "E203",
+
   # Allow gradual documentation
   # undocumented-public-module
   "D100",
@@ -231,7 +271,7 @@ ignore = [
   "D101",
   # undocumented-public-method
   "D102",
-  # undocumented-public-nested-class
+  # undocumented-public-function
   "D103",
   # undocumented-public-package
   "D104",
@@ -241,6 +281,7 @@ ignore = [
   "D106",
   # undocumented-public-init
   "D107",
+
   # blank-line-after-function
   "D202",
   # missing-blank-line-after-summary
@@ -251,6 +292,10 @@ ignore = [
   "PLC0415",
   # module-import-not-at-top-of-file
   "E402",
+
+  # assert
+  "S101",
+
   # For now:
   # logging-f-string
   "G004",
@@ -263,15 +308,20 @@ pydocstyle.convention = "pep257"
 
 [tool.ruff.lint.per-file-ignores]
 # Tests can ignore a few extra rules
-"tests/**.py" = [
-    # Missing return type annotation for public function
-    "ANN201",
-    # Missing docstring
-    "D103",
-    # Use of assert is detected
-    "S101",
-    # Missing __init__.py file
-    "INP001",
+"tests/**" = [
+  "ARG001",
+  "ANN001",
+  # Missing return type annotation for public function
+  "ANN201",
+  "ANN202",
+  # Missing docstring
+  "D103",
+  # Use of assert is detected
+  "S101",
+  # Missing __init__.py file
+  "INP001",
+  # Error messages
+  "EM",
 ]
 
 [tool.ruff.lint.flake8-annotations]
