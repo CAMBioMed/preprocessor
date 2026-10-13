@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Optional, Final, override
+from typing import Any, Final, Optional, override
 
 
 class MessageLevel(StrEnum):

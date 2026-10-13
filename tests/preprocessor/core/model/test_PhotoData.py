@@ -1,12 +1,20 @@
 from datetime import datetime
 from pathlib import Path
-from typing import override, ClassVar
+from typing import ClassVar, override
 
 import pytest
 
-from preprocessor.core.model import PhotoData, ColorCorrectionParams, LensCorrectionParams, CropParams, MetadataData
+from preprocessor.core.model import (
+    ColorCorrectionParams,
+    CropParams,
+    LensCorrectionParams,
+    MetadataData,
+    PhotoData,
+)
 from preprocessor.core.type_corners import Corners
-from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
+from tests.preprocessor.core.model.cls_PydanticModelTestBase import (
+    PydanticModelTestBase,
+)
 
 
 class Test_PhotoData(PydanticModelTestBase):

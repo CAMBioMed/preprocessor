@@ -1,12 +1,12 @@
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
+from datetime import UTC, datetime, timedelta, timezone
 from typing import ClassVar, override
 
 import pytest
 
 from preprocessor.core.model import MetadataData
-
-from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
+from tests.preprocessor.core.model.cls_PydanticModelTestBase import (
+    PydanticModelTestBase,
+)
 
 
 class Test_MetadataData(PydanticModelTestBase):

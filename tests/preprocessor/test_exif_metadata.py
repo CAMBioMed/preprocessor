@@ -1,5 +1,5 @@
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
 

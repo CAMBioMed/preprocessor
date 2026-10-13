@@ -1,32 +1,34 @@
 import warnings
-
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QCloseEvent, QKeySequence, QIcon
-from PySide6.QtWidgets import QMainWindow, QWidget, QFileDialog, QMessageBox
 from pathlib import Path
+
+from PySide6.QtCore import QObject, Qt, Slot
+from PySide6.QtGui import QCloseEvent, QIcon, QKeySequence
+from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QWidget
 
 from preprocessor import app_formal_name
 from preprocessor.core.model import PhotoData
+from preprocessor.core.transform.detect_quadrat_analysis import (
+    DetectQuadratAnalysisJob,
+    defaultParams,
+)
 from preprocessor.core.types import ImageRGB
 from preprocessor.gui.about_dialog import show_about_dialog
 from preprocessor.gui.apply_parameters_dialog import ApplyParametersDialog
 from preprocessor.gui.editor_dock_widget import EditorDockWidget
+from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
 from preprocessor.gui.jobs.export_photo_job import ExportPhotoJob
+from preprocessor.gui.jobs.qjobs import QJob
 from preprocessor.gui.metadata_dialog import MetadataDialog
+from preprocessor.gui.model._QApplicationState import QApplicationState
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
+from preprocessor.gui.model._QProjectModel import QProjectModel
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget, Tool
+from preprocessor.gui.progress_dialog import ProgressDialog
 from preprocessor.gui.project_settings_dialog import ProjectSettingsDialog
 from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.ui_main_window import Ui_MainWindow
 from preprocessor.gui.utils import icon_from_resource
-from preprocessor.gui.model._QApplicationState import QApplicationState
-from preprocessor.gui.model._QPhotoModel import QPhotoModel
-from preprocessor.gui.model._QProjectModel import QProjectModel
-from preprocessor.core.transform.detect_quadrat_analysis import defaultParams, DetectQuadratAnalysisJob
-from preprocessor.gui.jobs.qjobs import QJob
-from preprocessor.gui.progress_dialog import ProgressDialog
-from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
-from PySide6.QtCore import QObject, Slot
 
 
 class MainWindow(QMainWindow):

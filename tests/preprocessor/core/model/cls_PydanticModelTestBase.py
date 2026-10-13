@@ -1,10 +1,8 @@
-import pytest
-
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, ClassVar
+from typing import TypeVar
 
+import pytest
 from pydantic import BaseModel
-
 
 # Make this base test generic over the pydantic model type being tested.
 ModelT = TypeVar("ModelT", bound=BaseModel)

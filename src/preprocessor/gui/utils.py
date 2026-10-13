@@ -1,11 +1,10 @@
-from datetime import datetime, UTC
-
-from PySide6.QtCore import QDateTime
-from PySide6.QtGui import QIcon, QPixmap
+from datetime import UTC, datetime
 from importlib import resources as _importlib_resources
 
-from PySide6.QtWidgets import QFileDialog
 from _pytest.monkeypatch import MonkeyPatch
+from PySide6.QtCore import QDateTime
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import QFileDialog
 
 
 def icon_from_resource(relpath: str) -> QIcon:

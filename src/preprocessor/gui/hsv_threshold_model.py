@@ -1,7 +1,8 @@
+from dataclasses import replace
+
 from PySide6.QtCore import QObject, Signal
 
 from preprocessor.gui.hsv_threshold_params import HSVThresholdParams
-from dataclasses import replace
 
 
 class HSVThresholdModel(QObject):

@@ -1,11 +1,12 @@
-from typing import TypeVar, cast, overload, SupportsIndex
+import contextlib
+from collections.abc import Callable, Iterable, Iterator
 from pathlib import Path
-from collections.abc import Iterable, Iterator, Callable
-from PySide6.QtCore import QObject, Signal
+from typing import SupportsIndex, TypeVar, cast, overload
+
 from pydantic import BaseModel
+from PySide6.QtCore import QObject, Signal
 
 from preprocessor.gui.model._QModel import QModel
-import contextlib
 
 E = TypeVar("E", bound=QModel)
 

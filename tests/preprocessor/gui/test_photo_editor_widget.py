@@ -7,12 +7,11 @@ from pathlib import Path
 import pytest
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtWidgets import QApplication
+from pytestqt.qtbot import QtBot
 
 from preprocessor.core.model import PhotoData, ProjectData
 from preprocessor.gui.model import QPhotoModel, QProjectModel
 from preprocessor.gui.photo_editor_widget import PhotoEditorWidget, Tool
-from pytestqt.qtbot import QtBot
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -65,8 +64,8 @@ def widget_with_photo(qtbot: QtBot) -> tuple[PhotoEditorWidget, QPhotoModel]:
 
 
 def _press_left(widget: PhotoEditorWidget, x: int, y: int) -> None:
-    from PySide6.QtGui import QMouseEvent
     from PySide6.QtCore import QPointF
+    from PySide6.QtGui import QMouseEvent
 
     event = QMouseEvent(
         QMouseEvent.Type.MouseButtonPress,
@@ -80,8 +79,8 @@ def _press_left(widget: PhotoEditorWidget, x: int, y: int) -> None:
 
 
 def _press_right(widget: PhotoEditorWidget, x: int, y: int) -> None:
-    from PySide6.QtGui import QMouseEvent
     from PySide6.QtCore import QPointF
+    from PySide6.QtGui import QMouseEvent
 
     event = QMouseEvent(
         QMouseEvent.Type.MouseButtonPress,
@@ -95,8 +94,8 @@ def _press_right(widget: PhotoEditorWidget, x: int, y: int) -> None:
 
 
 def _move(widget: PhotoEditorWidget, x: int, y: int) -> None:
-    from PySide6.QtGui import QMouseEvent
     from PySide6.QtCore import QPointF
+    from PySide6.QtGui import QMouseEvent
 
     event = QMouseEvent(
         QMouseEvent.Type.MouseMove,
@@ -110,8 +109,8 @@ def _move(widget: PhotoEditorWidget, x: int, y: int) -> None:
 
 
 def _release_left(widget: PhotoEditorWidget, x: int, y: int) -> None:
-    from PySide6.QtGui import QMouseEvent
     from PySide6.QtCore import QPointF
+    from PySide6.QtGui import QMouseEvent
 
     event = QMouseEvent(
         QMouseEvent.Type.MouseButtonRelease,
@@ -437,8 +436,8 @@ class TestDrawQuadratMouseEvents:
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
         """DrawQuadrat commits on any release (not only left button), per mouseReleaseEvent logic."""
-        from PySide6.QtGui import QMouseEvent
         from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QMouseEvent
 
         w, photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)

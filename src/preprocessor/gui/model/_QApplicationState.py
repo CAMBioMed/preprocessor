@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import cast
 
-from PySide6.QtCore import QObject, Signal, QSettings, QByteArray
+from PySide6.QtCore import QByteArray, QObject, QSettings, Signal
 
 from preprocessor.core.model import ProjectData
 from preprocessor.gui.model._QPhotoModel import QPhotoModel

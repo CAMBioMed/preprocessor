@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget, QFileDialog, QApplication, QMessageBox
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QWidget
 
 from preprocessor.core.model import ProjectData
-from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.gui.model._QListModel import QListModel
 from preprocessor.gui.model._QModel import QModel
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 
 logger = logging.getLogger(__name__)
 

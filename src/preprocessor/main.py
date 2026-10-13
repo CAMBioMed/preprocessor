@@ -1,27 +1,32 @@
+import logging
+import signal
 import sys
 import traceback
+from pathlib import Path
 from types import TracebackType
 from typing import Any
-import signal
-from pathlib import Path
 
+import click
 import PySide6
-
-from preprocessor import app_version, app_organisation, app_domain, app_name, app_formal_name
-from preprocessor.gui.launch_dialog import LaunchDialog
-from preprocessor.gui.main_window import MainWindow
-from preprocessor.gui.model._QApplicationState import QApplicationState
-from preprocessor.gui.model._QProjectModel import QProjectModel
 from PySide6 import QtGui
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (
     QApplication,
-    QMessageBox,
     QDialog,
+    QMessageBox,
 )
 
-import logging
-import click
+from preprocessor import (
+    app_domain,
+    app_formal_name,
+    app_name,
+    app_organisation,
+    app_version,
+)
+from preprocessor.gui.launch_dialog import LaunchDialog
+from preprocessor.gui.main_window import MainWindow
+from preprocessor.gui.model._QApplicationState import QApplicationState
+from preprocessor.gui.model._QProjectModel import QProjectModel
 
 
 def main_gui(project_path: str | None = None) -> None:

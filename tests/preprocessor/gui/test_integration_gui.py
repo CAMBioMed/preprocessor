@@ -1,11 +1,13 @@
 from pathlib import Path
 
 from _pytest.monkeypatch import MonkeyPatch
-from pytestqt.qtbot import QtBot
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QFileDialog
+from pytestqt.qtbot import QtBot
 
-from preprocessor.gui.utils import patch_getSaveFileName_dialog, patch_getOpenFileNames_dialog
+from preprocessor.gui.utils import (
+    patch_getOpenFileNames_dialog,
+    patch_getSaveFileName_dialog,
+)
 
 
 def test_integration_new_project_add_images_save_and_quit(

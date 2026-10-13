@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
+from enum import Enum, auto
 from typing import Any, TypeVar
 
 from preprocessor.core.message_reporter import Message, MessageLevel
 from preprocessor.gui.jobs.qjobs import JobCancelledException
-from enum import Enum, auto
 
 R = TypeVar("R")
 

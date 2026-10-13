@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from preprocessor.core.types import LensVector, CameraMatrix
+from preprocessor.core.types import CameraMatrix, LensVector
 
 
 class LensCorrectionParams(BaseModel, validate_assignment=True):

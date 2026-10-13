@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
-from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
+from preprocessor.core.message_reporter import NOOP_MESSAGE_REPORTER, MessageReporter
 from preprocessor.core.model import PhotoData
-from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
+from preprocessor.core.progress_reporter import NOOP_PROGRESS_REPORTER, ProgressReporter
 from preprocessor.core.types import ImageRGB
 
 

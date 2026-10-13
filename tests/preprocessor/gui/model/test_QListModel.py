@@ -1,13 +1,10 @@
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 from PySide6.QtWidgets import QApplication
 
-from pydantic import BaseModel
-
-from preprocessor.gui.model import QListModel
-
-from preprocessor.gui.model import QModel
+from preprocessor.gui.model import QListModel, QModel
 
 #
 # # Ensure a Qt application context exists for QObject usage in tests. Rely on pytest-qt's qapp.

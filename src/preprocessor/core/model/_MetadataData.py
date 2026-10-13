@@ -1,9 +1,7 @@
-from pydantic import BaseModel, ConfigDict
-
 from datetime import datetime
 from typing import Any
 
-from pydantic import field_validator, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class MetadataData(BaseModel, validate_assignment=True):

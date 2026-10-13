@@ -1,7 +1,7 @@
-from typing import overload, Any
-from collections.abc import Sequence, Iterator
+from collections.abc import Iterator, Sequence
+from typing import Any, overload
 
-from pydantic import RootModel, ConfigDict, field_validator
+from pydantic import ConfigDict, RootModel, field_validator
 
 from preprocessor.core.types import Point2D
 

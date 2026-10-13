@@ -1,11 +1,19 @@
 from typing import ClassVar
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDockWidget, QWidget, QLineEdit, QLabel, QPlainTextEdit, QDateTimeEdit, QDoubleSpinBox
+from PySide6.QtWidgets import (
+    QDateTimeEdit,
+    QDockWidget,
+    QDoubleSpinBox,
+    QLabel,
+    QLineEdit,
+    QPlainTextEdit,
+    QWidget,
+)
 
+from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.gui.ui_editor_dock import Ui_EditorDock
 from preprocessor.gui.utils import _dt_to_qdatetime
-from preprocessor.gui.model._QPhotoModel import QPhotoModel
 from preprocessor.utils import to_upper_camel_case
 
 

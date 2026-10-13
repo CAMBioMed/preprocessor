@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QWidget, QMessageBox
+from PySide6.QtWidgets import QMessageBox, QWidget
 
-from preprocessor import app_version, app_formal_name, app_author
+from preprocessor import app_author, app_formal_name, app_version
 
 
 def show_about_dialog(parent: QWidget | None = None) -> None:

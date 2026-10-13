@@ -1,11 +1,11 @@
-from PySide6.QtCore import Qt, QSize, Signal, QPoint
-from PySide6.QtGui import QIcon, QPixmap, QAction, QKeySequence
-from PySide6.QtWidgets import QDockWidget, QWidget, QListWidget, QListWidgetItem, QMenu
+from PySide6.QtCore import QPoint, QSize, Qt, Signal
+from PySide6.QtGui import QAction, QIcon, QKeySequence, QPixmap
+from PySide6.QtWidgets import QDockWidget, QListWidget, QListWidgetItem, QMenu, QWidget
 
-from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
-from preprocessor.gui.utils import icon_from_resource
 from preprocessor.gui.model import QListModel
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
+from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
+from preprocessor.gui.utils import icon_from_resource
 
 
 class ThumbnailDockWidget(QDockWidget):

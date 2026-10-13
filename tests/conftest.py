@@ -1,9 +1,11 @@
+from collections.abc import Generator
+from typing import Any
+
 import pytest
-from typing import Generator, Any
+from _pytest.monkeypatch import MonkeyPatch
 
 import preprocessor.gui.main_window as main_window_mod
 from preprocessor.gui.progress_dialog import ProgressDialog as OrigProgressDialog
-from _pytest.monkeypatch import MonkeyPatch
 
 
 @pytest.fixture

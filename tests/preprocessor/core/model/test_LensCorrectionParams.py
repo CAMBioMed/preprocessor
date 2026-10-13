@@ -1,9 +1,11 @@
-from typing import override, ClassVar
+from typing import ClassVar, override
 
 import pytest
 
 from preprocessor.core.model import LensCorrectionParams
-from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
+from tests.preprocessor.core.model.cls_PydanticModelTestBase import (
+    PydanticModelTestBase,
+)
 
 
 class Test_LensCorrectionParams(PydanticModelTestBase):

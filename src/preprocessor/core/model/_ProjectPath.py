@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Annotated, Any, cast
 
-from pydantic import PlainSerializer, AfterValidator
-from pydantic_core.core_schema import ValidationInfo, SerializationInfo
+from pydantic import AfterValidator, PlainSerializer
+from pydantic_core.core_schema import SerializationInfo, ValidationInfo
 
 
 def _parse_project_path(v: Any, info: ValidationInfo) -> Path:  # noqa: ANN401

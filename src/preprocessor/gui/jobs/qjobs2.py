@@ -1,10 +1,17 @@
 import threading
 from threading import Event
-from typing import override, cast
+from typing import cast, override
 
-from PySide6.QtCore import QThreadPool, QObject, Signal, QRunnable, Slot
+from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal, Slot
 
-from preprocessor.core.jobs.jobs import JobProcessor, Job, JobHandle, R, JobState, JobContext
+from preprocessor.core.jobs.jobs import (
+    Job,
+    JobContext,
+    JobHandle,
+    JobProcessor,
+    JobState,
+    R,
+)
 from preprocessor.core.message_reporter import Message
 from preprocessor.gui.jobs.qjobs import CancelToken, JobCancelledException
 

@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from preprocessor.gui.jobs.qjobs import QJob
 from preprocessor.core.model import PhotoData
+from preprocessor.gui.jobs.qjobs import QJob
 
 
 class AddPhotoJob(QJob):
@@ -28,10 +28,10 @@ class AddPhotoJob(QJob):
 
         # Import here to avoid circular imports at module import time
         # Work with pydantic data objects in the worker thread (they are not QObjects)
-        from preprocessor.processing.exif import extract_exif_metadata
-
         # Compute relative path and image dimensions without creating any QObject
         from PIL import Image
+
+        from preprocessor.processing.exif import extract_exif_metadata
 
         with Image.open(self._filepath) as img:
             _width, _height = img.size

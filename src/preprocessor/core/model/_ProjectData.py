@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from preprocessor.core.model import PhotoData, MetadataData
+from preprocessor.core.model import MetadataData, PhotoData
 from preprocessor.core.model._ProjectPath import ProjectPath
 
 

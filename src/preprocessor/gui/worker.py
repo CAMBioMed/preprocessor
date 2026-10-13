@@ -1,12 +1,10 @@
 import logging
 import sys
 import traceback
-from typing import Any
 from collections.abc import Callable
+from typing import Any
 
-from PySide6.QtCore import Slot, QRunnable, Signal, QObject
-
-from PySide6.QtCore import QThreadPool
+from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal, Slot
 
 logger = logging.getLogger(__name__)
 

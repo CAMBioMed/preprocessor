@@ -1,15 +1,14 @@
+import logging
 import sys
 import traceback
 from types import TracebackType
 
-
-from preprocessor import app_formal_name
 from PySide6.QtWidgets import (
     QApplication,
     QMessageBox,
 )
 
-import logging
+from preprocessor import app_formal_name
 
 
 def setup_excepthook() -> None:

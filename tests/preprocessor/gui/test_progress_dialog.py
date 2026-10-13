@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from typing import Set, Optional
-
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QDialogButtonBox, QAbstractButton
-
+from PySide6.QtWidgets import QAbstractButton, QDialogButtonBox
 from pytestqt.qtbot import QtBot
 
-from preprocessor.gui.progress_dialog import ProgressDialog
 from preprocessor.gui.jobs.qjobs import QJob
+from preprocessor.gui.progress_dialog import ProgressDialog
 
 
 class AsyncTestJob(QJob):

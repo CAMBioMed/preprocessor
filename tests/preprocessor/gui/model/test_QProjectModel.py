@@ -1,16 +1,18 @@
 from pathlib import Path
-from typing import override, NoReturn
+from typing import NoReturn, override
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from PySide6.QtWidgets import QApplication, QFileDialog
 from pytestqt.qtbot import QtBot
-from PySide6.QtWidgets import QFileDialog, QApplication
 
-from preprocessor.core.model import ProjectData, PhotoData
-from preprocessor.gui.model import QProjectModel, QPhotoModel
+from preprocessor.core.model import PhotoData, ProjectData
+from preprocessor.gui.model import QListModel, QPhotoModel, QProjectModel
 from preprocessor.gui.model import _QProjectModel as qpm_mod
-from preprocessor.gui.model import QListModel
-from preprocessor.gui.utils import patch_getOpenFileName_dialog, patch_getSaveFileName_dialog
+from preprocessor.gui.utils import (
+    patch_getOpenFileName_dialog,
+    patch_getSaveFileName_dialog,
+)
 from tests.preprocessor.core.model.test_ProjectData import Test_ProjectData
 from tests.preprocessor.gui.cls_FakeMsgBox import _FakeMsgBox
 from tests.preprocessor.gui.model.cls_QModelTestBase import QModelTestBase

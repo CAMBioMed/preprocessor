@@ -3,19 +3,25 @@ from pathlib import Path
 from typing import override
 
 import numpy as np
-
 from _pytest.monkeypatch import MonkeyPatch
 
-from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
+from preprocessor.core.progress_reporter import NOOP_PROGRESS_REPORTER, ProgressReporter
 
 # Make local package importable when running tests from repository root
 sys.path.insert(0, "src")
 
-from preprocessor.core.transform.transform_image import transform_image
-from preprocessor.core.message_reporter import CollectingMessageReporter, MessageReporter, NOOP_MESSAGE_REPORTER
-from preprocessor.core.types import ImageRGB
-from preprocessor.core.transform.image_transform import ImageTransformWorkItem, ImageTransform
+from preprocessor.core.message_reporter import (
+    NOOP_MESSAGE_REPORTER,
+    CollectingMessageReporter,
+    MessageReporter,
+)
 from preprocessor.core.model import PhotoData
+from preprocessor.core.transform.image_transform import (
+    ImageTransform,
+    ImageTransformWorkItem,
+)
+from preprocessor.core.transform.transform_image import transform_image
+from preprocessor.core.types import ImageRGB
 
 
 class _IdentityTransform(ImageTransform):

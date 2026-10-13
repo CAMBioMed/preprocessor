@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import QDockWidget, QWidget
 
-from preprocessor.gui.ui_properties_dock import Ui_PropertiesDock
-from preprocessor.gui.properties_dock_model import PropertiesDockModel
 from preprocessor.core.transform.detect_quadrat_analysis import (
+    ContourApproximationMethod,
     ThresholdingMethod,
     defaultParams,
-    ContourApproximationMethod,
 )
+from preprocessor.gui.properties_dock_model import PropertiesDockModel
+from preprocessor.gui.ui_properties_dock import Ui_PropertiesDock
 
 
 class PropertiesDockWidget(QDockWidget):

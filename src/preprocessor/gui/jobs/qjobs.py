@@ -1,14 +1,11 @@
+from collections.abc import Iterable
+from threading import Event
 from typing import override
 
-from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool, QTimer
-
-
-from threading import Event
-from collections.abc import Iterable
-
+from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Signal, Slot
 from PySide6.QtGui import QIcon
 
-from preprocessor.core.message_reporter import MessageReporter, Message
+from preprocessor.core.message_reporter import Message, MessageReporter
 from preprocessor.core.progress_reporter import ProgressReporter
 
 

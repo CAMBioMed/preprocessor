@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QFileDialog
 from _pytest.monkeypatch import MonkeyPatch
+from PySide6.QtCore import Qt
 from pytestqt.qtbot import QtBot
 
 from preprocessor.gui.model._QApplicationState import QApplicationState

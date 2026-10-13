@@ -1,17 +1,23 @@
 import sys
-import numpy as np
 from pathlib import Path
 
+import numpy as np
 from _pytest.monkeypatch import MonkeyPatch
 
-from preprocessor.core.message_reporter import CollectingMessageReporter, Message, MessageLevel
+from preprocessor.core.message_reporter import (
+    CollectingMessageReporter,
+    Message,
+    MessageLevel,
+)
 
 # Make local package importable when running tests from repository root
 sys.path.insert(0, "src")
 
-from preprocessor.core.transform.perspective_crop_transform import PerspectiveCropTransform
+from preprocessor.core.model import CropParams, PhotoData
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem
-from preprocessor.core.model import PhotoData, CropParams
+from preprocessor.core.transform.perspective_crop_transform import (
+    PerspectiveCropTransform,
+)
 from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import ImageRGB
 

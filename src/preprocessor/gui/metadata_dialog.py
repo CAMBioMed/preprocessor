@@ -3,20 +3,20 @@ from typing import Any, ClassVar
 
 from PySide6.QtCore import QDateTime
 from PySide6.QtWidgets import (
-    QDialog,
-    QWidget,
-    QLineEdit,
     QCheckBox,
-    QPlainTextEdit,
     QDateTimeEdit,
+    QDialog,
     QDoubleSpinBox,
+    QLineEdit,
+    QPlainTextEdit,
     QSpinBox,
+    QWidget,
 )
 
-from preprocessor.gui.ui_metadata_dialog import Ui_MetadataDialog
-from preprocessor.gui.utils import _dt_to_qdatetime
 from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
+from preprocessor.gui.ui_metadata_dialog import Ui_MetadataDialog
+from preprocessor.gui.utils import _dt_to_qdatetime
 from preprocessor.utils import to_upper_camel_case
 
 _DIFFERENT = object()

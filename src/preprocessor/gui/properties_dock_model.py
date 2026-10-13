@@ -1,18 +1,17 @@
 from PySide6.QtCore import QObject, Signal
 
 from preprocessor.core.transform.detect_quadrat_analysis import (
-    ThresholdingMethod,
-    QuadratDetectionParams,
-    DownscaleParams,
     BlurParams,
-    ThresholdingParams,
     CannyParams,
     ContourApproximationMethod,
+    DownscaleParams,
     FindContourParams,
-    HoughParams,
     FixPerspectiveParams,
+    HoughParams,
+    QuadratDetectionParams,
+    ThresholdingMethod,
+    ThresholdingParams,
 )
-
 
 # NOTE: There must be a way in Python to avoid most of this boilerplate...
 

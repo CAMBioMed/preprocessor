@@ -1,14 +1,13 @@
-import numpy as np
-
 from pathlib import Path
 
+import numpy as np
 from _pytest.monkeypatch import MonkeyPatch
 
-from preprocessor.core.transform.lens_correct_transform import LensCorrectTransform
-from preprocessor.core.transform.image_transform import ImageTransformWorkItem
 from preprocessor.core.message_reporter import CollectingMessageReporter
+from preprocessor.core.model import LensCorrectionParams, PhotoData
+from preprocessor.core.transform.image_transform import ImageTransformWorkItem
+from preprocessor.core.transform.lens_correct_transform import LensCorrectTransform
 from preprocessor.core.types import ImageRGB
-from preprocessor.core.model import PhotoData, LensCorrectionParams
 
 
 def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None:

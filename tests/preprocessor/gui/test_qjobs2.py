@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from typing import List
-
 import pytest
-from PySide6.QtCore import QEventLoop
 from PySide6.QtWidgets import QApplication
 
 from preprocessor.core.jobs.jobs import Job, JobContext, JobState

@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 
+from preprocessor.core.message_reporter import NOOP_MESSAGE_REPORTER, MessageReporter
+from preprocessor.core.progress_reporter import NOOP_PROGRESS_REPORTER, ProgressReporter
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem
-from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
-from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
 from preprocessor.core.types import ImageRGB
 
 

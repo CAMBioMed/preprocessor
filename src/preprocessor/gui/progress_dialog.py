@@ -1,11 +1,17 @@
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QStyle, QTreeWidgetItem
-from PySide6.QtCore import QTimer
 import contextlib
-
 from collections.abc import Iterable
 
-from preprocessor.gui.jobs.qjobs import QJobProcessor, QJob
+from PySide6.QtCore import QTimer
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QStyle,
+    QTreeWidgetItem,
+    QWidget,
+)
+
+from preprocessor.gui.jobs.qjobs import QJob, QJobProcessor
 from preprocessor.gui.ui_progress_dialog import Ui_ProgressDialog
 
 

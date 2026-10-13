@@ -1,4 +1,4 @@
-from typing import Protocol, Optional, Final, override
+from typing import Final, Optional, Protocol, override
 
 
 class ProgressReporter(Protocol):

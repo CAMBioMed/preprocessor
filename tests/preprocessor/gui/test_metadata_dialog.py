@@ -1,14 +1,14 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLineEdit, QDateTimeEdit, QDoubleSpinBox, QSpinBox
+from PySide6.QtWidgets import QDateTimeEdit, QDoubleSpinBox, QLineEdit, QSpinBox
 from pytestqt.qtbot import QtBot
 
 from preprocessor.gui.metadata_dialog import MetadataDialog
 from preprocessor.gui.model._QApplicationState import QApplicationState
 from preprocessor.gui.model._QPhotoModel import QPhotoModel
-
 from preprocessor.gui.utils import _dt_to_qdatetime
 
 
