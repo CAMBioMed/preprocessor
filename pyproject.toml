@@ -24,10 +24,15 @@ dependencies = [
   "PySide6-Essentials>=6.10.2",
   "qimage2ndarray>=1.10.0",
   "scikit-learn>=1.8.0",
+]
+
+[project.optional-dependencies]
+torch = [
   # Not MacOS Intel compatible:
   "torch>=2.14; sys_platform == 'linux'",
   "torchvision>=0.29; sys_platform == 'linux'",
 ]
+
 
 [dependency-groups]
 # NOTE: This list must be kept in sync with `tool.briefcase.app.preprocessor.test_requires` test dependencies.
@@ -43,8 +48,11 @@ dev = [
   "hatch>=1.16.5",
   "hatchling>=1.29.0",
   # Development dependencies
+  "briefcase>=0.4.6",
   "mypy>=1.19.1",
   "ruff>=0.15.20",
+  "tox-uv>=1.37.0",
+  "tox>=4.65.4",
   "ty>=0.0.43",
 ]
 

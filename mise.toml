@@ -31,7 +31,7 @@ run = [
 description = "Test the project"
 run = [
   "uv run pytest tests",
-  "uvx --with tox-uv tox run -e 3.12 -q --",
+  "uv run --with tox-uv tox run -e 3.12 -q --",
 ]
 
 [tasks.check]
@@ -46,7 +46,7 @@ run = [
 
 [tasks.test-coverage]
 description = "Test the project with coverage"
-run = "uvx --with tox-uv tox run -e 3.12 -q -- --cov"
+run = "uv run --with tox-uv tox run -e 3.12 -q -- --cov"
 
 [tasks.typecheck]
 description = "Run ty and mypy"
@@ -88,23 +88,23 @@ run = [
 
 [tasks.app-update]
 description = "Update the app to match the current project state"
-run = "uvx briefcase update --update-requirements --update-resources"
+run = "uv run briefcase update --update-requirements --update-resources"
 
 [tasks.app-build]
 description = "Build the updated app"
-run = "uvx briefcase build --test --no-input --no-update"
+run = "uv run briefcase build --test --no-input --no-update"
 
 [tasks.app-test]
 description = "Test the built app"
-run = "uvx briefcase run --test --no-input"
+run = "uv run briefcase run --test --no-input"
 
 [tasks.app-run]
 description = "Run the built app"
-run = "uvx briefcase run"
+run = "uv run briefcase run"
 
 [tasks.app-package]
 description = "Package the built app"
-run = "uvx briefcase package --adhoc-sign"
+run = "uv run briefcase package --adhoc-sign"
 
 [tasks.app-clean]
 description = "Clean the app artifacts"
