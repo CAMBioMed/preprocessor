@@ -29,7 +29,7 @@ class Test_QMetadataModel(QModelTestBase):
         self.assert_has_a_property_for_each_data_field(MetadataModel, MetadataData)
 
     @pytest.mark.parametrize(
-        "field_name, initial_value, new_value",
+        ("field_name", "initial_value", "new_value"),
         [(n, v, vv) for n, (v, vvs, _, _) in Test_MetadataData.fields_and_values.items() for vv in vvs],
     )
     def test_property_valid_value_and_signals(
@@ -42,7 +42,7 @@ class Test_QMetadataModel(QModelTestBase):
         self.assert_property_valid_value_and_signals(field_name, initial_value, new_value, qtbot)
 
     @pytest.mark.parametrize(
-        "field_name, initial_value, invalid_value",
+        ("field_name", "initial_value", "invalid_value"),
         [(n, v, iv) for n, (v, _, _, ivs) in Test_MetadataData.fields_and_values.items() for iv in ivs],
     )
     def test_property_invalid_value_and_signals(
@@ -55,7 +55,7 @@ class Test_QMetadataModel(QModelTestBase):
         self.assert_property_invalid_value_and_signals(field_name, initial_value, invalid_value, qtbot)
 
     @pytest.mark.parametrize(
-        "field_name, initial_value, valid_value, input_value, expected_value",
+        ("field_name", "initial_value", "valid_value", "input_value", "expected_value"),
         [
             (n, v, vvs[0], lv, rv)
             for n, (v, vvs, nvs, _) in Test_MetadataData.fields_and_values.items()

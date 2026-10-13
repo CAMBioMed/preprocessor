@@ -69,7 +69,7 @@ class Test_RulerParams(PydanticModelTestBase):
         return new_model
 
     @pytest.mark.parametrize(
-        "field_name, initial_value, new_value",
+        ("field_name", "initial_value", "new_value"),
         [(n, v, vv) for n, (v, vvs, _, _) in fields_and_values.items() for vv in vvs],
     )
     def test_property_valid_value(
@@ -81,7 +81,7 @@ class Test_RulerParams(PydanticModelTestBase):
         self.assert_property_valid_value(field_name, initial_value, new_value)
 
     @pytest.mark.parametrize(
-        "field_name, initial_value, invalid_value",
+        ("field_name", "initial_value", "invalid_value"),
         [(n, v, iv) for n, (v, _, _, ivs) in fields_and_values.items() for iv in ivs],
     )
     def test_property_invalid_value(
@@ -93,7 +93,7 @@ class Test_RulerParams(PydanticModelTestBase):
         self.assert_property_invalid_value(field_name, initial_value, invalid_value)
 
     @pytest.mark.parametrize(
-        "field_name, initial_value, input_value, expected_value",
+        ("field_name", "initial_value", "input_value", "expected_value"),
         [(n, v, lv, rv) for n, (v, _, nvs, _) in fields_and_values.items() for (lv, rv) in nvs],
     )
     def test_property_normalization(
