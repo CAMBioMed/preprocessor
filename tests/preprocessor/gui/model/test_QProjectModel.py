@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import NoReturn, override
 
@@ -323,8 +324,14 @@ class TestQProjectModelIO:
         assert ok is True
         assert called.get("ok") is True
 
-    def test_save_project_to_path_failure_shows_error_message(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    def test_save_project_to_path_failure_shows_error_message(
+        self,
+        tmp_path: Path,
+        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         """save_project_to_path() should show an error message and return False if saving fails."""
+        caplog.set_level(logging.CRITICAL, logger=qpm_mod.logger.name)
         project = QProjectModel(ProjectData())
         out_file = tmp_path / "out.pbproj"
 
@@ -341,8 +348,14 @@ class TestQProjectModelIO:
         assert ok is False
         assert not out_file.exists()
 
-    def test_save_project_to_path_success_and_failure(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    def test_save_project_to_path_success_and_failure(
+        self,
+        tmp_path: Path,
+        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         project = QProjectModel(ProjectData())
+        caplog.set_level(logging.CRITICAL, logger=qpm_mod.logger.name)
         out_file = tmp_path / "out.pbproj"
 
         ok = QProjectModel.save_project_to_path(parent=None, project_model=project, path=out_file)
