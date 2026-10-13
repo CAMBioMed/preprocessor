@@ -11,7 +11,7 @@ from preprocessor.core.types import ImageRGB
 
 
 def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None:
-    """Should skip lens correction when no lens correction requested"""
+    """Should skip lens correction when no lens correction requested."""
     # Arrange
     h, w = 32, 48
     arr = np.zeros((h, w, 3), dtype=np.uint8)
@@ -42,7 +42,7 @@ def test_should_skip_lens_correction_when_no_lens_correction_requested() -> None
 
 
 def test_should_return_transformed_image_when_lens_correction_requested() -> None:
-    """Should return transformed image when lens correction requested"""
+    """Should return transformed image when lens correction requested."""
     # Arrange
     h, w = 64, 64
     # simple test image: horizontal gradient
@@ -82,7 +82,7 @@ def test_should_return_transformed_image_when_lens_correction_requested() -> Non
 
 
 def test_should_return_original_and_error_when_cv2_raises(monkeypatch: MonkeyPatch) -> None:
-    """Should return original work item and add an error when cv2 raises during transform"""
+    """Should return original work item and add an error when cv2 raises during transform."""
     # Arrange
     h, w = 32, 32
     arr = np.zeros((h, w, 3), dtype=np.uint8)

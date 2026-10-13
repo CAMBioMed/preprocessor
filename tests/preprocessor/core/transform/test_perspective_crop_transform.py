@@ -30,7 +30,7 @@ def _find_message(messages: list[Message], code: str) -> Message | None:
 
 
 def test_should_crop_successfully() -> None:
-    """Should crop successfully"""
+    """Should crop successfully."""
     # Arrange
     h, w = 100, 100
     img = np.zeros((h, w, 3), dtype=np.uint8)
@@ -81,7 +81,7 @@ def test_should_crop_successfully() -> None:
 
 
 def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
-    """Should skip perspective crop when no crop requested"""
+    """Should skip perspective crop when no crop requested."""
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
@@ -113,7 +113,7 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
 
 
 def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
-    """Should warn and skip when crop has no corners"""
+    """Should warn and skip when crop has no corners."""
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
@@ -148,7 +148,7 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
 
 
 def test_should_warn_and_skip_when_corners_are_invalid() -> None:
-    """Should warn and skip when corners are invalid"""
+    """Should warn and skip when corners are invalid."""
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
@@ -187,7 +187,7 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
 
 
 def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPatch) -> None:
-    """Should log error and return original when cv2 raises an exception"""
+    """Should log error and return original when cv2 raises an exception."""
     # Arrange
     h, w = 50, 50
     img = np.zeros((h, w, 3), dtype=np.uint8)

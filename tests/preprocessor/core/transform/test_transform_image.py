@@ -62,7 +62,7 @@ class _BadTransform(ImageTransform):
 
 
 def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: MonkeyPatch) -> None:
-    """should return None and report error when image load fails"""
+    """Should return None and report error when image load fails."""
     # Arrange
     image_path = Path("/nonexistent/path.jpg")
     image_id = "path"
@@ -89,7 +89,7 @@ def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: 
 
 
 def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
-    """should apply transforms and save output when transforms succeed and output path given"""
+    """Should apply transforms and save output when transforms succeed and output path given."""
     # Arrange
     h, w = 10, 10
     arr = np.zeros((h, w, 3), dtype=np.uint8)
@@ -132,7 +132,7 @@ def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_p
 
 
 def test_should_report_transform_failed_and_return_none_when_transform_raises(monkeypatch: MonkeyPatch) -> None:
-    """should return None and report transform_failed when a transform raises"""
+    """Should return None and report transform_failed when a transform raises."""
     # Arrange
     h, w = 5, 5
     arr = np.zeros((h, w, 3), dtype=np.uint8)
@@ -159,7 +159,7 @@ def test_should_report_transform_failed_and_return_none_when_transform_raises(mo
 def test_should_report_image_save_failed_and_return_none_when_save_raises(
     monkeypatch: MonkeyPatch, tmp_path: Path
 ) -> None:
-    """should return None and report image_save_failed when saving the image fails"""
+    """Should return None and report image_save_failed when saving the image fails."""
     # Arrange
     h, w = 6, 6
     arr = np.zeros((h, w, 3), dtype=np.uint8)
