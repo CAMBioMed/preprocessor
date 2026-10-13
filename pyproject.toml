@@ -370,6 +370,7 @@ files = [
     "src/preprocessor/gui/designer/progress_dialog.ui",
     "src/preprocessor/gui/designer/project_settings_dialog.ui",
     "src/preprocessor/gui/designer/properties_dock.ui",
+    "src/preprocessor/gui/designer/tree_dock.ui",
 ]
 
 
