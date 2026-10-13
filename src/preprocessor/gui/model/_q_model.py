@@ -96,16 +96,13 @@ class QModel[M: BaseModel](QObject):
         if sig is not None and hasattr(sig, "emit"):
             # Prefer emitting the new value (for signals that accept an argument),
             # but fall back to a no-argument emit if the signal doesn't accept parameters.
-            try:
+            with contextlib.suppress(Exception):
                 value = getattr(self._data, field_name)
-                sig.emit(value)
-            except TypeError:
-                # signal doesn't accept argument
-                with contextlib.suppress(Exception):
+                try:
+                    sig.emit(value)
+                except TypeError:
+                    # Signal doesn't accept an argument.
                     sig.emit()
-            except Exception:
-                # Suppress any other exceptions so signal emission doesn't break callers in tests
-                pass
 
     def _set_field(self, field: str, value: Any) -> None:  # noqa: ANN401
         """

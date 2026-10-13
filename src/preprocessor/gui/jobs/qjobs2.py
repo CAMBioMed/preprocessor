@@ -215,7 +215,7 @@ class _SubContext(JobContext):
 
 
 # Create a metaclass that is compatible with both QObject (from PySide6) and JobProcessor (ABC)
-class QJobProcessorMeta(type(QObject), type(JobProcessor)):  # type: ignore[ty:inconsistent-mro]
+class QJobProcessorMeta(type(QObject), type(JobProcessor)):  # type: ignore[misc, ty:inconsistent-mro]
     """Metaclass to allow QJobProcessor to inherit from both QObject and JobProcessor."""
 
 

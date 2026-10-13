@@ -1,4 +1,5 @@
 import contextlib
+import logging
 import math
 from enum import Enum, auto
 
@@ -24,6 +25,8 @@ from preprocessor.gui.jobs.display_photo_job import DisplayPhotoJob
 from preprocessor.gui.jobs.qjobs import QJobProcessor
 from preprocessor.gui.model import QPhotoModel, QProjectModel
 from preprocessor.gui.worker import Worker
+
+logger = logging.getLogger(__name__)
 
 
 class Tool(Enum):
@@ -100,17 +103,14 @@ class PhotoEditorWidget(QWidget):
 
     def show_photo(self, photo: QPhotoModel | None, project: QProjectModel) -> None:
         # Disconnect any previous signals and clear state
-        try:
-            if self._photo_signals_connected and self._photo is not None:
-                with contextlib.suppress(Exception):
-                    self._photo.on_color_correction_changed.disconnect(self._on_photo_params_changed)
-                with contextlib.suppress(Exception):
-                    self._photo.on_lens_correction_changed.disconnect(self._on_photo_params_changed)
-                with contextlib.suppress(Exception):
-                    self._photo.on_crop_changed.disconnect(self._on_photo_params_changed)
-                self._photo_signals_connected = False
-        except Exception:
-            pass
+        if self._photo_signals_connected and self._photo is not None:
+            with contextlib.suppress(Exception):
+                self._photo.on_color_correction_changed.disconnect(self._on_photo_params_changed)
+            with contextlib.suppress(Exception):
+                self._photo.on_lens_correction_changed.disconnect(self._on_photo_params_changed)
+            with contextlib.suppress(Exception):
+                self._photo.on_crop_changed.disconnect(self._on_photo_params_changed)
+            self._photo_signals_connected = False
         self._pixmap = None
         self._photo = None
         # Clear any stored cv images & signal flags
@@ -714,8 +714,7 @@ class PhotoEditorWidget(QWidget):
                         #     qimg = QImage(gray.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
                         self._pixmap = QPixmap.fromImage(qimg)
                     except Exception:
-                        # if conversion fails, leave pixmap as-is
-                        pass
+                        logger.warning("Failed to display transformed image", exc_info=True)
             finally:
                 # Clear worker ref and repaint
                 self._current_undistort_worker = None

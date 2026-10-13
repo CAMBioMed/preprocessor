@@ -1,8 +1,3 @@
-from preprocessor.core.message_reporter import MessageReporter, NOOP_MESSAGE_REPORTER
-from preprocessor.core.progress_reporter import ProgressReporter, NOOP_PROGRESS_REPORTER
-from preprocessor.core.type_corners import Corners
-from preprocessor.core.types import ImageRGB, Line, Point2D
-from preprocessor.gui.jobs.qjobs import CancelToken
 import logging
 import math
 from dataclasses import dataclass
@@ -13,6 +8,11 @@ import numpy as np
 from cv2.typing import MatLike
 from sklearn.cluster import KMeans
 
+from preprocessor.core.message_reporter import NOOP_MESSAGE_REPORTER, MessageReporter
+from preprocessor.core.progress_reporter import NOOP_PROGRESS_REPORTER, ProgressReporter
+from preprocessor.core.type_corners import Corners
+from preprocessor.core.types import ImageRGB, Line, Point2D
+from preprocessor.gui.jobs.qjobs import CancelToken
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +192,7 @@ class DetectQuadratAnalysisJob:
     ) -> Corners:
         cancel_token = cancel_token or CancelToken()
         params = self._params
-        original_img = self._image.data.copy()
+        original_img: MatLike = self._image.data.copy()
 
         if params.downscale.enabled:
             original_img, scale = DetectQuadratAnalysisJob._downscale_image(original_img, params.downscale)
@@ -238,8 +238,7 @@ class DetectQuadratAnalysisJob:
                 logger.debug(f"Downscaled image to {new_w}x{new_h} pixels")
                 return img, scale
         except Exception:
-            # if resizing fails for any reason, continue with original image
-            pass
+            logger.debug("Failed to downscale image; using the original image", exc_info=True)
         return img, 1.0
 
     @staticmethod

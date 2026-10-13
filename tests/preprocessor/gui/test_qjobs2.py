@@ -69,7 +69,7 @@ def test_run_subjob_maps_progress_to_parent_slice() -> None:
     seen: list[float] = []
 
     # collect progress updates emitted by the QJob signals
-    def _collector(job, progress: float) -> None:
+    def _collector(job: QJob, progress: float) -> None:
         seen.append(progress)
 
     qjob._signals.on_progress.connect(_collector)

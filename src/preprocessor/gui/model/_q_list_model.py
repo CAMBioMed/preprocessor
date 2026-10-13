@@ -184,8 +184,9 @@ class QListModel[E: QModel](QObject):
     def set_project_dir(self, project_dir: Path | None) -> None:
         """Propagate project_dir to every child item if they implement set_project_dir."""
         for item in self._items:
-            if hasattr(item, "set_project_dir"):
-                item.set_project_dir(project_dir)
+            setter = getattr(item, "set_project_dir", None)
+            if callable(setter):
+                cast(Callable[[Path | None], None], setter)(project_dir)
 
     def to_serializable_list(self) -> list[dict]:
         """
@@ -231,14 +232,16 @@ class QListModel[E: QModel](QObject):
                     project_dir = getattr(owner, "file", None)
                     if project_dir is not None:
                         project_dir = project_dir.parent
-                    if hasattr(a, "set_project_dir"):
-                        a.set_project_dir(project_dir)
+                    setter = getattr(a, "set_project_dir", None)
+                    if callable(setter):
+                        cast(Callable[[Path | None], None], setter)(project_dir)
                 for r in removed:
                     with contextlib.suppress(Exception):
                         r.on_changed.disconnect(child_changed_callback)  # type: ignore[attr-defined]
                         r.on_dirty_changed.disconnect(self._handle_child_dirty_changed)
-                    if hasattr(r, "set_project_dir"):
-                        r.set_project_dir(None)
+                    setter = getattr(r, "set_project_dir", None)
+                    if callable(setter):
+                        cast(Callable[[Path | None], None], setter)(None)
 
             payload = [item._data for item in self._items] if len(self._items) > 0 else []
             owner._set_field(field_name, payload)
