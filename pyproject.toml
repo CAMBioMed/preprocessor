@@ -421,7 +421,7 @@ test_requires = [
 min_os_version = "13.0"
 universal_build = true      # Support both x86_64/ARM64
 requires = [
-    "std-nslog~=1.0.3",
+    "std-nslog>=2.0.0,<3.0.0",
 ]
 
 [tool.briefcase.app.preprocessor.linux]
