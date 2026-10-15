@@ -1,12 +1,21 @@
 from pathlib import Path
 
+import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 from pytestqt.qtbot import QtBot
 
+import preprocessor.gui.model._q_project_model as qpm_mod
 from preprocessor.gui.model import QProjectModel
+from tests.preprocessor.gui.cls_FakeMsgBox import _FakeMsgBox
 
+
+@pytest.fixture(autouse=True)
+def discard_unsaved_changes_on_main_window_close(monkeypatch: MonkeyPatch) -> None:
+    """Make unsaved-project prompts nonblocking in MainWindow tests."""
+    _FakeMsgBox.next_clicked_text = "Discard"
+    monkeypatch.setattr(qpm_mod, "QMessageBox", _FakeMsgBox)
 
 class TestMainWindow:
     """Tests for the MainWindow class in the preprocessor GUI."""
@@ -590,3 +599,37 @@ class TestMainWindow:
         assert len(model.current_project.photos) == 0
 
         main_win.close()
+
+    def test_close_with_unsaved_project_canceled_keeps_window_open(
+        self, qtbot: QtBot, monkeypatch: MonkeyPatch
+    ) -> None:
+        """Canceling the unsaved-project prompt keeps the main window open."""
+        from preprocessor.gui.main_window import MainWindow
+        from preprocessor.gui.model import QApplicationState
+
+        # Arrange
+        model = QApplicationState()
+        project = QProjectModel.new_project(None, None, None)
+        assert project is not None
+        project.mark_dirty()
+        model.current_project = project
+        save_prompt_calls: list[tuple[object, QProjectModel | None, Path | None]] = []
+
+        def _cancel_save_prompt(
+            parent: object, current_project: QProjectModel | None, initial_dir: Path | None
+        ) -> bool:
+            save_prompt_calls.append((parent, current_project, initial_dir))
+            return False
+
+        monkeypatch.setattr(QProjectModel, "save_project_if_dirty", staticmethod(_cancel_save_prompt))
+        main_win = MainWindow(model)
+        qtbot.addWidget(main_win)
+        main_win.show()
+        qtbot.waitExposed(main_win)
+
+        # Act
+        main_win.close()
+
+        # Assert
+        assert main_win.isVisible()
+        assert save_prompt_calls == [(main_win, project, model.projects_path)]

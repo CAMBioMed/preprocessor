@@ -492,6 +492,10 @@ class MainWindow(QMainWindow):
         self._update_window_title()
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        """Prompt to save unsaved project changes before closing the application."""
+        if not QProjectModel.save_project_if_dirty(self, self.model.current_project, self.model.projects_path):
+            event.ignore()
+            return
         self.write_settings()
         super().closeEvent(event)
         event.accept()
