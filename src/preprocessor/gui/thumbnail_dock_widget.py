@@ -1,9 +1,11 @@
+from collections.abc import Iterable
+
 from PySide6.QtCore import QPoint, QSize, Qt, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QPixmap
 from PySide6.QtWidgets import QDockWidget, QListWidget, QListWidgetItem, QMenu, QWidget
 
-from preprocessor.gui.model import QListModel, QPhotoModel
-from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
+from preprocessor.gui.designer.ui_thumbnail_dock import Ui_ThumbnailDock
+from preprocessor.gui.model import QPhotoModel
 from preprocessor.gui.utils import icon_from_resource
 
 
@@ -11,6 +13,7 @@ class ThumbnailDockWidget(QDockWidget):
     ui: Ui_ThumbnailDock
 
     on_add_photos_action: Signal = Signal()
+    on_add_directory_action: Signal = Signal()
     on_remove_photos_action: Signal = Signal(object)
     on_selection_changed: Signal = Signal(object)  # Signal(list[QPhotoModel])
     on_item_double_clicked: Signal = Signal(object)  # Signal(QPhotoModel | None)
@@ -31,6 +34,7 @@ class ThumbnailDockWidget(QDockWidget):
         """Set up icons for actions."""
         # Toolbar
         self.ui.addPhotoAction.setIcon(icon_from_resource("icons/fuguex2/image--plus.png"))
+        self.ui.addDirectoryAction.setIcon(icon_from_resource("icons/fuguex2/folder--plus.png"))
         self.ui.removePhotoAction.setIcon(icon_from_resource("icons/fuguex2/image--minus.png"))
 
     def _setup_keyboard_shortcuts(self) -> None:
@@ -43,6 +47,7 @@ class ThumbnailDockWidget(QDockWidget):
     def _connect_signals(self) -> None:
         """Connect UI signals to internal handlers."""
         self.ui.addPhotoAction.triggered.connect(self._handle_add_photos_action)
+        self.ui.addDirectoryAction.triggered.connect(self._handle_add_directory_action)
         self.ui.removePhotoAction.triggered.connect(self._handle_remove_photos_action)
         self.ui.thumbnailListWidget.itemDoubleClicked.connect(self._handle_item_double_clicked)
         self.ui.thumbnailListWidget.itemSelectionChanged.connect(self._handle_selection_changed)
@@ -53,6 +58,9 @@ class ThumbnailDockWidget(QDockWidget):
 
     def _handle_add_photos_action(self) -> None:
         self.on_add_photos_action.emit()
+
+    def _handle_add_directory_action(self) -> None:
+        self.on_add_directory_action.emit()
 
     def _handle_remove_photos_action(self) -> None:
         selected_items = self.ui.thumbnailListWidget.selectedItems()
@@ -116,15 +124,16 @@ class ThumbnailDockWidget(QDockWidget):
         """Emit signal to indicate user requested 'Set metadata to all' for the selected photos."""
         self.on_set_metadata_to_selected.emit(selected_photos)
 
-    def update_thumbnails(self, photos: QListModel[QPhotoModel]) -> None:
+    def update_thumbnails(self, photos: Iterable[QPhotoModel]) -> None:
         """Update the thumbnails to match the given list of photos."""
+        photo_list = list(photos)
         thumbnail_list: QListWidget = self.ui.thumbnailListWidget
 
         # Go through the list, removing photos that are no longer present and adding new ones,
         # while preserving order and minimizing changes to the list widget
         current_photos = [thumbnail_list.item(i).data(Qt.ItemDataRole.UserRole) for i in range(thumbnail_list.count())]
         current_photos_set = set(current_photos)
-        new_photos_set = set(photos)
+        new_photos_set = set(photo_list)
         removed = current_photos_set - new_photos_set
         added = new_photos_set - current_photos_set
 
@@ -144,9 +153,11 @@ class ThumbnailDockWidget(QDockWidget):
                 thumbnail_list.takeItem(found_index)
 
         # Insert items for added QPhotoModel instances at the correct index to preserve order
-        for photo in added:
+        for photo in photo_list:
+            if photo not in added:
+                continue
             try:
-                insert_index = photos.index(photo)
+                insert_index = photo_list.index(photo)
             except ValueError:
                 insert_index = thumbnail_list.count()
 

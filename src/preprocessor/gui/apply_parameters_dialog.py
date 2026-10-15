@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QDialog, QWidget
 
+from preprocessor.gui.designer.ui_apply_parameters_dialog import Ui_ApplyParametersDialog
 from preprocessor.gui.model import QApplicationState, QPhotoModel
-from preprocessor.gui.ui_apply_parameters_dialog import Ui_ApplyParametersDialog
 
 
 class ApplyParametersDialog(QDialog):

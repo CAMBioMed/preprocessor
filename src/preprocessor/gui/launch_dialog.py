@@ -3,8 +3,8 @@ import logging
 from PySide6.QtWidgets import QDialog, QWidget
 
 from preprocessor import app_formal_name
+from preprocessor.gui.designer.ui_launch_dialog import Ui_LaunchDialog
 from preprocessor.gui.model import QApplicationState, QProjectModel
-from preprocessor.gui.ui_launch_dialog import Ui_LaunchDialog
 
 logger = logging.getLogger(__name__)
 

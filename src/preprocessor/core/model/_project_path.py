@@ -1,45 +1,75 @@
+from os import PathLike
 from pathlib import Path
-from typing import Annotated, Any, cast
+from typing import Annotated, TypeGuard
 
-from pydantic import AfterValidator, PlainSerializer
+from pydantic import PlainSerializer, PlainValidator
 from pydantic_core.core_schema import SerializationInfo, ValidationInfo
 
 
-def _parse_project_path(v: Any, info: ValidationInfo) -> Path:  # noqa: ANN401
-    """Pydantic validator to parse a path relative to the project directory."""
+def _is_object_dict(value: object) -> TypeGuard[dict[object, object]]:
+    """Return whether a value is a dictionary with object keys and values."""
 
-    p = Path(v) if not isinstance(v, Path) else v
-    if p.is_absolute():
-        return p.resolve()
-
-    project_dir = cast(Path, (info.context or {}).get("project_dir")) or Path.cwd()
-    project_dir = Path(project_dir).resolve()
-
-    return (project_dir / p).resolve()
+    return isinstance(value, dict)
 
 
-def _dump_project_path(v: Path, info: SerializationInfo) -> str:
-    """Pydantic serializer to dump a path as relative to the project directory if possible."""
+def _path_string(value: object) -> str | None:
+    """Return the string represented by a supported path value."""
 
-    p = v.resolve()
+    if isinstance(value, str):
+        return value
+    if not isinstance(value, PathLike):
+        return None
 
-    project_dir = cast(Path | None, (info.context or {}).get("project_dir"))
+    path = value.__fspath__()
+    return path if isinstance(path, str) else None
+
+
+def _project_dir_from_context(context: object) -> Path | None:
+    """Return the resolved project directory from a supported Pydantic context."""
+
+    if not _is_object_dict(context):
+        return None
+
+    project_dir = _path_string(context.get("project_dir"))
+    return Path(project_dir).resolve() if project_dir is not None else None
+
+
+def _validate_project_path(value: object, info: ValidationInfo) -> Path:
+    """Validate and resolve a project path."""
+
+    path_value = _path_string(value)
+    if path_value is None:
+        msg = "project path must be a string or path-like value"
+        raise ValueError(msg)
+
+    path = Path(path_value)
+    if path.is_absolute():
+        return path.resolve()
+
+    project_dir = _project_dir_from_context(info.context) or Path.cwd().resolve()
+    return (project_dir / path).resolve()
+
+
+def _serialize_project_path(path: Path, info: SerializationInfo) -> str:
+    """Serialize a path relative to the project directory when possible."""
+
+    resolved_path = path.resolve()
+    project_dir = _project_dir_from_context(info.context)
     if project_dir is None:
-        return str(p)
-    project_dir = Path(project_dir).resolve()
+        return str(resolved_path)
 
     try:
-        relative_path = p.relative_to(project_dir, walk_up=False)
+        relative_path = resolved_path.relative_to(project_dir, walk_up=False)
         # NOTE: We use str() here to preserve backslashes on Windows,
         # which Path.as_posix() would convert to forward slashes.
         return str(relative_path)
     except ValueError:
-        return str(p)
+        return str(resolved_path)
 
 
 ProjectPath = Annotated[
     Path,
-    AfterValidator(_parse_project_path),
-    PlainSerializer(_dump_project_path),
+    PlainValidator(_validate_project_path),
+    PlainSerializer(_serialize_project_path, return_type=str),
 ]
 """A Pydantic type for file paths that are stored relative to the project directory."""

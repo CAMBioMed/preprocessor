@@ -53,13 +53,19 @@ def test_integration_new_project_add_images_save_and_quit(
         main_win.show()
         qtbot.waitExposed(main_win)
 
-        # Prepare example images from the repository
+        # Copy example images into the project directory so the directory tree can group them
+        photos_dir = tmp_path / "photos"
+        photos_dir.mkdir()
         repo_root = Path(__file__).resolve().parent.parent.parent.parent
-        photos_dir = (repo_root / "tests" / "preprocessor" / "photos").resolve()
-        img1 = (photos_dir / "IMG_1054.JPG").resolve()
-        img2 = (photos_dir / "IMG_1069.JPG").resolve()
-        assert img1.exists(), f"Example image not found: {img1}"
-        assert img2.exists(), f"Example image not found: {img2}"
+        example_photos_dir = (repo_root / "tests" / "preprocessor" / "photos").resolve()
+        img1_src = (example_photos_dir / "IMG_1054.JPG").resolve()
+        img2_src = (example_photos_dir / "IMG_1069.JPG").resolve()
+        assert img1_src.exists(), f"Example image not found: {img1_src}"
+        assert img2_src.exists(), f"Example image not found: {img2_src}"
+        img1 = photos_dir / img1_src.name
+        img2 = photos_dir / img2_src.name
+        img1.write_bytes(img1_src.read_bytes())
+        img2.write_bytes(img2_src.read_bytes())
 
         # Patch the open-files dialog used by the Add Photos action to return our two images
         patch_getOpenFileNames_dialog([str(img1), str(img2)], monkeypatch)

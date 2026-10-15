@@ -11,8 +11,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from preprocessor.gui.designer.ui_progress_dialog import Ui_ProgressDialog
 from preprocessor.gui.jobs.qjobs import QJob, QJobProcessor
-from preprocessor.gui.ui_progress_dialog import Ui_ProgressDialog
 
 
 class ProgressDialog(QDialog):
