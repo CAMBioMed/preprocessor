@@ -12,6 +12,7 @@ class Ui_ThumbnailDock(object):
     mainLayout: QGridLayout
     toolbar: QToolBar
     addPhotoAction: QAction
+    addDirectoryAction: QAction
     removePhotoAction: QAction
     thumbnailListWidget: QListWidget
 
@@ -39,6 +40,10 @@ class Ui_ThumbnailDock(object):
         self.addPhotoAction = QAction("&Add Photos...", parent)
         self.addPhotoAction.setStatusTip("Add photos to the project.")
         self.toolbar.addAction(self.addPhotoAction)
+
+        self.addDirectoryAction = QAction("Add &Directory...", parent)
+        self.addDirectoryAction.setStatusTip("Add photos recursively from a directory in the project.")
+        self.toolbar.addAction(self.addDirectoryAction)
 
         self.removePhotoAction = QAction("&Remove Photos", parent)
         self.removePhotoAction.setStatusTip("Remove photos from the project.")

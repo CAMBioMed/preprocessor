@@ -213,6 +213,7 @@ class MainWindow(QMainWindow):
 
         # Thumbnail dock
         self.thumbnail_dock.on_add_photos_action.connect(self._handle_add_photos_action)
+        self.thumbnail_dock.on_add_directory_action.connect(self._handle_add_directory_action)
         self.thumbnail_dock.on_remove_photos_action.connect(self._handle_remove_photos_action)
         self.thumbnail_dock.on_item_double_clicked.connect(self._handle_photo_opened)
         self.thumbnail_dock.on_apply_parameters_to_selected.connect(self._handle_apply_to_selected_action)
@@ -315,51 +316,121 @@ class MainWindow(QMainWindow):
     def _handle_help_about_action(self) -> None:
         show_about_dialog(self)
 
-    def _handle_add_photos_action(self) -> None:
-        """Add photos using background jobs."""
-        assert self.model.current_project is not None
+    def _project_for_photo_addition(self) -> QProjectModel | None:
+        """Return the saved current project, or ``None`` when saving is canceled or fails."""
         project = self.model.current_project
-        # Ensure the project has a file so the directory tree has a defined root before adding photos.
+        assert project is not None
         if project.project_file is None:
             if not QProjectModel.save_project(self, project, self.model.projects_path):
-                return
+                return None
             assert project.project_file is not None
             self.model.projects_path = project.project_file.parent
-        # Prefer the project's photo directory, falling back to the project-file parent.
+        return project
+
+    def _handle_add_photos_action(self) -> None:
+        """Select individual files and add them to the current project."""
+        project = self._project_for_photo_addition()
+        if project is None:
+            return
+        assert project.project_file is not None
         initial_path = str(project.photos_path or project.project_file.parent)
-        paths, _ = QFileDialog.getOpenFileNames(self, "Add Photo", initial_path, "Photos (*.jpg;*.jpeg);;All Files (*)")
-        if not paths:
+        filenames, _ = QFileDialog.getOpenFileNames(
+            self,
+            "Add Photo",
+            initial_path,
+            "Photos (*.jpg;*.jpeg);;All Files (*)",
+        )
+        if not filenames:
             return
 
-        # Set the path as photos_path for future dialogs (if any files were added)
-        if paths:
-            project.photos_path = Path(paths[0]).parent
+        paths = [Path(filename).resolve() for filename in filenames]
+        self._add_photos(project, paths, paths[0].parent)
 
-        # Use the shared AddPhotoJob implementation to create QPhotoModel and extract EXIF in the background.
+    def _handle_add_directory_action(self) -> None:
+        """Select a directory and recursively add its JPEG photos."""
+        project = self._project_for_photo_addition()
+        if project is None:
+            return
+        assert project.project_file is not None
+        initial_path = str(project.photos_path or project.project_file.parent)
+        selected = QFileDialog.getExistingDirectory(self, "Add Photo Directory", initial_path)
+        if not selected:
+            return
 
-        # Helper QObject to perform the actual append on the main thread
+        source_directory = Path(selected).resolve()
+        project_directory = project.project_file.parent.resolve()
+        if not source_directory.is_relative_to(project_directory):
+            self._warn_photo_path_outside_project(source_directory, project_directory)
+            return
+
+        paths = sorted(
+            candidate.resolve()
+            for root, _directories, filenames in source_directory.walk(follow_symlinks=False)
+            for filename in filenames
+            if (candidate := root / filename).suffix.lower() in {".jpg", ".jpeg"} and candidate.is_file()
+        )
+        self._add_photos(project, paths, source_directory)
+
+    def _warn_photo_path_outside_project(self, outside_path: Path, project_directory: Path) -> None:
+        """Report that a selected or discovered photo path is outside the project directory."""
+        QMessageBox.warning(
+            self,
+            "Cannot Add Photos",
+            "A selected or discovered path is outside the project directory:"
+            f"\n{outside_path}\n\nProject directory:\n{project_directory}",
+        )
+
+    def _add_photos(self, project: QProjectModel, paths: list[Path], source_directory: Path) -> None:
+        """Add resolved photo paths from a source within the saved project directory."""
+        assert project.project_file is not None
+        project_directory = project.project_file.parent.resolve()
+        outside_path = next(
+            (path for path in (source_directory, *paths) if not path.is_relative_to(project_directory)),
+            None,
+        )
+        if outside_path is not None:
+            self._warn_photo_path_outside_project(outside_path, project_directory)
+            return
+
+        if not paths:
+            QMessageBox.information(self, "No Photos Added", "No photos were added.")
+            return
+
+        if len(paths) > 10:
+            directory_count = len({path.parent for path in paths})
+            directory_word = "directory" if directory_count == 1 else "directories"
+            response = QMessageBox.question(
+                self,
+                "Confirm Add Photos",
+                f"Add {len(paths)} photos from {directory_count} {directory_word}?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if response != QMessageBox.StandardButton.Yes:
+                return
+
         class _AppendHelper(QObject):
             @Slot(object, bool)
             def handle_job_success(self, job: AddPhotoJob, result: None) -> None:
-                # Only append if the job completed successfully and produced a photo
                 photo_data = job.result
                 if photo_data is not None:
-                    # Note that we create the QPhotoModel (a QObject) on the main thread,
-                    # using the data produced by the background job. This is required.
-                    photo_model = QPhotoModel(photo_data)
-                    project.photos.append(photo_model)
+                    project.photos.append(QPhotoModel(photo_data))
 
+        photo_count_before = len(project.photos)
         jobs: list[QJob] = []
         helper = _AppendHelper(self)
-        for p in paths:
-            job = AddPhotoJob(p)
-            # Connect the job end signal to the helper so append happens on the main thread
+        for path in paths:
+            job = AddPhotoJob(path)
             job.signals.on_job_success.connect(helper.handle_job_success)
             jobs.append(job)
 
-        # Show progress dialog and run jobs; dialog is modal and will block until done
         dlg = ProgressDialog("Adding Photos", jobs, parent=self, run_in_thread=True)
         dlg.exec()
+
+        if len(project.photos) == photo_count_before:
+            QMessageBox.information(self, "No Photos Added", "No photos were added.")
+            return
+        project.photos_path = source_directory
 
     def _handle_remove_photos_action(self, selected: list[QPhotoModel]) -> None:
         assert self.model.current_project is not None

@@ -143,7 +143,7 @@ class QJobProcessor(QObject):
     on_job_success: Signal = Signal(object, object)
     """Raised when the job successfully finished. Emits (QJob, result)"""
     on_job_failed: Signal = Signal(object, bool)
-    """Raised when the job failed or was aborted. Emits (QJob, aborted: bool, exception)."""
+    """Raised when a job failed or was aborted. Emits (QJob, aborted: bool)."""
     on_job_status: Signal = Signal(object, str, object)
     """Signal a job status update: QJob, new item status, new item icon (QIcon | str | None)"""
     on_job_progress: Signal = Signal(object, int, int)
@@ -204,7 +204,7 @@ class QJobProcessor(QObject):
     def _handle_job_failed(self, job: QJob, aborted: bool, exc: Exception | None) -> None:
         self._finished += 1
         self._any_aborted = self._any_aborted or aborted
-        self.on_job_failed.emit(job, aborted, exc)
+        self.on_job_failed.emit(job, aborted)
         self.update_progress()
         if self._finished == self.total:
             self.on_finished.emit(self._any_aborted)

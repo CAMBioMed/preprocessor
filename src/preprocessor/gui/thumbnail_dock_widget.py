@@ -13,6 +13,7 @@ class ThumbnailDockWidget(QDockWidget):
     ui: Ui_ThumbnailDock
 
     on_add_photos_action: Signal = Signal()
+    on_add_directory_action: Signal = Signal()
     on_remove_photos_action: Signal = Signal(object)
     on_selection_changed: Signal = Signal(object)  # Signal(list[QPhotoModel])
     on_item_double_clicked: Signal = Signal(object)  # Signal(QPhotoModel | None)
@@ -33,6 +34,7 @@ class ThumbnailDockWidget(QDockWidget):
         """Set up icons for actions."""
         # Toolbar
         self.ui.addPhotoAction.setIcon(icon_from_resource("icons/fuguex2/image--plus.png"))
+        self.ui.addDirectoryAction.setIcon(icon_from_resource("icons/fuguex2/folder--plus.png"))
         self.ui.removePhotoAction.setIcon(icon_from_resource("icons/fuguex2/image--minus.png"))
 
     def _setup_keyboard_shortcuts(self) -> None:
@@ -45,6 +47,7 @@ class ThumbnailDockWidget(QDockWidget):
     def _connect_signals(self) -> None:
         """Connect UI signals to internal handlers."""
         self.ui.addPhotoAction.triggered.connect(self._handle_add_photos_action)
+        self.ui.addDirectoryAction.triggered.connect(self._handle_add_directory_action)
         self.ui.removePhotoAction.triggered.connect(self._handle_remove_photos_action)
         self.ui.thumbnailListWidget.itemDoubleClicked.connect(self._handle_item_double_clicked)
         self.ui.thumbnailListWidget.itemSelectionChanged.connect(self._handle_selection_changed)
@@ -55,6 +58,9 @@ class ThumbnailDockWidget(QDockWidget):
 
     def _handle_add_photos_action(self) -> None:
         self.on_add_photos_action.emit()
+
+    def _handle_add_directory_action(self) -> None:
+        self.on_add_directory_action.emit()
 
     def _handle_remove_photos_action(self) -> None:
         selected_items = self.ui.thumbnailListWidget.selectedItems()
