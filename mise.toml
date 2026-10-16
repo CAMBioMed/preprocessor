@@ -3,17 +3,13 @@ uv = "0.12.23"
 
 [tasks.run]
 description = "Build and run the application"
-run = [
-  { task = "build" },
-  "uv run preprocessor",
-]
+depends = ["build"]
+run = "uv run preprocessor"
 
 [tasks.gui]
 description = "Build and run the GUI application"
-run = [
-  { task = "build" },
-  "uv run preprocessor-gui",
-]
+depends = ["build"]
+run = "uv run preprocessor-gui"
 
 [tasks.build-ui]
 description = "Build the UI files"
