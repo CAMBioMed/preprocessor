@@ -41,6 +41,14 @@ def _cache_png(cache_dir: Path) -> Path:
     return cache_paths[0]
 
 
+def _make_source_newer(source: Path, cache_path: Path) -> None:
+    """Set ``source`` newer than ``cache_path`` with filesystem-resolution headroom."""
+    source_mtime_ns = min(source.stat().st_mtime_ns, cache_path.stat().st_mtime_ns) - 4_000_000_000
+    cache_mtime_ns = source_mtime_ns - 4_000_000_000
+    os.utime(cache_path, ns=(cache_path.stat().st_atime_ns, cache_mtime_ns))
+    os.utime(source, ns=(source.stat().st_atime_ns, source_mtime_ns))
+
+
 def test_should_create_project_cache_and_return_proportional_thumbnail_when_first_requested(tmp_path: Path) -> None:
     """Should create cache artifacts and return a scaled thumbnail when first requested."""
     # Arrange
@@ -93,7 +101,7 @@ def test_should_regenerate_cache_entry_when_source_is_newer(tmp_path: Path) -> N
     cache.get_thumbnail(source, _THUMBNAIL_SIZE)
     cache_path = _cache_png(tmp_path / ".cache")
     _write_png(source, "blue")
-    os.utime(source, ns=(source.stat().st_atime_ns, cache_path.stat().st_mtime_ns + 1))
+    _make_source_newer(source, cache_path)
 
     # Act
 
@@ -240,9 +248,10 @@ def test_should_replace_blocking_cache_entry_with_regenerated_thumbnail_when_ini
 
 
 def test_should_warn_and_return_thumbnail_without_storing_when_cache_entry_cannot_be_replaced(
-    tmp_path: Path, caplog: pytest.LogCaptureFixture
+    tmp_path: Path, caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Should warn and return a thumbnail without storing it when a cache entry cannot be replaced."""
+
     # Arrange
     source = tmp_path / "photo.png"
     project_file = tmp_path / "project.pbproj"
@@ -253,14 +262,14 @@ def test_should_warn_and_return_thumbnail_without_storing_when_cache_entry_canno
     cache_path = _cache_png(cache_dir)
     cache_path.unlink()
     cache_path.mkdir()
-    caplog.clear()
-    cache_dir.chmod(0o500)
+
+    def _raise_permission_error(_: Path) -> None:
+        raise PermissionError("access denied")
+
+    monkeypatch.setattr(ThumbnailCache, "_remove_cache_entry", staticmethod(_raise_permission_error))
 
     # Act
-    try:
-        thumbnail = cache.get_thumbnail(source, _THUMBNAIL_SIZE)
-    finally:
-        cache_dir.chmod(0o700)
+    thumbnail = cache.get_thumbnail(source, _THUMBNAIL_SIZE)
 
     # Assert
     assert thumbnail is not None

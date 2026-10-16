@@ -13,6 +13,14 @@ from preprocessor.gui.model import QPhotoModel
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 
 
+def _make_source_newer(source: Path, cache_path: Path) -> None:
+    """Set ``source`` newer than ``cache_path`` with filesystem-resolution headroom."""
+    source_mtime_ns = min(source.stat().st_mtime_ns, cache_path.stat().st_mtime_ns) - 4_000_000_000
+    cache_mtime_ns = source_mtime_ns - 4_000_000_000
+    os.utime(cache_path, ns=(cache_path.stat().st_atime_ns, cache_mtime_ns))
+    os.utime(source, ns=(source.stat().st_atime_ns, source_mtime_ns))
+
+
 def test_should_refresh_retained_icon_and_cache_when_source_becomes_newer(qtbot: QtBot, tmp_path: Path) -> None:
     """Should refresh a retained icon and cache entry when its source becomes newer."""
     # Arrange
@@ -27,7 +35,7 @@ def test_should_refresh_retained_icon_and_cache_when_source_becomes_newer(qtbot:
     assert item is not None
     cache_path = next((tmp_path / ".cache").glob("*.png"))
     Image.new("RGB", (40, 20), "blue").save(source)
-    os.utime(source, ns=(source.stat().st_atime_ns, cache_path.stat().st_mtime_ns + 1))
+    _make_source_newer(source, cache_path)
 
     # Act
     dock.update_thumbnails([photo], project_file)
