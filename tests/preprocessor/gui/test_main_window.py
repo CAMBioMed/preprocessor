@@ -17,6 +17,7 @@ def discard_unsaved_changes_on_main_window_close(monkeypatch: MonkeyPatch) -> No
     _FakeMsgBox.next_clicked_text = "Discard"
     monkeypatch.setattr(qpm_mod, "QMessageBox", _FakeMsgBox)
 
+
 class TestMainWindow:
     """Tests for the MainWindow class in the preprocessor GUI."""
 

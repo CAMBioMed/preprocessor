@@ -82,6 +82,7 @@
 - Test observable behavior, boundaries, and error cases rather than implementation details.
 - Follow Arrange / Act / Assert and comment these phases in each unit test.
 - Keep one logical action per test.
+- Tests should have names of the form `should X, when Y`. 
 - While iterating, run the narrowest relevant pytest command.
 - Before completion, run `nix develop path:$PWD -c mise run test`.
 - Run `nix develop path:$PWD -c mise run build` when packaging or entry points change.
