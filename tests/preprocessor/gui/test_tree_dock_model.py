@@ -1,3 +1,5 @@
+import re
+
 from pathlib import Path
 
 import pytest
@@ -212,7 +214,7 @@ def test_photo_outside_project_directory_is_rejected(tmp_path: Path) -> None:
     # Act / Assert
     with pytest.raises(
         ValueError,
-        match=f"^photo path is outside project directory: {outside_photo.original_filename}$",
+        match=rf"^photo path is outside project directory: {re.escape(str(outside_photo.original_filename))}$",
     ):
         model.set_photos([outside_photo], project_directory=project_directory)
 
