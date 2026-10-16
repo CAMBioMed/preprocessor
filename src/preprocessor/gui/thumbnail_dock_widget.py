@@ -1,11 +1,13 @@
 from collections.abc import Iterable
+from pathlib import Path
 
 from PySide6.QtCore import QPoint, QSize, Qt, Signal
-from PySide6.QtGui import QAction, QIcon, QKeySequence, QPixmap
+from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import QDockWidget, QListWidget, QListWidgetItem, QMenu, QWidget
 
 from preprocessor.gui.designer.ui_thumbnail_dock import Ui_ThumbnailDock
 from preprocessor.gui.model import QPhotoModel
+from preprocessor.gui.thumbnail_cache import ThumbnailCache
 from preprocessor.gui.utils import icon_from_resource
 
 
@@ -124,13 +126,13 @@ class ThumbnailDockWidget(QDockWidget):
         """Emit signal to indicate user requested 'Set metadata to all' for the selected photos."""
         self.on_set_metadata_to_selected.emit(selected_photos)
 
-    def update_thumbnails(self, photos: Iterable[QPhotoModel]) -> None:
-        """Update the thumbnails to match the given list of photos."""
+    def update_thumbnails(self, photos: Iterable[QPhotoModel], project_file: Path | None) -> None:
+        """Update thumbnail items and icons for ``photos`` using ``project_file``'s cache."""
         photo_list = list(photos)
         thumbnail_list: QListWidget = self.ui.thumbnailListWidget
+        thumbnail_cache = ThumbnailCache(project_file)
 
         # Go through the list, removing photos that are no longer present and adding new ones,
-        # while preserving order and minimizing changes to the list widget
         current_photos = [thumbnail_list.item(i).data(Qt.ItemDataRole.UserRole) for i in range(thumbnail_list.count())]
         current_photos_set = set(current_photos)
         new_photos_set = set(photo_list)
@@ -161,20 +163,15 @@ class ThumbnailDockWidget(QDockWidget):
             except ValueError:
                 insert_index = thumbnail_list.count()
 
-            # Show basename as text; if there's an image file, load it as a thumbnail icon
-            display_text = photo.name
-            item = QListWidgetItem(display_text)
-
-            original_path = photo.original_filename
-            pix = QPixmap(str(original_path))
-            if not pix.isNull():
-                thumb = pix.scaled(
-                    QSize(120, 120),
-                    Qt.AspectRatioMode.KeepAspectRatio,
-                    Qt.TransformationMode.SmoothTransformation,
-                )
-                item.setIcon(QIcon(thumb))
-
+            item = QListWidgetItem(photo.name)
             item.setData(Qt.ItemDataRole.UserRole, photo)
-            # Insert at the position matching the project's photo index
             thumbnail_list.insertItem(insert_index, item)
+
+        # Refresh every icon so source mtime changes apply to retained list items.
+        items_by_photo = {
+            thumbnail_list.item(index).data(Qt.ItemDataRole.UserRole): thumbnail_list.item(index)
+            for index in range(thumbnail_list.count())
+        }
+        for photo in photo_list:
+            thumbnail = thumbnail_cache.get_thumbnail(photo.original_filename, QSize(120, 120))
+            items_by_photo[photo].setIcon(QIcon() if thumbnail is None else QIcon(thumbnail))

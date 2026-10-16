@@ -89,6 +89,7 @@ class MainWindow(QMainWindow):
         if project is not None:
             project_directory = project.project_file.parent.resolve() if project.project_file else None
             self.tree_dock.set_photos(project.photos, project_directory=project_directory, reset_active=True)
+            self._update_thumbnails()
         self._update_window_title()
 
     def _update_window_title(self) -> None:
@@ -110,7 +111,10 @@ class MainWindow(QMainWindow):
         """Update the thumbnails to match the active directory of the current project."""
         if self.model.current_project is not None:
             active_directory = self.tree_dock.model.active_directory
-            self.thumbnail_dock.update_thumbnails(self.tree_dock.model.photos_in_directory(active_directory))
+            self.thumbnail_dock.update_thumbnails(
+                self.tree_dock.model.photos_in_directory(active_directory),
+                self.model.current_project.project_file,
+            )
 
     def _setup_icons(self) -> None:
         """Set up icons for actions."""
