@@ -39,6 +39,7 @@ class Test_QMetadataModel(QModelTestBase):
         new_value: object,
         qtbot: QtBot,
     ) -> None:
+        """Should accept a valid value and emit signals when the property is set."""
         self.assert_property_valid_value_and_signals(field_name, initial_value, new_value, qtbot)
 
     @pytest.mark.parametrize(
@@ -52,6 +53,7 @@ class Test_QMetadataModel(QModelTestBase):
         invalid_value: object,
         qtbot: QtBot,
     ) -> None:
+        """Should reject an invalid value and emit signals when the property is set."""
         self.assert_property_invalid_value_and_signals(field_name, initial_value, invalid_value, qtbot)
 
     @pytest.mark.parametrize(
@@ -71,6 +73,7 @@ class Test_QMetadataModel(QModelTestBase):
         expected_value: object,
         qtbot: QtBot,
     ) -> None:
+        """Should normalize a value and emit signals when the property is set."""
         self.assert_property_normalization_and_signals(
             field_name,
             initial_value,

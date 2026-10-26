@@ -20,6 +20,7 @@ class CustomPathLike(os.PathLike[str]):
 
 
 def test_should_resolve_relative_input_when_project_directory_context_is_present(tmp_path: Path) -> None:
+    """Should resolve relative input when project directory context is present."""
     project_dir = tmp_path / "project"
 
     document = PathDocument.model_validate(
@@ -31,6 +32,7 @@ def test_should_resolve_relative_input_when_project_directory_context_is_present
 
 
 def test_should_preserve_absolute_input_when_model_is_validated(tmp_path: Path) -> None:
+    """Should preserve absolute input when the model is validated."""
     absolute_path = (tmp_path / "photos/image.jpg").resolve()
 
     document = PathDocument.model_validate(
@@ -42,6 +44,7 @@ def test_should_preserve_absolute_input_when_model_is_validated(tmp_path: Path) 
 
 
 def test_should_accept_path_like_input_when_model_is_validated(tmp_path: Path) -> None:
+    """Should accept path-like input when the model is validated."""
     project_dir = tmp_path / "project"
 
     document = PathDocument.model_validate(
@@ -53,6 +56,7 @@ def test_should_accept_path_like_input_when_model_is_validated(tmp_path: Path) -
 
 
 def test_should_report_validation_error_when_input_is_unsupported() -> None:
+    """Should report a validation error when input is unsupported."""
     with pytest.raises(ValidationError) as exc_info:
         PathDocument.model_validate({"path": object()})
 
@@ -65,6 +69,7 @@ def test_should_use_current_directory_when_relative_input_has_no_context(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Should use the current directory when relative input has no context."""
     monkeypatch.chdir(tmp_path)
 
     document = PathDocument.model_validate({"path": "photos/image.jpg"})
@@ -81,6 +86,7 @@ def test_should_use_current_directory_when_context_is_malformed(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Should use the current directory when context is malformed."""
     monkeypatch.chdir(tmp_path)
 
     document = PathDocument.model_validate({"path": "photos/image.jpg"}, context=context)
@@ -89,6 +95,7 @@ def test_should_use_current_directory_when_context_is_malformed(
 
 
 def test_should_serialize_inside_and_outside_paths_when_python_and_json_modes_are_used(tmp_path: Path) -> None:
+    """Should serialize inside and outside paths when Python and JSON modes are used."""
     project_dir = (tmp_path / "project").resolve()
     inside_path = project_dir / "photos/image.jpg"
     outside_path = (tmp_path / "outside/image.jpg").resolve()
@@ -120,6 +127,7 @@ def test_should_emit_absolute_path_when_serialization_context_is_malformed(
     context: object,
     tmp_path: Path,
 ) -> None:
+    """Should emit an absolute path when serialization context is malformed."""
     absolute_path = (tmp_path / "photos/image.jpg").resolve()
     document = PathDocument(path=absolute_path)
 

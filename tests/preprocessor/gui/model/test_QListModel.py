@@ -46,6 +46,7 @@ def model() -> QListModel[Item]:
 
 class TestQListModel:
     def test_should_append_item_and_set_parent_when_item_is_added(self, model: QListModel[Item]) -> None:
+        """Should append an item and set its parent when the item is added."""
         # Arrange
         it = Item(ItemData(name="a"))
 
@@ -57,6 +58,7 @@ class TestQListModel:
         assert it.parent() is model
 
     def test_should_insert_item_when_index_is_valid(self, model: QListModel[Item]) -> None:
+        """Should insert an item when the index is valid."""
         # Arrange
         a = Item(ItemData(name="a"))
         b = Item(ItemData(name="b"))
@@ -71,6 +73,7 @@ class TestQListModel:
         assert b.parent() is model
 
     def test_should_get_item_or_slice_when_index_is_requested(self, model: QListModel[Item]) -> None:
+        """Should get an item or slice when an index is requested."""
         # Arrange
         items = [Item(ItemData(name=str(i))) for i in range(5)]
         for it in items:
@@ -86,6 +89,7 @@ class TestQListModel:
         assert sl[0].parent() is model
 
     def test_should_set_item_when_index_is_requested(self, model: QListModel[Item]) -> None:
+        """Should set an item when an index is requested."""
         # Arrange
         a = Item(ItemData(name="a"))
         b = Item(ItemData(name="b"))
@@ -100,6 +104,7 @@ class TestQListModel:
         assert model[0] == b
 
     def test_should_set_items_when_slice_is_requested(self, model: QListModel[Item]) -> None:
+        """Should set items when a slice is requested."""
         # Arrange
         orig = [
             Item(ItemData(name="1")),
@@ -126,6 +131,7 @@ class TestQListModel:
         assert replacements[1].parent() is model
 
     def test_should_delete_item_or_slice_when_index_is_requested(self, model: QListModel[Item]) -> None:
+        """Should delete an item or slice when an index is requested."""
         # Arrange
         items = [Item(ItemData(name=str(i))) for i in range(4)]
         for it in items:
@@ -148,6 +154,7 @@ class TestQListModel:
         assert model[0].parent() is model
 
     def test_should_raise_type_errors_when_invalid_items_are_used(self, model: QListModel[Item]) -> None:
+        """Should raise type errors when invalid items are used."""
         # Arrange/Act/Assert for append non-QObject
         with pytest.raises(TypeError):
             # Act
@@ -165,6 +172,7 @@ class TestQListModel:
             model[0:1] = [object()]  # type: ignore[list-item, ty:invalid-assignment]
 
     def test_should_emit_changed_signal_when_items_change(self, model: QListModel[Item]) -> None:
+        """Should emit the changed signal when items change."""
         # Arrange
         calls = []
 
@@ -186,6 +194,7 @@ class TestQListModel:
         assert len(calls) == 5
 
     def test_should_iterate_items_when_model_is_iterated(self, model: QListModel[Item]) -> None:
+        """Should iterate over items when the model is iterated."""
         # Arrange
         items = [Item(ItemData(name=str(i))) for i in range(3)]
         for it in items:

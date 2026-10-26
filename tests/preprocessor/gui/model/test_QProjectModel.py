@@ -38,6 +38,7 @@ class Test_QProjectModel(QModelTestBase):
     def test_should_get_set_project_file_and_emit_signal_when_project_file_changes(
         self, qtbot: QtBot, tmp_path: Path
     ) -> None:
+        """Should get and set the project file and emit a signal when it changes."""
         with qtbot.capture_exceptions():
             # Arrange
             project_dir = tmp_path / "project"
@@ -54,6 +55,7 @@ class Test_QProjectModel(QModelTestBase):
             )
 
     def test_should_return_photos_when_photos_are_requested(self, tmp_path: Path, qtbot: QtBot) -> None:
+        """Should return photos when photos are requested."""
         with qtbot.capture_exceptions():
             # Arrange
             project_dir = tmp_path / "project"
@@ -104,6 +106,7 @@ class Test_QProjectModel(QModelTestBase):
         new_value: object,
         qtbot: QtBot,
     ) -> None:
+        """Should accept a valid value and emit signals when the property is set."""
         self.assert_property_valid_value_and_signals(field_name, initial_value, new_value, qtbot)
 
     @pytest.mark.parametrize(
@@ -117,6 +120,7 @@ class Test_QProjectModel(QModelTestBase):
         invalid_value: object,
         qtbot: QtBot,
     ) -> None:
+        """Should reject an invalid value and emit signals when the property is set."""
         self.assert_property_invalid_value_and_signals(field_name, initial_value, invalid_value, qtbot)
 
     @pytest.mark.parametrize(
@@ -136,6 +140,7 @@ class Test_QProjectModel(QModelTestBase):
         expected_value: object,
         qtbot: QtBot,
     ) -> None:
+        """Should normalize a value and emit signals when the property is set."""
         self.assert_property_normalization_and_signals(
             field_name,
             initial_value,
@@ -364,6 +369,7 @@ class TestQProjectModelIO:
         monkeypatch: MonkeyPatch,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
+        """Should report success and failure when saving the project to a path."""
         project = QProjectModel(ProjectData())
         caplog.set_level(logging.CRITICAL, logger=qpm_mod.logger.name)
         out_file = tmp_path / "out.pbproj"
@@ -386,6 +392,7 @@ class TestQProjectModelIO:
     def test_should_call_save_as_when_save_project_has_no_project_file(
         self, tmp_path: Path, monkeypatch: MonkeyPatch
     ) -> None:
+        """Should call Save As when the project has no project file."""
         project = QProjectModel(ProjectData())
         save_path = tmp_path / "saved.pbproj"
         patch_getSaveFileName_dialog(str(save_path), monkeypatch)
@@ -396,6 +403,7 @@ class TestQProjectModelIO:
         assert save_path.exists()
 
     def test_should_return_false_when_save_project_as_is_canceled(self, monkeypatch: MonkeyPatch) -> None:
+        """Should return false when saving a project is canceled."""
         monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *args, **kwargs: ("", ""))
         project = QProjectModel(ProjectData())
 
@@ -406,6 +414,7 @@ class TestQProjectModelIO:
     def test_should_return_save_if_dirty_result_when_project_dirty_state_is_checked(
         self, tmp_path: Path, monkeypatch: MonkeyPatch
     ) -> None:
+        """Should return the save-if-dirty result when the project dirty state is checked."""
         assert QProjectModel.save_project_if_dirty(parent=None, project=None, initial_dir=None) is True
 
         clean_project = QProjectModel(ProjectData())
@@ -442,6 +451,7 @@ class TestQProjectModelIO:
     def test_should_return_none_when_open_project_respects_save_if_dirty(
         self, tmp_path: Path, monkeypatch: MonkeyPatch
     ) -> None:
+        """Should return None when opening a project respects save-if-dirty."""
         monkeypatch.setattr(QProjectModel, "save_project_if_dirty", staticmethod(lambda *args, **kwargs: False))
 
         result = QProjectModel.open_project_from_path(

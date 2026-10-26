@@ -130,21 +130,26 @@ def _release_left(widget: PhotoEditorWidget, x: int, y: int) -> None:
 
 class TestWidgetNoPhoto:
     def test_should_use_move_tool_when_widget_has_no_photo(self, widget: PhotoEditorWidget) -> None:
+        """Should use the move tool when the widget has no photo."""
         assert widget._current_tool == Tool.Move
 
     def test_should_return_empty_widget_points_when_widget_has_no_photo(self, widget: PhotoEditorWidget) -> None:
+        """Should return empty widget points when the widget has no photo."""
         assert widget._widget_points(Tool.DrawQuadrat) == []
         assert widget._widget_points(Tool.Ruler) == []
 
     def test_should_return_no_handle_when_widget_has_no_photo(self, widget: PhotoEditorWidget) -> None:
+        """Should return no handle when the widget has no photo."""
         assert widget._find_handle_index(QPoint(100, 100), Tool.DrawQuadrat) is None
         assert widget._find_handle_index(QPoint(100, 100), Tool.Ruler) is None
 
     def test_should_return_no_drag_index_when_widget_is_initialized(self, widget: PhotoEditorWidget) -> None:
+        """Should return no drag index when the widget is initialized."""
         assert widget._tool_drag_index(Tool.DrawQuadrat) is None
         assert widget._tool_drag_index(Tool.Ruler) is None
 
     def test_should_hide_annotation_cursor_when_mouse_position_is_missing(self, widget: PhotoEditorWidget) -> None:
+        """Should hide the annotation cursor when the mouse position is missing."""
         widget._mouse_position = None
         assert not widget._is_annotation_cursor_visible(Tool.DrawQuadrat)
         assert not widget._is_annotation_cursor_visible(Tool.Ruler)
@@ -157,6 +162,7 @@ class TestWidgetNoPhoto:
         assert widget._edit_tool is None
 
     def test_should_return_maximum_points_when_tool_is_selected(self, widget: PhotoEditorWidget) -> None:
+        """Should return the maximum points when a tool is selected."""
         assert widget._tool_max_points(Tool.DrawQuadrat) == 4
         assert widget._tool_max_points(Tool.Ruler) == 2
         assert widget._tool_max_points(Tool.Move) == 0
@@ -171,6 +177,7 @@ class TestWidgetPoints:
     def test_should_return_empty_points_when_no_corners_are_set(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return empty points when no corners are set."""
         w, photo = widget_with_photo
         assert photo.quadrat_corners is None
         assert w._widget_points(Tool.DrawQuadrat) == []
@@ -178,6 +185,7 @@ class TestWidgetPoints:
     def test_should_return_model_corners_when_quadrat_is_not_being_edited(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return model corners when the quadrat is not being edited."""
         w, photo = widget_with_photo
         # Set two corners — with null pixmap, image coords == widget coords.
         photo.quadrat_corners = [(10.0, 20.0), (200.0, 300.0)]
@@ -189,6 +197,7 @@ class TestWidgetPoints:
     def test_should_return_edit_buffer_when_quadrat_is_being_edited(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return the edit buffer when the quadrat is being edited."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(10.0, 10.0)]
         # Manually push an edit buffer for DrawQuadrat.
@@ -200,6 +209,7 @@ class TestWidgetPoints:
     def test_should_ignore_edit_buffer_when_different_tool_is_selected(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should ignore the edit buffer when a different tool is selected."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(10.0, 10.0)]
         # Buffer owned by Ruler, not DrawQuadrat.
@@ -213,6 +223,7 @@ class TestWidgetPoints:
     def test_should_return_model_ruler_points_when_ruler_is_not_being_edited(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return model ruler points when the ruler is not being edited."""
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 60.0), (150.0, 160.0)]
         pts = w._widget_points(Tool.Ruler)
@@ -223,6 +234,7 @@ class TestWidgetPoints:
     def test_should_return_ruler_edit_buffer_when_ruler_is_being_edited(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return the ruler edit buffer when the ruler is being edited."""
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 60.0)]
         w._edit_tool = Tool.Ruler
@@ -240,6 +252,7 @@ class TestFindHandleIndex:
     def test_should_return_handle_index_when_point_is_within_radius(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return a handle index when a point is within the radius."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 200.0)]
         r = w._handle_radius  # 8
@@ -251,6 +264,7 @@ class TestFindHandleIndex:
     def test_should_return_no_handle_index_when_point_is_outside_radius(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return no handle index when a point is outside the radius."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 200.0)]
         r = w._handle_radius
@@ -260,6 +274,7 @@ class TestFindHandleIndex:
     def test_should_return_first_handle_index_when_multiple_handles_are_hit(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return the first handle index when multiple handles are hit."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0), (200.0, 200.0)]
         assert w._find_handle_index(QPoint(200, 200), Tool.DrawQuadrat) == 1
@@ -267,6 +282,7 @@ class TestFindHandleIndex:
     def test_should_return_ruler_handle_index_when_point_hits_ruler(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should return a ruler handle index when a point hits the ruler."""
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 50.0), (300.0, 300.0)]
         assert w._find_handle_index(QPoint(50, 50), Tool.Ruler) == 0
@@ -283,6 +299,7 @@ class TestAnnotationCursorVisibility:
     def test_should_hide_annotation_cursor_when_mouse_position_is_missing(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should hide the annotation cursor when the mouse position is missing."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0)]
         w._mouse_position = None
@@ -291,6 +308,7 @@ class TestAnnotationCursorVisibility:
     def test_should_hide_annotation_cursor_when_mouse_is_not_over_handle(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should hide the annotation cursor when the mouse is not over a handle."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0)]
         w._mouse_position = QPoint(400, 400)
@@ -299,6 +317,7 @@ class TestAnnotationCursorVisibility:
     def test_should_show_annotation_cursor_when_mouse_is_over_handle(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should show the annotation cursor when the mouse is over a handle."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0)]
         w._mouse_position = QPoint(100, 100)
@@ -307,6 +326,7 @@ class TestAnnotationCursorVisibility:
     def test_should_show_annotation_cursor_when_ruler_handle_is_under_mouse(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should show the annotation cursor when the ruler handle is under the mouse."""
         w, photo = widget_with_photo
         photo.ruler_points = [(200.0, 200.0)]
         w._mouse_position = QPoint(200, 200)
@@ -322,6 +342,7 @@ class TestToolSwitching:
     def test_should_commit_quadrat_edit_when_tool_is_switched(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should commit a quadrat edit when the tool is switched."""
         w, photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         # Manually inject an in-progress edit (two points).
@@ -339,6 +360,7 @@ class TestToolSwitching:
     def test_should_commit_ruler_edit_when_tool_is_switched(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should commit a ruler edit when the tool is switched."""
         w, photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         w._edit_tool = Tool.Ruler
@@ -353,6 +375,7 @@ class TestToolSwitching:
     def test_should_not_commit_other_tool_edit_when_same_tool_is_selected(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should not commit another tool's edit when the same tool is selected."""
         w, _photo = widget_with_photo
         # Ruler edit active, switch to Ruler itself — quadrat should not be committed.
         w._edit_tool = Tool.Ruler
@@ -371,6 +394,7 @@ class TestDrawQuadratMouseEvents:
     def test_should_add_new_point_when_left_button_is_pressed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should add a new point when the left button is pressed."""
         w, _photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         _press_left(w, 100, 150)
@@ -382,6 +406,7 @@ class TestDrawQuadratMouseEvents:
     def test_should_start_drag_when_existing_handle_is_left_pressed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should start dragging when an existing handle is pressed with the left button."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0)]
         w.set_tool(Tool.DrawQuadrat)
@@ -391,6 +416,7 @@ class TestDrawQuadratMouseEvents:
     def test_should_stop_at_four_points_when_more_points_are_added(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should stop at four points when more points are added."""
         w, photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         for i in range(6):
@@ -404,6 +430,7 @@ class TestDrawQuadratMouseEvents:
     def test_should_move_edit_point_when_dragged(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should move an edit point when it is dragged."""
         w, photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         _press_left(w, 100, 100)
@@ -416,6 +443,7 @@ class TestDrawQuadratMouseEvents:
     def test_should_commit_edit_to_model_when_left_button_is_released(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should commit an edit to the model when the left button is released."""
         w, photo = widget_with_photo
         w.set_tool(Tool.DrawQuadrat)
         _press_left(w, 100, 100)
@@ -432,6 +460,7 @@ class TestDrawQuadratMouseEvents:
     def test_should_remove_point_when_right_button_is_pressed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should remove a point when the right button is pressed."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0), (300.0, 300.0)]
         w.set_tool(Tool.DrawQuadrat)
@@ -443,6 +472,7 @@ class TestDrawQuadratMouseEvents:
     def test_should_clear_corners_when_last_point_is_removed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should clear corners when the last point is removed."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0)]
         w.set_tool(Tool.DrawQuadrat)
@@ -452,6 +482,7 @@ class TestDrawQuadratMouseEvents:
     def test_should_do_nothing_when_right_button_is_pressed_on_empty_area(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should do nothing when the right button is pressed on an empty area."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(100.0, 100.0)]
         w.set_tool(Tool.DrawQuadrat)
@@ -493,6 +524,7 @@ class TestRulerMouseEvents:
     def test_should_add_ruler_point_when_left_button_is_pressed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should add a ruler point when the left button is pressed."""
         w, _photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         _press_left(w, 200, 300)
@@ -502,6 +534,7 @@ class TestRulerMouseEvents:
     def test_should_commit_ruler_to_model_when_left_button_is_released(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should commit the ruler to the model when the left button is released."""
         w, photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         _press_left(w, 200, 300)
@@ -514,6 +547,7 @@ class TestRulerMouseEvents:
     def test_should_add_second_ruler_point_when_second_point_is_pressed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should add a second ruler point when the second point is pressed."""
         w, photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         _press_left(w, 10, 10)
@@ -526,6 +560,7 @@ class TestRulerMouseEvents:
     def test_should_limit_ruler_to_two_points_when_more_points_are_pressed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should limit the ruler to two points when more points are pressed."""
         w, photo = widget_with_photo
         w.set_tool(Tool.Ruler)
         for x in [10, 200, 400]:
@@ -537,6 +572,7 @@ class TestRulerMouseEvents:
     def test_should_remove_ruler_point_when_right_button_is_pressed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should remove a ruler point when the right button is pressed."""
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 50.0), (400.0, 400.0)]
         w.set_tool(Tool.Ruler)
@@ -546,6 +582,7 @@ class TestRulerMouseEvents:
     def test_should_clear_ruler_when_last_point_is_removed(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should clear the ruler when the last point is removed."""
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 50.0)]
         w.set_tool(Tool.Ruler)
@@ -555,6 +592,7 @@ class TestRulerMouseEvents:
     def test_should_move_ruler_endpoint_when_dragged(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should move a ruler endpoint when it is dragged."""
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 50.0), (400.0, 400.0)]
         w.set_tool(Tool.Ruler)
@@ -566,6 +604,7 @@ class TestRulerMouseEvents:
     def test_should_commit_ruler_drag_to_model_when_left_button_is_released(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should commit a ruler drag to the model when the left button is released."""
         w, photo = widget_with_photo
         photo.ruler_points = [(50.0, 50.0), (400.0, 400.0)]
         w.set_tool(Tool.Ruler)
@@ -584,6 +623,7 @@ class TestRulerMouseEvents:
 
 class TestOrderPointsByAngle:
     def test_should_order_four_points_as_simple_polygon_when_four_points_are_given(self) -> None:
+        """Should order four points as a simple polygon when four points are given."""
         # Place 4 corners of a 100x100 square in a scrambled order.
         pts = [QPoint(100, 0), QPoint(0, 100), QPoint(100, 100), QPoint(0, 0)]
         result = PhotoEditorWidget._order_points_by_angle(pts)
@@ -599,9 +639,11 @@ class TestOrderPointsByAngle:
             assert angles[i] < angles[i + 1]
 
     def test_should_return_empty_list_when_no_points_are_given(self) -> None:
+        """Should return an empty list when no points are given."""
         assert PhotoEditorWidget._order_points_by_angle([]) == []
 
     def test_should_return_same_point_when_one_point_is_given(self) -> None:
+        """Should return the same point when one point is given."""
         pts = [QPoint(5, 5)]
         assert PhotoEditorWidget._order_points_by_angle(pts) == pts
 
@@ -615,6 +657,7 @@ class TestWriteHelpers:
     def test_should_store_widget_points_as_image_coordinates_when_points_are_written(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should store widget points as image coordinates when points are written."""
         w, photo = widget_with_photo
         # With null pixmap, ratio=1.0 and offset=(0,0) → image coord == widget coord.
         w._write_widget_points([QPoint(10, 20), QPoint(200, 300)])
@@ -625,6 +668,7 @@ class TestWriteHelpers:
     def test_should_clear_corners_when_widget_points_are_none(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should clear corners when widget points are None."""
         w, photo = widget_with_photo
         photo.quadrat_corners = [(1.0, 2.0)]
         w._write_widget_points(None)
@@ -633,6 +677,7 @@ class TestWriteHelpers:
     def test_should_store_ruler_points_as_image_coordinates_when_points_are_written(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should store ruler points as image coordinates when points are written."""
         w, photo = widget_with_photo
         w._write_ruler_widget_points([QPoint(100, 200), QPoint(300, 400)])
         pts = photo.ruler_points
@@ -642,6 +687,7 @@ class TestWriteHelpers:
     def test_should_clear_ruler_when_ruler_widget_points_are_none(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should clear the ruler when ruler widget points are None."""
         w, photo = widget_with_photo
         photo.ruler_points = [(1.0, 2.0)]
         w._write_ruler_widget_points(None)
@@ -657,6 +703,7 @@ class TestShowPhoto:
     def test_should_clear_state_when_photo_is_none(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should clear state when the photo is None."""
         w, _photo = widget_with_photo
         # Inject some state.
         w._edit_tool = Tool.DrawQuadrat
@@ -672,6 +719,7 @@ class TestShowPhoto:
         assert w._drag_index is None
 
     def test_should_set_photo_model_when_photo_is_shown(self, widget: PhotoEditorWidget) -> None:
+        """Should set the photo model when a photo is shown."""
         photo = _make_photo()
         w = widget
         w.show_photo(photo, _make_project())
@@ -680,6 +728,7 @@ class TestShowPhoto:
     def test_should_replace_previous_photo_when_new_photo_is_shown(
         self, widget_with_photo: tuple[PhotoEditorWidget, QPhotoModel]
     ) -> None:
+        """Should replace the previous photo when a new photo is shown."""
         w, _old_photo = widget_with_photo
         new_photo = _make_photo("/nonexistent/other.jpg")
         w.show_photo(new_photo, _make_project())

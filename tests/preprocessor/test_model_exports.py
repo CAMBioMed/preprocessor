@@ -28,6 +28,7 @@ MODEL_EXPORTS = {
 def test_should_expose_expected_model_exports_when_model_package_is_imported(
     package_name: str, exports: dict[str, str]
 ) -> None:
+    """Should expose expected model exports when the model package is imported."""
     parent = importlib.import_module(package_name)
 
     assert parent.__all__ == list(exports)

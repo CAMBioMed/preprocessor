@@ -248,6 +248,7 @@ class Test_ProjectData(PydanticModelTestBase):
         initial_value: object,
         new_value: object,
     ) -> None:
+        """Should accept a valid value when the property is set."""
         self.assert_property_valid_value(field_name, initial_value, new_value)
 
     @pytest.mark.parametrize(
@@ -260,6 +261,7 @@ class Test_ProjectData(PydanticModelTestBase):
         initial_value: object,
         invalid_value: object,
     ) -> None:
+        """Should reject an invalid value when the property is set."""
         self.assert_property_invalid_value(field_name, initial_value, invalid_value)
 
     @pytest.mark.parametrize(
@@ -273,9 +275,11 @@ class Test_ProjectData(PydanticModelTestBase):
         input_value: object,
         expected_value: object,
     ) -> None:
+        """Should normalize a value when the property is set."""
         self.assert_property_normalization(field_name, initial_value, input_value, expected_value)
 
     def test_should_write_csv_file_when_export_is_requested(self, tmp_path: Path) -> None:
+        """Should write a CSV file when export is requested."""
         # Arrange
         project_dir = tmp_path / "project"
         photos_dir = project_dir / "photos"  # Inside project dir
