@@ -10,10 +10,14 @@ from PySide6.QtCore import (
     Qt,
     Signal,
 )
+from PySide6.QtGui import QIcon
 
 from preprocessor.gui.model import QPhotoModel
+from preprocessor.gui.utils import icon_from_resource
 
 _INVALID_INDEX = QModelIndex()
+_FOLDER_CLOSED_ICON_RESOURCE = "icons/fugue16/folder.png"
+_FOLDER_OPEN_ICON_RESOURCE = "icons/fugue16/folder-open.png"
 
 
 @dataclass
@@ -35,6 +39,8 @@ class TreeDockModel(QAbstractItemModel):
         self._nodes_by_path: dict[Path, _DirectoryNode] = {}
         self._photos_by_directory: dict[Path, list[QPhotoModel]] = {}
         self._active_directory: Path | None = None
+        self._folder_closed_icon: QIcon | None = None
+        self._folder_open_icon: QIcon | None = None
 
     def index(
         self,
@@ -56,6 +62,8 @@ class TreeDockModel(QAbstractItemModel):
             return QModelIndex()
         return self.createIndex(row, column, children[row])
 
+    # There are two parent() methods to override, we override the one in QAbstractItemModel.
+    # This is correct, but because this confuses all the type checking tools, we ignore these errors.
     def parent(  # type: ignore[override]  # ty: ignore[invalid-method-override]
         self, index: QModelIndex | QPersistentModelIndex
     ) -> QModelIndex:
@@ -91,6 +99,12 @@ class TreeDockModel(QAbstractItemModel):
         node = self._node_for_index(index)
         if node is None or index.column() != 0:
             return None
+        if role == Qt.ItemDataRole.DecorationRole:
+            if self._folder_closed_icon is None:
+                self._folder_closed_icon = icon_from_resource(_FOLDER_CLOSED_ICON_RESOURCE)
+            if self._folder_open_icon is None:
+                self._folder_open_icon = icon_from_resource(_FOLDER_OPEN_ICON_RESOURCE)
+            return self._folder_open_icon if node.path == self._active_directory else self._folder_closed_icon
         if role == Qt.ItemDataRole.DisplayRole:
             return node.path.name or str(node.path)
         if role == Qt.ItemDataRole.ToolTipRole:
@@ -187,7 +201,13 @@ class TreeDockModel(QAbstractItemModel):
             raise ValueError(message)
         if directory == self._active_directory:
             return
+        old_directory = self._active_directory
         self._active_directory = directory
+        for changed_directory in (old_directory, directory):
+            if changed_directory is not None:
+                changed_index = self.index_for_directory(changed_directory)
+                if changed_index.isValid():
+                    self.dataChanged.emit(changed_index, changed_index, [Qt.ItemDataRole.DecorationRole])
         self.on_active_directory_changed.emit(directory)
 
     def directory_for_index(self, index: QModelIndex) -> Path | None:

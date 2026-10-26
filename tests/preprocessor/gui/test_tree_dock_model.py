@@ -4,8 +4,9 @@ from pathlib import Path
 
 import pytest
 from PySide6.QtCore import QModelIndex, Qt
-from PySide6.QtGui import QStandardItemModel
+from PySide6.QtGui import QIcon, QStandardItemModel
 from PySide6.QtTest import QSignalSpy
+from PySide6.QtWidgets import QApplication
 
 from preprocessor.core.model import PhotoData
 from preprocessor.gui.model import QPhotoModel
@@ -108,6 +109,38 @@ def test_initial_activation_is_deterministic_and_case_insensitive(tmp_path: Path
 
     # Assert
     assert model.active_directory == project_directory / "A"
+
+
+def test_uses_open_folder_icon_for_active_directory_and_folder_icon_elsewhere(
+    qapp: QApplication, tmp_path: Path
+) -> None:
+    """The active directory has an open-folder icon and all other directories have folder icons."""
+    # Arrange
+    project_directory = tmp_path.resolve()
+    root_photo = _photo(project_directory / "root.jpg", "root")
+    nested_photo = _photo(project_directory / "nested" / "photo.jpg", "nested")
+    model = TreeDockModel()
+    model.set_photos([root_photo, nested_photo], project_directory=project_directory)
+    root_index = model.index_for_directory(project_directory)
+    nested_index = model.index_for_directory(project_directory / "nested")
+
+    # Act
+    root_icon = model.data(root_index, Qt.ItemDataRole.DecorationRole)
+    nested_icon = model.data(nested_index, Qt.ItemDataRole.DecorationRole)
+    model.active_directory = project_directory / "nested"
+    changed_root_icon = model.data(root_index, Qt.ItemDataRole.DecorationRole)
+    changed_nested_icon = model.data(nested_index, Qt.ItemDataRole.DecorationRole)
+
+    # Assert
+    assert isinstance(root_icon, QIcon)
+    assert isinstance(nested_icon, QIcon)
+    assert isinstance(changed_root_icon, QIcon)
+    assert isinstance(changed_nested_icon, QIcon)
+    assert not root_icon.isNull()
+    assert not nested_icon.isNull()
+    assert root_icon.cacheKey() == changed_nested_icon.cacheKey()
+    assert nested_icon.cacheKey() == changed_root_icon.cacheKey()
+    assert root_icon.cacheKey() != nested_icon.cacheKey()
 
 
 def test_activation_persists_and_reset_selects_first_direct_directory(tmp_path: Path) -> None:
