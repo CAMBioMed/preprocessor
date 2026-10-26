@@ -9,7 +9,9 @@ from preprocessor.gui.utils import patch_getOpenFileName_dialog
 
 
 class TestLaunchDialog:
-    def test_new_project(self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    def test_should_create_new_project_when_new_project_is_selected(
+        self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test that a new project can be created using the launch dialog."""
         from preprocessor.gui.launch_dialog import LaunchDialog
 
@@ -28,7 +30,9 @@ class TestLaunchDialog:
         # Assert: the dialog handler should have returned the project and accepted the dialog
         assert launch_dialog.project_model is not None
 
-    def test_open_project(self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    def test_should_open_existing_project_when_open_project_is_selected(
+        self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test that an existing project can be opened using the launch dialog."""
         from preprocessor.gui.launch_dialog import LaunchDialog
 

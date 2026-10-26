@@ -88,7 +88,9 @@ def test_should_return_none_and_report_error_when_image_load_fails(monkeypatch: 
     assert errors, "expected an image_load_failed error message"
 
 
-def test_should_apply_transforms_and_save_output(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+def test_should_apply_transforms_and_save_output_when_transforms_succeed(
+    monkeypatch: MonkeyPatch, tmp_path: Path
+) -> None:
     """Should apply transforms and save output when transforms succeed and output path given."""
     # Arrange
     h, w = 10, 10

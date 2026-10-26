@@ -58,35 +58,38 @@ class Test_CropParams(PydanticModelTestBase):
         ("field_name", "initial_value", "new_value"),
         [(n, v, vv) for n, (v, vvs, _, _) in fields_and_values.items() for vv in vvs],
     )
-    def test_property_valid_value(
+    def test_should_accept_valid_value_when_property_is_set(
         self,
         field_name: str,
         initial_value: object,
         new_value: object,
     ) -> None:
+        """Should accept a valid value when the property is set."""
         self.assert_property_valid_value(field_name, initial_value, new_value)
 
     @pytest.mark.parametrize(
         ("field_name", "initial_value", "invalid_value"),
         [(n, v, iv) for n, (v, _, _, ivs) in fields_and_values.items() for iv in ivs],
     )
-    def test_property_invalid_value(
+    def test_should_reject_invalid_value_when_property_is_set(
         self,
         field_name: str,
         initial_value: object,
         invalid_value: object,
     ) -> None:
+        """Should reject an invalid value when the property is set."""
         self.assert_property_invalid_value(field_name, initial_value, invalid_value)
 
     @pytest.mark.parametrize(
         ("field_name", "initial_value", "input_value", "expected_value"),
         [(n, v, lv, rv) for n, (v, _, nvs, _) in fields_and_values.items() for (lv, rv) in nvs],
     )
-    def test_property_normalization(
+    def test_should_normalize_value_when_property_is_set(
         self,
         field_name: str,
         initial_value: object,
         input_value: object,
         expected_value: object,
     ) -> None:
+        """Should normalize a value when the property is set."""
         self.assert_property_normalization(field_name, initial_value, input_value, expected_value)

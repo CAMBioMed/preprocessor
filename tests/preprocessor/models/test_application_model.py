@@ -15,7 +15,8 @@ def _ensure_qapp(qapp: QApplication) -> QApplication:
 
 
 class TestApplicationModel:
-    def test_current_project(self) -> None:
+    def test_should_return_current_project_when_current_project_is_requested(self) -> None:
+        """Should return the current project when it is requested."""
         # Arrange
         app_model = QApplicationState()
 

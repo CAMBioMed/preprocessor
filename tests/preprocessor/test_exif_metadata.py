@@ -4,7 +4,8 @@ from pathlib import Path
 from preprocessor.gui.jobs.add_photo_job import AddPhotoJob
 
 
-def test_append_photo_model_populates_photo_metadata(tmp_path: Path) -> None:
+def test_should_populate_photo_metadata_when_photo_model_is_appended(tmp_path: Path) -> None:
+    """Should populate photo metadata when a photo model is appended."""
     repo_root = Path(__file__).resolve().parent.parent.parent
     photos_dir = (repo_root / "tests" / "preprocessor" / "photos").resolve()
     img1 = (photos_dir / "IMG_1054.JPG").resolve()

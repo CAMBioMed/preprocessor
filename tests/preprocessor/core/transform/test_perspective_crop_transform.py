@@ -29,7 +29,7 @@ def _find_message(messages: list[Message], code: str) -> Message | None:
     return None
 
 
-def test_should_crop_successfully() -> None:
+def test_should_crop_successfully_when_crop_is_requested() -> None:
     """Should crop successfully."""
     # Arrange
     h, w = 100, 100
@@ -186,7 +186,7 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     assert "corners" in msg.details
 
 
-def test_should_log_error_and_return_original_on_exception(monkeypatch: MonkeyPatch) -> None:
+def test_should_log_error_and_return_original_when_exception_is_raised(monkeypatch: MonkeyPatch) -> None:
     """Should log error and return original when cv2 raises an exception."""
     # Arrange
     h, w = 50, 50
