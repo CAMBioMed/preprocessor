@@ -202,6 +202,34 @@ module = [
 ignore_errors = true
 
 
+########
+# ty   #
+########
+
+[tool.ty.environment]
+# Source and test packages are both checked; tests import helpers through the
+# repository-root `tests` package.
+root = ["./src", "."]
+python-version = "3.12"
+
+[tool.ty.rules]
+# Keep correctness failures fatal.
+invalid-argument-type = "error"
+invalid-assignment = "error"
+invalid-return-type = "error"
+possibly-missing-attribute = "error"
+possibly-unresolved-reference = "error"
+
+# Useful, but less important than correctness failures.
+unused-ignore-comment = "warn"
+
+# Generated Qt modules are excluded below rather than weakening production code.
+[[tool.ty.overrides]]
+include = ["src/preprocessor/gui/designer/ui_*.py"]
+
+[tool.ty.overrides.rules]
+all = "ignore"
+
 
 #############################
 # Ruff Linting & Formatting #
