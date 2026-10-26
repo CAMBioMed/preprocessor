@@ -10,7 +10,6 @@ MODEL_EXPORTS = {
         "MetadataData": "_metadata_data",
         "PhotoData": "_photo_data",
         "ProjectData": "_project_data",
-        "ProjectPath": "_project_path",
         "RulerParams": "_ruler_params",
     },
     "preprocessor.gui.model": {

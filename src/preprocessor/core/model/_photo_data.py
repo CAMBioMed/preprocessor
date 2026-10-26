@@ -6,8 +6,8 @@ from preprocessor.core.model._color_correction_params import ColorCorrectionPara
 from preprocessor.core.model._crop_params import CropParams
 from preprocessor.core.model._lens_correction_params import LensCorrectionParams
 from preprocessor.core.model._metadata_data import MetadataData
-from preprocessor.core.model._project_path import ProjectPath
 from preprocessor.core.model._ruler_params import RulerParams
+from preprocessor.core.serialization import ProjectPath
 
 
 class PhotoData(BaseModel, validate_assignment=True):

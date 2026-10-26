@@ -1,3 +1,7 @@
+"""Context-aware filesystem paths for project-file models."""
+
+from __future__ import annotations
+
 from os import PathLike
 from pathlib import Path
 from typing import Annotated, TypeGuard
@@ -25,7 +29,7 @@ def _path_string(value: object) -> str | None:
 
 
 def _project_dir_from_context(context: object) -> Path | None:
-    """Return the resolved project directory from a supported Pydantic context."""
+    """Return the project directory supplied to Pydantic validation or serialization."""
 
     if not _is_object_dict(context):
         return None
@@ -35,13 +39,12 @@ def _project_dir_from_context(context: object) -> Path | None:
 
 
 def _validate_project_path(value: object, info: ValidationInfo) -> Path:
-    """Validate and resolve a project path."""
+    """Resolve a project-file path against validation context or the current directory."""
 
     path_value = _path_string(value)
     if path_value is None:
         msg = "project path must be a string or path-like value"
         raise ValueError(msg)
-
     path = Path(path_value)
     if path.is_absolute():
         return path.resolve()
@@ -51,25 +54,21 @@ def _validate_project_path(value: object, info: ValidationInfo) -> Path:
 
 
 def _serialize_project_path(path: Path, info: SerializationInfo) -> str:
-    """Serialize a path relative to the project directory when possible."""
+    """Serialize a project-file path relative to context when possible."""
 
-    resolved_path = path.resolve()
+    absolute_path = Path(path).resolve()
     project_dir = _project_dir_from_context(info.context)
-    if project_dir is None:
-        return str(resolved_path)
-
-    try:
-        relative_path = resolved_path.relative_to(project_dir, walk_up=False)
-        # NOTE: We use str() here to preserve backslashes on Windows,
-        # which Path.as_posix() would convert to forward slashes.
-        return str(relative_path)
-    except ValueError:
-        return str(resolved_path)
+    if project_dir is not None:
+        try:
+            return str(absolute_path.relative_to(project_dir))
+        except ValueError:
+            return str(absolute_path)
+    return str(absolute_path)
 
 
-ProjectPath = Annotated[
+type ProjectPath = Annotated[
     Path,
     PlainValidator(_validate_project_path),
     PlainSerializer(_serialize_project_path, return_type=str),
 ]
-"""A Pydantic type for file paths that are stored relative to the project directory."""
+"""A path that resolves relative values against the project file directory."""
