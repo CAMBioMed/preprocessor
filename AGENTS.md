@@ -1,42 +1,75 @@
 # Agent Guidance
 
-# This Repository
+# Agent Guidance
+
+- Follow task-specific and repository-specific instructions before this file.
+- Before editing, inspect the relevant implementation, tests, configuration, and similar code.
+
+## Implementation rules
+
+- Reuse established patterns and repository tooling; do not introduce a second convention.
+- Keep changes narrowly scoped to the task.
+- Favor straightforward existing abstractions over speculative generalization.
+- Preserve public behavior unless the task intentionally changes it.
+- During intentional cutovers, remove obsolete code instead of adding compatibility shims.
+- Preserve or improve existing type safety; use type annotations for new or changed code.
+- Document public caller-facing entities such as modules, fields, methods, functions, parameters, classes, data types, 
+  interfaces, errors, special values, and non-obvious invariants or error behavior.
+- Prefer documentation on individual members to documenting at the class level, and avoid duplication. 
+- Docstrings must describe behavior relevant to users and callers of the entity, not implementation details.
+- Docstrings should briefly describe any special values.
+- Make error behavior explicit. Do not swallow errors or suppress warnings to make checks pass.
+- Avoid unrelated refactoring, formatting, documentation, or comment churn.
+- Add dependencies only when clearly required.
+- Do not invent product requirements or compatibility guarantees not supported by the task or repository.
+- Investigate discrepancies between documentation and implementation.
+- Update README/configuration examples and CHANGELOG.md when a user-visible command, configuration option, or behavior changes.
+
+## Testing and completion
+
+- Every changed executable behavior needs a focused automated test.
+- Test observable behavior, boundaries, and error cases rather than implementation details.
+- Keep tests focused and follow existing test patterns.
+- Every bug fix needs a regression test that fails before the fix.
+- Follow Arrange / Act / Assert structure and comment these phases in each unit test; label non-obvious or multi-step phases.
+- While iterating, run the narrowest relevant checks first.
+- Treat formatter, linter, type-checker, test warnings, and failures as work to resolve rather than suppress.
+- Before completion, run the relevant formatter, linter, type checker, tests, and build/code-generation checks.
+- Review the final diff for unrelated changes, stale code, debugging artifacts, and inconsistent documentation or call sites.
+- If a relevant check cannot be run, state that explicitly.
+
+## Repository safety
+
+- Do not overwrite unrelated working-tree changes.
+- Do not commit, do not perform destructive Git operations.
+- Keep secrets and machine-specific state out of the repository.
+- Do not read, expose, log, copy, commit, or modify secrets. Avoid opening or modifying credential files, ask the user instead.
+- Do not edit generated files when an authoritative source or generator exists.
+- Do not run deployment or destructive tasks.
+
+## Repository orientation
 
 - `README.md` is the product overview.
 - `pyproject.toml` is the authority for Python metadata, dependencies, build configuration, pytest, Ruff, `ty`, and mypy policy.
 - `mise.toml` is the routine command entry point. Use `mise tasks ls` to discover supported tasks.
 - `tests/` contains the behavioral test suite.
-- Before editing, inspect the relevant implementation and adjacent tests. Reuse established patterns; do not introduce a second convention beside an existing one.
 
-- `src/preprocessor/main.py` is the app entrypoint: creates the Qt app, loads `QApplicationState`, opens
-  or creates a project, then shows `MainWindow`.
-- Architecture splits persisted Pydantic data from Qt wrapper models:
-  - `src/preprocessor/core/model/`: persisted state such as `ProjectData`, `PhotoData`, `MetadataData`.
-  - `src/preprocessor/gui/model/`: `QObject` wrappers such as `QProjectModel`, `QPhotoModel`,
-    `QApplicationState`, with signals and dirty tracking.
-- Project files are `*.pbproj` JSON files saved and loaded through `ProjectData.save_to_file()` /
-  `load_from_file()`. `ProjectPath` keeps paths relative to the project directory when possible.
-- Image processing lives in `src/preprocessor/core/transform/transform_image.py`: load `ImageRGB`, apply
-  ordered transforms, optionally save.
-- Main flows:
-  - Add photos: `MainWindow._handle_add_photos_action()` → `AddPhotoJob` → `PhotoData` + EXIF →
-    `QPhotoModel`.
-  - Export photos: `MainWindow._handle_export_all_action()` → `PhotoData.group_photos()` →
-    `ExportPhotoJob` → `transform_image()`.
-  - Quadrat detection: `MainWindow._handle_detect_quadrat_action()` → `DetectQuadratAnalysisJob` →
-    `QPhotoModel.quadrat_corners`.
-- Do not create or mutate `QObject` instances in worker threads. Use plain Pydantic data off-thread;
-  construct Qt models on the main thread.
-- In Qt wrappers, use `QModel._set_field(...)` so validation, field signals, and dirty tracking stay
-  consistent.
-- Update project/photo state through `QProjectModel` and `QPhotoModel`; do not replace _`data` directly.
-- Prefer `ImageRGB`, `ImageBGR`, and `ImageGreyscale` from `src/preprocessor/core/types.py` at module
-  boundaries.
-- Use `MessageReporter` and `ProgressReporter` for processing status; avoid ad-hoc prints.
-- There are two job APIs. Match surrounding code:
-  - `gui/jobs/qjobs.py`: current batch-dialog path.
-  - `gui/jobs/qjobs2.py` + `core/jobs/jobs.py`: newer generic abstraction.
-- Qt Designer `.ui` files live in `src/preprocessor/gui/`; generated `ui_*.py` files are tracked but
+## Repository-specific development environment
+
+- Prefer `nix develop` for an interactive shell.
+- Prefer `nix develop -c <command>` for one command in the repository toolchain.
+- If Nix is unavailable, use mise directly according to `mise.toml`.
+- Make Python dependency changes in `pyproject.toml`.
+- Change `flake.nix` or `flake.lock` only when the development toolchain itself intentionally changes.
+
+## Repository-specific implementation rules
+
+- Use Python type annotations for new or changed Python code.
+- Use Pydantic validation at data boundaries.
+- Use `pathlib.Path` for filesystem paths.
+- Document using PEP 287 reST-style docstrings.
+- Run `nix develop path:$PWD -c mise run build` when packaging or entry points change.
+- Qt Designer `.ui` files live in `src/preprocessor/gui/designer/`; generated `ui_*.py` files are tracked but
   should not be hand-edited unless unavoidable.
 - Useful commands:
   - Discover tasks: `nix develop path:$PWD -c mise tasks ls`
@@ -47,44 +80,4 @@
   - Build package + UI: `nix develop path:$PWD -c mise run build`
 - Testing gotchas: pytest uses importlib mode, warnings-as-errors, and `pythonpath = ["src"];` Qt
   tests may force run_in_thread=False.
-
-## Development environment
-
-- Prefer `nix develop` for an interactive shell.
-- Prefer `nix develop -c <command>` for one command in the repository toolchain.
-- If Nix is unavailable, use mise directly according to `mise.toml`.
-- Make Python dependency changes in `pyproject.toml`.
-- Change `flake.nix` or `flake.lock` only when the development toolchain itself intentionally changes.
-
-## Implementation rules
-
-- Keep changes narrowly scoped to the task.
-- Favor straightforward existing abstractions over speculative generalization.
-- Preserve public behavior unless the task intentionally changes it.
-- During intentional cutovers, remove obsolete code instead of adding compatibility shims.
-- Use Python type annotations for new or changed Python code.
-- Use Pydantic validation at data boundaries.
-- Use `pathlib.Path` for filesystem paths.
-- For models carrying `ProjectPath` values, preserve project-context-aware validation and serialization; inspect the existing implementations rather than restating schemas here.
-- Document all Python modules, fields, methods, functions, classes, data types, interfaces, and other public caller-facing entities with PEP 287 reST-style docstrings.
-- Prefer documentation on individual members to documenting at the class level, and avoid duplication. 
-- Docstrings must describe behavior relevant to users and callers of the entity, not implementation details.
-- Docstrings must describe behavior relevant to users and callers of the entity, not implementation details.
-- Docstrings should briefly describe any special values such as `None`, except when a function returns only `None`.
-- Make error behavior explicit. Do not swallow exceptions or suppress warnings/failures instead of fixing them.
-- Avoid unrelated formatting churn.
-- Do not add a dependency without demonstrated task-related need.
-
-## Testing and completion
-
-- Every behavior change needs a focused test.
-- Every bug fix needs a regression test that fails before the fix.
-- Test observable behavior, boundaries, and error cases rather than implementation details.
-- Follow Arrange / Act / Assert and comment these phases in each unit test.
-- Keep one logical action per test.
-- Tests should have names of the form `should X, when Y`. 
-- While iterating, run the narrowest relevant pytest command.
-- Before completion, run `nix develop path:$PWD -c mise run test`.
-- Run `nix develop path:$PWD -c mise run build` when packaging or entry points change.
-- Exercise the actual CLI for CLI behavior changes.
-- Treat formatter, linter, type-checker, test warnings, and failures as work to resolve rather than suppress.
+- Tests should have names of the form `test_should_X_when_Y`, and have a human-readable docstring of the same test name.
