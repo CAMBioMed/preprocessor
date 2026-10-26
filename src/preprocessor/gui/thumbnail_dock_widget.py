@@ -5,9 +5,9 @@ from PySide6.QtCore import QPoint, QSize, Qt, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import QDockWidget, QListWidget, QListWidgetItem, QMenu, QWidget
 
-from preprocessor.gui.designer.ui_thumbnail_dock import Ui_ThumbnailDock
 from preprocessor.gui.model import QPhotoModel
 from preprocessor.gui.thumbnail_cache import ThumbnailCache
+from preprocessor.gui.ui_thumbnail_dock import Ui_ThumbnailDock
 from preprocessor.gui.utils import icon_from_resource
 
 
