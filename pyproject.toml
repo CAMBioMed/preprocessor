@@ -84,7 +84,7 @@ preprocessor-gui = "preprocessor.main:main_gui"
 
 [project.urls]
 Homepage = "https://cambiomed-biodiversa.com/"
-#Documentation = "https://readthedocs.org"
+Documentation = "https://cambiomed-biodiversa.com/preprocessor/"
 Repository = "https://github.com/CAMBioMed/preprocessor.git"
 Source = "https://github.com/CAMBioMed/preprocessor/"
 Issues = "https://github.com/CAMBioMed/preprocessor/issues"
