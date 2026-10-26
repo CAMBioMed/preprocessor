@@ -22,7 +22,7 @@ def _make_photo(metadata: dict[str, Any] | None = None) -> QPhotoModel:
     return QPhotoModel(data=data)
 
 
-def test_metadata_dialog_copy_from_current_and_apply(qtbot: QtBot) -> None:
+def test_should_copy_current_metadata_and_apply_it_when_dialog_is_used(qtbot: QtBot) -> None:
     """Copy metadata from the current photo into the dialog and apply to selected photos."""
     with qtbot.capture_exceptions():
         app_model: QApplicationState = QApplicationState()
@@ -120,7 +120,7 @@ def test_metadata_dialog_copy_from_current_and_apply(qtbot: QtBot) -> None:
         assert target_photo.metadata.comments == "A sample comment"
 
 
-def test_metadata_dialog_apply_all_checked_to_multiple_photos(qtbot: QtBot) -> None:
+def test_should_apply_checked_metadata_to_multiple_photos_when_all_fields_are_checked(qtbot: QtBot) -> None:
     """Apply common metadata to multiple selected photos."""
     with qtbot.capture_exceptions():
         app_model: QApplicationState = QApplicationState()
@@ -250,7 +250,7 @@ def test_metadata_dialog_apply_all_checked_to_multiple_photos(qtbot: QtBot) -> N
         assert photo2.metadata.comments == "Updated comment"
 
 
-def test_metadata_dialog_apply_checked_to_multiple_photos_1(qtbot: QtBot) -> None:
+def test_should_apply_checked_metadata_to_multiple_photos_when_first_selection_is_used(qtbot: QtBot) -> None:
     """Apply common metadata to multiple selected photos."""
     with qtbot.capture_exceptions():
         app_model: QApplicationState = QApplicationState()
@@ -380,7 +380,7 @@ def test_metadata_dialog_apply_checked_to_multiple_photos_1(qtbot: QtBot) -> Non
         assert photo2.metadata.comments == "Updated comment"
 
 
-def test_metadata_dialog_apply_checked_to_multiple_photos_2(qtbot: QtBot) -> None:
+def test_should_apply_checked_metadata_to_multiple_photos_when_second_selection_is_used(qtbot: QtBot) -> None:
     """Apply common metadata to multiple selected photos."""
     with qtbot.capture_exceptions():
         app_model: QApplicationState = QApplicationState()

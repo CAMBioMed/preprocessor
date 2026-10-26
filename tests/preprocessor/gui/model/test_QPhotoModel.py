@@ -30,7 +30,7 @@ class Test_QPhotoModel(QModelTestBase):
             )
         )
 
-    def test_has_a_property_for_each_data_field(self) -> None:
+    def test_should_expose_a_property_for_each_data_field_when_model_is_created(self) -> None:
         """Model should have a property for each field in the data model."""
         self.assert_has_a_property_for_each_data_field(QPhotoModel, PhotoData)
 
@@ -38,7 +38,7 @@ class Test_QPhotoModel(QModelTestBase):
         ("field_name", "initial_value", "new_value"),
         [(n, v, vv) for n, (v, vvs, _, _) in Test_PhotoData.fields_and_values.items() for vv in vvs],
     )
-    def test_property_valid_value_and_signals(
+    def test_should_accept_valid_value_and_emit_signals_when_property_is_set(
         self,
         field_name: str,
         initial_value: object,
@@ -51,7 +51,7 @@ class Test_QPhotoModel(QModelTestBase):
         ("field_name", "initial_value", "invalid_value"),
         [(n, v, iv) for n, (v, _, _, ivs) in Test_PhotoData.fields_and_values.items() for iv in ivs],
     )
-    def test_property_invalid_value_and_signals(
+    def test_should_reject_invalid_value_and_emit_signals_when_property_is_set(
         self,
         field_name: str,
         initial_value: object,
@@ -68,7 +68,7 @@ class Test_QPhotoModel(QModelTestBase):
             for (lv, rv) in nvs
         ],
     )
-    def test_property_normalization_and_signals(
+    def test_should_normalize_value_and_emit_signals_when_property_is_set(
         self,
         field_name: str,
         initial_value: object,

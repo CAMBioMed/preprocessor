@@ -21,7 +21,7 @@ def discard_unsaved_changes_on_main_window_close(monkeypatch: MonkeyPatch) -> No
 class TestMainWindow:
     """Tests for the MainWindow class in the preprocessor GUI."""
 
-    def test_photos_are_added(
+    def test_should_add_photos_when_paths_are_selected(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """Test that photos are added and the photos_path is adjusted correctly."""
@@ -94,7 +94,7 @@ class TestMainWindow:
         assert reopened_project_model.photos[0].name == photos[0].name
         assert reopened_project_model.photos[1].name == photos[1].name
 
-    def test_directory_activation_filters_thumbnails(
+    def test_should_filter_thumbnails_when_directory_is_activated(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """Double-clicking a directory filters thumbnails to that directory's photos."""
@@ -185,7 +185,7 @@ class TestMainWindow:
 
         main_win.close()
 
-    def test_directory_add_recursively_imports_jpegs_in_path_order(
+    def test_should_import_jpegs_in_path_order_when_directory_is_added(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """Adding a directory recursively imports only JPEG files in deterministic order."""
@@ -233,7 +233,7 @@ class TestMainWindow:
         )
         assert project.photos_path == source_dir.resolve()
 
-    def test_file_add_rejects_all_paths_when_one_is_outside_project(
+    def test_should_reject_all_paths_when_one_path_is_outside_project(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """Selecting any file outside the project rejects the complete batch."""
@@ -279,7 +279,7 @@ class TestMainWindow:
         assert len(project.photos) == 0
         assert project.photos_path is None
 
-    def test_directory_add_rejects_outside_directory_before_traversal(
+    def test_should_reject_directory_when_it_is_outside_project(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """Selecting an outside directory rejects it before recursive traversal."""
@@ -326,7 +326,7 @@ class TestMainWindow:
         assert len(project.photos) == 0
         assert project.photos_path is None
 
-    def test_ten_files_do_not_require_confirmation(
+    def test_should_skip_confirmation_when_exactly_ten_files_are_selected(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """A batch of exactly ten photos proceeds without confirmation."""
@@ -369,7 +369,7 @@ class TestMainWindow:
         # Assert: all files were added without asking for confirmation
         assert [photo.original_filename for photo in project.photos] == [path.resolve() for path in paths]
 
-    def test_eleven_files_can_be_declined(
+    def test_should_leave_project_unchanged_when_eleven_files_are_declined(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """Declining an eleven-photo batch leaves the project unchanged."""
@@ -422,7 +422,7 @@ class TestMainWindow:
         assert len(project.photos) == 0
         assert project.photos_path is None
 
-    def test_eleven_files_can_be_confirmed(
+    def test_should_add_all_selected_photos_when_eleven_files_are_confirmed(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """Confirming an eleven-photo batch adds every selected photo."""
@@ -474,7 +474,7 @@ class TestMainWindow:
         assert [photo.original_filename for photo in project.photos] == [path.resolve() for path in paths]
         assert project.photos_path == first_dir.resolve()
 
-    def test_empty_directory_reports_no_photos_added(
+    def test_should_report_no_photos_added_when_directory_is_empty(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """An attempted empty directory import reports that no photos were added."""
@@ -519,7 +519,7 @@ class TestMainWindow:
         assert len(project.photos) == 0
         assert project.photos_path is None
 
-    def test_failed_photo_job_reports_no_photos_added(
+    def test_should_report_no_photos_added_when_all_photo_jobs_fail(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """A batch in which every photo job fails reports that no photos were added."""
@@ -559,7 +559,7 @@ class TestMainWindow:
         assert len(project.photos) == 0
         assert project.photos_path is None
 
-    def test_cancel_save_on_unsaved_project_aborts_add_photos(
+    def test_should_abort_add_photos_when_save_is_canceled(
         self, qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
     ) -> None:
         """Canceling the first save aborts both add flows before either picker opens."""
@@ -601,7 +601,7 @@ class TestMainWindow:
 
         main_win.close()
 
-    def test_close_with_unsaved_project_canceled_keeps_window_open(
+    def test_should_keep_window_open_when_unsaved_project_close_is_canceled(
         self, qtbot: QtBot, monkeypatch: MonkeyPatch
     ) -> None:
         """Canceling the unsaved-project prompt keeps the main window open."""

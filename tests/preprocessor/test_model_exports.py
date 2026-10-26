@@ -25,7 +25,9 @@ MODEL_EXPORTS = {
 
 
 @pytest.mark.parametrize(("package_name", "exports"), MODEL_EXPORTS.items())
-def test_model_package_exports(package_name: str, exports: dict[str, str]) -> None:
+def test_should_expose_expected_model_exports_when_model_package_is_imported(
+    package_name: str, exports: dict[str, str]
+) -> None:
     parent = importlib.import_module(package_name)
 
     assert parent.__all__ == list(exports)

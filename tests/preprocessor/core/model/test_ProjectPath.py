@@ -19,7 +19,7 @@ class CustomPathLike(os.PathLike[str]):
         return self.path
 
 
-def test_relative_input_resolves_against_context_project_directory(tmp_path: Path) -> None:
+def test_should_resolve_relative_input_when_project_directory_context_is_present(tmp_path: Path) -> None:
     project_dir = tmp_path / "project"
 
     document = PathDocument.model_validate(
@@ -30,7 +30,7 @@ def test_relative_input_resolves_against_context_project_directory(tmp_path: Pat
     assert document.path == (project_dir / "photos/image.jpg").resolve()
 
 
-def test_absolute_input_is_preserved(tmp_path: Path) -> None:
+def test_should_preserve_absolute_input_when_model_is_validated(tmp_path: Path) -> None:
     absolute_path = (tmp_path / "photos/image.jpg").resolve()
 
     document = PathDocument.model_validate(
@@ -41,7 +41,7 @@ def test_absolute_input_is_preserved(tmp_path: Path) -> None:
     assert document.path == absolute_path
 
 
-def test_path_like_input_is_accepted(tmp_path: Path) -> None:
+def test_should_accept_path_like_input_when_model_is_validated(tmp_path: Path) -> None:
     project_dir = tmp_path / "project"
 
     document = PathDocument.model_validate(
@@ -52,7 +52,7 @@ def test_path_like_input_is_accepted(tmp_path: Path) -> None:
     assert document.path == (project_dir / "photos/image.jpg").resolve()
 
 
-def test_unsupported_input_reports_controlled_validation_error() -> None:
+def test_should_report_validation_error_when_input_is_unsupported() -> None:
     with pytest.raises(ValidationError) as exc_info:
         PathDocument.model_validate({"path": object()})
 
@@ -61,7 +61,7 @@ def test_unsupported_input_reports_controlled_validation_error() -> None:
     assert errors[0]["msg"] == "Value error, project path must be a string or path-like value"
 
 
-def test_relative_input_without_context_uses_current_directory(
+def test_should_use_current_directory_when_relative_input_has_no_context(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -76,7 +76,7 @@ def test_relative_input_without_context_uses_current_directory(
     "context",
     ["not a dictionary", {"project_dir": object()}],
 )
-def test_relative_input_with_malformed_context_uses_current_directory(
+def test_should_use_current_directory_when_context_is_malformed(
     context: object,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -88,7 +88,7 @@ def test_relative_input_with_malformed_context_uses_current_directory(
     assert document.path == (tmp_path / "photos/image.jpg").resolve()
 
 
-def test_inside_and_outside_paths_serialize_in_python_and_json_modes(tmp_path: Path) -> None:
+def test_should_serialize_inside_and_outside_paths_when_python_and_json_modes_are_used(tmp_path: Path) -> None:
     project_dir = (tmp_path / "project").resolve()
     inside_path = project_dir / "photos/image.jpg"
     outside_path = (tmp_path / "outside/image.jpg").resolve()
@@ -116,7 +116,7 @@ def test_inside_and_outside_paths_serialize_in_python_and_json_modes(tmp_path: P
     "context",
     ["not a dictionary", {"project_dir": object()}],
 )
-def test_malformed_serialization_context_emits_absolute_path(
+def test_should_emit_absolute_path_when_serialization_context_is_malformed(
     context: object,
     tmp_path: Path,
 ) -> None:

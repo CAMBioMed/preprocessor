@@ -22,7 +22,7 @@ class SimpleJob(Job[str]):
         return "ok"
 
 
-def test_qjobprocessor_runs_job_and_emits_signals() -> None:
+def test_should_run_job_and_emit_signals_when_processor_processes_job() -> None:
     processor = QJobProcessor(run_in_thread=False)
 
     seen: list[str] = []
@@ -43,7 +43,7 @@ def test_qjobprocessor_runs_job_and_emits_signals() -> None:
     assert seen == ["start", "finished:JobState.COMPLETED:ok"]
 
 
-def test_qjob_runs_and_context_reports_result() -> None:
+def test_should_report_result_when_job_runs_with_context() -> None:
     job = SimpleJob()
     qjob = QJob(job)
     ctx = qjob._ctx
@@ -58,7 +58,7 @@ def test_qjob_runs_and_context_reports_result() -> None:
     assert ctx.await_result() == "ok"
 
 
-def test_run_subjob_maps_progress_to_parent_slice() -> None:
+def test_should_map_progress_to_parent_slice_when_subjob_runs() -> None:
     parent_job = SimpleJob()
     qjob = QJob(parent_job)
     ctx = qjob._ctx
@@ -88,7 +88,7 @@ def test_run_subjob_maps_progress_to_parent_slice() -> None:
     assert seen[2] == pytest.approx(0.2 + 1.0 * 0.4)
 
 
-def test_qjobprocessor_cancel_all() -> None:
+def test_should_cancel_all_jobs_when_processor_is_canceled() -> None:
     processor = QJobProcessor(run_in_thread=False)
 
     # Submit two simple jobs

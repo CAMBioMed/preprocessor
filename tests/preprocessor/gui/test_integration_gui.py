@@ -10,7 +10,7 @@ from preprocessor.gui.utils import (
 )
 
 
-def test_integration_new_project_add_images_save_and_quit(
+def test_should_add_images_and_save_project_when_new_project_is_created(
     qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch, auto_close_progress_dialog: object
 ) -> None:
     """Integration test: New Project -> add images -> save -> quit.

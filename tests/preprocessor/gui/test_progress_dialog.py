@@ -64,7 +64,7 @@ def _make_dialog(qtbot: QtBot, jobs: set[QJob]) -> ProgressDialog:
     return dlg
 
 
-def test_running_worker_and_progress_and_status_and_finish(qtbot: QtBot) -> None:
+def test_should_report_progress_and_status_when_worker_runs_and_finishes(qtbot: QtBot) -> None:
     job = AsyncTestJob("job1", steps=2, interval_ms=10)
     dlg = _make_dialog(qtbot, {job})
 
@@ -84,7 +84,7 @@ def test_running_worker_and_progress_and_status_and_finish(qtbot: QtBot) -> None
     assert any(x in item.text(1) for x in ("Done", "Aborted", "Processing...", "Step 2", "2 / 2"))
 
 
-def test_cancel_aborts_running_job(qtbot: QtBot) -> None:
+def test_should_abort_job_when_cancel_is_requested(qtbot: QtBot) -> None:
     # Long running job (many steps) so we can cancel it
     job = AsyncTestJob("job-cancel", steps=20, interval_ms=20)
     dlg = _make_dialog(qtbot, {job})

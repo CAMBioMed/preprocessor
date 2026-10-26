@@ -17,7 +17,7 @@ def _photo(path: Path, image_id: str) -> QPhotoModel:
     return QPhotoModel(PhotoData(image_id=image_id, original_filename=path.resolve()))
 
 
-def test_builds_only_required_hierarchy_with_roles(tmp_path: Path) -> None:
+def test_should_build_required_hierarchy_with_roles_when_photos_are_provided(tmp_path: Path) -> None:
     """The tree contains the root and only photo directory ancestry."""
     # Arrange
     project_directory = (tmp_path / "project").resolve()
@@ -47,7 +47,7 @@ def test_builds_only_required_hierarchy_with_roles(tmp_path: Path) -> None:
     assert not model.index_for_directory(project_directory / "unrelated").isValid()
 
 
-def test_rejects_invalid_and_foreign_indexes(tmp_path: Path) -> None:
+def test_should_reject_invalid_and_foreign_indexes_when_tree_data_is_requested(tmp_path: Path) -> None:
     """Invalid model coordinates and foreign indexes have no tree data."""
     # Arrange
     project_directory = tmp_path.resolve()
@@ -74,7 +74,7 @@ def test_rejects_invalid_and_foreign_indexes(tmp_path: Path) -> None:
     assert model.directory_for_index(foreign_index) is None
 
 
-def test_groups_only_direct_photos_in_flat_order(tmp_path: Path) -> None:
+def test_should_group_only_direct_photos_when_tree_is_built(tmp_path: Path) -> None:
     """Directory photo groups preserve input order and exclude descendants."""
     # Arrange
     project_directory = tmp_path.resolve()
@@ -95,7 +95,7 @@ def test_groups_only_direct_photos_in_flat_order(tmp_path: Path) -> None:
     assert model.photos_in_directory(None) == []
 
 
-def test_initial_activation_is_deterministic_and_case_insensitive(tmp_path: Path) -> None:
+def test_should_choose_deterministic_case_insensitive_activation_when_tree_is_initialized(tmp_path: Path) -> None:
     """Initial activation uses case-insensitive path order with a stable tie-breaker."""
     # Arrange
     project_directory = tmp_path.resolve()
@@ -111,7 +111,7 @@ def test_initial_activation_is_deterministic_and_case_insensitive(tmp_path: Path
     assert model.active_directory == project_directory / "A"
 
 
-def test_uses_open_folder_icon_for_active_directory_and_folder_icon_elsewhere(
+def test_should_use_open_folder_icon_for_active_directory_when_tree_icons_are_requested(
     qapp: QApplication, tmp_path: Path
 ) -> None:
     """The active directory has an open-folder icon and all other directories have folder icons."""
@@ -143,7 +143,7 @@ def test_uses_open_folder_icon_for_active_directory_and_folder_icon_elsewhere(
     assert root_icon.cacheKey() != nested_icon.cacheKey()
 
 
-def test_activation_persists_and_reset_selects_first_direct_directory(tmp_path: Path) -> None:
+def test_should_preserve_or_reset_activation_when_tree_is_rebuilt(tmp_path: Path) -> None:
     """Rebuilds preserve a present active node unless reset is requested."""
     # Arrange
     project_directory = tmp_path.resolve()
@@ -164,7 +164,7 @@ def test_activation_persists_and_reset_selects_first_direct_directory(tmp_path: 
     assert model.active_directory == project_directory
 
 
-def test_missing_active_directory_falls_back_to_first_direct_directory(tmp_path: Path) -> None:
+def test_should_fall_back_to_first_direct_directory_when_active_directory_is_missing(tmp_path: Path) -> None:
     """Removing the active node activates the first remaining photo directory."""
     # Arrange
     project_directory = tmp_path.resolve()
@@ -181,7 +181,7 @@ def test_missing_active_directory_falls_back_to_first_direct_directory(tmp_path:
     assert model.active_directory == project_directory
 
 
-def test_structural_active_directory_persists_without_direct_photos(tmp_path: Path) -> None:
+def test_should_preserve_structural_active_directory_when_it_has_no_direct_photos(tmp_path: Path) -> None:
     """An active ancestor remains selected while it still has displayed descendants."""
     # Arrange
     project_directory = tmp_path.resolve()
@@ -199,7 +199,7 @@ def test_structural_active_directory_persists_without_direct_photos(tmp_path: Pa
     assert model.photos_in_directory(model.active_directory) == []
 
 
-def test_active_directory_rejects_absent_path(tmp_path: Path) -> None:
+def test_should_reject_active_directory_when_path_is_absent(tmp_path: Path) -> None:
     """Explicit activation accepts only exact paths represented in the tree."""
     # Arrange
     project_directory = tmp_path.resolve()
@@ -211,7 +211,7 @@ def test_active_directory_rejects_absent_path(tmp_path: Path) -> None:
         model.active_directory = project_directory / "missing"
 
 
-def test_empty_photos_clear_tree_without_project_directory(tmp_path: Path) -> None:
+def test_should_clear_tree_when_photos_are_empty(tmp_path: Path) -> None:
     """An empty photo iterable clears the tree and activation without a root."""
     # Arrange
     project_directory = tmp_path.resolve()
@@ -226,7 +226,7 @@ def test_empty_photos_clear_tree_without_project_directory(tmp_path: Path) -> No
     assert model.active_directory is None
 
 
-def test_nonempty_photos_require_project_directory(tmp_path: Path) -> None:
+def test_should_require_project_directory_when_photos_are_nonempty(tmp_path: Path) -> None:
     """Photos cannot build a tree without a project-directory root."""
     # Arrange
     photo = _photo(tmp_path / "root.jpg", "root")
@@ -237,7 +237,7 @@ def test_nonempty_photos_require_project_directory(tmp_path: Path) -> None:
         model.set_photos([photo], project_directory=None)
 
 
-def test_photo_outside_project_directory_is_rejected(tmp_path: Path) -> None:
+def test_should_reject_photo_when_it_is_outside_project_directory(tmp_path: Path) -> None:
     """Photos outside the project directory violate the single-root invariant."""
     # Arrange
     project_directory = (tmp_path / "project").resolve()
@@ -252,7 +252,7 @@ def test_photo_outside_project_directory_is_rejected(tmp_path: Path) -> None:
         model.set_photos([outside_photo], project_directory=project_directory)
 
 
-def test_rebuild_emits_only_for_effective_activation_change(tmp_path: Path) -> None:
+def test_should_emit_activation_only_when_effective_activation_changes(tmp_path: Path) -> None:
     """A rebuild emits activation once only when its final active path changes."""
     # Arrange
     project_directory = tmp_path.resolve()
