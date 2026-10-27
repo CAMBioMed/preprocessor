@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 from preprocessor.core.serialization.crop_params import CropParams
 from preprocessor.core.serialization.folder import Folder
+from preprocessor.core.serialization.lens_correction_params import LensCorrectionParams
 from preprocessor.core.serialization.photo import Photo
 from preprocessor.core.serialization.project import Project
 from preprocessor.core.serialization.project_file import ProjectFile
@@ -140,8 +141,8 @@ def test_should_preserve_four_corner_order_when_quadrat_round_trips_through_json
     )
 
 
-def test_should_round_trip_crop_and_ruler_params_when_project_file_is_loaded(tmp_path: Path) -> None:
-    """Should round-trip crop and ruler parameters when a project file is loaded."""
+def test_should_round_trip_crop_ruler_and_lens_params_when_project_file_is_loaded(tmp_path: Path) -> None:
+    """Should round-trip crop, ruler, and lens parameters when a project file is loaded."""
 
     # Arrange
     raw_document = project_document()
@@ -162,6 +163,11 @@ def test_should_round_trip_crop_and_ruler_params_when_project_file_is_loaded(tmp
                 {"x": 3.0, "y": 4.0},
             ],
         },
+        {
+            "enabled": True,
+            "camera_matrix": [[1000.0, 0.0, 512.0], [0.0, 1000.0, 384.0], [0.0, 0.0, 1.0]],
+            "coefficients": [0.1, -0.2, 0.0, 0.01],
+        },
     ]
 
     # Act
@@ -175,6 +181,9 @@ def test_should_round_trip_crop_and_ruler_params_when_project_file_is_loaded(tmp
     assert params[0].quadrat == ((0.0, 0.0), (10.0, 0.0), (10.0, 5.0), (0.0, 5.0))
     assert isinstance(params[1], RulerParams)
     assert params[1].points == ((1.0, 2.0), (3.0, 4.0))
+    assert isinstance(params[2], LensCorrectionParams)
+    assert params[2].camera_matrix == ((1000.0, 0.0, 512.0), (0.0, 1000.0, 384.0), (0.0, 0.0, 1.0))
+    assert params[2].coefficients == [0.1, -0.2, 0.0, 0.01]
 
 
 @pytest.mark.parametrize("coordinate", ["x", "y"])

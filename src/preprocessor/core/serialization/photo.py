@@ -7,12 +7,13 @@ from collections.abc import Iterable
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, PositiveInt, field_validator
 
 from preprocessor.core.serialization.crop_params import CropParams
+from preprocessor.core.serialization.lens_correction_params import LensCorrectionParams
 from preprocessor.core.serialization.metadata import parse_date, parse_str
 from preprocessor.core.serialization.point2d import Point2D
 from preprocessor.core.serialization.project_path import ProjectPath
 from preprocessor.core.serialization.ruler_params import RulerParams
 
-type PhotoParam = CropParams | RulerParams
+type PhotoParam = CropParams | LensCorrectionParams | RulerParams
 """A processing parameter stored with a photo."""
 
 
@@ -169,3 +170,30 @@ def set_ruler_param(photo: Photo, ruler_param: RulerParams) -> None:
             photo.params[index] = ruler_param
             return
     photo.params.append(ruler_param)
+
+
+def get_lens_correction_params(photo: Photo) -> LensCorrectionParams | None:
+    """Return the last lens-correction parameter associated with a photo, if any.
+
+    :param photo: The photo whose parameters should be searched.
+    :return: The last lens-correction parameter, or None if the photo has none.
+    """
+
+    for param in reversed(photo.params):
+        if isinstance(param, LensCorrectionParams):
+            return param
+    return None
+
+
+def set_lens_correction_params(photo: Photo, lens_correction_params: LensCorrectionParams) -> None:
+    """Replace the last lens-correction parameter or append one.
+
+    :param photo: The photo whose parameters should be updated.
+    :param lens_correction_params: The lens-correction parameter to replace or append.
+    """
+
+    for index in range(len(photo.params) - 1, -1, -1):
+        if isinstance(photo.params[index], LensCorrectionParams):
+            photo.params[index] = lens_correction_params
+            return
+    photo.params.append(lens_correction_params)

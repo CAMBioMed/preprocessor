@@ -2,13 +2,16 @@
 
 from preprocessor.core.serialization.crop_params import CropParams
 from preprocessor.core.serialization.folder import Folder
+from preprocessor.core.serialization.lens_correction_params import LensCorrectionParams
 from preprocessor.core.serialization.metadata import parse_date, parse_date_or_datetime, parse_str
 from preprocessor.core.serialization.photo import (
     Photo,
     PhotoParam,
     get_crop_param,
+    get_lens_correction_params,
     get_ruler_param,
     set_crop_param,
+    set_lens_correction_params,
     set_ruler_param,
 )
 from preprocessor.core.serialization.photo_container import PhotoContainer
@@ -27,6 +30,7 @@ from preprocessor.core.serialization.ruler_params import RulerParams
 __all__ = [
     "CropParams",
     "Folder",
+    "LensCorrectionParams",
     "Photo",
     "PhotoContainer",
     "PhotoParam",
@@ -37,6 +41,7 @@ __all__ = [
     "RulerParams",
     "dumps_project",
     "get_crop_param",
+    "get_lens_correction_params",
     "get_ruler_param",
     "loads_project",
     "parse_date",
@@ -44,6 +49,7 @@ __all__ = [
     "parse_str",
     "read_project",
     "set_crop_param",
+    "set_lens_correction_params",
     "set_ruler_param",
     "write_project",
 ]

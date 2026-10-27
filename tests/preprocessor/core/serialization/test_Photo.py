@@ -2,17 +2,20 @@ from pathlib import Path
 from typing import ClassVar, override
 
 import pytest
+from tests.preprocessor.core.serialization.cls_PydanticModelTestBase import PydanticModelTestBase
 
 from preprocessor.core.serialization.crop_params import CropParams
+from preprocessor.core.serialization.lens_correction_params import LensCorrectionParams
 from preprocessor.core.serialization.photo import (
     Photo,
     get_crop_param,
+    get_lens_correction_params,
     get_ruler_param,
     set_crop_param,
+    set_lens_correction_params,
     set_ruler_param,
 )
 from preprocessor.core.serialization.ruler_params import RulerParams
-from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
 class Test_Photo(PydanticModelTestBase[Photo]):
@@ -75,7 +78,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
         ),
         "params": (
             [],
-            [[CropParams()], [RulerParams()]],
+            [[CropParams()], [LensCorrectionParams()], [RulerParams()]],
             [],
             [["not a parameter"]],
         ),
@@ -324,6 +327,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
 
         # Act / Assert
         assert get_crop_param(photo) is None
+        assert get_lens_correction_params(photo) is None
         assert get_ruler_param(photo) is None
 
     def test_should_return_last_parameter_of_each_type_when_photo_has_multiple(self) -> None:
@@ -331,13 +335,16 @@ class Test_Photo(PydanticModelTestBase[Photo]):
 
         # Arrange
         first_crop = CropParams()
+        first_lens = LensCorrectionParams()
         ruler = RulerParams()
         last_crop = CropParams(enabled=True)
+        last_lens = LensCorrectionParams(enabled=True)
         photo = self.create_model()
-        photo.params = [first_crop, ruler, last_crop]
+        photo.params = [first_crop, first_lens, ruler, last_crop, last_lens]
 
         # Act / Assert
         assert get_crop_param(photo) is last_crop
+        assert get_lens_correction_params(photo) is last_lens
         assert get_ruler_param(photo) is ruler
 
     def test_should_replace_last_parameter_of_each_type_when_setting_parameters(self) -> None:
@@ -345,20 +352,25 @@ class Test_Photo(PydanticModelTestBase[Photo]):
 
         # Arrange
         first_crop = CropParams()
+        first_lens = LensCorrectionParams()
         first_ruler = RulerParams()
         last_crop = CropParams(enabled=True)
+        last_lens = LensCorrectionParams(enabled=True)
         photo = self.create_model()
-        photo.params = [first_crop, first_ruler, last_crop]
+        photo.params = [first_crop, first_lens, first_ruler, last_crop, last_lens]
         replacement_crop = CropParams(quadrat=((0, 0), (1, 0)))
+        replacement_lens = LensCorrectionParams(coefficients=[0.1] * 4)
         replacement_ruler = RulerParams(points=((2, 2),))
 
         # Act
         set_crop_param(photo, replacement_crop)
+        set_lens_correction_params(photo, replacement_lens)
         set_ruler_param(photo, replacement_ruler)
 
         # Assert
-        assert photo.params == [first_crop, replacement_ruler, replacement_crop]
+        assert photo.params == [first_crop, first_lens, replacement_ruler, replacement_crop, replacement_lens]
         assert get_crop_param(photo) is replacement_crop
+        assert get_lens_correction_params(photo) is replacement_lens
         assert get_ruler_param(photo) is replacement_ruler
 
     def test_should_append_parameter_when_setting_type_is_not_present(self) -> None:
@@ -367,11 +379,13 @@ class Test_Photo(PydanticModelTestBase[Photo]):
         # Arrange
         photo = self.create_model()
         crop_param = CropParams()
+        lens_correction_params = LensCorrectionParams()
         ruler_param = RulerParams()
 
         # Act
         set_crop_param(photo, crop_param)
+        set_lens_correction_params(photo, lens_correction_params)
         set_ruler_param(photo, ruler_param)
 
         # Assert
-        assert photo.params == [crop_param, ruler_param]
+        assert photo.params == [crop_param, lens_correction_params, ruler_param]
