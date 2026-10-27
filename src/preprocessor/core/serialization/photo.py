@@ -7,7 +7,12 @@ from collections.abc import Iterable
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, PositiveInt, field_validator
 
 from preprocessor.core.serialization import Point2D, ProjectPath
+from preprocessor.core.serialization.crop_params import CropParams
 from preprocessor.core.serialization.metadata import parse_date, parse_str
+from preprocessor.core.serialization.ruler_params import RulerParams
+
+type PhotoParam = CropParams | RulerParams
+"""A processing parameter stored with a photo."""
 
 
 class Photo(BaseModel, validate_assignment=True):
@@ -39,6 +44,11 @@ class Photo(BaseModel, validate_assignment=True):
             "increasing rightward and y increasing downward."
         ),
         default=None,
+    )
+
+    params: list[PhotoParam] = Field(
+        description="The processing parameters associated with the photo.",
+        default_factory=list,
     )
 
     @field_validator("id")
@@ -104,3 +114,57 @@ class Photo(BaseModel, validate_assignment=True):
                 groups[key] = []
             groups[key].append(photo)
         return list(groups.values())
+
+
+def get_crop_param(photo: Photo) -> CropParams | None:
+    """Return the last crop parameter associated with a photo, if any.
+
+    :param photo: The photo whose parameters should be searched.
+    :return: The last crop parameter, or None if the photo has no crop parameter.
+    """
+
+    for param in reversed(photo.params):
+        if isinstance(param, CropParams):
+            return param
+    return None
+
+
+def set_crop_param(photo: Photo, crop_param: CropParams) -> None:
+    """Replace the last crop parameter associated with a photo or append one.
+
+    :param photo: The photo whose parameters should be updated.
+    :param crop_param: The crop parameter to replace or append.
+    """
+
+    for index in range(len(photo.params) - 1, -1, -1):
+        if isinstance(photo.params[index], CropParams):
+            photo.params[index] = crop_param
+            return
+    photo.params.append(crop_param)
+
+
+def get_ruler_param(photo: Photo) -> RulerParams | None:
+    """Return the last ruler parameter associated with a photo, if any.
+
+    :param photo: The photo whose parameters should be searched.
+    :return: The last ruler parameter, or None if the photo has no ruler parameter.
+    """
+
+    for param in reversed(photo.params):
+        if isinstance(param, RulerParams):
+            return param
+    return None
+
+
+def set_ruler_param(photo: Photo, ruler_param: RulerParams) -> None:
+    """Replace the last ruler parameter associated with a photo or append one.
+
+    :param photo: The photo whose parameters should be updated.
+    :param ruler_param: The ruler parameter to replace or append.
+    """
+
+    for index in range(len(photo.params) - 1, -1, -1):
+        if isinstance(photo.params[index], RulerParams):
+            photo.params[index] = ruler_param
+            return
+    photo.params.append(ruler_param)

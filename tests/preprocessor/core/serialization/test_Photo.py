@@ -3,7 +3,15 @@ from typing import ClassVar, override
 
 import pytest
 
-from preprocessor.core.serialization.photo import Photo
+from preprocessor.core.serialization.crop_params import CropParams
+from preprocessor.core.serialization.photo import (
+    Photo,
+    get_crop_param,
+    get_ruler_param,
+    set_crop_param,
+    set_ruler_param,
+)
+from preprocessor.core.serialization.ruler_params import RulerParams
 from tests.preprocessor.core.model.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
@@ -64,6 +72,12 @@ class Test_Photo(PydanticModelTestBase[Photo]):
                 )
             ],
             [[], [(0, 0), (640, 0), (640, 480)]],
+        ),
+        "params": (
+            [],
+            [[CropParams()], [RulerParams()]],
+            [],
+            [["not a parameter"]],
         ),
     }
     """Map fields to initial, valid, normalized, and invalid values."""
@@ -301,3 +315,63 @@ class Test_Photo(PydanticModelTestBase[Photo]):
 
         # Assert
         assert filename == "Site_1_001.jpg"
+
+    def test_should_return_none_when_photo_has_no_parameter_of_requested_type(self) -> None:
+        """Should return None when a photo has no parameter of the requested type."""
+
+        # Arrange
+        photo = self.create_model()
+
+        # Act / Assert
+        assert get_crop_param(photo) is None
+        assert get_ruler_param(photo) is None
+
+    def test_should_return_last_parameter_of_each_type_when_photo_has_multiple(self) -> None:
+        """Should return the last parameter of each type."""
+
+        # Arrange
+        first_crop = CropParams()
+        ruler = RulerParams()
+        last_crop = CropParams(enabled=True)
+        photo = self.create_model()
+        photo.params = [first_crop, ruler, last_crop]
+
+        # Act / Assert
+        assert get_crop_param(photo) is last_crop
+        assert get_ruler_param(photo) is ruler
+
+    def test_should_replace_last_parameter_of_each_type_when_setting_parameters(self) -> None:
+        """Should replace the last parameter of each type when setting parameters."""
+
+        # Arrange
+        first_crop = CropParams()
+        first_ruler = RulerParams()
+        last_crop = CropParams(enabled=True)
+        photo = self.create_model()
+        photo.params = [first_crop, first_ruler, last_crop]
+        replacement_crop = CropParams(quadrat=((0, 0), (1, 0)))
+        replacement_ruler = RulerParams(points=((2, 2),))
+
+        # Act
+        set_crop_param(photo, replacement_crop)
+        set_ruler_param(photo, replacement_ruler)
+
+        # Assert
+        assert photo.params == [first_crop, replacement_ruler, replacement_crop]
+        assert get_crop_param(photo) is replacement_crop
+        assert get_ruler_param(photo) is replacement_ruler
+
+    def test_should_append_parameter_when_setting_type_is_not_present(self) -> None:
+        """Should append a parameter when its type is not present."""
+
+        # Arrange
+        photo = self.create_model()
+        crop_param = CropParams()
+        ruler_param = RulerParams()
+
+        # Act
+        set_crop_param(photo, crop_param)
+        set_ruler_param(photo, ruler_param)
+
+        # Assert
+        assert photo.params == [crop_param, ruler_param]
