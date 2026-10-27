@@ -26,11 +26,14 @@ from preprocessor.core.serialization.project_file import (
 )
 from preprocessor.core.serialization.project_path import ProjectPath
 from preprocessor.core.serialization.ruler_params import RulerParams
+from preprocessor.core.serialization.types import LensVector, Matrix3x3
 
 __all__ = [
     "CropParams",
     "Folder",
     "LensCorrectionParams",
+    "LensVector",
+    "Matrix3x3",
     "Photo",
     "PhotoContainer",
     "PhotoParam",

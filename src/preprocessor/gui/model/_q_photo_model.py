@@ -11,9 +11,8 @@ from preprocessor.core.model import (
     PhotoData,
     RulerParams,
 )
-from preprocessor.core.serialization import Point2D
+from preprocessor.core.serialization import Matrix3x3, Point2D
 from preprocessor.core.type_corners import Corners
-from preprocessor.core.types import CameraMatrix
 from preprocessor.gui.model._q_model import QModel
 
 
@@ -161,7 +160,7 @@ class QPhotoModel(QModel[PhotoData]):
 
     # TODO: Replace by direct submodel access:
     @property
-    def camera_matrix(self) -> CameraMatrix | None:
+    def camera_matrix(self) -> Matrix3x3 | None:
         """3x3 camera matrix or None."""
         if not self.lens_correction.enabled:
             return None
@@ -169,7 +168,7 @@ class QPhotoModel(QModel[PhotoData]):
 
     # TODO: Replace by direct submodel access:
     @camera_matrix.setter
-    def camera_matrix(self, value: CameraMatrix | None) -> None:
+    def camera_matrix(self, value: Matrix3x3 | None) -> None:
         old_model = self.lens_correction
         new_model = LensCorrectionParams.model_validate(
             {
