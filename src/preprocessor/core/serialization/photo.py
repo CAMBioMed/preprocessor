@@ -6,9 +6,10 @@ from collections.abc import Iterable
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, PositiveInt, field_validator
 
-from preprocessor.core.serialization import Point2D, ProjectPath
 from preprocessor.core.serialization.crop_params import CropParams
 from preprocessor.core.serialization.metadata import parse_date, parse_str
+from preprocessor.core.serialization.point2d import Point2D
+from preprocessor.core.serialization.project_path import ProjectPath
 from preprocessor.core.serialization.ruler_params import RulerParams
 
 type PhotoParam = CropParams | RulerParams

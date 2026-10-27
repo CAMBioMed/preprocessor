@@ -3,7 +3,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from preprocessor.core.serialization import Point2D
+from preprocessor.core.serialization.point2d import Point2D
 
 
 class CropParams(BaseModel, validate_assignment=True):
@@ -134,12 +134,5 @@ def _clockwise_corners(points: Sequence[Point2D]) -> tuple[Point2D, Point2D, Poi
     # Rotate sequence to start with the topmost vertex.
     start = min(range(4), key=lambda i: (clockwise[i][1], clockwise[i][0]))
     clockwise = clockwise[start:] + clockwise[:start]
-
-    # Ensure non-degenerate quad (area != 0)
-    (x1, y1), (x2, y2), (x3, y3), (x4, y4) = clockwise
-    area = abs(x1 * y2 - y1 * x2 + x2 * y3 - y2 * x3 + x3 * y4 - y3 * x4 + x4 * y1 - y4 * x1)
-    if area == 0:
-        msg = "Degenerate quad (area is zero)"
-        raise ValueError(msg)
 
     return (clockwise[0], clockwise[1], clockwise[2], clockwise[3])

@@ -45,6 +45,16 @@ class TestCropParams:
         with pytest.raises(ValueError, match="Expected 4 distinct points"):
             crop_params.quadrat_clockwise()
 
+    def test_should_reject_non_convex_quadrat_when_ordering(self) -> None:
+        """Should reject a non-convex quadrat when ordering its corners."""
+
+        # Arrange
+        crop_params = CropParams(quadrat=((0, 0), (2, 0), (1, 1), (0, 2)))
+
+        # Act / Assert
+        with pytest.raises(ValueError, match="strictly convex"):
+            crop_params.quadrat_clockwise()
+
     def test_should_reject_more_than_four_quadrat_corners(self) -> None:
         """Should reject a quadrat with more than four corners."""
 

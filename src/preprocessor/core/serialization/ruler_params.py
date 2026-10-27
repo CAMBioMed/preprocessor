@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
-from preprocessor.core.serialization import Point2D
+from preprocessor.core.serialization.point2d import Point2D
 
 
 class RulerParams(BaseModel, validate_assignment=True):
