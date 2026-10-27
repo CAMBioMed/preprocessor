@@ -104,4 +104,3 @@ class Photo(BaseModel, validate_assignment=True):
                 groups[key] = []
             groups[key].append(photo)
         return list(groups.values())
-

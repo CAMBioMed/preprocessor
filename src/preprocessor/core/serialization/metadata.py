@@ -1,7 +1,6 @@
 """Metadata parsing helpers for project files."""
 
-from datetime import date
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import JsonValue
 
@@ -39,6 +38,7 @@ def parse_date(value: JsonValue) -> date | None:
         return datetime.fromisoformat(value).date()
     except ValueError:
         return None
+
 
 def parse_str(value: JsonValue) -> str | None:
     """Parse the value as a string.

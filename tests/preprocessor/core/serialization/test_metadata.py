@@ -5,6 +5,7 @@ from pydantic import JsonValue
 
 from preprocessor.core.serialization.metadata import parse_date, parse_date_or_datetime
 
+
 class TestParseDateOrDatetime:
     """Tests for the parse_date_or_datetime() function."""
 
@@ -30,7 +31,6 @@ class TestParseDateOrDatetime:
 
         # Assert
         assert parsed_value == expected
-
 
     @pytest.mark.parametrize("value", ["2025-02-30", "not a date", 2025, None])
     def test_should_return_none_when_iso_date_or_datetime_value_is_invalid(
@@ -74,7 +74,6 @@ class TestParseDate:
 
         # Assert
         assert parsed_value == expected
-
 
     @pytest.mark.parametrize("value", ["2025-02-30", "not a date", 2025, None])
     def test_should_return_none_when_iso_date_value_is_invalid(
