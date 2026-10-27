@@ -10,15 +10,16 @@ import pytest
 from pydantic import ValidationError
 
 from preprocessor.core.serialization.crop_params import CropParams
+from preprocessor.core.serialization.folder import Folder
 from preprocessor.core.serialization.photo import Photo
-from preprocessor.core.serialization.photo_set import PhotoSet
 from preprocessor.core.serialization.project import Project
 from preprocessor.core.serialization.project_file import ProjectFile
 from preprocessor.core.serialization.ruler_params import RulerParams
 
 PROJECT_ID = "11111111-1111-1111-1111-111111111111"
-PHOTO_SET_ID = "22222222-2222-2222-2222-222222222222"
-OTHER_PHOTO_SET_ID = "33333333-3333-3333-3333-333333333333"
+FOLDER_ID = "22222222-2222-2222-2222-222222222222"
+NESTED_FOLDER_ID = "44444444-4444-4444-4444-444444444444"
+TOP_LEVEL_PHOTO_ID = "c" * 64
 PHOTO_ID = "a" * 64
 OTHER_PHOTO_ID = "b" * 64
 
@@ -44,30 +45,46 @@ def project_document() -> dict[str, object]:
             "id": PROJECT_ID,
             "name": "Example project",
             "metadata": {"project": "value"},
-            "photo_sets": [
+            "photos": [photo_document(TOP_LEVEL_PHOTO_ID)],
+            "folders": [
                 {
-                    "id": PHOTO_SET_ID,
-                    "name": "Set 1",
-                    "metadata": {"set": "value"},
+                    "id": FOLDER_ID,
+                    "name": "Folder 1",
+                    "metadata": {"folder": "value"},
                     "photos": [photo_document()],
+                    "folders": [
+                        {
+                            "id": NESTED_FOLDER_ID,
+                            "name": "Nested folder",
+                            "metadata": {"nested": "value"},
+                            "photos": [photo_document(OTHER_PHOTO_ID)],
+                            "folders": [],
+                        },
+                    ],
                 },
             ],
         },
     }
 
 
-def photo_sets_payload(raw_document: dict[str, object]) -> list[dict[str, object]]:
-    """Return mutable photo-set payloads from a raw project document."""
+def folders_payload(raw_document: dict[str, object]) -> list[dict[str, object]]:
+    """Return mutable folder payloads from a raw project document."""
 
     project = cast("dict[str, object]", raw_document["project"])
-    return cast("list[dict[str, object]]", project["photo_sets"])
+    return cast("list[dict[str, object]]", project["folders"])
+
+
+def first_folder_payload(raw_document: dict[str, object]) -> dict[str, object]:
+    """Return the first mutable folder payload from a raw project document."""
+
+    return folders_payload(raw_document)[0]
 
 
 def first_photo_payload(raw_document: dict[str, object]) -> dict[str, object]:
-    """Return the first mutable photo payload from a raw project document."""
+    """Return the first mutable photo payload from the first folder."""
 
-    photo_set = photo_sets_payload(raw_document)[0]
-    photos = cast("list[dict[str, object]]", photo_set["photos"])
+    folder = first_folder_payload(raw_document)
+    photos = cast("list[dict[str, object]]", folder["photos"])
     return photos[0]
 
 
@@ -84,11 +101,15 @@ def test_should_validate_shape_and_round_trip_uuids_when_project_file_is_loaded(
 
     # Assert
     assert project_file.project.id == UUID(PROJECT_ID)
-    assert project_file.project.photo_sets[0].id == UUID(PHOTO_SET_ID)
+    assert project_file.project.photos[0].id == TOP_LEVEL_PHOTO_ID
+    assert project_file.project.folders[0].id == UUID(FOLDER_ID)
+    assert project_file.project.folders[0].folders[0].id == UUID(NESTED_FOLDER_ID)
     assert loaded.project.id == UUID(PROJECT_ID)
-    assert loaded.project.photo_sets[0].id == UUID(PHOTO_SET_ID)
-    assert loaded.project.photo_sets[0].photos[0].width == 4000
-    assert loaded.project.photo_sets[0].photos[0].height == 3000
+    assert loaded.project.photos[0].id == TOP_LEVEL_PHOTO_ID
+    assert loaded.project.folders[0].id == UUID(FOLDER_ID)
+    assert loaded.project.folders[0].folders[0].id == UUID(NESTED_FOLDER_ID)
+    assert loaded.project.folders[0].photos[0].width == 4000
+    assert loaded.project.folders[0].photos[0].height == 3000
 
 
 def test_should_preserve_four_corner_order_when_quadrat_round_trips_through_json(tmp_path: Path) -> None:
@@ -110,8 +131,8 @@ def test_should_preserve_four_corner_order_when_quadrat_round_trips_through_json
     dumped = json.loads(project_file.model_dump_json(context={"project_dir": tmp_path}))
 
     # Assert
-    assert dumped["project"]["photo_sets"][0]["photos"][0]["quadrat"] == corners
-    assert project_file.project.photo_sets[0].photos[0].quadrat == (
+    assert dumped["project"]["folders"][0]["photos"][0]["quadrat"] == corners
+    assert project_file.project.folders[0].photos[0].quadrat == (
         (0.0, 0.0),
         (10.0, 0.0),
         (10.0, 5.0),
@@ -147,7 +168,7 @@ def test_should_round_trip_crop_and_ruler_params_when_project_file_is_loaded(tmp
     project_file = ProjectFile.model_validate(raw_document, context={"project_dir": tmp_path})
     dumped = project_file.model_dump_json(context={"project_dir": tmp_path})
     loaded = ProjectFile.model_validate_json(dumped, context={"project_dir": tmp_path})
-    params = loaded.project.photo_sets[0].photos[0].params
+    params = loaded.project.folders[0].photos[0].params
 
     # Assert
     assert isinstance(params[0], CropParams)
@@ -190,7 +211,7 @@ def test_should_default_quadrat_to_none_when_it_is_omitted(tmp_path: Path) -> No
     project_file = ProjectFile.model_validate(raw_document, context={"project_dir": tmp_path})
 
     # Assert
-    assert project_file.project.photo_sets[0].photos[0].quadrat is None
+    assert project_file.project.folders[0].photos[0].quadrat is None
 
 
 def test_should_normalize_uppercase_value_when_photo_id_is_loaded() -> None:
@@ -243,43 +264,31 @@ def test_should_require_positive_integer_dimensions_when_photo_is_loaded(field: 
         Photo.model_validate(raw_photo)
 
 
-def test_should_fail_when_photo_ids_are_duplicated_across_photo_sets(tmp_path: Path) -> None:
-    """Should fail when photo IDs are duplicated across photo sets."""
+def test_should_fail_when_photo_ids_are_duplicated_across_project_tree(tmp_path: Path) -> None:
+    """Should fail when photo IDs are duplicated across the project tree."""
 
     # Arrange
     raw_document = project_document()
-    photo_sets = photo_sets_payload(raw_document)
-    photo_sets.append(
-        {
-            "id": OTHER_PHOTO_SET_ID,
-            "name": "Set 2",
-            "metadata": {},
-            "photos": [photo_document(PHOTO_ID.upper())],
-        },
-    )
+    project = cast("dict[str, object]", raw_document["project"])
+    photos = cast("list[dict[str, object]]", project["photos"])
+    photos.append(photo_document(PHOTO_ID.upper()))
 
     # Act / Assert
     with pytest.raises(ValidationError, match=f"duplicate photo id: {PHOTO_ID}"):
         ProjectFile.model_validate(raw_document, context={"project_dir": tmp_path})
 
 
-def test_should_fail_when_photo_set_uuids_are_duplicated(tmp_path: Path) -> None:
-    """Should fail when photo set UUIDs are duplicated."""
+def test_should_fail_when_folder_uuids_are_duplicated_in_project_tree(tmp_path: Path) -> None:
+    """Should fail when folder UUIDs are duplicated in the project tree."""
 
     # Arrange
     raw_document = project_document()
-    photo_sets = photo_sets_payload(raw_document)
-    photo_sets.append(
-        {
-            "id": PHOTO_SET_ID,
-            "name": "Duplicate set",
-            "metadata": {},
-            "photos": [photo_document(OTHER_PHOTO_ID)],
-        },
-    )
+    folders = cast("list[dict[str, object]]", first_folder_payload(raw_document)["folders"])
+    nested_folder = folders[0]
+    nested_folder["id"] = FOLDER_ID
 
     # Act / Assert
-    with pytest.raises(ValidationError, match=f"duplicate photo set id: {PHOTO_SET_ID}"):
+    with pytest.raises(ValidationError, match=f"duplicate folder id: {FOLDER_ID}"):
         ProjectFile.model_validate(raw_document, context={"project_dir": tmp_path})
 
 
@@ -307,43 +316,79 @@ def test_should_fail_when_object_contains_unknown_field(tmp_path: Path) -> None:
         ProjectFile.model_validate(raw_document, context={"project_dir": tmp_path})
 
 
-def test_should_return_fresh_shallow_overlays_when_metadata_resolvers_are_called() -> None:
-    """Should return fresh shallow overlays when metadata resolvers are called."""
+def test_should_iterate_tree_and_resolve_inherited_metadata_when_project_is_traversed() -> None:
+    """Should iterate the folder tree and resolve inherited metadata."""
 
     # Arrange
-    project = Project(
-        id=UUID(PROJECT_ID),
-        name="Example project",
-        metadata={"shared": "project", "project_only": {"nested": 1}},
-        photo_sets=[],
+    top_level_photo = Photo(
+        id=TOP_LEVEL_PHOTO_ID,
+        original_filename=Path("photos/top.jpg"),
+        metadata={"shared": "top", "top_only": "value"},
+        width=4000,
+        height=3000,
     )
-    photo_set = PhotoSet(
-        id=UUID(PHOTO_SET_ID),
-        name="Set 1",
-        metadata={"shared": "set", "set_only": "value"},
-        photos=[],
-    )
-    photo = Photo(
+    root_photo = Photo(
         id=PHOTO_ID,
-        original_filename=Path("photos/image.jpg"),
+        original_filename=Path("photos/root.jpg"),
         metadata={"shared": "photo", "photo_only": "value"},
         width=4000,
         height=3000,
     )
+    nested_photo = Photo(
+        id=OTHER_PHOTO_ID,
+        original_filename=Path("photos/nested.jpg"),
+        metadata={"nested_only": "value"},
+        width=4000,
+        height=3000,
+    )
+    nested_folder = Folder(
+        id=UUID(NESTED_FOLDER_ID),
+        name="Nested folder",
+        metadata={"nested": "folder"},
+        photos=[nested_photo],
+        folders=[],
+    )
+    root_folder = Folder(
+        id=UUID(FOLDER_ID),
+        name="Folder 1",
+        metadata={"shared": "folder", "folder_only": "value"},
+        photos=[root_photo],
+        folders=[nested_folder],
+    )
+    project = Project(
+        id=UUID(PROJECT_ID),
+        name="Example project",
+        metadata={"shared": "project", "project_only": {"nested": 1}},
+        photos=[top_level_photo],
+        folders=[root_folder],
+    )
 
     # Act
-    photo_set_metadata = project.metadata_for_photo_set(photo_set)
-    photo_metadata = project.metadata_for_photo(photo_set, photo)
-    photo_metadata["shared"] = "changed"
+    folders = list(project.iter_folders())
+    photos = list(project.iter_photos())
+    resolved = list(project.iter_photos_with_metadata())
+    resolved[0][1]["shared"] = "changed"
 
     # Assert
-    assert photo_set_metadata == {"shared": "set", "project_only": {"nested": 1}, "set_only": "value"}
-    assert photo_metadata == {
+    assert [folder.id for folder in folders] == [UUID(FOLDER_ID), UUID(NESTED_FOLDER_ID)]
+    assert [photo.id for photo in photos] == [TOP_LEVEL_PHOTO_ID, PHOTO_ID, OTHER_PHOTO_ID]
+    assert [photo.id for photo, _ in resolved] == [TOP_LEVEL_PHOTO_ID, PHOTO_ID, OTHER_PHOTO_ID]
+    assert resolved[0][1] == {
         "shared": "changed",
         "project_only": {"nested": 1},
-        "set_only": "value",
+        "top_only": "value",
+    }
+    assert resolved[1][1] == {
+        "shared": "photo",
+        "project_only": {"nested": 1},
+        "folder_only": "value",
         "photo_only": "value",
     }
-    assert project.metadata == {"shared": "project", "project_only": {"nested": 1}}
-    assert photo_set.metadata == {"shared": "set", "set_only": "value"}
-    assert photo.metadata == {"shared": "photo", "photo_only": "value"}
+    assert resolved[2][1] == {
+        "shared": "folder",
+        "project_only": {"nested": 1},
+        "folder_only": "value",
+        "nested": "folder",
+        "nested_only": "value",
+    }
+    assert project.metadata["shared"] == "project"

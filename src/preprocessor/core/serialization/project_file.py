@@ -5,6 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from preprocessor.core.serialization.folder import Folder
 from preprocessor.core.serialization.project import Project
 
 
@@ -19,6 +20,9 @@ class ProjectFile(BaseModel, validate_assignment=True):
     project: Project = Field(
         description="Project payload stored in the document.",
     )
+
+
+ProjectFile.model_rebuild(_types_namespace={"Folder": Folder})
 
 
 def _context(project_dir: Path | None) -> dict[str, Path] | None:

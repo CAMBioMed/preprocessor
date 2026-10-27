@@ -1,6 +1,7 @@
 """Project-file storage models and JSON filesystem helpers."""
 
 from preprocessor.core.serialization.crop_params import CropParams
+from preprocessor.core.serialization.folder import Folder
 from preprocessor.core.serialization.metadata import parse_date, parse_date_or_datetime, parse_str
 from preprocessor.core.serialization.photo import (
     Photo,
@@ -10,7 +11,7 @@ from preprocessor.core.serialization.photo import (
     set_crop_param,
     set_ruler_param,
 )
-from preprocessor.core.serialization.photo_set import PhotoSet
+from preprocessor.core.serialization.photo_container import PhotoContainer
 from preprocessor.core.serialization.point2d import Point2D
 from preprocessor.core.serialization.project import Project
 from preprocessor.core.serialization.project_file import (
@@ -25,9 +26,10 @@ from preprocessor.core.serialization.ruler_params import RulerParams
 
 __all__ = [
     "CropParams",
+    "Folder",
     "Photo",
+    "PhotoContainer",
     "PhotoParam",
-    "PhotoSet",
     "Point2D",
     "Project",
     "ProjectFile",

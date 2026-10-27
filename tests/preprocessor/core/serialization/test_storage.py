@@ -16,9 +16,31 @@ from preprocessor.core.serialization.project_file import (
 
 
 PROJECT_ID = "11111111-1111-1111-1111-111111111111"
-PHOTO_SET_ID = "22222222-2222-2222-2222-222222222222"
+FOLDER_ID = "22222222-2222-2222-2222-222222222222"
+NESTED_FOLDER_ID = "44444444-4444-4444-4444-444444444444"
+TOP_LEVEL_PHOTO_ID = "c" * 64
 PHOTO_ID = "a" * 64
-RELATIVE_PHOTO_PATH = Path("photosets/set1/originals/img001.jpg")
+NESTED_PHOTO_ID = "b" * 64
+RELATIVE_PHOTO_PATH = Path("photos/folder/originals/img001.jpg")
+RELATIVE_TOP_LEVEL_PHOTO_PATH = Path("photos/top-level.jpg")
+
+
+def photo_document(photo_id: str, relative_path: Path) -> dict[str, object]:
+    """Return a photo payload for storage tests."""
+
+    return {
+        "id": photo_id,
+        "original_filename": str(relative_path),
+        "width": 4000,
+        "height": 3000,
+        "metadata": {"shared": "photo", "photo_only": {"nested": "value"}},
+        "quadrat": [
+            {"x": 0.0, "y": 0.0},
+            {"x": 10.0, "y": 0.0},
+            {"x": 10.0, "y": 5.0},
+            {"x": 0.0, "y": 5.0},
+        ],
+    }
 
 
 def nested_project_document() -> dict[str, object]:
@@ -30,24 +52,20 @@ def nested_project_document() -> dict[str, object]:
             "id": PROJECT_ID,
             "name": "Example project",
             "metadata": {"shared": "project", "project_only": True},
-            "photo_sets": [
+            "photos": [photo_document(TOP_LEVEL_PHOTO_ID, RELATIVE_TOP_LEVEL_PHOTO_PATH)],
+            "folders": [
                 {
-                    "id": PHOTO_SET_ID,
-                    "name": "Set 1",
-                    "metadata": {"shared": "set", "set_only": [1, 2]},
-                    "photos": [
+                    "id": FOLDER_ID,
+                    "name": "Folder 1",
+                    "metadata": {"shared": "folder", "folder_only": [1, 2]},
+                    "photos": [photo_document(PHOTO_ID, RELATIVE_PHOTO_PATH)],
+                    "folders": [
                         {
-                            "id": PHOTO_ID,
-                            "original_filename": str(RELATIVE_PHOTO_PATH),
-                            "width": 4000,
-                            "height": 3000,
-                            "metadata": {"shared": "photo", "photo_only": {"nested": "value"}},
-                            "quadrat": [
-                                {"x": 0.0, "y": 0.0},
-                                {"x": 10.0, "y": 0.0},
-                                {"x": 10.0, "y": 5.0},
-                                {"x": 0.0, "y": 5.0},
-                            ],
+                            "id": NESTED_FOLDER_ID,
+                            "name": "Nested folder",
+                            "metadata": {"nested": True},
+                            "photos": [photo_document(NESTED_PHOTO_ID, Path("photos/nested.jpg"))],
+                            "folders": [],
                         },
                     ],
                 },
@@ -66,8 +84,12 @@ def test_should_resolve_photo_paths_against_project_directory_when_project_is_lo
     project_file = loads_project(project_json, project_dir=tmp_path)
 
     # Assert
-    photo = project_file.project.photo_sets[0].photos[0]
-    assert photo.original_filename == (tmp_path / RELATIVE_PHOTO_PATH).resolve()
+    assert project_file.project.photos[0].original_filename == (tmp_path / RELATIVE_TOP_LEVEL_PHOTO_PATH).resolve()
+    assert project_file.project.folders[0].photos[0].original_filename == (tmp_path / RELATIVE_PHOTO_PATH).resolve()
+    assert (
+        project_file.project.folders[0].folders[0].photos[0].original_filename
+        == (tmp_path / "photos/nested.jpg").resolve()
+    )
 
 
 def test_should_emit_relative_path_metadata_quadrat_and_trailing_newline_when_project_is_dumped(tmp_path: Path) -> None:
@@ -83,12 +105,16 @@ def test_should_emit_relative_path_metadata_quadrat_and_trailing_newline_when_pr
     # Assert
     assert project_json.endswith("\n")
     assert not project_json.endswith("\n\n")
-    photo = dumped["project"]["photo_sets"][0]["photos"][0]
+    top_level_photo = dumped["project"]["photos"][0]
+    photo = dumped["project"]["folders"][0]["photos"][0]
+    nested_photo = dumped["project"]["folders"][0]["folders"][0]["photos"][0]
+    assert top_level_photo["original_filename"] == str(RELATIVE_TOP_LEVEL_PHOTO_PATH)
     assert photo["original_filename"] == str(RELATIVE_PHOTO_PATH)
+    assert nested_photo["original_filename"] == "photos/nested.jpg"
     assert photo["width"] == 4000
     assert photo["height"] == 3000
     assert dumped["project"]["metadata"] == {"shared": "project", "project_only": True}
-    assert dumped["project"]["photo_sets"][0]["metadata"] == {"shared": "set", "set_only": [1, 2]}
+    assert dumped["project"]["folders"][0]["metadata"] == {"shared": "folder", "folder_only": [1, 2]}
     assert photo["metadata"] == {"shared": "photo", "photo_only": {"nested": "value"}}
     assert photo["quadrat"] == [
         {"x": 0.0, "y": 0.0},
