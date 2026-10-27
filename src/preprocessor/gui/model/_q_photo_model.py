@@ -11,8 +11,9 @@ from preprocessor.core.model import (
     PhotoData,
     RulerParams,
 )
+from preprocessor.core.serialization import Point2D
 from preprocessor.core.type_corners import Corners
-from preprocessor.core.types import CameraMatrix, Point2D
+from preprocessor.core.types import CameraMatrix
 from preprocessor.gui.model._q_model import QModel
 
 

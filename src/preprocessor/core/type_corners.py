@@ -3,7 +3,7 @@ from typing import Any, overload
 
 from pydantic import ConfigDict, RootModel, field_validator
 
-from preprocessor.core.types import Point2D
+from preprocessor.core.serialization import Point2D
 
 
 class Corners(RootModel[tuple[Point2D, ...]]):

@@ -5,9 +5,6 @@ import cv2
 import numpy as np
 import numpy.typing as npt
 
-Point2D = tuple[float, float]
-"""A 2D point represented as a tuple of (x, y) coordinates."""
-
 
 @dataclass
 class Line:

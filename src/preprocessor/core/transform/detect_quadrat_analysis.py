@@ -10,8 +10,9 @@ from sklearn.cluster import KMeans
 
 from preprocessor.core.message_reporter import NOOP_MESSAGE_REPORTER, MessageReporter
 from preprocessor.core.progress_reporter import NOOP_PROGRESS_REPORTER, ProgressReporter
+from preprocessor.core.serialization import Point2D
 from preprocessor.core.type_corners import Corners
-from preprocessor.core.types import ImageRGB, Line, Point2D
+from preprocessor.core.types import ImageRGB, Line
 from preprocessor.gui.jobs.qjobs import CancelToken
 
 logger = logging.getLogger(__name__)

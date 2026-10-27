@@ -96,14 +96,14 @@ class Test_ProjectData(PydanticModelTestBase):
               }},
               "crop": {{
                 "corners": [
-                  [
-                    1.0,
-                    2.0
-                  ],
-                  [
-                    3.0,
-                    4.0
-                  ]
+                  {{
+                    "x": 1.0,
+                    "y": 2.0
+                  }},
+                  {{
+                    "x": 3.0,
+                    "y": 4.0
+                  }}
                 ]
               }},
               "metadata": {{
@@ -139,14 +139,14 @@ class Test_ProjectData(PydanticModelTestBase):
               }},
               "crop": {{
                 "corners": [
-                  [
-                    1.0,
-                    2.0
-                  ],
-                  [
-                    3.0,
-                    4.0
-                  ]
+                  {{
+                    "x": 1.0,
+                    "y": 2.0
+                  }},
+                  {{
+                    "x": 3.0,
+                    "y": 4.0
+                  }}
                 ]
               }},
               "metadata": {{
