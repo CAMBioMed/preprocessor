@@ -17,7 +17,6 @@ class ApplyParametersDialog(QDialog):
         self.selected_photos = selected_photos
         self.ui = Ui_ApplyParametersDialog()
         self.ui.setupUi(self)
-        self.ui.chkColorCorrection.setEnabled(False)  # Not implemented yet
         self._connect_signals()
 
     def _connect_signals(self) -> None:
@@ -29,15 +28,11 @@ class ApplyParametersDialog(QDialog):
         if not current_photo:
             return
 
-        copy_color_correction = self.ui.chkColorCorrection.isChecked()
         copy_camera = self.ui.chkCamera.isChecked()
         copy_lens_correction = self.ui.chkLensCorrection.isChecked()
         copy_crop = self.ui.chkCrop.isChecked()
 
         for photo in self.selected_photos:
-            if copy_color_correction:
-                # Not implemented yet
-                pass
             if copy_camera:
                 photo.camera_matrix = current_photo.camera_matrix
             if copy_lens_correction:

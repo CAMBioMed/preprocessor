@@ -16,11 +16,11 @@ class Message:
     level: MessageLevel
     """The severity level of the message."""
     code: str
-    """A machine-readable code for the message, e.g. 'color_correction_failed'."""
+    """A machine-readable code for the message, e.g. 'lens_correction_failed'."""
     text: str
     """A human-readable message to be displayed to the user."""
     step: str | None = None
-    """The name of the processing step that generated this message, e.g. 'color_correction'."""
+    """The name of the processing step that generated this message, e.g. 'lens_correction'."""
     subject: str | None = None
     """The subject that this message pertains to, if applicable. For example, an image ID or path."""
     details: dict[str, Any] | None = None
@@ -49,9 +49,9 @@ class MessageReporter:
         """Report a message.
 
         :param level: The severity level of the message.
-        :param code: A machine-readable code for the message, e.g. 'color_correction_failed'.
+        :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
-        :param step: The name of the processing step that generated this message, e.g. 'color_correction'.
+        :param step: The name of the processing step that generated this message, e.g. 'lens_correction'.
         :param image_id: The stable image ID that this message pertains to, if applicable.
         :param details: Optional additional details about the message, for debugging or display purposes.
         """
@@ -68,9 +68,9 @@ class MessageReporter:
     ) -> None:
         """Report an error message to this work item.
 
-        :param code: A machine-readable code for the message, e.g. 'color_correction_failed'.
+        :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
-        :param step: The name of the processing step that generated this message, e.g. 'color_correction'.
+        :param step: The name of the processing step that generated this message, e.g. 'lens_correction'.
         :param image_id: The stable image ID that this message pertains to, if applicable.
         :param details: Optional additional details about the message, for debugging or display purposes.
         """
@@ -87,9 +87,9 @@ class MessageReporter:
     ) -> None:
         """Report a warning message to this work item.
 
-        :param code: A machine-readable code for the message, e.g. 'color_correction_failed'.
+        :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
-        :param step: The name of the processing step that generated this message, e.g. 'color_correction'.
+        :param step: The name of the processing step that generated this message, e.g. 'lens_correction'.
         :param image_id: The stable image ID that this message pertains to, if applicable.
         :param details: Optional additional details about the message, for debugging or display purposes.
         """
@@ -106,9 +106,9 @@ class MessageReporter:
     ) -> None:
         """Report an info message.
 
-        :param code: A machine-readable code for the message, e.g. 'color_correction_failed'.
+        :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
-        :param step: The name of the processing step that generated this message, e.g. 'color_correction'.
+        :param step: The name of the processing step that generated this message, e.g. 'lens_correction'.
         :param image_id: The stable image ID that this message pertains to, if applicable.
         :param details: Optional additional details about the message, for debugging or display purposes.
         """

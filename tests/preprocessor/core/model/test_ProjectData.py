@@ -7,15 +7,8 @@ from typing import ClassVar, override
 
 import pytest
 
-from preprocessor.core.model import (
-    ColorCorrectionParams,
-    CropParams,
-    LensCorrectionParams,
-    MetadataData,
-    PhotoData,
-    ProjectData,
-)
-from preprocessor.core.type_corners import Corners
+from preprocessor.core.model import MetadataData, PhotoData, ProjectData
+from preprocessor.core.serialization import CropParams, LensCorrectionParams
 from tests.preprocessor.core.model.cls_PydanticModelTestBase import (
     PydanticModelTestBase,
 )
@@ -35,9 +28,8 @@ class Test_ProjectData(PydanticModelTestBase):
             PhotoData(
                 image_id="photo1",
                 original_filename=Path("photos/photo1.jpg").resolve(),
-                color_correction=ColorCorrectionParams(),
                 lens_correction=LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
-                crop=CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
+                crop=CropParams(quadrat=((1.0, 2.0), (3.0, 4.0))),
                 metadata=MetadataData(partner="SZN", camera="EOS R5"),
             ),
             PhotoData(
@@ -66,9 +58,8 @@ class Test_ProjectData(PydanticModelTestBase):
                 PhotoData(
                     image_id="photo1",
                     original_filename=photos_dir / "photo1.jpg",
-                    color_correction=ColorCorrectionParams(),
                     lens_correction=LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
-                    crop=CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
+                    crop=CropParams(quadrat=((1.0, 2.0), (3.0, 4.0))),
                     metadata=MetadataData(partner="SZN", camera="EOS R5"),
                 ),
             ],
@@ -95,7 +86,7 @@ class Test_ProjectData(PydanticModelTestBase):
                 ]
               }},
               "crop": {{
-                "corners": [
+                "quadrat": [
                   {{
                     "x": 1.0,
                     "y": 2.0
@@ -128,7 +119,6 @@ class Test_ProjectData(PydanticModelTestBase):
             {{
               "image_id": "photo1",
               "original_filename": {json.dumps(os.path.join("photos", "photo1.jpg"))},
-              "color_correction": {{}},
               "lens_correction": {{
                 "coefficients": [
                   0.01,
@@ -138,7 +128,7 @@ class Test_ProjectData(PydanticModelTestBase):
                 ]
               }},
               "crop": {{
-                "corners": [
+                "quadrat": [
                   {{
                     "x": 1.0,
                     "y": 2.0
@@ -168,9 +158,8 @@ class Test_ProjectData(PydanticModelTestBase):
                 PhotoData(
                     image_id="photo1",
                     original_filename=photos_dir / "photo1.jpg",
-                    color_correction=ColorCorrectionParams(),
                     lens_correction=LensCorrectionParams(coefficients=[0.01, -0.02, 0.001, 0.0005]),
-                    crop=CropParams(corners=Corners(((1.0, 2.0), (3.0, 4.0)))),
+                    crop=CropParams(quadrat=((1.0, 2.0), (3.0, 4.0))),
                     metadata=MetadataData(partner="SZN", camera="EOS R5"),
                 ),
             ],

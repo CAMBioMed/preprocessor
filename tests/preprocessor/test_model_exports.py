@@ -4,13 +4,9 @@ import pytest
 
 MODEL_EXPORTS = {
     "preprocessor.core.model": {
-        "ColorCorrectionParams": "_color_correction_params",
-        "CropParams": "_crop_params",
-        "LensCorrectionParams": "_lens_correction_params",
         "MetadataData": "_metadata_data",
         "PhotoData": "_photo_data",
         "ProjectData": "_project_data",
-        "RulerParams": "_ruler_params",
     },
     "preprocessor.gui.model": {
         "MetadataModel": "_q_metadata_model",

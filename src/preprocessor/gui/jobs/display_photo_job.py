@@ -22,7 +22,6 @@ class DisplayPhotoJob(QJob):
             self.photo,
             None,
             transforms=[
-                # TODO: Add color correction transform once implemented
                 LensCorrectTransform(),
                 # NOTE: We don't do PerspectiveCropTransform, because we want to display the image uncropped
             ],

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'apply_parameters_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -51,11 +51,6 @@ class Ui_ApplyParametersDialog(object):
         self.lblParameters.setObjectName(u"lblParameters")
 
         self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.lblParameters)
-
-        self.chkColorCorrection = QCheckBox(self.scrollAreaWidgetContents)
-        self.chkColorCorrection.setObjectName(u"chkColorCorrection")
-
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.chkColorCorrection)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
@@ -115,7 +110,6 @@ class Ui_ApplyParametersDialog(object):
         ApplyParametersDialog.setWindowTitle(QCoreApplication.translate("ApplyParametersDialog", u"Apply", None))
         self.lblSummary.setText(QCoreApplication.translate("ApplyParametersDialog", u"Select the parameters to copy from the opened photo to the selected photos.", None))
         self.lblParameters.setText(QCoreApplication.translate("ApplyParametersDialog", u"Parameters:", None))
-        self.chkColorCorrection.setText(QCoreApplication.translate("ApplyParametersDialog", u"Color correction", None))
         self.chkLensCorrection.setText(QCoreApplication.translate("ApplyParametersDialog", u"Lens correction", None))
         self.chkCrop.setText(QCoreApplication.translate("ApplyParametersDialog", u"Crop", None))
         self.chkCamera.setText(QCoreApplication.translate("ApplyParametersDialog", u"Camera", None))

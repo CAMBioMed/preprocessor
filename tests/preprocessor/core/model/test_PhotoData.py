@@ -4,14 +4,8 @@ from typing import ClassVar, override
 
 import pytest
 
-from preprocessor.core.model import (
-    ColorCorrectionParams,
-    CropParams,
-    LensCorrectionParams,
-    MetadataData,
-    PhotoData,
-)
-from preprocessor.core.type_corners import Corners
+from preprocessor.core.model import MetadataData, PhotoData
+from preprocessor.core.serialization import CropParams, LensCorrectionParams, RulerParams
 from tests.preprocessor.core.model.cls_PydanticModelTestBase import (
     PydanticModelTestBase,
 )
@@ -29,24 +23,6 @@ class Test_PhotoData(PydanticModelTestBase):
             ],
         ]
     ] = {
-        "color_correction": (
-            # Initial
-            ColorCorrectionParams(),
-            # Valid
-            [
-                ColorCorrectionParams(
-                    enabled=True,
-                    gain_r=0.1,
-                    gain_g=-0.1,
-                ),
-            ],
-            # Normalized
-            [],
-            # Invalid
-            [
-                "foo",
-            ],
-        ),
         "lens_correction": (
             # Initial
             LensCorrectionParams(),
@@ -69,7 +45,22 @@ class Test_PhotoData(PydanticModelTestBase):
             [
                 CropParams(
                     enabled=True,
-                    corners=Corners(((1.0, 2.0), (3.0, 4.0))),
+                    quadrat=((1.0, 2.0), (3.0, 4.0)),
+                ),
+            ],
+            # Normalized
+            [],
+            # Invalid
+            ["foo"],
+        ),
+        "ruler": (
+            # Initial
+            RulerParams(),
+            # Valid
+            [
+                RulerParams(
+                    enabled=True,
+                    points=((1.0, 2.0), (3.0, 4.0)),
                 ),
             ],
             # Normalized
@@ -106,6 +97,20 @@ class Test_PhotoData(PydanticModelTestBase):
             image_id="test_photo",
             original_filename=Path("photos/test_photo.jpg").resolve(),
         )
+
+    def test_should_reject_removed_parameter_input_when_photo_data_is_created(self) -> None:
+        """Should reject removed parameter input when PhotoData is created."""
+        # Arrange
+        removed_field = "color_" + "correction"
+        photo_data = {
+            "image_id": "test_photo",
+            "original_filename": Path("photos/test_photo.jpg").resolve(),
+            removed_field: {},
+        }
+
+        # Act / Assert
+        with pytest.raises(ValueError):
+            PhotoData.model_validate(photo_data)
 
     @override
     def update_model(self, model: PhotoData, field_name: str, new_value: object) -> PhotoData:

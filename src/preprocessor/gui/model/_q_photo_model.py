@@ -3,16 +3,14 @@ from typing import Any
 
 from PySide6.QtCore import Signal
 
-from preprocessor.core.model import (
-    ColorCorrectionParams,
+from preprocessor.core.model import MetadataData, PhotoData
+from preprocessor.core.serialization import (
     CropParams,
     LensCorrectionParams,
-    MetadataData,
-    PhotoData,
+    Matrix3x3,
+    Point2D,
     RulerParams,
 )
-from preprocessor.core.serialization import Matrix3x3, Point2D
-from preprocessor.core.type_corners import Corners
 from preprocessor.gui.model._q_model import QModel
 
 
@@ -21,7 +19,6 @@ class QPhotoModel(QModel[PhotoData]):
 
     on_image_id_changed: Signal = Signal(str)
     on_original_filename_changed: Signal = Signal(Path)
-    on_color_correction_changed: Signal = Signal(object)  # Emits ColorCorrectionParams | None
     on_lens_correction_changed: Signal = Signal(object)  # Emits LensCorrectionParams | None
     on_crop_changed: Signal = Signal(object)  # Emits CropParams | None
     on_ruler_changed: Signal = Signal(object)  # Emits RulerParams
@@ -57,15 +54,6 @@ class QPhotoModel(QModel[PhotoData]):
     ######################
 
     @property
-    def color_correction(self) -> ColorCorrectionParams:
-        """The parameters for color correction."""
-        return self._data.color_correction
-
-    @color_correction.setter
-    def color_correction(self, value: ColorCorrectionParams) -> None:
-        self._set_field("color_correction", value)
-
-    @property
     def lens_correction(self) -> LensCorrectionParams:
         """The parameters for lens correction."""
         return self._data.lens_correction
@@ -94,26 +82,14 @@ class QPhotoModel(QModel[PhotoData]):
 
     @property
     def ruler_points(self) -> "list[Point2D]":
-        """The ruler start/end points in image coordinates (0, 1, or 2 items)."""
+        """The ruler points in image coordinates (0, 1, or 2 items)."""
         if not self._data.ruler.enabled:
             return []
-        r = self._data.ruler
-        if r.start is None and r.end is not None:
-            return [r.end]
-        if r.start is not None and r.end is None:
-            return [r.start]
-        if r.start is not None and r.end is not None:
-            return [r.start, r.end]
-        return []
+        return list(self._data.ruler.points)
 
     @ruler_points.setter
     def ruler_points(self, value: "list[Point2D] | None") -> None:
-        if not value:
-            self.ruler = RulerParams()
-        elif len(value) == 1:
-            self.ruler = RulerParams(enabled=True, start=value[0])
-        else:
-            self.ruler = RulerParams(enabled=True, start=value[0], end=value[1])
+        self.ruler = RulerParams(enabled=bool(value), points=tuple(value or ()))
 
     ##############
     ## Metadata ##
@@ -137,26 +113,19 @@ class QPhotoModel(QModel[PhotoData]):
         """The name of the photo, derived from the original path."""
         return self.original_filename.name
 
-    # TODO: Replace by direct submodel access:
     @property
     def quadrat_corners(self) -> list[Point2D] | None:
         """The corners of the quadrat in the photo, if set."""
         if not self._data.crop.enabled:
             return None
-        return list(self._data.crop.corners.as_tuple())
+        return list(self._data.crop.quadrat_as_tuple())
 
-    # TODO: Replace by direct submodel access:
     @quadrat_corners.setter
     def quadrat_corners(self, value: list[Point2D] | None) -> None:
-        old_model = self.crop
-        new_model = CropParams.model_validate(
-            {
-                **(old_model.model_dump() if old_model is not None else {}),
-                "enabled": value is not None,
-                "corners": Corners(tuple(value)) if value is not None else Corners(()),
-            }
+        self.crop = CropParams(
+            enabled=value is not None,
+            quadrat=tuple(value or ()),
         )
-        self.crop = new_model
 
     # TODO: Replace by direct submodel access:
     @property

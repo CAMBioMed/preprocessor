@@ -4,7 +4,8 @@ import numpy as np
 from _pytest.monkeypatch import MonkeyPatch
 
 from preprocessor.core.message_reporter import CollectingMessageReporter
-from preprocessor.core.model import LensCorrectionParams, PhotoData
+from preprocessor.core.model import PhotoData
+from preprocessor.core.serialization import LensCorrectionParams
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem
 from preprocessor.core.transform.lens_correct_transform import LensCorrectTransform
 from preprocessor.core.types import ImageRGB

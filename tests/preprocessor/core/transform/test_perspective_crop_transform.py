@@ -13,12 +13,12 @@ from preprocessor.core.message_reporter import (
 # Make local package importable when running tests from repository root
 sys.path.insert(0, "src")
 
-from preprocessor.core.model import CropParams, PhotoData
+from preprocessor.core.model import PhotoData
+from preprocessor.core.serialization import CropParams
 from preprocessor.core.transform.image_transform import ImageTransformWorkItem
 from preprocessor.core.transform.perspective_crop_transform import (
     PerspectiveCropTransform,
 )
-from preprocessor.core.type_corners import Corners
 from preprocessor.core.types import ImageRGB
 
 
@@ -45,13 +45,13 @@ def test_should_crop_successfully_when_crop_is_requested() -> None:
     tr = (90.0, 10.0)
     bl = (10.0, 90.0)
     br = (90.0, 90.0)
-    corners = Corners((tl, tr, bl, br))
+    quadrat = (tl, tr, bl, br)
     params = PhotoData(
         image_id=image_id,
         original_filename=image_path,
         crop=CropParams(
             enabled=True,
-            corners=corners,
+            quadrat=quadrat,
         ),
     )
 
@@ -124,7 +124,7 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
         original_filename=image_path,
         crop=CropParams(
             enabled=True,
-            corners=Corners(()),
+            quadrat=(),
         ),
     )
     item = ImageTransformWorkItem(
@@ -154,14 +154,14 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     image = ImageRGB.from_rgb_array(img)
     image_path = Path("/tmp/img3.jpg")
     image_id = "id3"
-    # Create 4 corners but with a negative coordinate to make them invalid per Corners.ordered()
-    bad_corners = Corners(((-1.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
+    # Create a non-convex quadrat to make the geometry invalid.
+    bad_quadrat = ((0.0, 0.0), (2.0, 0.0), (1.0, 1.0), (0.0, 2.0))
     params = PhotoData(
         image_id=image_id,
         original_filename=image_path,
         crop=CropParams(
             enabled=True,
-            corners=bad_corners,
+            quadrat=bad_quadrat,
         ),
     )
     item = ImageTransformWorkItem(
@@ -183,7 +183,7 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     assert msg.level == MessageLevel.warning
     assert msg.step == transform.name
     assert msg.details is not None
-    assert "corners" in msg.details
+    assert "quadrat" in msg.details
 
 
 def test_should_log_error_and_return_original_when_exception_is_raised(monkeypatch: MonkeyPatch) -> None:
@@ -198,13 +198,13 @@ def test_should_log_error_and_return_original_when_exception_is_raised(monkeypat
     tr = (45.0, 5.0)
     bl = (5.0, 45.0)
     br = (45.0, 45.0)
-    corners = Corners((tl, tr, bl, br))
+    quadrat = (tl, tr, bl, br)
     params = PhotoData(
         image_id=image_id,
         original_filename=image_path,
         crop=CropParams(
             enabled=True,
-            corners=corners,
+            quadrat=quadrat,
         ),
     )
     item = ImageTransformWorkItem(

@@ -105,8 +105,6 @@ class PhotoEditorWidget(QWidget):
         # Disconnect any previous signals and clear state
         if self._photo_signals_connected and self._photo is not None:
             with contextlib.suppress(Exception):
-                self._photo.on_color_correction_changed.disconnect(self._on_photo_params_changed)
-            with contextlib.suppress(Exception):
                 self._photo.on_lens_correction_changed.disconnect(self._on_photo_params_changed)
             with contextlib.suppress(Exception):
                 self._photo.on_crop_changed.disconnect(self._on_photo_params_changed)
@@ -144,7 +142,6 @@ class PhotoEditorWidget(QWidget):
             try:
                 # Connect to the new photo signals
                 assert self._photo is not None
-                self._photo.on_color_correction_changed.connect(self._on_photo_params_changed)
                 self._photo.on_lens_correction_changed.connect(self._on_photo_params_changed)
                 self._photo.on_crop_changed.connect(self._on_photo_params_changed)
                 self._photo_signals_connected = True
