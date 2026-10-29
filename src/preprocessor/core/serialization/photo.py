@@ -27,8 +27,8 @@ class Photo(BaseModel, validate_assignment=True):
     id: str = Field(
         description="The unique identifier of the photo.",
     )
-    original_filename: ProjectPath = Field(
-        description="The path to the original image file.",
+    image_path: ProjectPath = Field(
+        description="The path to the image file.",
     )
     width: PositiveInt = Field(
         description="The width of the photo, in pixels.",
@@ -86,7 +86,7 @@ class Photo(BaseModel, validate_assignment=True):
         season: str | None = parse_str(self.metadata.get("season"))
         transect: str | None = parse_str(self.metadata.get("transect"))
         idx: str | None = f"{group_idx:03d}"
-        ext: str = self.original_filename.suffix.lower() if self.original_filename.suffix else ".jpg"
+        ext: str = self.image_path.suffix.lower() if self.image_path.suffix else ".jpg"
 
         # Generate _ separated string of all the parts that are not None
         parts = [p for p in [partner, area, site, year, season, transect, date_str, idx] if p is not None]

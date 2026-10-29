@@ -30,7 +30,7 @@ def photo_document(photo_id: str = PHOTO_ID) -> dict[str, object]:
 
     return {
         "id": photo_id,
-        "original_filename": "photos/image.jpg",
+        "image_path": "photos/image.jpg",
         "width": 4000,
         "height": 3000,
         "metadata": {"photo": "value"},
@@ -331,21 +331,21 @@ def test_should_iterate_tree_and_resolve_inherited_metadata_when_project_is_trav
     # Arrange
     top_level_photo = Photo(
         id=TOP_LEVEL_PHOTO_ID,
-        original_filename=Path("photos/top.jpg"),
+        image_path=Path("photos/top.jpg"),
         metadata={"shared": "top", "top_only": "value"},
         width=4000,
         height=3000,
     )
     root_photo = Photo(
         id=PHOTO_ID,
-        original_filename=Path("photos/root.jpg"),
+        image_path=Path("photos/root.jpg"),
         metadata={"shared": "photo", "photo_only": "value"},
         width=4000,
         height=3000,
     )
     nested_photo = Photo(
         id=OTHER_PHOTO_ID,
-        original_filename=Path("photos/nested.jpg"),
+        image_path=Path("photos/nested.jpg"),
         metadata={"nested_only": "value"},
         width=4000,
         height=3000,

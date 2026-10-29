@@ -30,7 +30,7 @@ def photo_document(photo_id: str, relative_path: Path) -> dict[str, object]:
 
     return {
         "id": photo_id,
-        "original_filename": str(relative_path),
+        "image_path": str(relative_path),
         "width": 4000,
         "height": 3000,
         "metadata": {"shared": "photo", "photo_only": {"nested": "value"}},
@@ -84,12 +84,9 @@ def test_should_resolve_photo_paths_against_project_directory_when_project_is_lo
     project_file = loads_project(project_json, project_dir=tmp_path)
 
     # Assert
-    assert project_file.project.photos[0].original_filename == (tmp_path / RELATIVE_TOP_LEVEL_PHOTO_PATH).resolve()
-    assert project_file.project.folders[0].photos[0].original_filename == (tmp_path / RELATIVE_PHOTO_PATH).resolve()
-    assert (
-        project_file.project.folders[0].folders[0].photos[0].original_filename
-        == (tmp_path / "photos/nested.jpg").resolve()
-    )
+    assert project_file.project.photos[0].image_path == (tmp_path / RELATIVE_TOP_LEVEL_PHOTO_PATH).resolve()
+    assert project_file.project.folders[0].photos[0].image_path == (tmp_path / RELATIVE_PHOTO_PATH).resolve()
+    assert project_file.project.folders[0].folders[0].photos[0].image_path == (tmp_path / "photos/nested.jpg").resolve()
 
 
 def test_should_emit_relative_path_metadata_quadrat_and_trailing_newline_when_project_is_dumped(tmp_path: Path) -> None:
@@ -108,9 +105,9 @@ def test_should_emit_relative_path_metadata_quadrat_and_trailing_newline_when_pr
     top_level_photo = dumped["project"]["photos"][0]
     photo = dumped["project"]["folders"][0]["photos"][0]
     nested_photo = dumped["project"]["folders"][0]["folders"][0]["photos"][0]
-    assert top_level_photo["original_filename"] == str(RELATIVE_TOP_LEVEL_PHOTO_PATH)
-    assert photo["original_filename"] == str(RELATIVE_PHOTO_PATH)
-    assert nested_photo["original_filename"] == "photos/nested.jpg"
+    assert top_level_photo["image_path"] == str(RELATIVE_TOP_LEVEL_PHOTO_PATH)
+    assert photo["image_path"] == str(RELATIVE_PHOTO_PATH)
+    assert nested_photo["image_path"] == "photos/nested.jpg"
     assert photo["width"] == 4000
     assert photo["height"] == 3000
     assert dumped["project"]["metadata"] == {"shared": "project", "project_only": True}

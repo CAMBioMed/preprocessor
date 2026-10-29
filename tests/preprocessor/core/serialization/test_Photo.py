@@ -36,7 +36,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
             [("UPPERCASE_ID", "uppercase_id")],
             ["", "   "],
         ),
-        "original_filename": (
+        "image_path": (
             Path("photos/test_photo.jpg").resolve(),
             [Path("photos/another_photo.jpg").resolve()],
             [],
@@ -91,7 +91,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
 
         return Photo(
             id="test_photo",
-            original_filename=Path("photos/test_photo.jpg").resolve(),
+            image_path=Path("photos/test_photo.jpg").resolve(),
             width=640,
             height=480,
             metadata={},
@@ -159,7 +159,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
         photos = [
             Photo(
                 id="first",
-                original_filename=Path("photos/first.jpg").resolve(),
+                image_path=Path("photos/first.jpg").resolve(),
                 width=640,
                 height=480,
                 metadata={
@@ -172,7 +172,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
             ),
             Photo(
                 id="second",
-                original_filename=Path("photos/second.jpg").resolve(),
+                image_path=Path("photos/second.jpg").resolve(),
                 width=640,
                 height=480,
                 metadata={
@@ -186,7 +186,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
             ),
             Photo(
                 id="different-site",
-                original_filename=Path("photos/different-site.jpg").resolve(),
+                image_path=Path("photos/different-site.jpg").resolve(),
                 width=640,
                 height=480,
                 metadata={
@@ -199,7 +199,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
             ),
             Photo(
                 id="different-area",
-                original_filename=Path("photos/different-area.jpg").resolve(),
+                image_path=Path("photos/different-area.jpg").resolve(),
                 width=640,
                 height=480,
                 metadata={
@@ -212,7 +212,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
             ),
             Photo(
                 id="different-year",
-                original_filename=Path("photos/different-year.jpg").resolve(),
+                image_path=Path("photos/different-year.jpg").resolve(),
                 width=640,
                 height=480,
                 metadata={
@@ -225,7 +225,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
             ),
             Photo(
                 id="different-season",
-                original_filename=Path("photos/different-season.jpg").resolve(),
+                image_path=Path("photos/different-season.jpg").resolve(),
                 width=640,
                 height=480,
                 metadata={
@@ -238,7 +238,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
             ),
             Photo(
                 id="different-transect",
-                original_filename=Path("photos/different-transect.jpg").resolve(),
+                image_path=Path("photos/different-transect.jpg").resolve(),
                 width=640,
                 height=480,
                 metadata={
@@ -282,7 +282,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
 
         # Arrange
         photo = self.create_model()
-        photo.original_filename = Path("photos/input.JPEG").resolve()
+        photo.image_path = Path("photos/input.JPEG").resolve()
         photo.metadata = {
             "partner": "Partner",
             "area": "Area",
@@ -303,7 +303,7 @@ class Test_Photo(PydanticModelTestBase[Photo]):
 
         # Arrange
         photo = self.create_model()
-        photo.original_filename = Path("photos/input").resolve()
+        photo.image_path = Path("photos/input").resolve()
         photo.metadata = {
             "partner": 123,
             "area": None,
