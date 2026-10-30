@@ -696,7 +696,6 @@ class PhotoEditorWidget(QWidget):
                     self._transformed_img = rgb
                     # update pixmap from result on the main thread
                     try:
-
                         # und = result
                         # Result is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
 

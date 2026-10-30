@@ -232,7 +232,7 @@ def test_should_require_project_directory_when_photos_are_nonempty(tmp_path: Pat
     model = TreeDockModel()
 
     # Act / Assert
-    with pytest.raises(ValueError, match="^project directory is required when photos are present$"):
+    with pytest.raises(ValueError, match=r"^project directory is required when photos are present$"):
         model.set_photos([photo], project_directory=None)
 
 

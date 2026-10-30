@@ -180,7 +180,8 @@ class TestQProjectModelIO:
         self, monkeypatch: MonkeyPatch
     ) -> None:
         """new_project() should return a new QProjectModel when old project is dirty but user
-        chooses to discard changes."""
+        chooses to discard changes.
+        """
         # Arrange
         old_project = QProjectModel(ProjectData())
         old_project.mark_dirty()
@@ -214,7 +215,8 @@ class TestQProjectModelIO:
         self, tmp_path: Path, monkeypatch: MonkeyPatch
     ) -> None:
         """open_project() should return a QProjectModel when given a valid project file path and
-        no old project is provided."""
+        no old project is provided.
+        """
         # Arrange
         project_file = tmp_path / "proj.pbproj"
         pd = ProjectData()
@@ -254,7 +256,8 @@ class TestQProjectModelIO:
         self, tmp_path: Path, monkeypatch: MonkeyPatch
     ) -> None:
         """open_project() should return a new QProjectModel when old project is dirty but user
-        chooses to discard changes."""
+        chooses to discard changes.
+        """
         # Arrange
         old_project = QProjectModel(ProjectData())
         old_project.mark_dirty()
