@@ -249,103 +249,59 @@ exclude = [
     "tests/**",
 ]
 select = [
-  # isort
   "I",
-  # flake8-2020
   "YTT",
-  # flake8-annotations
   "ANN",
-  # flake8-bandit
   "S",
-  # flake8-no-pep420 (require __init__.py)
   "INP",
-  # flake8-bugbear
   "B",
-  # flake8-comprehensions
   "C4",
-  # flake8-errmsg
   "EM",
-  # flake8-executable
   "EXE",
-  # flake8-implicit-str-concat
   "ISC",
-  # flake8-import-conventions
   "ICN",
-  # flake8-logging-format
   "G",
-  # flake8-pie
   "PIE",
-  # flake8-pytest-style
   "PT",
-  # flake8-return
   "RET",
-  # flake8-simplify
   "SIM",
-  # flake8-unused-arguments
   "ARG",
   "E",
-  # pycodestyle
   "W",
-  # Pyflakes
   "F",
-  # pydocstyle
   "D",
-  # pylint
   "PL",
-  # pyupgrade
   "UP",
-  # Ruff-specific
   "RUF",
 ]
 ignore = [
-  # Stylistic choices
-  # Pylint/Refactor
   "PLR",
-  # unnecessary-assign
   "RET504",
 
   # Ensure formatter compatibility
-  # whitespace-before-punctuation
   "E203",
 
   # Allow gradual documentation
-  # undocumented-public-module
   "D100",
-  # undocumented-public-class
   "D101",
-  # undocumented-public-method
   "D102",
-  # undocumented-public-function
   "D103",
-  # undocumented-public-package
   "D104",
-  # undocumented-magic-method
   "D105",
-  # undocumented-public-nested-class
   "D106",
-  # undocumented-public-init
   "D107",
 
-  # blank-line-after-function
   "D202",
-  # missing-blank-line-after-summary
   "D205",
-  # non-imperative-mood
   "D401",
-  # import-outside-top-level
   "PLC0415",
-  # module-import-not-at-top-of-file
   "E402",
 
-  # assert
   "S101",
 
   # For now:
-  # logging-f-string
   "G004",
-  # unused-method-argument
   "ARG002",
-  # unused-lambda-argument
   "ARG005",
 ]
 pydocstyle.convention = "pep257"
