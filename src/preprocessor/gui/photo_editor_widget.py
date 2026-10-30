@@ -7,6 +7,7 @@ from cv2.typing import MatLike
 from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, QSize, Qt
 from PySide6.QtGui import (
     QColor,
+    QEnterEvent,
     QImage,
     QMouseEvent,
     QPainter,

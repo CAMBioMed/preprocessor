@@ -109,7 +109,7 @@ class Test_PhotoData(PydanticModelTestBase):
         }
 
         # Act / Assert
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Extra inputs are not permitted"):
             PhotoData.model_validate(photo_data)
 
     @override
