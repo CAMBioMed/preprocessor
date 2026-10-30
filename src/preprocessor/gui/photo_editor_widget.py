@@ -7,7 +7,7 @@ from cv2.typing import MatLike
 from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, QSize, Qt
 from PySide6.QtGui import (
     QColor,
-    QEnterEvent,
+    QImage,
     QMouseEvent,
     QPainter,
     QPainterPath,
@@ -695,7 +695,6 @@ class PhotoEditorWidget(QWidget):
                     self._transformed_img = rgb
                     # update pixmap from result on the main thread
                     try:
-                        from PySide6.QtGui import QImage
 
                         # und = result
                         # Result is in BGR/BGRA ordering (OpenCV). Convert to RGB/RGBA for QImage
