@@ -157,7 +157,7 @@ class Test_PhotoData(PydanticModelTestBase):
         """Should normalize a value when the property is set."""
         self.assert_property_normalization(field_name, initial_value, input_value, expected_value)
 
-    photos = [
+    photos: ClassVar[list[tuple[str, PhotoData]]] = [
         (
             "CSIC_Montgri_Dui_2025_Summer_1_2025-08-27_001.jpg",
             PhotoData(
