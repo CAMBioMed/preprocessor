@@ -308,9 +308,6 @@ pydocstyle.convention = "pep257"
 "tests/preprocessor/core/transform/test_transform_image.py" = [
   "S108",
 ]
-"tests/preprocessor/core/model/test_ProjectData.py" = [
-  "E501",
-]
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true

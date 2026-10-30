@@ -325,5 +325,5 @@ class Test_ProjectData(PydanticModelTestBase):
         Name,Date,Partner,Area,Site,Season,Transect,Height (cm),Latitude,Longitude,Depth,Camera,Photographer,Water quality,Strobes,Framing gear used,White balance card,Comments
         testfile1.jpg,,SZN,,,,,,,,,EOS R5,,,,,,
         testfile2.jpg,2023-09-01,Aegean,Crete,Site1,Fall,Transect1,100,35.0,25.0,10m,Nikon D850,John Doe,Clear,Strobe1,Framing1,Card1,No comments
-        """)
+        """)  # noqa: E501
         assert content == expected_content
