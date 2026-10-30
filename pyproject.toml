@@ -249,30 +249,30 @@ exclude = [
     "tests/**",
 ]
 select = [
-  "I",
-  "YTT",
   "ANN",
-  "S",
-  "INP",
+  "ARG",
   "B",
   "C4",
+  "D",
+  "E",
   "EM",
   "EXE",
-  "ISC",
-  "ICN",
+  "F",
   "G",
+  "I",
+  "ICN",
+  "INP",
+  "ISC",
   "PIE",
+  "PL",
   "PT",
   "RET",
-  "SIM",
-  "ARG",
-  "E",
-  "W",
-  "F",
-  "D",
-  "PL",
-  "UP",
   "RUF",
+  "S",
+  "SIM",
+  "UP",
+  "W",
+  "YTT",
 ]
 ignore = [
   "PLR",
@@ -294,34 +294,28 @@ ignore = [
   "D202",
   "D205",
   "D401",
-  "PLC0415",
   "E402",
-
+  "PLC0415",
   "S101",
 
   # For now:
-  "G004",
   "ARG002",
   "ARG005",
+  "G004",
 ]
 pydocstyle.convention = "pep257"
 
 [tool.ruff.lint.per-file-ignores]
 # Tests can ignore a few extra rules
 "tests/**" = [
-  "ARG001",
   "ANN001",
-  # Missing return type annotation for public function
   "ANN201",
   "ANN202",
-  # Missing docstring
+  "ARG001",
   "D103",
-  # Use of assert is detected
-  "S101",
-  # Missing __init__.py file
-  "INP001",
-  # Error messages
   "EM",
+  "INP001",
+  "S101",
 ]
 
 [tool.ruff.lint.flake8-annotations]
