@@ -98,7 +98,7 @@ def test_should_apply_transforms_and_save_output_when_transforms_succeed(
     # set a pixel to make the image non-empty
     arr[1, 1] = [1, 2, 3]
     image = ImageRGB.from_rgb_array(arr)
-    image_path = Path("/tmp/img.jpg")
+    image_path = Path("/tmp/img.jpg")  # noqa: S108
     image_id = "img"
     params = PhotoData(
         image_id=image_id,
@@ -139,7 +139,7 @@ def test_should_report_transform_failed_and_return_none_when_transform_raises(mo
     h, w = 5, 5
     arr = np.zeros((h, w, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(arr)
-    image_path = Path("/tmp/img2.jpg")
+    image_path = Path("/tmp/img2.jpg")  # noqa: S108
     image_id = "img2"
     params = PhotoData(
         image_id=image_id,
@@ -166,7 +166,7 @@ def test_should_report_image_save_failed_and_return_none_when_save_raises(
     h, w = 6, 6
     arr = np.zeros((h, w, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(arr)
-    image_path = Path("/tmp/img3.jpg")
+    image_path = Path("/tmp/img3.jpg")  # noqa: S108
     image_id = "img3"
     params = PhotoData(
         image_id=image_id,

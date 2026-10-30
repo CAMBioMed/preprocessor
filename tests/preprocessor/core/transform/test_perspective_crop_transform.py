@@ -37,7 +37,7 @@ def test_should_crop_successfully_when_crop_is_requested() -> None:
     # Put a distinctive pixel inside the target rectangle at (20, 20)
     img[20, 20] = [123, 45, 67]
     image = ImageRGB.from_rgb_array(img)
-    image_path = Path("/tmp/img4.jpg")
+    image_path = Path("/tmp/img4.jpg")  # noqa: S108
     image_id = "id4"
 
     # Define corners for an axis-aligned square from (10,10) to (90,90)
@@ -85,7 +85,7 @@ def test_should_skip_perspective_crop_when_no_crop_requested() -> None:
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
-    image_path = Path("/tmp/img.jpg")
+    image_path = Path("/tmp/img.jpg")  # noqa: S108
     image_id = "id"
     params = PhotoData(
         image_id=image_id,
@@ -117,7 +117,7 @@ def test_should_warn_and_skip_when_crop_has_no_corners() -> None:
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
-    image_path = Path("/tmp/img2.jpg")
+    image_path = Path("/tmp/img2.jpg")  # noqa: S108
     image_id = "id2"
     params = PhotoData(
         image_id=image_id,
@@ -152,7 +152,7 @@ def test_should_warn_and_skip_when_corners_are_invalid() -> None:
     # Arrange
     img = np.zeros((10, 10, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
-    image_path = Path("/tmp/img3.jpg")
+    image_path = Path("/tmp/img3.jpg")  # noqa: S108
     image_id = "id3"
     # Create a non-convex quadrat to make the geometry invalid.
     bad_quadrat = ((0.0, 0.0), (2.0, 0.0), (1.0, 1.0), (0.0, 2.0))
@@ -192,7 +192,7 @@ def test_should_log_error_and_return_original_when_exception_is_raised(monkeypat
     h, w = 50, 50
     img = np.zeros((h, w, 3), dtype=np.uint8)
     image = ImageRGB.from_rgb_array(img)
-    image_path = Path("/tmp/img5.jpg")
+    image_path = Path("/tmp/img5.jpg")  # noqa: S108
     image_id = "id5"
     tl = (5.0, 5.0)
     tr = (45.0, 5.0)
