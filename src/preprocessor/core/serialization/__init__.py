@@ -4,6 +4,7 @@ from preprocessor.core.serialization.crop_params import CropParams
 from preprocessor.core.serialization.folder import Folder
 from preprocessor.core.serialization.lens_correction_params import LensCorrectionParams
 from preprocessor.core.serialization.metadata import parse_date, parse_date_or_datetime, parse_str
+from preprocessor.core.serialization.metadata_csv_writer import MetadataCsvWriter
 from preprocessor.core.serialization.photo import (
     Photo,
     PhotoParam,
@@ -34,6 +35,7 @@ __all__ = [
     "LensCorrectionParams",
     "LensVector",
     "Matrix3x3",
+    "MetadataCsvWriter",
     "Photo",
     "PhotoContainer",
     "PhotoParam",
