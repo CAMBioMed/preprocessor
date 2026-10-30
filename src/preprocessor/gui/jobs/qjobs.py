@@ -202,7 +202,7 @@ class QJobProcessor(QObject):
         if self._finished == self.total:
             self.on_finished.emit(self._any_aborted)
 
-    def _handle_job_failed(self, job: QJob, aborted: bool, exc: Exception | None) -> None:
+    def _handle_job_failed(self, job: QJob, aborted: bool, _exc: Exception | None) -> None:
         self._finished += 1
         self._any_aborted = self._any_aborted or aborted
         self.on_job_failed.emit(job, aborted)

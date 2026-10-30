@@ -415,7 +415,7 @@ class MainWindow(QMainWindow):
 
         class _AppendHelper(QObject):
             @Slot(object, bool)
-            def handle_job_success(self, job: AddPhotoJob, result: None) -> None:
+            def handle_job_success(self, job: AddPhotoJob, _result: None) -> None:
                 photo_data = job.result
                 if photo_data is not None:
                     project.photos.append(QPhotoModel(photo_data))

@@ -189,7 +189,7 @@ class PhotoEditorWidget(QWidget):
         """Return whether annotation cursor should be visible for `tool`."""
         return self._mouse_position is not None and self._find_tool_handle_index(tool, self._mouse_position) is not None
 
-    def _on_photo_params_changed(self, *args: object, **kwargs: object) -> None:
+    def _on_photo_params_changed(self, *_args: object, **_kwargs: object) -> None:
         """
         Handler called when the photo transformation parameters change.
         Applies the transformation to the currently displayed image and updates the pixmap.

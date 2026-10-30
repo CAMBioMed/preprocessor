@@ -188,8 +188,8 @@ class DetectQuadratAnalysisJob:
     def __call__(
         self,
         cancel_token: CancelToken | None = None,
-        messages: MessageReporter = NOOP_MESSAGE_REPORTER,
-        progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
+        messages: MessageReporter = NOOP_MESSAGE_REPORTER,  # noqa: ARG002
+        progress: ProgressReporter = NOOP_PROGRESS_REPORTER,  # noqa: ARG002
     ) -> Corners:
         cancel_token = cancel_token or CancelToken()
         params = self._params
