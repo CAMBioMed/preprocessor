@@ -218,7 +218,7 @@ class DetectQuadratAnalysisJob:
         if params.hough.enabled:
             (debug_img, lines) = DetectQuadratAnalysisJob._hough(img, debug_img, params.hough)
             corners = DetectQuadratAnalysisJob._find_corners(lines, debug_img, scale)
-            logger.debug(f"Detected corners: {corners}")
+            logger.debug("Detected corners: %s", corners)
 
         if params.find_contour.enabled:
             debug_img = DetectQuadratAnalysisJob._find_contours(img, debug_img, params.find_contour)
@@ -234,9 +234,9 @@ class DetectQuadratAnalysisJob:
                 scale = float(params.max_size) / float(max(h, w))
                 new_w = max(1, int(w * scale))
                 new_h = max(1, int(h * scale))
-                logger.debug(f"Downscaling image to {new_w}x{new_h} pixels...")
+                logger.debug("Downscaling image to %sx%s pixels...", new_w, new_h)
                 img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
-                logger.debug(f"Downscaled image to {new_w}x{new_h} pixels")
+                logger.debug("Downscaled image to %sx%s pixels", new_w, new_h)
                 return img, scale
         except Exception:
             logger.debug("Failed to downscale image; using the original image", exc_info=True)
@@ -267,7 +267,7 @@ class DetectQuadratAnalysisJob:
         block_size = params.block_size
         C = params.C
 
-        logger.debug(f"Thresholding image with method {method}...")
+        logger.debug("Thresholding image with method %s...", method)
         if method == ThresholdingMethod.NONE:
             return img
 
@@ -309,7 +309,7 @@ class DetectQuadratAnalysisJob:
         # WARNING: This seems to work better on the scaled down preview
         # than on the full image. Thus, generating the final image
         # full-scale will produce different results!
-        logger.debug(f"Cannying image to {threshold1}, {threshold2}...")
+        logger.debug("Cannying image to %s, %s...", threshold1, threshold2)
         img = cv2.Canny(img, threshold1, threshold2, apertureSize=params.aperture_size)
         logger.debug("Cannied image.")
         return img
@@ -333,7 +333,7 @@ class DetectQuadratAnalysisJob:
                 maxLineGap=params.max_line_gap,
             )
             if lines is not None:
-                logger.debug(f"Found {len(lines)} lines.")
+                logger.debug("Found %s lines.", len(lines))
                 for i in range(len(lines)):
                     x1, y1, x2, y2 = lines[i][0]
                     pt1 = (x1, y1)
@@ -359,7 +359,7 @@ class DetectQuadratAnalysisJob:
                 max_theta=math.radians(params.max_theta),
             )
             if lines is not None:
-                logger.debug(f"Found {len(lines)} lines.")
+                logger.debug("Found %s lines.", len(lines))
                 for i in range(len(lines)):
                     rho = lines[i][0][0]
                     theta = lines[i][0][1]
@@ -420,7 +420,7 @@ class DetectQuadratAnalysisJob:
                     if 0 <= x < width and 0 <= y < height:
                         corners.append(pt)
                         cv2.circle(debug_img, pt, 2, (255, 0, 0, 255), -1)
-        logger.debug(f"Found {len(corners)} candidate corners.")
+        logger.debug("Found %s candidate corners.", len(corners))
         if not corners:
             return []
 
@@ -499,6 +499,6 @@ class DetectQuadratAnalysisJob:
             raise NotImplementedError(msg)
 
         contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, method)
-        logger.debug(f"Found {len(contours)} contours.")
+        logger.debug("Found %s contours.", len(contours))
         debug_img = cv2.drawContours(debug_img, contours, -1, (0, 255, 0), 2)
         return debug_img
