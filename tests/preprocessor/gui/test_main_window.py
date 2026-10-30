@@ -272,8 +272,10 @@ class TestMainWindow:
         assert warnings == [
             (
                 "Cannot Add Photos",
-                "A selected or discovered path is outside the project directory:"
-                f"\n{outside_path}\n\nProject directory:\n{project_dir.resolve()}",
+                (
+                    "A selected or discovered path is outside the project directory:"
+                    f"\n{outside_path}\n\nProject directory:\n{project_dir.resolve()}"
+                ),
             )
         ]
         assert len(project.photos) == 0
@@ -319,8 +321,10 @@ class TestMainWindow:
         assert warnings == [
             (
                 "Cannot Add Photos",
-                "A selected or discovered path is outside the project directory:"
-                f"\n{outside_dir.resolve()}\n\nProject directory:\n{project_dir.resolve()}",
+                (
+                    "A selected or discovered path is outside the project directory:"
+                    f"\n{outside_dir.resolve()}\n\nProject directory:\n{project_dir.resolve()}"
+                ),
             )
         ]
         assert len(project.photos) == 0
