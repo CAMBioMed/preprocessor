@@ -500,5 +500,4 @@ class DetectQuadratAnalysisJob:
 
         contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, method)
         logger.debug("Found %s contours.", len(contours))
-        debug_img = cv2.drawContours(debug_img, contours, -1, (0, 255, 0), 2)
-        return debug_img
+        return cv2.drawContours(debug_img, contours, -1, (0, 255, 0), 2)
