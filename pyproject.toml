@@ -245,65 +245,43 @@ extend-exclude = [
 docstring-code-format = true
 
 [tool.ruff.lint]
-exclude = [
-    "tests/**",
-]
 select = [
+  "E4",
+  "E7",
+  "E9",
+  "F",
+]
+extend-select = [
   "ANN",
   "ARG",
   "B",
   "C4",
-  "D",
-  "D213",
-  "E",
+  "D2",
+  "D3",
+  "D4",
+  "E501",
   "EM",
-  "EXE",
-  "F",
   "G",
   "I",
   "ICN",
   "INP",
   "ISC",
   "PIE",
-  "PL",
+  "PLC",
+  "PLE",
+  "PLW",
   "PT",
   "RET",
   "RUF",
   "S",
   "SIM",
   "UP",
-  "W",
-  "YTT",
 ]
 ignore = [
-  "PLR",
-  "RET504",
-
-  # Ensure formatter compatibility
-  "E203",
-
-  # Allow gradual documentation
-  "D100",
-  "D101",
-  "D102",
-  "D103",
-  "D104",
-  "D105",
-  "D106",
-  "D107",
-
   "D202",
   "D205",
-  "D212",
   "D401",
-  "E402",
-  "PLC0415",
   "S101",
-
-  # For now:
-  "ARG002",
-  "ARG005",
-  "G004",
 ]
 pydocstyle.convention = "pep257"
 
@@ -314,10 +292,24 @@ pydocstyle.convention = "pep257"
   "ANN201",
   "ANN202",
   "ARG001",
-  "D103",
+  "ARG002",
+  "ARG004",
+  "ARG005",
   "EM",
   "INP001",
-  "S101",
+  "PLC0415",
+]
+"tests/preprocessor/core/transform/test_perspective_crop_transform.py" = [
+  "S108",
+]
+"tests/preprocessor/core/transform/test_lens_correct_transform.py" = [
+  "S108",
+]
+"tests/preprocessor/core/transform/test_transform_image.py" = [
+  "S108",
+]
+"tests/preprocessor/core/model/test_ProjectData.py" = [
+  "E501",
 ]
 
 [tool.ruff.lint.flake8-annotations]
