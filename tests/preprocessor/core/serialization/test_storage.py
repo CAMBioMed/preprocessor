@@ -16,7 +16,6 @@ from preprocessor.core.serialization.project_file import (
     write_project,
 )
 
-
 PROJECT_ID = "11111111-1111-1111-1111-111111111111"
 FOLDER_ID = "22222222-2222-2222-2222-222222222222"
 NESTED_FOLDER_ID = "44444444-4444-4444-4444-444444444444"

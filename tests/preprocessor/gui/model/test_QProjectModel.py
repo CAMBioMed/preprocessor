@@ -7,9 +7,9 @@ from _pytest.monkeypatch import MonkeyPatch
 from PySide6.QtWidgets import QApplication, QFileDialog
 from pytestqt.qtbot import QtBot
 
+import preprocessor.gui.model._q_project_model as qpm_mod
 from preprocessor.core.model import PhotoData, ProjectData
 from preprocessor.gui.model import QListModel, QPhotoModel, QProjectModel
-import preprocessor.gui.model._q_project_model as qpm_mod
 from preprocessor.gui.utils import (
     patch_getOpenFileName_dialog,
     patch_getSaveFileName_dialog,

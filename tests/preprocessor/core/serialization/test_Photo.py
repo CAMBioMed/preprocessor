@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import ClassVar, override
 
 import pytest
-from tests.preprocessor.core.serialization.cls_PydanticModelTestBase import PydanticModelTestBase
 
 from preprocessor.core.serialization.crop_params import CropParams
 from preprocessor.core.serialization.lens_correction_params import LensCorrectionParams
@@ -16,6 +15,7 @@ from preprocessor.core.serialization.photo import (
     set_ruler_param,
 )
 from preprocessor.core.serialization.ruler_params import RulerParams
+from tests.preprocessor.core.serialization.cls_PydanticModelTestBase import PydanticModelTestBase
 
 
 class Test_Photo(PydanticModelTestBase[Photo]):

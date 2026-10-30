@@ -5,8 +5,8 @@ from _pytest.monkeypatch import MonkeyPatch
 from PySide6.QtWidgets import QWidget
 
 import preprocessor.gui.main_window as main_window_mod
-from preprocessor.gui.progress_dialog import ProgressDialog as OrigProgressDialog
 from preprocessor.gui.jobs.qjobs import QJob
+from preprocessor.gui.progress_dialog import ProgressDialog as OrigProgressDialog
 
 
 @pytest.fixture
