@@ -5,7 +5,8 @@ from preprocessor.gui.jobs.qjobs import QJob
 
 
 class AddPhotoJob(QJob):
-    """Background job that creates a QPhotoModel from a file and extracts EXIF metadata.
+    """
+    Background job that creates a QPhotoModel from a file and extracts EXIF metadata.
 
     This core logic is shared by the GUI and tests to avoid duplication.
     """

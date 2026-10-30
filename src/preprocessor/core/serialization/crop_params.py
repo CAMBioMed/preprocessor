@@ -28,7 +28,8 @@ class CropParams(BaseModel, validate_assignment=True):
     )
 
     def quadrat_clockwise(self) -> tuple[Point2D, Point2D, Point2D, Point2D]:
-        """Return the corners ordered in a consistent polygon traversal order.
+        """
+        Return the corners ordered in a consistent polygon traversal order.
 
         The returned order is clockwise from the top-left, lowest y first.
 
@@ -42,7 +43,8 @@ class CropParams(BaseModel, validate_assignment=True):
 
     @property
     def quadrat_tl(self) -> Point2D:
-        """The top-left corner of the quadrilateral, as a (x, y) tuple.
+        """
+        The top-left corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The top-left corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
@@ -51,7 +53,8 @@ class CropParams(BaseModel, validate_assignment=True):
 
     @property
     def quadrat_tr(self) -> Point2D:
-        """The top-right corner of the quadrilateral, as a (x, y) tuple.
+        """
+        The top-right corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The top-right corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
@@ -60,7 +63,8 @@ class CropParams(BaseModel, validate_assignment=True):
 
     @property
     def quadrat_br(self) -> Point2D:
-        """The bottom-right corner of the quadrilateral, as a (x, y) tuple.
+        """
+        The bottom-right corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The bottom-right corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
@@ -69,7 +73,8 @@ class CropParams(BaseModel, validate_assignment=True):
 
     @property
     def quadrat_bl(self) -> Point2D:
-        """The bottom-left corner of the quadrilateral, as a (x, y) tuple.
+        """
+        The bottom-left corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The bottom-left corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
@@ -77,7 +82,8 @@ class CropParams(BaseModel, validate_assignment=True):
         return self.quadrat_clockwise()[3]
 
     def quadrat_as_tuple(self) -> tuple[Point2D, ...]:
-        """Return the corners as a tuple of (x, y) points.
+        """
+        Return the corners as a tuple of (x, y) points.
 
         If the corners are valid (4 corners and non-degenerate), they will be returned in a consistent polygon
         traversal order (top-left, top-right, bottom-right, bottom-left).
@@ -91,7 +97,8 @@ class CropParams(BaseModel, validate_assignment=True):
 
 
 def _clockwise_corners(points: Sequence[Point2D]) -> tuple[Point2D, Point2D, Point2D, Point2D]:
-    """Helper function to return the points ordered in a consistent polygon traversal order.
+    """
+    Helper function to return the points ordered in a consistent polygon traversal order.
 
     The returned order is clockwise from the top-left, lowest y first.
 

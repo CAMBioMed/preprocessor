@@ -37,7 +37,8 @@ class ImageTransform(Protocol):
         messages: MessageReporter = NOOP_MESSAGE_REPORTER,
         progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
     ) -> ImageTransformWorkItem:
-        """Apply the transformation to the given work item and return the new work item.
+        """
+        Apply the transformation to the given work item and return the new work item.
 
         :param item: The work item to transform.
         :param messages: A message reporter for reporting messages during processing of this image.

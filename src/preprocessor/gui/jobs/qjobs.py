@@ -88,7 +88,8 @@ class QJob(QRunnable):
             self.signals.on_job_failed.emit(self, False, e)
 
     def process(self) -> object:
-        """Override this method with the job's task.
+        """
+        Override this method with the job's task.
         This method will be called in the background thread.
 
         :return: The result of the job, which will be emitted in the on_job_success signal.

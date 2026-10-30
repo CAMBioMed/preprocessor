@@ -190,13 +190,15 @@ class PhotoEditorWidget(QWidget):
         return self._mouse_position is not None and self._find_tool_handle_index(tool, self._mouse_position) is not None
 
     def _on_photo_params_changed(self, *args: object, **kwargs: object) -> None:
-        """Handler called when the photo transformation parameters change.
+        """
+        Handler called when the photo transformation parameters change.
         Applies the transformation to the currently displayed image and updates the pixmap.
         """
         self._apply_transformations_and_update()
 
     def _apply_transformations_and_update(self) -> None:
-        """Apply the transformations to the loaded CV image and update the displayed QPixmap.
+        """
+        Apply the transformations to the loaded CV image and update the displayed QPixmap.
         Falls back to the original QPixmap if the transformation fails.
         """
         if self._photo is None:
@@ -212,7 +214,8 @@ class PhotoEditorWidget(QWidget):
         self._start_undistort_for_current()
 
     def get_processing_image(self) -> MatLike | None:
-        """Return a cv2 image to use for processing (undistorted if available).
+        """
+        Return a cv2 image to use for processing (undistorted if available).
 
         Returns the undistorted image if we've successfully computed it, otherwise
         returns the original cv image if available, otherwise None.
@@ -293,7 +296,8 @@ class PhotoEditorWidget(QWidget):
         return []
 
     def _write_widget_points(self, pts: list[QPoint] | None) -> None:
-        """Write a list of QPoint (or None) back into the QPhotoModel as list of floats (image coords) or None.
+        """
+        Write a list of QPoint (or None) back into the QPhotoModel as list of floats (image coords) or None.
         Converts the widget coordinates (mouse positions) into image coordinates using the current scale.
         """
         if self._photo is None:
@@ -636,7 +640,8 @@ class PhotoEditorWidget(QWidget):
 
     @staticmethod
     def _order_points_by_angle(pts: list[QPoint]) -> list[QPoint]:
-        """Return points sorted by angle around their centroid (counter-clockwise).
+        """
+        Return points sorted by angle around their centroid (counter-clockwise).
         This ordering yields a simple polygon (no self intersections) for small point sets.
         """
         if not pts:

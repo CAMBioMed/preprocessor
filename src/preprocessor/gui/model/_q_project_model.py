@@ -43,7 +43,8 @@ class QProjectModel(QModel[ProjectData]):
 
     @property
     def project_file(self) -> Path | None:
-        """The file path where the project is or will be saved, or None if not set.
+        """
+        The file path where the project is or will be saved, or None if not set.
         This property is not serialized/deserialized.
         """
         return self._data.project_file

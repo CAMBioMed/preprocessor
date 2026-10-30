@@ -7,7 +7,8 @@ from preprocessor.core.serialization import Point2D
 
 
 class Corners(RootModel[tuple[Point2D, ...]]):
-    """A tuple of up to 4 Point2D representing the corners of a quadrilateral.
+    """
+    A tuple of up to 4 Point2D representing the corners of a quadrilateral.
 
     Use the is_valid() method to check if the corners are valid (i.e., 4 corners and non-degenerate).
     Use the ordered() method to get the corners in a consistent order (top-left, top-right, bottom-right, bottom-left).
@@ -55,7 +56,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         return self.root[i]
 
     def is_valid(self) -> bool:
-        """Check if the corners are valid (i.e., 4 corners and non-degenerate).
+        """
+        Check if the corners are valid (i.e., 4 corners and non-degenerate).
 
         :return: True if the corners are valid; otherwise, False.
         """
@@ -66,7 +68,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
             return False
 
     def ordered(self) -> tuple[Point2D, Point2D, Point2D, Point2D]:
-        """Return the corners ordered in a consistent polygon traversal order.
+        """
+        Return the corners ordered in a consistent polygon traversal order.
 
         The returned order is (top-left, top-right, bottom-right, bottom-left).
 
@@ -101,7 +104,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
     @property
     def tl(self) -> Point2D:
-        """The top-left corner of the quadrilateral, as a (x, y) tuple.
+        """
+        The top-left corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The top-left corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
@@ -110,7 +114,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
     @property
     def tr(self) -> Point2D:
-        """The top-right corner of the quadrilateral, as a (x, y) tuple.
+        """
+        The top-right corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The top-right corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
@@ -119,7 +124,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
     @property
     def bl(self) -> Point2D:
-        """The bottom-left corner of the quadrilateral, as a (x, y) tuple.
+        """
+        The bottom-left corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The bottom-left corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
@@ -128,7 +134,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
     @property
     def br(self) -> Point2D:
-        """The bottom-right corner of the quadrilateral, as a (x, y) tuple.
+        """
+        The bottom-right corner of the quadrilateral, as a (x, y) tuple.
 
         :return: The bottom-right corner of the quadrilateral.
         :raises ValueError: If the corners are not valid (e.g., not 4 corners or degenerate).
@@ -136,7 +143,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
         return self.ordered()[2]
 
     def as_tuple(self) -> tuple[Point2D, ...]:
-        """Return the corners as a tuple of (x, y) points.
+        """
+        Return the corners as a tuple of (x, y) points.
 
         If the corners are valid (4 corners and non-degenerate), they will be returned in a consistent polygon
         traversal order (top-left, top-right, bottom-right, bottom-left).
@@ -150,7 +158,8 @@ class Corners(RootModel[tuple[Point2D, ...]]):
 
 
 def _order_corners(points: Sequence[Point2D]) -> tuple[Point2D, Point2D, Point2D, Point2D]:
-    """Helper function to order 4 points in polygon traversal order: top-left, top-right, bottom-right, bottom-left.
+    """
+    Helper function to order 4 points in polygon traversal order: top-left, top-right, bottom-right, bottom-left.
 
     :param points: A sequence of 4 (x, y) points.
     :return: A tuple of 4 points ordered as (top-left, top-right, bottom-right, bottom-left).

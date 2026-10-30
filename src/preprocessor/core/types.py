@@ -42,7 +42,8 @@ class ImageRGB:
 
     @classmethod
     def from_file(cls, path: Path) -> "ImageRGB":
-        """Load an image from a file path and return an ImageRGB instance.
+        """
+        Load an image from a file path and return an ImageRGB instance.
 
         :param path: The file path to load the image from.
         :return: An ImageRGB instance containing the loaded image data.
@@ -56,7 +57,8 @@ class ImageRGB:
         return cls.from_rgb_array(rgb_arr)
 
     def to_file(self, path: Path, quality: float = 0.95) -> None:
-        """Save the image to a file path.
+        """
+        Save the image to a file path.
 
         :param path: The file path to save the image to.
         :param quality: The JPEG quality (0.0-1.0) to use when saving the image.
@@ -103,7 +105,8 @@ class ImageBGR:
 
     @classmethod
     def from_file(cls, path: Path) -> "ImageBGR":
-        """Load an image from a file path and return an ImageBGR instance.
+        """
+        Load an image from a file path and return an ImageBGR instance.
 
         :param path: The file path to load the image from.
         :return: An ImageRGB instance containing the loaded image data.
@@ -116,7 +119,8 @@ class ImageBGR:
         return cls.from_bgr_array(arr)
 
     def to_file(self, path: Path, quality: float = 0.95) -> None:
-        """Save the image to a file path.
+        """
+        Save the image to a file path.
 
         :param path: The file path to save the image to.
         :param quality: The JPEG quality (0.0-1.0) to use when saving the image.
@@ -169,7 +173,8 @@ class ImageGreyscale:
 
     @classmethod
     def from_file(cls, path: Path) -> "ImageGreyscale":
-        """Load an image from a file path and return an ImageGreyscale instance.
+        """
+        Load an image from a file path and return an ImageGreyscale instance.
 
         :param path: The file path to load the image from.
         :return: An ImageRGB instance containing the loaded image data.
@@ -182,7 +187,8 @@ class ImageGreyscale:
         return cls.from_greyscale_array(arr)
 
     def to_file(self, path: Path, quality: float = 0.95) -> None:
-        """Save the image to a file path.
+        """
+        Save the image to a file path.
 
         :param path: The file path to save the image to.
         :param quality: The JPEG quality (0.0-1.0) to use when saving the image.

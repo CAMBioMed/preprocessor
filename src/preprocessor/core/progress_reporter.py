@@ -5,7 +5,8 @@ class ProgressReporter(Protocol):
     """Protocol for reporting progress of image processing steps."""
 
     def __call__(self, progress: float, detail: str | None = None, /) -> None:
-        """Report progress of a processing step for an image.
+        """
+        Report progress of a processing step for an image.
 
         :param progress: A float between 0.0 and 1.0 indicating the progress of the step.
         :param detail: Optional additional details about the step.
@@ -20,7 +21,8 @@ class NoopProgressReporter(ProgressReporter):
     _instance: Optional["NoopProgressReporter"] = None
 
     def __new__(cls) -> "NoopProgressReporter":
-        """Return a shared singleton instance for this no-op reporter.
+        """
+        Return a shared singleton instance for this no-op reporter.
 
         Constructing NoopProgressReporter() will always return the same
         object. This keeps the implementation stateless while avoiding
@@ -37,7 +39,8 @@ class NoopProgressReporter(ProgressReporter):
 
 
 def _clamp01(x: float) -> float:
-    """Clamp a float to the range [0.0, 1.0].
+    """
+    Clamp a float to the range [0.0, 1.0].
 
     :param x: The float to clamp.
     :return: The clamped float.

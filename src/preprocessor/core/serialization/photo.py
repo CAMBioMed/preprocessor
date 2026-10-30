@@ -119,7 +119,8 @@ class Photo(BaseModel, validate_assignment=True):
 
 
 def get_crop_param(photo: Photo) -> CropParams | None:
-    """Return the last crop parameter associated with a photo, if any.
+    """
+    Return the last crop parameter associated with a photo, if any.
 
     :param photo: The photo whose parameters should be searched.
     :return: The last crop parameter, or None if the photo has no crop parameter.
@@ -132,7 +133,8 @@ def get_crop_param(photo: Photo) -> CropParams | None:
 
 
 def set_crop_param(photo: Photo, crop_param: CropParams) -> None:
-    """Replace the last crop parameter associated with a photo or append one.
+    """
+    Replace the last crop parameter associated with a photo or append one.
 
     :param photo: The photo whose parameters should be updated.
     :param crop_param: The crop parameter to replace or append.
@@ -146,7 +148,8 @@ def set_crop_param(photo: Photo, crop_param: CropParams) -> None:
 
 
 def get_ruler_param(photo: Photo) -> RulerParams | None:
-    """Return the last ruler parameter associated with a photo, if any.
+    """
+    Return the last ruler parameter associated with a photo, if any.
 
     :param photo: The photo whose parameters should be searched.
     :return: The last ruler parameter, or None if the photo has no ruler parameter.
@@ -159,7 +162,8 @@ def get_ruler_param(photo: Photo) -> RulerParams | None:
 
 
 def set_ruler_param(photo: Photo, ruler_param: RulerParams) -> None:
-    """Replace the last ruler parameter associated with a photo or append one.
+    """
+    Replace the last ruler parameter associated with a photo or append one.
 
     :param photo: The photo whose parameters should be updated.
     :param ruler_param: The ruler parameter to replace or append.
@@ -173,7 +177,8 @@ def set_ruler_param(photo: Photo, ruler_param: RulerParams) -> None:
 
 
 def get_lens_correction_params(photo: Photo) -> LensCorrectionParams | None:
-    """Return the last lens-correction parameter associated with a photo, if any.
+    """
+    Return the last lens-correction parameter associated with a photo, if any.
 
     :param photo: The photo whose parameters should be searched.
     :return: The last lens-correction parameter, or None if the photo has none.
@@ -186,7 +191,8 @@ def get_lens_correction_params(photo: Photo) -> LensCorrectionParams | None:
 
 
 def set_lens_correction_params(photo: Photo, lens_correction_params: LensCorrectionParams) -> None:
-    """Replace the last lens-correction parameter or append one.
+    """
+    Replace the last lens-correction parameter or append one.
 
     :param photo: The photo whose parameters should be updated.
     :param lens_correction_params: The lens-correction parameter to replace or append.

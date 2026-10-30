@@ -94,7 +94,8 @@ def setup_logging() -> None:
 @click.command()
 @click.argument("project", required=False)
 def main(project: str | None = None) -> None:
-    """Command-line entrypoint for the preprocessor application.
+    """
+    Command-line entrypoint for the preprocessor application.
 
     If a positional PROJECT is provided, the application will open that project file
     directly and bypass the launch dialog.

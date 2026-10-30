@@ -37,7 +37,8 @@ class MetadataCsvWriter:
     )
 
     def __init__(self, file: TextIO) -> None:
-        """Create a writer and write the CSV header to ``file``.
+        """
+        Create a writer and write the CSV header to ``file``.
 
         :param file: A text stream receiving CSV output.
         """
@@ -52,7 +53,8 @@ class MetadataCsvWriter:
         return list(MetadataCsvWriter._HEADERS)
 
     def write_row(self, metadata: Mapping[str, JsonValue]) -> None:
-        """Write one metadata mapping as a CSV row.
+        """
+        Write one metadata mapping as a CSV row.
 
         Unknown metadata fields are ignored. String values are trimmed and
         blank strings are written as empty values, matching the legacy

@@ -31,7 +31,8 @@ class MessageReporter:
     """Class handling reporting messages (info, warnings, errors) during image processing steps."""
 
     def report_msg(self, message: Message) -> None:
-        """Report a message.
+        """
+        Report a message.
 
         :param message: The message to report.
         """
@@ -46,7 +47,8 @@ class MessageReporter:
         image_id: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Report a message.
+        """
+        Report a message.
 
         :param level: The severity level of the message.
         :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
@@ -66,7 +68,8 @@ class MessageReporter:
         image_id: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Report an error message to this work item.
+        """
+        Report an error message to this work item.
 
         :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
@@ -85,7 +88,8 @@ class MessageReporter:
         image_id: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Report a warning message to this work item.
+        """
+        Report a warning message to this work item.
 
         :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
@@ -104,7 +108,8 @@ class MessageReporter:
         image_id: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Report an info message.
+        """
+        Report an info message.
 
         :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
@@ -122,7 +127,8 @@ class NoopMessageReporter(MessageReporter):
     _instance: Optional["NoopMessageReporter"] = None
 
     def __new__(cls) -> "NoopMessageReporter":
-        """Ensure only one instance of NoopMessageReporter exists.
+        """
+        Ensure only one instance of NoopMessageReporter exists.
 
         Any attempt to construct the class will return the same shared
         instance. This simplifies usage and avoids unnecessary allocations

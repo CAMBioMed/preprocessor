@@ -9,7 +9,8 @@ R = TypeVar("R")
 
 
 class JobContext(ABC):
-    """Context for running a job, providing necessary services and information.
+    """
+    Context for running a job, providing necessary services and information.
 
     This class can be extended to include additional context information as needed.
     """
@@ -26,7 +27,8 @@ class JobContext(ABC):
 
     @abstractmethod
     def update_status(self, message: str) -> None:
-        """Update the status message for the job, which can be displayed to the user.
+        """
+        Update the status message for the job, which can be displayed to the user.
 
         Updating the status message replaces any previous status message.
         """
@@ -34,7 +36,8 @@ class JobContext(ABC):
 
     @abstractmethod
     def update_progress(self, progress: float) -> None:
-        """Update the progress of the job.
+        """
+        Update the progress of the job.
 
         :param progress: A number representing the current progress of the job, between 0.0 and 1.0.
         """
@@ -42,7 +45,8 @@ class JobContext(ABC):
 
     @abstractmethod
     def log_msg(self, message: Message) -> None:
-        """Report a message.
+        """
+        Report a message.
 
         :param message: The message to report.
         """
@@ -58,7 +62,8 @@ class JobContext(ABC):
         subject: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Report a message.
+        """
+        Report a message.
 
         :param level: The severity level of the message.
         :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
@@ -78,7 +83,8 @@ class JobContext(ABC):
         subject: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Report an error message to this work item.
+        """
+        Report an error message to this work item.
 
         :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
@@ -97,7 +103,8 @@ class JobContext(ABC):
         subject: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Report a warning message to this work item.
+        """
+        Report a warning message to this work item.
 
         :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
@@ -116,7 +123,8 @@ class JobContext(ABC):
         subject: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Report an info message.
+        """
+        Report an info message.
 
         :param code: A machine-readable code for the message, e.g. 'lens_correction_failed'.
         :param text: A human-readable message to be displayed to the user.
@@ -128,7 +136,8 @@ class JobContext(ABC):
 
     @abstractmethod
     def run_subjob[R](self, job: "Job[R]", weight: float = 1.0) -> R:
-        """Run a child job within this job's context.
+        """
+        Run a child job within this job's context.
 
         This method can be used to run another job as part of this job's execution, while still respecting
         the cancellation status and allowing the sub-job to report messages and progress through this context.
@@ -143,7 +152,8 @@ class JobContext(ABC):
 
 
 class Job[R](ABC):
-    """Base class for jobs.
+    """
+    Base class for jobs.
 
     Each job should implement the run method to perform the job's action and return results.
     """
@@ -156,7 +166,8 @@ class Job[R](ABC):
         self,
         ctx: JobContext,
     ) -> R:
-        """Run the job and return its result.
+        """
+        Run the job and return its result.
 
         :param ctx: The context for running the job, providing necessary services
         and information such as cancellation status, progress reporting, and message reporting.
@@ -195,7 +206,8 @@ class JobHandle[R](ABC):
 
     @abstractmethod
     def await_result(self, timeout: float | None = None) -> R:
-        """Blocks the thread waiting for the job to complete and return its result.
+        """
+        Blocks the thread waiting for the job to complete and return its result.
 
         :param timeout: Optional timeout in seconds to wait for the job to complete.
         If None, wait indefinitely.
@@ -208,7 +220,8 @@ class JobHandle[R](ABC):
 
     @abstractmethod
     def try_result(self) -> R | None:
-        """Try to get the result of the job without blocking.
+        """
+        Try to get the result of the job without blocking.
 
         :return: The result of the job if it is completed, or None if the job is still running.
         :raises JobCancelledException: If the job was canceled before completion.
@@ -222,7 +235,8 @@ class JobProcessor(ABC):
 
     @abstractmethod
     def submit[R](self, job: Job[R]) -> JobHandle[R]:
-        """Submit a job for processing.
+        """
+        Submit a job for processing.
 
         :param job: The job to process.
         :return: A handle to the submitted job, which can be used to track its progress,
