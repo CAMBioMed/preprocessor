@@ -108,7 +108,7 @@ def test_should_emit_relative_path_metadata_quadrat_and_trailing_newline_when_pr
     nested_photo = dumped["project"]["folders"][0]["folders"][0]["photos"][0]
     assert top_level_photo["image_path"] == str(RELATIVE_TOP_LEVEL_PHOTO_PATH)
     assert photo["image_path"] == str(RELATIVE_PHOTO_PATH)
-    assert nested_photo["image_path"] == "photos/nested.jpg"
+    assert nested_photo["image_path"] == str(Path("photos/nested.jpg"))
     assert photo["width"] == 4000
     assert photo["height"] == 3000
     assert dumped["project"]["metadata"] == {"shared": "project", "project_only": True}

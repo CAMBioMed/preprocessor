@@ -1,13 +1,21 @@
+import logging
 from pathlib import Path
 
+import cv2
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from PIL import Image
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QFileDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 from pytestqt.qtbot import QtBot
 
+import preprocessor.gui.main_window as main_window
 import preprocessor.gui.model._q_project_model as qpm_mod
-from preprocessor.gui.model import QProjectModel
+from preprocessor.core.model import PhotoData
+from preprocessor.core.serialization import Point2D
+from preprocessor.core.type_corners import Corners
+from preprocessor.gui.main_window import MainWindow
+from preprocessor.gui.model import QApplicationState, QPhotoModel, QProjectModel
 from tests.preprocessor.gui.cls_FakeMsgBox import _FakeMsgBox
 
 
@@ -16,6 +24,38 @@ def discard_unsaved_changes_on_main_window_close(monkeypatch: MonkeyPatch) -> No
     """Make unsaved-project prompts nonblocking in MainWindow tests."""
     _FakeMsgBox.next_clicked_text = "Discard"
     monkeypatch.setattr(qpm_mod, "QMessageBox", _FakeMsgBox)
+
+
+@pytest.fixture
+def autodetection_window(
+    qtbot: QtBot, tmp_path: Path, monkeypatch: MonkeyPatch
+) -> tuple[MainWindow, QPhotoModel, QProjectModel]:
+    """Show a clean project with a quadrat, rejecting any autodetection dialog."""
+    source = tmp_path / "photo.jpg"
+    Image.new("RGB", (64, 64)).save(source)
+    model = QApplicationState()
+    project = QProjectModel.new_project(None, None, None)
+    assert project is not None
+    project.project_file = tmp_path / "project.pbproj"
+    photo = QPhotoModel(PhotoData(image_id="photo", original_filename=source))
+    project.photos.append(photo)
+    model.current_project = project
+    corners: list[Point2D] = [(5, 5), (55, 5), (55, 55), (5, 55)]
+    photo.quadrat_corners = corners
+    model.current_photo = photo
+    main_win = MainWindow(model)
+    qtbot.addWidget(main_win)
+    main_win.show()
+    qtbot.waitExposed(main_win)
+    photo.mark_clean()
+    project.mark_clean()
+
+    def reject_dialog(*args: object, **kwargs: object) -> None:
+        pytest.fail("Autodetection must log failures without a dialog")
+
+    for method in ("warning", "critical", "information"):
+        monkeypatch.setattr(main_window.QMessageBox, method, reject_dialog)
+    return main_win, photo, project
 
 
 class TestMainWindow:
@@ -638,3 +678,143 @@ class TestMainWindow:
         # Assert
         assert main_win.isVisible()
         assert save_prompt_calls == [(main_win, project, model.projects_path)]
+
+
+@pytest.mark.parametrize("error_type", [ValueError, cv2.error, RuntimeError])
+def test_should_preserve_quadrat_when_autodetection_raises(
+    autodetection_window: tuple[MainWindow, QPhotoModel, QProjectModel],
+    monkeypatch: MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    error_type: type[Exception],
+) -> None:
+    """Should preserve quadrat when autodetection raises."""
+    # Arrange
+    main_win, photo, project = autodetection_window
+    before = (photo.crop.model_dump(), photo.dirty, project.dirty)
+
+    def fail_detection(self: main_window.DetectQuadratAnalysisJob) -> Corners:
+        raise error_type("detector failure")
+
+    monkeypatch.setattr(main_window.DetectQuadratAnalysisJob, "__call__", fail_detection)
+
+    # Act
+    with caplog.at_level(logging.ERROR, logger=main_window.__name__):
+        main_win._handle_detect_quadrat_action()
+
+    # Assert
+    assert (photo.crop.model_dump(), photo.dirty, project.dirty) == before
+    assert main_win.isVisible()
+    record = next(record for record in caplog.records if record.name == main_window.__name__)
+    assert record.levelno == logging.ERROR
+    assert "autodetection failed" in record.getMessage()
+    assert str(photo.original_filename) in record.getMessage()
+    assert record.exc_info is not None
+    assert str(record.exc_info[1]) == "detector failure"
+
+
+def test_should_preserve_quadrat_when_autodetection_image_loading_fails(
+    autodetection_window: tuple[MainWindow, QPhotoModel, QProjectModel],
+    monkeypatch: MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Should preserve quadrat when autodetection image loading fails."""
+    # Arrange
+    main_win, photo, project = autodetection_window
+    before = (photo.crop.model_dump(), photo.dirty, project.dirty)
+
+    def fail_loading(path: Path) -> main_window.ImageRGB:
+        raise ValueError("image loading failure")
+
+    monkeypatch.setattr(main_window.ImageRGB, "from_file", fail_loading)
+
+    # Act
+    with caplog.at_level(logging.ERROR, logger=main_window.__name__):
+        main_win._handle_detect_quadrat_action()
+
+    # Assert
+    assert (photo.crop.model_dump(), photo.dirty, project.dirty) == before
+    assert main_win.isVisible()
+    record = next(record for record in caplog.records if record.name == main_window.__name__)
+    assert record.levelno == logging.ERROR
+    assert "autodetection failed" in record.getMessage()
+    assert str(photo.original_filename) in record.getMessage()
+    assert record.exc_info is not None
+    assert str(record.exc_info[1]) == "image loading failure"
+
+
+@pytest.mark.parametrize("annotated", [True, False])
+@pytest.mark.parametrize(
+    "result",
+    [
+        Corners(()),
+        Corners(((5, 5), (55, 5), (55, 55))),
+        Corners(((5, 5), (15, 15), (25, 25), (35, 35))),
+    ],
+)
+def test_should_preserve_quadrat_when_autodetection_result_is_invalid(
+    autodetection_window: tuple[MainWindow, QPhotoModel, QProjectModel],
+    monkeypatch: MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    result: Corners,
+    annotated: bool,
+) -> None:
+    """Should preserve quadrat when autodetection result is invalid."""
+    # Arrange
+    main_win, photo, project = autodetection_window
+    if not annotated:
+        photo.quadrat_corners = None
+        photo.mark_clean()
+        project.mark_clean()
+    before = (photo.crop.model_dump(), photo.dirty, project.dirty)
+    monkeypatch.setattr(main_window.DetectQuadratAnalysisJob, "__call__", lambda self: result)
+
+    # Act
+    with caplog.at_level(logging.WARNING, logger=main_window.__name__):
+        main_win._handle_detect_quadrat_action()
+
+    # Assert
+    assert (photo.crop.model_dump(), photo.dirty, project.dirty) == before
+    assert main_win.isVisible()
+    record = next(record for record in caplog.records if record.name == main_window.__name__)
+    assert record.levelno == logging.WARNING
+    assert "no valid quadrat" in record.getMessage()
+    assert str(photo.original_filename) in record.getMessage()
+    assert record.exc_info is None
+
+
+def test_should_apply_quadrat_when_autodetection_succeeds_after_failure(
+    autodetection_window: tuple[MainWindow, QPhotoModel, QProjectModel],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """Should apply quadrat when autodetection succeeds after failure."""
+    # Arrange
+    main_win, photo, project = autodetection_window
+    before = (photo.crop.model_dump(), photo.dirty, project.dirty)
+    corners: list[Point2D] = [(10, 10), (50, 10), (50, 50), (10, 50)]
+    calls = 0
+
+    def detect(self: main_window.DetectQuadratAnalysisJob) -> Corners:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise RuntimeError("first detection failed")
+        return Corners(tuple(corners))
+
+    monkeypatch.setattr(main_window.DetectQuadratAnalysisJob, "__call__", detect)
+
+    # Act: fail through the menu entry point
+    main_win.ui.menuEdit_DetectQuadrat.trigger()
+    QApplication.processEvents()
+
+    # Assert: failure leaves annotations and dirty state unchanged
+    assert (photo.crop.model_dump(), photo.dirty, project.dirty) == before
+
+    # Act: retry through the editor entry point
+    main_win.editor_dock.on_autodetect_quadrat_clicked.emit()
+    QApplication.processEvents()
+
+    # Assert
+    assert photo.quadrat_corners == corners
+    assert main_win.isVisible()
+    editor = main_win.central_widget
+    assert editor._widget_points() == [editor._image_to_widget_point(x, y) for x, y in corners]

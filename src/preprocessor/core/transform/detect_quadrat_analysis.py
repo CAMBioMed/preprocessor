@@ -383,7 +383,7 @@ class DetectQuadratAnalysisJob:
         scale: float = 1.0,
         draw_debug: bool = True,
     ) -> list[Point2D]:
-        """Find corners from the detected lines."""
+        """Find corners from detected lines, returning an empty list for fewer than four candidates."""
         logger.debug("Finding corners from lines...")
         corners: list[Point2D] = []
         angle_threshold = math.radians(20)  # minimum angle difference to consider lines non-parallel
@@ -421,7 +421,7 @@ class DetectQuadratAnalysisJob:
                         corners.append(pt)
                         cv2.circle(debug_img, pt, 2, (255, 0, 0, 255), -1)
         logger.debug("Found %s candidate corners.", len(corners))
-        if not corners:
+        if len(corners) < 4:
             return []
 
         points = np.array(corners)  # shape (N,2)
