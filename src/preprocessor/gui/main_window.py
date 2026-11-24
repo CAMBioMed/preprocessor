@@ -1,3 +1,4 @@
+import logging
 import warnings
 from pathlib import Path
 
@@ -28,6 +29,8 @@ from preprocessor.gui.properties_dock_widget import PropertiesDockWidget
 from preprocessor.gui.thumbnail_dock_widget import ThumbnailDockWidget
 from preprocessor.gui.tree_dock_widget import TreeDockWidget
 from preprocessor.gui.utils import icon_from_resource
+
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -292,24 +295,26 @@ class MainWindow(QMainWindow):
         dlg.exec()
 
     def _handle_detect_quadrat_action(self) -> None:
-        if self.model.current_photo is None:
+        """Detect a quadrat, logging failures without changing existing annotations."""
+        photo = self.model.current_photo
+        if photo is None:
             return
 
-        original_path = self.model.current_photo.original_filename
-
-        # TODO: Do this in a separate thread!
-        job = DetectQuadratAnalysisJob(
-            ImageRGB.from_file(original_path),
-            defaultParams,
-        )
-        result = job()
-        if result is None:
-            # No corners detected
+        original_path = photo.original_filename
+        try:
+            image = ImageRGB.from_file(original_path)
+            job = DetectQuadratAnalysisJob(image, defaultParams)
+            result = job()
+            if not result.is_valid():
+                logger.warning("Quadrat autodetection found no valid quadrat for %s", original_path)
+                return
+            corners = list(result.as_tuple())
+        except Exception:
+            logger.exception("Quadrat autodetection failed for %s", original_path)
             return
 
-        self.model.current_photo.quadrat_corners = list(result.as_tuple())
-        # Trigger updating the opened editor
-        self._handle_current_photo_changed(self.model.current_photo)
+        photo.quadrat_corners = corners
+        self._handle_current_photo_changed(photo)
 
     def _handle_tool_action(self, tool: Tool) -> None:
         self.ui.menuTools_Move.setChecked(tool == Tool.Move)
