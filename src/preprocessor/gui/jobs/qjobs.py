@@ -88,7 +88,8 @@ class QJob(QRunnable):
             self.signals.on_job_failed.emit(self, False, e)
 
     def process(self) -> object:
-        """Override this method with the job's task.
+        """
+        Override this method with the job's task.
         This method will be called in the background thread.
 
         :return: The result of the job, which will be emitted in the on_job_success signal.
@@ -201,7 +202,7 @@ class QJobProcessor(QObject):
         if self._finished == self.total:
             self.on_finished.emit(self._any_aborted)
 
-    def _handle_job_failed(self, job: QJob, aborted: bool, exc: Exception | None) -> None:
+    def _handle_job_failed(self, job: QJob, aborted: bool, _exc: Exception | None) -> None:
         self._finished += 1
         self._any_aborted = self._any_aborted or aborted
         self.on_job_failed.emit(job, aborted)

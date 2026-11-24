@@ -2,12 +2,13 @@ from collections.abc import Iterable
 
 from pydantic import BaseModel, ConfigDict
 
-from preprocessor.core.model._color_correction_params import ColorCorrectionParams
-from preprocessor.core.model._crop_params import CropParams
-from preprocessor.core.model._lens_correction_params import LensCorrectionParams
 from preprocessor.core.model._metadata_data import MetadataData
-from preprocessor.core.model._ruler_params import RulerParams
-from preprocessor.core.serialization import ProjectPath
+from preprocessor.core.serialization import (
+    CropParams,
+    LensCorrectionParams,
+    ProjectPath,
+    RulerParams,
+)
 
 
 class PhotoData(BaseModel, validate_assignment=True):
@@ -31,8 +32,6 @@ class PhotoData(BaseModel, validate_assignment=True):
     ## Photo correction ##
     ######################
 
-    color_correction: ColorCorrectionParams = ColorCorrectionParams()
-    """The parameters for color correction."""
     lens_correction: LensCorrectionParams = LensCorrectionParams()
     """The parameters for lens correction."""
     crop: CropParams = CropParams()

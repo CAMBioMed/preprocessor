@@ -124,7 +124,8 @@ class TreeDockModel(QAbstractItemModel):
         project_directory: Path | None,
         reset_active: bool = False,
     ) -> None:
-        """Rebuild the directory tree from *photos* beneath *project_directory*.
+        """
+        Rebuild the directory tree from *photos* beneath *project_directory*.
 
         Raises:
             ValueError: If photos are supplied without a project directory or a photo is outside it.
@@ -191,7 +192,8 @@ class TreeDockModel(QAbstractItemModel):
 
     @active_directory.setter
     def active_directory(self, directory: Path | None) -> None:
-        """Select an exact directory present in the tree, or clear the selection.
+        """
+        Select an exact directory present in the tree, or clear the selection.
 
         Raises:
             ValueError: If *directory* is not present in the current tree.

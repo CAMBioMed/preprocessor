@@ -17,17 +17,14 @@ class DisplayPhotoJob(QJob):
     def process(self) -> ImageRGB | None:
         self.update_status("Displaying...")
 
-        new_img = transform_image(
+        return transform_image(
             self.photo.original_filename,
             self.photo,
             None,
             transforms=[
-                # TODO: Add color correction transform once implemented
                 LensCorrectTransform(),
                 # NOTE: We don't do PerspectiveCropTransform, because we want to display the image uncropped
             ],
             messages=self.reporter,
             progress=self.reporter,
         )
-
-        return new_img

@@ -26,8 +26,8 @@ def run_tests() -> None:
             # Overwrite the cache directory to somewhere writable
             "-o",
             f"cache_dir={tempfile.gettempdir()}/.pytest_cache",
+            *args,
         ]
-        + args
     )
 
     print("DEBUG: pytest.main() returned", flush=True)

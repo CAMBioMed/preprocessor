@@ -31,7 +31,6 @@ class ExportPhotoJob(QJob):
             self.photo,
             output_path,
             transforms=[
-                # TODO: Add color correction transform once implemented
                 LensCorrectTransform(),
                 PerspectiveCropTransform(),
             ],

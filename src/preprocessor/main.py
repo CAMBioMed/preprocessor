@@ -94,7 +94,8 @@ def setup_logging() -> None:
 @click.command()
 @click.argument("project", required=False)
 def main(project: str | None = None) -> None:
-    """Command-line entrypoint for the preprocessor application.
+    """
+    Command-line entrypoint for the preprocessor application.
 
     If a positional PROJECT is provided, the application will open that project file
     directly and bypass the launch dialog.
@@ -106,7 +107,7 @@ def main(project: str | None = None) -> None:
     pyside_version = getattr(PySide6, "__version__", "unknown")
     qtcore_version = getattr(getattr(PySide6, "QtCore", None), "__version__", "unknown")
 
-    logger.info(f"Starting {app_formal_name} {app_version}...")
+    logger.info("Starting %s %s...", app_formal_name, app_version)
     logger.info("Python: %s", sys.version)
     logger.info("PySide6: %s", pyside_version)
     logger.info("QtCore: %s", qtcore_version)

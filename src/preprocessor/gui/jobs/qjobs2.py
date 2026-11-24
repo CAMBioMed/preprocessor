@@ -172,7 +172,7 @@ class QJobContext[E](JobContext, JobHandle):
         msg = "Job finished in unexpected state"
         raise RuntimeError(msg)
 
-    def _on_finished(self, job: QJob, state: JobState, result: object) -> None:
+    def _on_finished(self, _job: QJob, state: JobState, result: object) -> None:
         # Capture final state and result, and wake waiters
         self._finished_state = state
         self._finished_result = result

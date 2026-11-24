@@ -22,7 +22,8 @@ def transform_image(
     messages: MessageReporter = NOOP_MESSAGE_REPORTER,
     progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
 ) -> ImageRGB | None:
-    """Process an image with the given transforms and export it to the output path, if given.
+    """
+    Process an image with the given transforms and export it to the output path, if given.
 
     :param input_path: The path to the input image file.
     :param params: The parameters used for processing this image, e.g. quadrat corners.

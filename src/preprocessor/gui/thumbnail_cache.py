@@ -16,14 +16,16 @@ class ThumbnailCache:
     """Provide scaled image thumbnails backed by a disposable project cache."""
 
     def __init__(self, project_file: Path | None) -> None:
-        """Initialize the cache adjacent to ``project_file``.
+        """
+        Initialize the cache adjacent to ``project_file``.
 
         ``None`` denotes an unsaved project and bypasses on-disk caching.
         """
         self._cache_directory = project_file.parent.resolve() / ".cache" if project_file is not None else None
 
     def get_thumbnail(self, image_path: Path, size: QSize) -> QPixmap | None:
-        """Return a smoothly scaled pixmap from cache or ``image_path``.
+        """
+        Return a smoothly scaled pixmap from cache or ``image_path``.
 
         A fresh cache entry is preferred. Cache failures are logged at ``WARNING`` level
         and bypassed or regenerated. ``None`` is returned when the source image cannot

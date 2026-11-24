@@ -62,7 +62,7 @@ class PydanticModelTestBase[ModelT: BaseModel](ABC):
         )
 
         # Assert: updating the model with an invalid value should fail
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011 - Parameterized values produce varied validation messages.
             self.update_model(model, field_name, invalid_value)
 
     def assert_property_normalization(

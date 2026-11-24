@@ -67,7 +67,7 @@ class QModelTestBase[QModelT: QModel](ABC):
         )
 
         # Assert: updating the model with an invalid value should fail
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011 - Parameterized values produce varied validation messages.
             self.assert_model_property_signals_on_mutation(
                 qtbot,
                 model,

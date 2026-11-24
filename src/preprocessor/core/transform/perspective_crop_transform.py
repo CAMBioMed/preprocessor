@@ -18,7 +18,8 @@ class PerspectiveCropTransform:
         messages: MessageReporter = NOOP_MESSAGE_REPORTER,
         progress: ProgressReporter = NOOP_PROGRESS_REPORTER,
     ) -> ImageTransformWorkItem:
-        if not item.params.crop or not item.params.crop.enabled:
+        crop = item.params.crop
+        if not crop or not crop.enabled:
             messages.info(
                 "no_crop_requested",
                 "Perspective crop skipped: no crop requested",
@@ -27,8 +28,7 @@ class PerspectiveCropTransform:
             )
             return item
 
-        # If corners object exists but contains no points, signal no corners
-        if len(item.params.crop.corners) == 0:
+        if len(crop.quadrat) == 0:
             messages.warn(
                 "no_quadrat_corners",
                 "Perspective crop skipped: no quadrat corners set",
@@ -37,22 +37,23 @@ class PerspectiveCropTransform:
             )
             return item
 
-        if not item.params.crop.corners.is_valid():
+        try:
+            ordered_quadrat = crop.quadrat_clockwise()
+        except ValueError:
             messages.warn(
                 "invalid_quadrat_corners",
                 "Perspective crop skipped: quadrat corners are invalid",
                 step=self.name,
                 image_id=item.image_id,
-                details={"corners": item.params.crop.corners},
+                details={"quadrat": crop.quadrat},
             )
             return item
 
         try:
             progress(0.0, "Computing perspective transform...")
             src = item.image.data
-            ordered_corners = np.array(item.params.crop.corners.ordered(), dtype=np.float32)
+            ordered_corners = np.array(ordered_quadrat, dtype=np.float32)
             tl, tr, br, bl = ordered_corners
-
             # Compute widths (distance between left and right points) and heights (distance between top and bottom)
             w_bottom = float(np.linalg.norm(br - bl))
             w_top = float(np.linalg.norm(tr - tl))

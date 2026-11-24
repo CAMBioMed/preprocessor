@@ -5,7 +5,8 @@ from preprocessor.gui.jobs.qjobs import QJob
 
 
 class AddPhotoJob(QJob):
-    """Background job that creates a QPhotoModel from a file and extracts EXIF metadata.
+    """
+    Background job that creates a QPhotoModel from a file and extracts EXIF metadata.
 
     This core logic is shared by the GUI and tests to avoid duplication.
     """
@@ -29,9 +30,9 @@ class AddPhotoJob(QJob):
         # Import here to avoid circular imports at module import time
         # Work with pydantic data objects in the worker thread (they are not QObjects)
         # Compute relative path and image dimensions without creating any QObject
-        from PIL import Image
+        from PIL import Image  # noqa: PLC0415
 
-        from preprocessor.processing.exif import extract_exif_metadata
+        from preprocessor.processing.exif import extract_exif_metadata  # noqa: PLC0415
 
         with Image.open(self._filepath) as img:
             _width, _height = img.size
